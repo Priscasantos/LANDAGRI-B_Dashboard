@@ -374,224 +374,84 @@ with tab2:
 
     temporal_df = pd.DataFrame(temporal_data)
 
-    # Timeline principal - Timeline comparativa melhorada
-    min_year = temporal_df['Início'].min()
-    max_year = temporal_df['Fim'].max()
-    # Gera um DataFrame expandido: uma linha por iniciativa por ano
-    expanded = []
-    for _, row in temporal_df.iterrows():
-        for year in range(row['Início'], row['Fim']+1):
-            expanded.append({
-                'Nome': row['Nome'],
-                'Ano': year,
-                'Tipo': row['Tipo']
-            })
-    expanded_df = pd.DataFrame(expanded)
-    # Gráfico de barras horizontais preenchendo todos os anos
-    fig = px.bar(
-        expanded_df,
-        y='Nome',
-        x='Ano',
-        color='Tipo',
-        orientation='h',
-        color_discrete_map={
-            'Global': '#00BFFF',    # azul claro
-            'Nacional': '#FFD700',  # amarelo ouro
-            'Regional': '#FF69B4'   # rosa
-        },
-        title="📊 Timeline Comparativa das Iniciativas LULC - Períodos de Disponibilidade",
-        height=max(600, len(temporal_df) * 35)
-    )
-    fig.update_layout(
-        font=dict(size=13, color="#F3F4F6", family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
-        xaxis_title="Ano",
-        yaxis_title="Iniciativa",
-        title_font_size=16,
-        plot_bgcolor="#18181b",
-        paper_bgcolor="#18181b",
-        margin=dict(l=200, r=50, t=80, b=50),
-        xaxis=dict(
-            gridcolor="#444",
-            gridwidth=1,
-            showgrid=True,
-            range=[min_year-0.5, max_year+0.5],
-            dtick=1,
-            tickmode='linear',
-            tick0=min_year,
-            color="#F3F4F6"
-        ),
-        yaxis=dict(
-            gridcolor="#444",
-            gridwidth=1,
-            showgrid=True,
-            color="#F3F4F6"
-        ),
-        showlegend=True,
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="center",
-            x=0.5,
-            font=dict(color="#F3F4F6")
+    # --- NOVA TIMELINE USANDO ANOS DISPONÍVEIS DO METADATA ---
+    # Carregar anos_disponiveis do metadata
+    blocos = []
+    for nome, meta in metadata.items():
+        if 'anos_disponiveis' in meta:
+            anos = sorted(meta['anos_disponiveis'])
+            tipo = filtered_df[filtered_df['Nome'] == nome]['Tipo'].iloc[0] if nome in filtered_df['Nome'].values else None
+            if not tipo:
+                continue
+            # Agrupa blocos contínuos
+            if anos:
+                bloco_inicio = anos[0]
+                bloco_fim = anos[0]
+                for i in range(1, len(anos)):
+                    if anos[i] == bloco_fim + 1:
+                        bloco_fim = anos[i]
+                    else:
+                        blocos.append({'Nome': nome, 'Ano Início': bloco_inicio, 'Ano Fim': bloco_fim, 'Tipo': tipo})
+                        bloco_inicio = anos[i]
+                        bloco_fim = anos[i]
+                blocos.append({'Nome': nome, 'Ano Início': bloco_inicio, 'Ano Fim': bloco_fim, 'Tipo': tipo})
+    blocos_df = pd.DataFrame(blocos)
+    if not blocos_df.empty:
+        min_year = blocos_df['Ano Início'].min()
+        max_year = blocos_df['Ano Fim'].max()
+        # Escala fixa anual
+        fig = px.timeline(
+            blocos_df,
+            x_start="Ano Início",
+            x_end="Ano Fim",
+            y="Nome",
+            color="Tipo",
+            color_discrete_map={
+                'Global': '#00BFFF',
+                'Nacional': '#FFD700',
+                'Regional': '#FF69B4'
+            },
+            title="📊 Timeline Comparativa das Iniciativas LULC - Períodos de Disponibilidade",
+            height=max(600, len(blocos_df['Nome'].unique()) * 35)
         )
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Gráfico específico de anos de início - Timeline de lançamento
-    st.subheader("🚀 Timeline de Lançamento das Iniciativas")
-    
-    # Criar gráfico específico para anos de início
-    inicio_df = temporal_df[['Nome', 'Início', 'Tipo', 'Resolução', 'Acurácia']].copy()
-    inicio_df = inicio_df.sort_values('Início')
-    
-    fig_inicio = px.scatter(
-        inicio_df,
-        x='Início',
-        y='Nome',
-        color='Tipo',
-        size='Resolução',
-        title="Anos de Lançamento das Iniciativas LULC",
-        height=500,
-        color_discrete_map={'Global': '#FF6B6B', 'Nacional': '#4ECDC4', 'Regional': '#45B7D1'},
-        hover_data={'Resolução': True, 'Acurácia': True}
-    )
-    
-    fig_inicio.update_layout(
-        font=dict(size=12, family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
-        xaxis_title="Ano de Lançamento",
-        yaxis_title="Iniciativas",
-        plot_bgcolor='white',
-        paper_bgcolor='white',
-        xaxis=dict(
-            gridcolor='lightgray',
-            showgrid=True,
-            range=[1980, 2025],
-            dtick=5  # Mostrar marcações a cada 5 anos
-        ),
-        yaxis=dict(
-            categoryorder="array",
-            categoryarray=inicio_df['Nome'].tolist()
-        ),
-        margin=dict(l=200, r=50, t=80, b=50)
-    )
-    
-    # Adicionar linha vertical para marcar décadas
-    for decada in [1990, 2000, 2010, 2020]:
-        fig_inicio.add_vline(
-            x=decada,
-            line_dash="dot",
-            line_color="lightblue",
-            opacity=0.7
+        fig.update_layout(
+            font=dict(size=13, color="#F3F4F6", family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
+            xaxis_title="Ano",
+            yaxis_title="Iniciativa",
+            title_font_size=16,
+            plot_bgcolor="#18181b",
+            paper_bgcolor="#18181b",
+            margin=dict(l=200, r=50, t=80, b=50),
+            xaxis=dict(
+                gridcolor="#444",
+                gridwidth=1,
+                showgrid=True,
+                range=[min_year-0.5, max_year+0.5],
+                dtick=1,
+                tickmode='linear',
+                tick0=min_year,
+                color="#F3F4F6",
+                tickformat='d'
+            ),
+            yaxis=dict(
+                gridcolor="#444",
+                gridwidth=1,
+                showgrid=True,
+                color="#F3F4F6"
+            ),
+            showlegend=True,
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="center",
+                x=0.5,
+                font=dict(color="#F3F4F6")
+            )
         )
-    
-    st.plotly_chart(fig_inicio, use_container_width=True)
-
-    # Tabela de comparação de anos de início
-    st.subheader("📋 Comparação de Anos de Início")
-    
-    inicio_comparison = inicio_df.groupby('Tipo').agg({
-        'Início': ['min', 'max', 'count'],
-        'Nome': lambda x: list(x)
-    }).round(1)
-    
-    inicio_comparison.columns = ['Primeira Iniciativa (Ano)', 'Última Iniciativa (Ano)', 'Quantidade', 'Nomes']
-    inicio_comparison = inicio_comparison.reset_index()
-    
-    # Use safe HTML display to avoid PyArrow serialization issues
-    st.markdown("### Análise por Ano de Início")
-    st.markdown(safe_dataframe_display(inicio_comparison), unsafe_allow_html=True)
-
-    # Gráfico de disponibilidade por ano
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("📈 Disponibilidade por Ano")
-        
-        years_df = pd.DataFrame(list(yearly_availability.items()), columns=['Ano', 'Número de Iniciativas'])
-        years_df = years_df.sort_values('Ano')
-        
-        fig_bar = px.bar(
-            years_df,
-            x='Ano',
-            y='Número de Iniciativas',
-            title="Número de Iniciativas Disponíveis por Ano",
-            color='Número de Iniciativas',
-            color_continuous_scale='Blues'
-        )
-        
-        fig_bar.update_layout(
-            font=dict(size=12, family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
-            plot_bgcolor='white',
-            paper_bgcolor='white',
-            showlegend=False,
-            xaxis=dict(gridcolor='lightgray', showgrid=True),
-            yaxis=dict(gridcolor='lightgray', showgrid=True)
-        )
-        
-        st.plotly_chart(fig_bar, use_container_width=True)
-    
-    with col2:
-        st.subheader("🔄 Evolução Temporal por Tipo")
-        
-        # Criar dados para evolução por tipo
-        evolution_data = []
-        for year in sorted(yearly_availability.keys()):
-            for tipo in ['Global', 'Nacional', 'Regional']:
-                count = len([1 for _, row in temporal_df.iterrows() 
-                           if row['Início'] <= year <= row['Fim'] and row['Tipo'] == tipo])
-                evolution_data.append({
-                    'Ano': year,
-                    'Tipo': tipo,
-                    'Contagem': count
-                })
-        
-        evolution_df = pd.DataFrame(evolution_data)
-        
-        fig_line = px.line(
-            evolution_df,
-            x='Ano',
-            y='Contagem',
-            color='Tipo',
-            title="Evolução das Iniciativas por Tipo",
-            color_discrete_map={'Global': '#3b82f6', 'Nacional': '#10b981', 'Regional': '#f59e0b'}
-        )
-        
-        fig_line.update_layout(
-            font=dict(size=12, family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)'
-        )
-        
-        st.plotly_chart(fig_line, use_container_width=True)
-
-    # Estatísticas temporais aprimoradas
-    st.subheader("📊 Estatísticas Temporais")
-    
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        oldest = temporal_df.loc[temporal_df['Início'].idxmin()]
-        st.info(f"📅 **Mais Antiga**\n{oldest['Nome']}\n({oldest['Início']})")
-    with col2:
-        longest = temporal_df.loc[temporal_df['Duração'].idxmax()]
-        st.info(f"⏱️ **Maior Duração**\n{longest['Nome']}\n({longest['Duração']} anos)")
-    with col3:
-        most_recent = temporal_df.loc[temporal_df['Fim'].idxmax()]
-        st.info(f"🆕 **Mais Recente**\n{most_recent['Nome']}\n(até {most_recent['Fim']})")
-    with col4:
-        peak_year = max(yearly_availability, key=yearly_availability.get)
-        st.info(f"🏆 **Ano com Mais Dados**\n{peak_year}\n({yearly_availability[peak_year]} iniciativas)")
-
-    # Tabela detalhada de períodos
-    st.subheader("📋 Detalhamento dos Períodos de Disponibilidade")
-    
-    display_df = temporal_df.copy()
-    display_df['Período'] = display_df.apply(lambda x: f"{x['Início']}-{x['Fim']}" if x['Início'] != x['Fim'] else str(x['Início']), axis=1)
-    display_df = display_df[['Nome', 'Tipo', 'Período', 'Duração', 'Resolução', 'Acurácia']].sort_values(['Tipo', 'Duração'], ascending=[True, False])
-    
-    # Use safe HTML display to avoid PyArrow serialization issues
-    st.markdown("### Análise Temporal das Iniciativas")
-    st.markdown(safe_dataframe_display(display_df), unsafe_allow_html=True)
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.warning('Nenhuma iniciativa com anos_disponiveis encontrada para o filtro atual.')
 
 with tab3:
     st.subheader("Distribuição do Número de Classes")
