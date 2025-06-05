@@ -1,0 +1,39 @@
+# Python/Streamlit
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.log
+*.env
+.env*
+*.egg-info/
+*.bak
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*.~
+# Streamlit cache
+.streamlit/
+# Dados e outputs
+*.csv
+*.xlsx
+*.json
+# Instalações locais
+lulc_env/
+# Instalações Windows
+Thumbs.db
+# Relatórios temporários
+*.pdf
+*.svg
+*.png
+*.jpg
+*.jpeg
+# Instalação e scripts
+install.bat
+install.sh
+setup_dependencies.py
+system_report.json
