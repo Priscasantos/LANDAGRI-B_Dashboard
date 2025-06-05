@@ -35,7 +35,3 @@ def prepare_plot_data(df: pd.DataFrame) -> pd.DataFrame:
         else:
             plot_data[col] = df[col].astype(str).tolist()
     return pd.DataFrame(plot_data)
-
-def safe_dataframe_display(df: pd.DataFrame) -> str:
-    """Convert DataFrame to HTML table for Streamlit display."""
-    return df.to_html(classes='streamlit-table', escape=False, index=False)

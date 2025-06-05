@@ -1,10 +1,11 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from typing import Dict, Any
+from typing import Dict, Any, List
+from config import get_initiative_color_map
 
 def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Figure:
-    """Plot a timeline using anos_disponiveis from metadata."""
+    """Plot a timeline using anos_disponiveis from metadata, with per-initiative color."""
     blocos = []
     for nome, meta in metadata.items():
         if 'anos_disponiveis' in meta:
@@ -28,17 +29,15 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Fig
         return go.Figure()
     min_year = blocos_df['Ano Início'].min()
     max_year = blocos_df['Ano Fim'].max()
+    initiative_names = blocos_df['Nome'].unique().tolist()
+    color_map = get_initiative_color_map(initiative_names)
     fig = px.timeline(
         blocos_df,
         x_start="Ano Início",
         x_end="Ano Fim",
         y="Nome",
-        color="Tipo",
-        color_discrete_map={
-            'Global': '#00BFFF',
-            'Nacional': '#FFD700',
-            'Regional': '#FF69B4'
-        },
+        color="Nome",
+        color_discrete_map=color_map,
         title="📊 Timeline Comparativa das Iniciativas LULC - Períodos de Disponibilidade",
         height=max(600, len(blocos_df['Nome'].unique()) * 35)
     )
@@ -69,12 +68,13 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Fig
         ),
         showlegend=True,
         legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="center",
-            x=0.5,
-            font=dict(color="#F3F4F6")
+            orientation="v",
+            yanchor="top",
+            y=1,
+            xanchor="left",
+            x=1.01,
+            font=dict(color="#F3F4F6"),
+            title="Iniciativa"
         )
     )
     return fig
@@ -215,9 +215,16 @@ def plot_distribuicao_classes(filtered_df):
 
 def plot_distribuicao_metodologias(method_counts):
     import plotly.express as px
+    # Verificar se method_counts tem dados
+    if method_counts is None or method_counts.empty:
+        # Retorna uma figura vazia ou uma mensagem, se preferir
+        fig = go.Figure()
+        fig.update_layout(title="Distribuição das Metodologias Utilizadas (Dados insuficientes)")
+        return fig
+
     fig = px.pie(
-        values=method_counts.values,
-        names=method_counts.index,
+        values=method_counts.values,  # Passar os valores explicitamente
+        names=method_counts.index,    # Passar os índices (nomes das metodologias) explicitamente
         title="Distribuição das Metodologias Utilizadas",
         height=400
     )
@@ -306,5 +313,66 @@ def plot_heatmap_tecnico(filtered_df):
         font=dict(size=12, family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig
+
+def plot_annual_coverage_multiselect(metadata: Dict[str, Any], filtered_df: pd.DataFrame, selected_initiatives: List[str]) -> go.Figure:
+    """Plot annual coverage for selected initiatives, each with a unique color."""
+    # Prepare data for selected initiatives only
+    data = []
+    for nome in selected_initiatives:
+        meta = metadata.get(nome, {})
+        if 'anos_disponiveis' in meta:
+            anos = sorted(meta['anos_disponiveis'])
+            for ano in anos:
+                data.append({'Nome': nome, 'Ano': ano})
+    if not data:
+        return go.Figure()
+    df_anos = pd.DataFrame(data)
+    color_map = get_initiative_color_map(selected_initiatives)
+    fig = go.Figure()
+    for nome in selected_initiatives:
+        anos = df_anos[df_anos['Nome'] == nome]['Ano'].tolist()
+        fig.add_trace(go.Scatter(
+            x=anos,
+            y=[nome]*len(anos),
+            mode='markers+lines',
+            name=nome,
+            marker=dict(color=color_map[nome], size=12, line=dict(width=2, color=color_map[nome])),
+            line=dict(color=color_map[nome], width=3),
+            showlegend=True
+        ))
+    # Fix x-axis to show all years in range, with correct labels
+    if not df_anos.empty:
+        min_year = int(df_anos['Ano'].min())
+        max_year = int(df_anos['Ano'].max())
+        fig.update_xaxes(
+            tickmode='linear',
+            tick0=min_year,
+            dtick=1,
+            range=[min_year-0.5, max_year+0.5],
+            title='Ano',
+            showgrid=True,
+            gridcolor="#444",
+            tickformat='d',
+        )
+    fig.update_layout(
+        title="Cobertura Anual das Iniciativas Selecionadas",
+        xaxis_title="Ano",
+        yaxis_title="Iniciativa",
+        yaxis=dict(type='category', categoryorder='array', categoryarray=selected_initiatives),
+        plot_bgcolor="#18181b",
+        paper_bgcolor="#18181b",
+        font=dict(color="#F3F4F6", size=13, family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
+        legend=dict(
+            orientation="v",
+            yanchor="top",
+            y=1,
+            xanchor="left",
+            x=1.01,
+            font=dict(color="#F3F4F6"),
+            title="Iniciativa"
+        ),
+        margin=dict(l=120, r=50, t=60, b=50)
     )
     return fig
