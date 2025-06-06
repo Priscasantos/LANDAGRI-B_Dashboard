@@ -1,5 +1,8 @@
 import streamlit as st
 import pandas as pd
+import plotly.graph_objects as go
+import plotly.express as px
+import numpy as np
 from utils import safe_download_image
 from tools.radar import plot_radar_comparacao
 from tools.tables import safe_dataframe_display
@@ -103,44 +106,65 @@ def run():
             st.warning(init_metadata.get("cobertura", "Não disponível"))
             st.markdown("**📡 Fontes de Dados:**")
             st.info(init_metadata.get("fonte_dados", "Não disponível"))
+    
+    # Adicionar link para comparações detalhadas
+    st.markdown("---")
+    st.info("💡 **Para comparações detalhadas entre múltiplas iniciativas**, acesse a página **'🔍 Análises Detalhadas'** no menu lateral.")
     st.markdown("---")
 
-    # Comparação Direta Entre Duas Iniciativas
-    if len(filtered_df) > 1:
-        st.markdown("---")
-        st.subheader("⚡ Comparação Direta entre Iniciativas")
-        col1_comp, col2_comp = st.columns(2)
-        initiative_names = filtered_df["Nome"].tolist()
-        with col1_comp:
-            init1 = st.selectbox(
-                "Primeira iniciativa:",
-                options=initiative_names,
-                key="visao_geral_direct_comparison1",
+    # Adicionar gráfico de densidade temporal
+    st.subheader("🌊 Densidade Temporal de Iniciativas LULC")
+    
+    if meta:
+        # Criar dados de densidade usando metadados
+        density_data = []
+        all_years = set()
+        
+        for nome, meta_item in meta.items():
+            if 'anos_disponiveis' in meta_item and meta_item['anos_disponiveis']:
+                for ano in meta_item['anos_disponiveis']:
+                    density_data.append({'nome': nome, 'ano': ano})
+                    all_years.add(ano)
+        
+        if density_data:
+            density_df = pd.DataFrame(density_data)
+            year_counts = density_df['ano'].value_counts().sort_index()
+            
+            # Gráfico de densidade por ano (linha + área)
+            fig_density_line = go.Figure()
+            fig_density_line.add_trace(go.Scatter(
+                x=year_counts.index,
+                y=year_counts.values,
+                mode='lines+markers',
+                fill='tonexty',
+                name='Iniciativas Ativas',
+                line=dict(color='rgba(0,150,136,0.8)', width=3),
+                marker=dict(size=8, color='rgba(0,150,136,1)')
+            ))
+            
+            fig_density_line.update_layout(
+                title='📊 Densidade Temporal: Número de Iniciativas por Ano (1985-2024)',
+                xaxis_title='Ano',
+                yaxis_title='Número de Iniciativas Ativas',
+                height=400,
+                hovermode='x unified'
             )
-        with col2_comp:
-            init2 = st.selectbox(
-                "Segunda iniciativa:",
-                options=initiative_names,
-                key="visao_geral_direct_comparison2",
-            )
-        if init1 and init2 and init1 != init2:
-            data_comp = filtered_df[filtered_df["Nome"].isin([init1, init2])]
-            if not data_comp.empty:
-                data1 = data_comp[data_comp["Nome"] == init1].iloc[0]
-                data2 = data_comp[data_comp["Nome"] == init2].iloc[0]
-                st.markdown("#### 📊 Comparação de Métricas")
-                fig = plot_radar_comparacao(data1, data2, filtered_df, init1, init2)
-                st.plotly_chart(fig, use_container_width=True)
-                st.markdown("#### 📋 Tabela Comparativa")
-                comparison_df = data_comp[["Nome", "Acurácia (%)", "Resolução (m)", "Classes", "Frequência Temporal"]]
-                safe_dataframe_display(comparison_df)
-
-                # Download links for images
-                st.markdown("#### ⬇️ Download das Imagens do Gráfico")
-                safe_download_image(fig, f"comparacao_{init1}_vs_{init2}.png", "⬇️ Baixar Comparação (PNG)")
-            else:
-                st.warning("⚠️ Dados para comparação não encontrados.")
+            st.plotly_chart(fig_density_line, use_container_width=True)
+            safe_download_image(fig_density_line, "densidade_temporal_overview.png", "⬇️ Baixar Densidade Temporal (PNG)")
+            
+            # Métricas de densidade temporal
+            col1_temp, col2_temp, col3_temp, col4_temp = st.columns(4)
+            with col1_temp:
+                st.metric("🗓️ Primeiro Ano", min(all_years))
+            with col2_temp:
+                st.metric("📅 Último Ano", max(all_years))
+            with col3_temp:
+                st.metric("🎯 Pico de Atividade", f"{max(year_counts.values)} iniciativas")
+            with col4_temp:
+                st.metric("📈 Média por Ano", f"{np.mean(year_counts.values):.1f}")
         else:
-            st.info("🔄 Selecione duas iniciativas diferentes para comparar.")
+            st.info("Dados temporais não disponíveis nos metadados.")
     else:
-        st.info("⚠️ Pelo menos duas iniciativas são necessárias para comparação direta.")
+        st.error("Metadados não disponíveis para análise temporal.")
+
+    st.markdown("---")

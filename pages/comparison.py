@@ -51,9 +51,7 @@ def run():
         selected_acc = st.slider("Acurácia (%)", min_value=min_acc, max_value=max_acc, value=(min_acc, max_acc))
     with col4:
         metodologias = df["Metodologia"].unique().tolist()
-        selected_methods = st.multiselect("Metodologia", options=metodologias, default=metodologias)
-
-    # Aplicar filtros
+        selected_methods = st.multiselect("Metodologia", options=metodologias, default=metodologias)    # Aplicar filtros
     filtered_df = df[
         (df["Tipo"].isin(selected_types)) &
         (df["Resolução (m)"].between(selected_res[0], selected_res[1])) &
@@ -66,35 +64,16 @@ def run():
         st.warning("⚠️ Nenhuma iniciativa corresponde aos filtros selecionados. Ajuste os filtros para visualizar os dados.")
         st.stop()
 
-    df_filt = filtered_df    # Otimizações de performance
-    st.markdown("### ⚡ Configurações de Performance")
-    col_perf1, col_perf2, col_perf3 = st.columns(3)
-    
-    with col_perf1:
-        max_records = st.selectbox(
-            "Máximo de registros:", 
-            [10, 25, 50, 100, 200], 
-            index=2,  # Default: 50
-            help="Limitar registros melhora a performance"
-        )
-    
-    with col_perf2:
-        use_cache = st.checkbox("Cache habilitado", value=True, help="Cache acelera carregamento")
-    
-    with col_perf3:
-        show_loading = st.checkbox("Indicadores de carregamento", value=True)    # Aplicar limitação de dados para performance
-    if len(df_filt) > max_records:
-        df_filt_limited = df_filt.nlargest(max_records, 'Acurácia (%)')
-        st.warning(f"⚠️ Mostrando top {max_records} iniciativas (de {len(df_filt)} total) para melhor performance")
-    else:
-        df_filt_limited = df_filt.copy()
+    df_filt = filtered_df    # Aplicar filtros básicos
+    df_filt_limited = df_filt.copy()
 
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "📊 Barras Duplas",
         "🎯 Resolução vs Acurácia",
         "📅 Cobertura Temporal",
         "🏷️ Número de Classes",
-        "⚙️ Metodologias"
+        "⚙️ Metodologias",
+        "🕸️ Análise Radar"
     ])
 
     with tab1:
@@ -215,63 +194,152 @@ def run():
             st.plotly_chart(fig_acuracia_metodologia, use_container_width=True)
             safe_download_image(fig_acuracia_metodologia, "acuracia_por_metodologia.png", "⬇️ Baixar Acurácia Metodologia (PNG)")
 
-    # Seção de Performance e Estatísticas
-    st.markdown("---")
-    st.markdown("### 📊 Estatísticas de Performance")
-    
-    col_stats1, col_stats2, col_stats3, col_stats4 = st.columns(4)
-    
-    with col_stats1:
-        total_records = len(df_geral_original)
-        filtered_records = len(df_filt)
-        st.metric("Total de Iniciativas", total_records, delta=None)
-    
-    with col_stats2:
-        displayed_records = len(df_filt_limited)
-        st.metric("Registros Exibidos", displayed_records, delta=f"-{filtered_records - displayed_records}" if filtered_records > displayed_records else None)
-    
-    with col_stats3:
-        cache_info = "✅ Ativo" if use_cache else "❌ Desabilitado"
-        st.metric("Cache", cache_info, delta=None)
-    
-    with col_stats4:
-        perf_mode = f"Máx {max_records}"
-        st.metric("Limite Performance", perf_mode, delta=None)
-
-    st.info(f"""
-        **📈 Análise atual:**
-        - **Produtos analisados:** {len(df_filt_limited)} iniciativas (filtradas)
-        - **Métricas avaliadas:** Acurácia, Resolução, Classes, Metodologia, Escopo
-        - **Performance:** Dados limitados a {max_records} registros para otimização
+    with tab6:
+        st.subheader("🕸️ Análise Radar - Comparação Multi-dimensional")
+          # Radar chart with top initiatives
+        radar_columns = ['Acurácia (%)', 'Resolução (m)', 'Classes']
+        available_radar_cols = [col for col in radar_columns if col in df_filt.columns]
         
-        **💡 Funcionalidades:**
-        - Filtros interativos por tipo, resolução, acurácia e metodologia
-        - Normalização automática de dados para comparação
-        - Tratamento robusto de dados ausentes
-        - Downloads disponíveis para todos os gráficos principais
-        - Cache inteligente para melhor performance
+        if len(available_radar_cols) >= 2 and len(df_filt) >= 2:
+            # Allow users to select number of initiatives to compare
+            col1_radar, col2_radar = st.columns(2)
+            with col1_radar:
+                max_initiatives = min(8, len(df_filt))
+                if max_initiatives > 2:
+                    num_initiatives = st.slider(
+                        "Número de iniciativas no radar",
+                        min_value=2,
+                        max_value=max_initiatives,
+                        value=min(5, max_initiatives),
+                        help="Selecione quantas iniciativas exibir no gráfico radar"
+                    )
+                else:
+                    # If only 2 initiatives available, don't show slider
+                    num_initiatives = max_initiatives
+                    st.info(f"Exibindo todas as {max_initiatives} iniciativas disponíveis")
+            
+            with col2_radar:
+                sort_by = st.selectbox(
+                    "Ordenar por",
+                    options=['Acurácia (%)', 'Resolução (m)', 'Classes'],
+                    help="Critério para selecionar as top iniciativas"
+                )
+            
+            # Prepare radar data
+            if sort_by == 'Resolução (m)':
+                # For resolution, lower is better, so sort ascending
+                top_initiatives = df_filt.nsmallest(num_initiatives, sort_by)
+            else:
+                # For others, higher is better
+                top_initiatives = df_filt.nlargest(num_initiatives, sort_by)
+            
+            radar_df = top_initiatives[['Nome'] + available_radar_cols].copy()
+            
+            # Normalize data for radar chart (0-1 scale)
+            for col in available_radar_cols:
+                min_val, max_val = df_filt[col].min(), df_filt[col].max()
+                if max_val - min_val > 0:
+                    if col == 'Resolução (m)':
+                        # Invert resolution (lower is better)
+                        radar_df[col] = 1 - (radar_df[col] - min_val) / (max_val - min_val)
+                    else:
+                        radar_df[col] = (radar_df[col] - min_val) / (max_val - min_val)
+                else:
+                    radar_df[col] = 0.5
+            
+            # Create radar chart
+            fig_radar = go.Figure()
+            colors = px.colors.qualitative.Set1
+            
+            for i, (idx, row) in enumerate(radar_df.iterrows()):
+                values = row[available_radar_cols].tolist()
+                values_closed = values + [values[0]]  # Close the radar
+                theta_closed = available_radar_cols + [available_radar_cols[0]]
+                
+                fig_radar.add_trace(go.Scatterpolar(
+                    r=values_closed,
+                    theta=theta_closed,
+                    fill='toself',
+                    name=row['Nome'],
+                    line_color=colors[i % len(colors)],
+                    opacity=0.7
+                ))
+            
+            fig_radar.update_layout(
+                polar=dict(
+                    radialaxis=dict(
+                        visible=True,
+                        range=[0, 1],
+                        tickmode='array',
+                        tickvals=[0, 0.25, 0.5, 0.75, 1],
+                        ticktext=['Baixo', 'Médio-Baixo', 'Médio', 'Médio-Alto', 'Alto']
+                    )
+                ),
+                showlegend=True,
+                title=f'🎯 Comparação Radar - Top {num_initiatives} por {sort_by}',
+                height=600,
+                font=dict(size=12)
+            )
+            
+            st.plotly_chart(fig_radar, use_container_width=True)
+            safe_download_image(fig_radar, "radar_comparison.png", "⬇️ Baixar Gráfico Radar (PNG)")
+            
+            # Show normalized values table
+            st.markdown("#### 📊 Valores Normalizados (Escala 0-1)")
+            display_df = radar_df.copy()
+            for col in available_radar_cols:
+                display_df[col] = display_df[col].round(3)
+            
+            st.dataframe(
+                display_df,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Nome": st.column_config.TextColumn("Iniciativa", width="large"),
+                    "Acurácia (%)": st.column_config.NumberColumn("Acurácia (norm.)", format="%.3f"),
+                    "Resolução (m)": st.column_config.NumberColumn("Resolução (norm.)", format="%.3f", help="Invertido: 1 = melhor resolução"),
+                    "Classes": st.column_config.NumberColumn("Classes (norm.)", format="%.3f")
+                }
+            )
+            
+            # Insights section
+            st.markdown("#### 💡 Insights da Análise Radar")
+            insights_col1, insights_col2 = st.columns(2)
+            
+            with insights_col1:
+                # Find best overall performer
+                radar_df['score_total'] = radar_df[available_radar_cols].mean(axis=1)
+                best_overall = radar_df.loc[radar_df['score_total'].idxmax(), 'Nome']
+                st.success(f"🏆 **Melhor Performance Geral:** {best_overall}")
+                
+                # Find specialist initiatives
+                for col in available_radar_cols:
+                    specialist = radar_df.loc[radar_df[col].idxmax(), 'Nome']
+                    col_display = "Resolução" if col == "Resolução (m)" else col.replace(" (%)", "")
+                    st.info(f"🎯 **Especialista em {col_display}:** {specialist}")
+            
+            with insights_col2:
+                # Performance distribution
+                st.markdown("**📈 Distribuição de Performance:**")
+                for col in available_radar_cols:
+                    avg_performance = radar_df[col].mean()
+                    col_display = "Resolução" if col == "Resolução (m)" else col.replace(" (%)", "")
+                    performance_level = "Alto" if avg_performance > 0.7 else "Médio" if avg_performance > 0.4 else "Baixo"
+                    st.write(f"• **{col_display}:** {performance_level} ({avg_performance:.2f})")
+                
+                # Balance analysis
+                balance_scores = radar_df[available_radar_cols].std(axis=1)
+                most_balanced = radar_df.loc[balance_scores.idxmin(), 'Nome']
+                st.info(f"⚖️ **Mais Equilibrada:** {most_balanced}")
         
-        **🧪 Testes de visualizações:** Movidos para sistema separado em `/tests/teste_graficos.py`
-        """)
-    
-    # Dicas de performance
-    with st.expander("💡 Dicas para Melhor Performance"):
-        st.markdown("""
-        **Para melhorar a velocidade do dashboard:**
-        
-        1. **Reduzir dados:** Use filtros para reduzir o número de iniciativas analisadas
-        2. **Limite de registros:** Configure um limite menor (10-25) para visualizações complexas
-        3. **Cache:** Mantenha o cache habilitado para evitar recálculos
-        4. **Visualização simples:** Use "Coordenadas Paralelas" para análises rápidas
-        5. **Fechar abas:** Feche abas não utilizadas para liberar memória
-        
-        **Visualizações por complexidade:**
-        - 📊 **Coordenadas Paralelas**: Mais rápido (até 100+ registros)
-        - 🎯 **Radar**: Médio (máximo 15 registros)
-        - 📋 **Matriz**: Complexo (até 10 registros)
-        """)
-        
-    # Botão para limpar cache
-    if st.button("🧹 Limpar Cache", help="Limpa o cache para forçar atualização dos dados"):
-        st.cache_data.clear()
-        st.success("Cache limpo com sucesso! A próxima visualização será regenerada.")
+        else:
+            if len(df_filt) < 2:
+                st.warning("⚠️ São necessárias pelo menos 2 iniciativas para comparação em radar.")
+            else:
+                st.warning("⚠️ Dados insuficientes para gráfico radar. Verifique se as colunas necessárias estão disponíveis.")
+            
+            # Show available data info
+            st.info("📋 **Dados disponíveis:**")
+            st.write(f"• Iniciativas filtradas: {len(df_filt)}")
+            st.write(f"• Colunas para radar disponíveis: {available_radar_cols}")
+            st.write(f"• Colunas necessárias: {radar_columns}")
