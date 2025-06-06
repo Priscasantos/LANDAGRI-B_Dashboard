@@ -1,115 +1,104 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-import altair as alt
 import numpy as np
 import ast
+from utils import safe_download_image
+from tests.teste_graficos import run_test_acuracia_aprimorada
 
-st.title('Comparativo Visual de Produtos')
+def run():
+    st.title('📊 Comparativo Visual de Produtos LULC')
 
-# Carregar dados de exemplo (ajuste conforme seu dataset real)
-df = pd.read_csv('initiative_data/initiatives_comparison.csv')
+    # Carregar dados processados se não estiverem no session_state
+    if 'df_geral' not in st.session_state or st.session_state.df_geral.empty:
+        from data import load_data
+        df_loaded, metadata_loaded = load_data(
+            os.path.join("initiative_data", "initiatives_processed.csv"),
+            os.path.join("initiative_data", "metadata_processed.json")
+        )
+        if df_loaded is not None and not df_loaded.empty:
+            st.session_state.df_geral = df_loaded
+            st.session_state.metadata = metadata_loaded
+        else:
+            st.warning("⚠️ Dados não encontrados. Verifique os arquivos de dados processados.")
+            st.stop()
+    df = st.session_state.df_geral.copy()
 
-# 1. Gráfico de Barras Horizontais Duplas
-st.header('1. Barras Horizontais Duplas: Acurácia x Resolução Espacial')
+    required_columns = ['Nome', 'Acurácia (%)', 'Resolução (m)', 'Classes']
+    missing_columns = [col for col in required_columns if col not in df.columns]
+    if missing_columns:
+        st.error(f"Colunas faltando no dataset: {missing_columns}")
+        st.info("Colunas disponíveis: " + ", ".join(df.columns.tolist()))
+        return
 
-# Normalizar resolução para facilitar a leitura (quanto menor, melhor)
-df['resolucao_norm'] = df['resolucao'] / df['resolucao'].max()
+    tab1, tab2, tab3 = st.tabs([
+        "📊 Barras Duplas",
+        "📈 Análise de Acurácia Aprimorada",
+        "📋 Tabela"
+    ])
 
-fig = go.Figure()
-fig.add_trace(go.Bar(
-    y=df['produto'],
-    x=df['acuracia'],
-    name='Acurácia (%)',
-    orientation='h',
-    marker_color='royalblue'
-))
-fig.add_trace(go.Bar(
-    y=df['produto'],
-    x=1 - df['resolucao_norm'],
-    name='Resolução (normalizada, quanto maior melhor)',
-    orientation='h',
-    marker_color='orange'
-))
-fig.update_layout(barmode='group', xaxis_title='Valor', yaxis_title='Produto')
-st.plotly_chart(fig, use_container_width=True)
+    with tab1:
+        # Barras Duplas: Acurácia x Resolução
+        df['resolucao_norm'] = (1 / df['Resolução (m)']) / (1 / df['Resolução (m)']).max()
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            y=df['Nome'],
+            x=df['Acurácia (%)'],
+            name='Acurácia (%)',
+            orientation='h',
+            marker_color='royalblue'
+        ))
+        fig.add_trace(go.Bar(
+            y=df['Nome'],
+            x=df['resolucao_norm'] * 100,  # Converter para porcentagem
+            name='Resolução (normalizada)',
+            orientation='h',
+            marker_color='orange'
+        ))
+        fig.update_layout(
+            barmode='group', 
+            xaxis_title='Valor (%)', 
+            yaxis_title='Produto',
+            title='Comparação: Acurácia vs Resolução',
+            height=max(400, len(df) * 25)
+        )
+        st.plotly_chart(fig, use_container_width=True)
+        safe_download_image(fig, "barras_duplas.png", "⬇️ Baixar Gráfico")
 
-# 2. Gráfico de Radar (Spider Chart)
-st.header('2. Gráfico de Radar (Spider Chart)')
+    with tab2:
+        # Análise de Acurácia Aprimorada (Ranking, Scatter, Heatmap, etc)
+        st.subheader('📊 Análise de Acurácia - Visualizações Aprimoradas')
+        # Aproveita a função do teste para mostrar as opções de análise aprimorada
+        # Adapta para o DataFrame do dashboard
+        from tests.teste_graficos import run_test_acuracia_aprimorada as run_acuracia
+        # Renomeia colunas para compatibilidade
+        df_teste = df.rename(columns={
+            'Nome': 'produto',
+            'Acurácia (%)': 'acuracia',
+            'Resolução (m)': 'resolucao',
+            'Classes': 'num_classes',
+            'Metodologia': 'metodologia',
+            'Escopo': 'escopo',
+            'Anos Disponíveis': 'disponibilidade',
+            'Categoria Resolução': 'categoria_resolucao',
+            'Score Geral': 'score_geral'
+        })
+        run_acuracia(df_teste, show_loading=False)
 
-# Selecionar algumas métricas para o radar
-eixos = ['acuracia', 'resolucao', 'num_classes', 'cobertura_temporal']
-radar_df = df[['produto'] + eixos].copy()
-# Normalizar todas as métricas para 0-1
-for eixo in eixos:
-    if eixo == 'resolucao':
-        radar_df[eixo] = 1 - (radar_df[eixo] - radar_df[eixo].min()) / (radar_df[eixo].max() - radar_df[eixo].min())
-    else:
-        radar_df[eixo] = (radar_df[eixo] - radar_df[eixo].min()) / (radar_df[eixo].max() - radar_df[eixo].min())
+    with tab3:
+        st.dataframe(df, use_container_width=True)
+        st.header('📈 Resumo Estatístico')
+        numeric_columns = df.select_dtypes(include=[np.number]).columns
+        if len(numeric_columns) > 0:
+            st.dataframe(df[numeric_columns].describe(), use_container_width=True)
+        else:
+            st.warning("Nenhuma coluna numérica encontrada para estatísticas.")
 
-fig_radar = go.Figure()
-for i, row in radar_df.iterrows():
-    fig_radar.add_trace(go.Scatterpolar(
-        r=row[eixos].tolist() + [row[eixos[0]]],
-        theta=eixos + [eixos[0]],
-        fill='toself',
-        name=row['produto']
-    ))
-fig_radar.update_layout(
-    polar=dict(radialaxis=dict(visible=True, range=[0,1])),
-    showlegend=True
-)
-st.plotly_chart(fig_radar, use_container_width=True)
-
-# 3. Heatmap de Comparação
-st.header('3. Heatmap de Comparação')
-
-heatmap_df = radar_df.set_index('produto')
-fig_heatmap = px.imshow(heatmap_df, color_continuous_scale='viridis', aspect='auto',
-                       labels=dict(x='Métrica', y='Produto', color='Valor Normalizado'))
-st.plotly_chart(fig_heatmap, use_container_width=True)
-
-# 4. Gráfico de Ranking (Score Composto)
-st.header('4. Gráfico de Ranking (Score Composto)')
-
-# Exemplo de score composto: 50% acurácia, 30% resolução, 20% cobertura temporal
-radar_df['score'] = 0.5*radar_df['acuracia'] + 0.3*radar_df['resolucao'] + 0.2*radar_df['cobertura_temporal']
-ranked = radar_df.sort_values('score', ascending=False)
-fig_score = px.bar(ranked, x='score', y='produto', orientation='h', color='score', color_continuous_scale='Blues')
-st.plotly_chart(fig_score, use_container_width=True)
-
-# 5. Pequenos Múltiplos (Small Multiples)
-st.header('5. Pequenos Múltiplos')
-
-small_multiples = pd.melt(df, id_vars=['produto'], value_vars=eixos, var_name='Métrica', value_name='Valor')
-fig_sm = px.bar(small_multiples, x='produto', y='Valor', facet_col='Métrica', color='produto',
-                category_orders={'Métrica': eixos})
-st.plotly_chart(fig_sm, use_container_width=True)
-
-# 6. Disponibilidade de dados ao longo do tempo (dinâmico)
-st.header('6. Disponibilidade de Dados ao Longo do Tempo')
-
-if 'disponibilidade' in df.columns:
-    # Corrigir: garantir que a coluna 'disponibilidade' seja lista de anos (não string ou array 2D)
-    anos = list(range(2010, 2025))
-    disp_matrix = np.zeros((len(df), len(anos)))
-    for i, disp in enumerate(df['disponibilidade']):
-        # Se for string, converter para lista
-        if isinstance(disp, str):
-            try:
-                disp = ast.literal_eval(disp)
-            except Exception:
-                disp = []
-        # Se for float ou valor único, transformar em lista
-        if isinstance(disp, (int, float)):
-            disp = [int(disp)]
-        for ano in disp:
-            if isinstance(ano, (int, float)) and int(ano) in anos:
-                disp_matrix[i, anos.index(int(ano))] = 1
-    fig_disp = px.imshow(disp_matrix, aspect='auto',
-                        labels=dict(x='Ano', y='Produto', color='Disponível'),
-                        x=anos, y=df['produto'])
-    st.plotly_chart(fig_disp, use_container_width=True)
-else:
-    st.info('Coluna "disponibilidade" não encontrada no dataset.')
+if __name__ == "__main__":
+    run()

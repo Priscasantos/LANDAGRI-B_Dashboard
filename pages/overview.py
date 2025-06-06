@@ -9,8 +9,8 @@ def run():
     if 'df_original' not in st.session_state or 'metadata' not in st.session_state:
         from data import load_data, prepare_plot_data
         df_loaded, metadata_loaded = load_data(
-            "initiative_data/initiatives_comparison.csv",
-            "initiative_data/initiative_meta.json"
+            "initiative_data/initiatives_processed.csv",
+            "initiative_data/metadata_processed.json"
         )
         st.session_state.df_original = df_loaded
         st.session_state.metadata = metadata_loaded

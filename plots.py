@@ -3,7 +3,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 from typing import Dict, Any, List
 from config import get_initiative_color_map
+import streamlit as st
 
+@st.cache_data(ttl=300)  # Cache por 5 minutos para melhor performance
 def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Figure:
     """Plot a timeline using anos_disponiveis from metadata, with per-initiative color."""
     blocos = []
@@ -79,6 +81,7 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Fig
     )
     return fig
 
+@st.cache_data(ttl=300)  # Cache por 5 minutos
 def plot_ano_overlap(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Figure:
     all_anos = []
     for nome, meta in metadata.items():
@@ -140,44 +143,206 @@ def plot_heatmap(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Figu
     )
     return fig
 
-def gap_analysis(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> pd.DataFrame:
-    gap_data = []
-    for nome, meta in metadata.items():
-        if 'anos_disponiveis' in meta:
-            anos = sorted(meta['anos_disponiveis'])
-            tipo = filtered_df[filtered_df['Nome'] == nome]['Tipo'].iloc[0] if nome in filtered_df['Nome'].values else None
-            if not tipo or len(anos) < 2:
-                continue
-            gaps = [anos[i+1] - anos[i] for i in range(len(anos)-1)]
-            max_gap = max(gaps) if gaps else 0
-            gap_data.append({'Nome': nome, 'Maior Lacuna (anos)': max_gap, 'Tipo': tipo})
-    return pd.DataFrame(gap_data)
-
-def plot_resolucao_acuracia(filtered_df):
-    fig = px.scatter(
-        filtered_df,
-        x='Resolução (m)',
-        y='Acurácia (%)',
-        color='Tipo',
-        size='Classes',
-        hover_name='Nome',
-        hover_data=['Metodologia', 'Frequência Temporal'],
-        log_x=True,
-        labels={
-            'Resolução (m)': 'Resolução Espacial (m) - Escala Log',
-            'Acurácia (%)': 'Acurácia (%)'
-        },
-        title="Relação entre Resolução Espacial e Acurácia das Iniciativas",
-        height=600,
-        color_discrete_map={'Global': '#ff6b6b', 'Nacional': '#4dabf7', 'Regional': '#51cf66'}
-    )
+@st.cache_data(ttl=300)  # Cache por 5 minutos
+def plot_resolucao_acuracia(filtered_df, viz_mode="parallel"):
+    """
+    Cria visualizações alternativas para análise de acurácia e resolução.
+    OTIMIZADO PARA PERFORMANCE
+    
+    Parâmetros:
+    - filtered_df: DataFrame filtrado
+    - viz_mode: tipo de visualização ("parallel", "radar", "matrix")
+    """
+    
+    # Otimização: Limitar dados automaticamente se muito grande
+    MAX_ITEMS = 100
+    if len(filtered_df) > MAX_ITEMS:
+        filtered_df = filtered_df.nlargest(MAX_ITEMS, 'Acurácia (%)')
+    
+    if viz_mode == "parallel":
+        # Coordenadas Paralelas - OTIMIZADA
+        numeric_cols = ['Acurácia (%)', 'Resolução (m)', 'Classes']
+        available_cols = [col for col in numeric_cols if col in filtered_df.columns]
+        
+        if len(available_cols) >= 2:
+            # OTIMIZAÇÃO: Limitar ainda mais para coordenadas paralelas (max 30)
+            parallel_df = filtered_df[available_cols + ['Nome', 'Metodologia']].dropna()
+            if len(parallel_df) > 30:
+                parallel_df = parallel_df.nlargest(30, 'Acurácia (%)')
+                st.info(f"ℹ️ Mostrando top 30 iniciativas para melhor performance na visualização paralela")
+            
+            if not parallel_df.empty:
+                # Normalizar dados para melhor visualização
+                parallel_norm = parallel_df.copy()
+                for col in available_cols:
+                    if col == 'Resolução (m)':
+                        # Para resolução, inverter (menor é melhor)
+                        if parallel_df[col].max() != parallel_df[col].min():
+                            parallel_norm[col] = (parallel_df[col].max() - parallel_df[col]) / (parallel_df[col].max() - parallel_df[col].min())
+                        else:
+                            parallel_norm[col] = 0.5
+                    else:
+                        if parallel_df[col].max() != parallel_df[col].min():
+                            parallel_norm[col] = (parallel_df[col] - parallel_df[col].min()) / (parallel_df[col].max() - parallel_df[col].min())
+                        else:
+                            parallel_norm[col] = 0.5
+                
+                # Mapear metodologias para cores numéricas
+                if 'Metodologia' in parallel_norm.columns:
+                    metodologias = parallel_norm['Metodologia'].astype('category')
+                    parallel_norm['Color'] = metodologias.cat.codes
+                else:
+                    parallel_norm['Color'] = 0
+                
+                fig = px.parallel_coordinates(
+                    parallel_norm, 
+                    dimensions=available_cols,
+                    color='Color',
+                    color_continuous_scale='viridis',
+                    title="📊 Coordenadas Paralelas - Comparação Multidimensional",
+                    labels={col: col for col in available_cols}
+                )
+                # Otimizações de rendering
+                fig.update_layout(
+                    template='plotly_white',
+                    height=600
+                )
+            else:
+                # Fallback para radar se parallel não funcionar
+                return plot_resolucao_acuracia(filtered_df, "radar")
+        else:
+            return plot_resolucao_acuracia(filtered_df, "radar")
+    elif viz_mode == "radar":
+        # Gráfico Radar Comparativo - OTIMIZADO (máximo 5 para performance)
+        radar_cols = ['Acurácia (%)', 'Resolução (m)', 'Classes']
+        available_radar = [col for col in radar_cols if col in filtered_df.columns]
+        
+        if len(available_radar) >= 2:
+            # OTIMIZAÇÃO: Sempre máximo 5 iniciativas para não sobrecarregar
+            top_initiatives = filtered_df.nlargest(5, 'Acurácia (%)')
+            
+            fig = go.Figure()
+            
+            # Cores predefinidas para melhor performance
+            colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']
+            
+            for idx, (_, row) in enumerate(top_initiatives.iterrows()):
+                if idx >= 5:  # Garantir limite máximo
+                    break
+                    
+                values = []
+                for col in available_radar:
+                    if col == 'Resolução (m)':
+                        # Normalizar resolução (inverter - menor é melhor)
+                        if filtered_df[col].max() != filtered_df[col].min():
+                            norm_val = (filtered_df[col].max() - row[col]) / (filtered_df[col].max() - filtered_df[col].min()) * 100
+                        else:
+                            norm_val = 50
+                    else:
+                        # Normalizar outras métricas
+                        if filtered_df[col].max() != filtered_df[col].min():
+                            norm_val = (row[col] - filtered_df[col].min()) / (filtered_df[col].max() - filtered_df[col].min()) * 100
+                        else:
+                            norm_val = 50
+                    values.append(norm_val)
+                
+                # Fechar o polígono
+                values.append(values[0])
+                theta_labels = available_radar + [available_radar[0]]
+                
+                # OTIMIZAÇÃO: Truncar nomes muito longos
+                display_name = row['Nome'][:25] + ('...' if len(row['Nome']) > 25 else '')
+                
+                fig.add_trace(go.Scatterpolar(
+                    r=values,
+                    theta=theta_labels,
+                    fill='toself',
+                    name=display_name,
+                    line_color=colors[idx % len(colors)]
+                ))
+            
+            fig.update_layout(
+                polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
+                showlegend=True,                title="🎯 Gráfico Radar - Top 5 Iniciativas por Acurácia",
+                height=600,
+                template='plotly_white'
+            )
+        else:
+            # Fallback para matrix se radar não tiver dados suficientes
+            return plot_resolucao_acuracia(filtered_df, "matrix")
+    elif viz_mode == "matrix":
+        # Matriz de Comparação - OTIMIZADA (top 15 máximo)
+        comparison_cols = ['Acurácia (%)', 'Resolução (m)', 'Classes', 'Metodologia', 'Tipo']
+        available_matrix = [col for col in comparison_cols if col in filtered_df.columns]
+        
+        if len(available_matrix) >= 3:
+            matrix_df = filtered_df[['Nome'] + available_matrix].copy()
+            
+            # OTIMIZAÇÃO: Processar apenas top 15 para evitar sobrecarga
+            if len(matrix_df) > 15:
+                matrix_df = matrix_df.nlargest(15, 'Acurácia (%)')
+                st.info("ℹ️ Mostrando top 15 iniciativas para melhor performance na matriz")
+            
+            # Criar score composto
+            score_components = []
+            if 'Acurácia (%)' in matrix_df.columns:
+                score_components.append(matrix_df['Acurácia (%)'] * 0.5)  # 50% peso
+            if 'Resolução (m)' in matrix_df.columns:
+                # Inverter resolução (menor é melhor)
+                max_res = matrix_df['Resolução (m)'].max()
+                if max_res > 0:
+                    score_components.append((max_res - matrix_df['Resolução (m)']) / max_res * 100 * 0.3)  # 30% peso
+            if 'Classes' in matrix_df.columns:
+                if matrix_df['Classes'].max() != matrix_df['Classes'].min():
+                    norm_classes = (matrix_df['Classes'] - matrix_df['Classes'].min()) / (matrix_df['Classes'].max() - matrix_df['Classes'].min()) * 100
+                    score_components.append(norm_classes * 0.2)  # 20% peso
+            
+            if score_components:
+                matrix_df['Score_Composto'] = sum(score_components)
+                matrix_sorted = matrix_df.sort_values('Score_Composto', ascending=False)
+                
+                fig = px.bar(
+                    matrix_sorted.head(10),  # Top 10 sempre
+                    x='Score_Composto',
+                    y='Nome',
+                    orientation='h',
+                    color='Score_Composto',
+                    color_continuous_scale='Viridis',
+                    title="📋 Matriz de Comparação - Score Composto (Top 10)",
+                    labels={'Score_Composto': 'Score Composto', 'Nome': 'Iniciativas'},
+                    text='Score_Composto',
+                    height=600
+                )
+                fig.update_traces(texttemplate='%{text:.1f}', textposition='outside')
+                fig.update_layout(
+                    showlegend=False,
+                    font=dict(size=12),
+                    margin=dict(l=200),
+                    template='plotly_white'                )
+            else:
+                # Fallback para parallel se matrix não conseguir criar score
+                return plot_resolucao_acuracia(filtered_df, "parallel")
+        else:
+            # Fallback para parallel se matrix não tiver colunas suficientes
+            return plot_resolucao_acuracia(filtered_df, "parallel")            
+    else:  # Default: parallel
+        return plot_resolucao_acuracia(filtered_df, "parallel")
+    
+    # Configurações comuns de layout OTIMIZADAS
     fig.update_layout(
         font=dict(size=12),
         showlegend=True,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        template='plotly_white',
+        # OTIMIZAÇÕES DE RENDERING
+        dragmode=False,  # Desabilitar drag para melhor performance
+        hovermode='closest',  # Hover mais eficiente
+        modebar_remove=['zoom', 'pan', 'select', 'lasso2d', 'zoomIn', 'zoomOut', 'autoScale', 'resetScale2d']  # Remover controles desnecessários
     )
+    
     return fig
 
+@st.cache_data(ttl=300)  # Cache por 5 minutos
 def plot_classes_por_iniciativa(filtered_df):
     fig = px.bar(
         filtered_df.sort_values('Classes', ascending=True),
@@ -196,6 +361,7 @@ def plot_classes_por_iniciativa(filtered_df):
     )
     return fig
 
+@st.cache_data(ttl=300)  # Cache por 5 minutos
 def plot_distribuicao_classes(filtered_df):
     fig = px.histogram(
         filtered_df,
@@ -213,6 +379,7 @@ def plot_distribuicao_classes(filtered_df):
     )
     return fig
 
+@st.cache_data(ttl=300)  # Cache por 5 minutos
 def plot_distribuicao_metodologias(method_counts):
     import plotly.express as px
     # Verificar se method_counts tem dados

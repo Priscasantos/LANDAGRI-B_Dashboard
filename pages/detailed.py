@@ -1,65 +1,151 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.express as px
 from utils import safe_download_image
+import os
+import sys
 
 def run():
-    if 'filtered_df' not in st.session_state or st.session_state.filtered_df.empty:
-        st.warning("⚠️ Nenhuma iniciativa corresponde aos filtros selecionados na página principal. Ajuste os filtros para visualizar os dados.")
-        st.stop()
-    df_filt = st.session_state.filtered_df
-    default_multi_selection = df_filt["Nome"].tolist()[:min(3, len(df_filt['Nome'].tolist()))]
-    if len(default_multi_selection) < 2 and len(df_filt["Nome"].tolist()) >=2:
-        default_multi_selection = df_filt["Nome"].tolist()[:2]
-    elif len(df_filt["Nome"].tolist()) < 2:
-        default_multi_selection = df_filt["Nome"].tolist()
-    selected_inits_multi = st.multiselect(
-        "Selecione 2 ou mais iniciativas para comparar:",
-        options=df_filt["Nome"].tolist(),
-        default=default_multi_selection,
-        help="Selecione duas ou mais iniciativas para comparação detalhada",
-        key="comparacao_multi_compare_select"
-    )
-    if len(selected_inits_multi) >= 2:
-        categories_radar = ["Acurácia (%)", "Resolução (m)", "Classes"]
-        fig_radar_multi = go.Figure()
-        def normalize_for_radar_multi(value, column, df_source):
-            if column not in df_source.columns or not pd.api.types.is_numeric_dtype(df_source[column]):
-                return 50
-            min_val = df_source[column].min()
-            max_val = df_source[column].max()
-            if max_val == min_val: return 50 
-            if column == "Resolução (m)": 
-                return (max_val - value) / (max_val - min_val) * 100
-            else: 
-                return (value - min_val) / (max_val - min_val) * 100
-        for nome_init in selected_inits_multi:
-            data_init = df_filt[df_filt["Nome"] == nome_init].iloc[0]
-            values_radar = [normalize_for_radar_multi(data_init.get(cat_r), cat_r, df_filt) for cat_r in categories_radar]
-            fig_radar_multi.add_trace(go.Scatterpolar(
-                r=values_radar + [values_radar[0]], 
-                theta=categories_radar + [categories_radar[0]],
-                fill='toself',
-                name=nome_init
-            ))
-        fig_radar_multi.update_layout(
-            polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
-            showlegend=True,
-            title="Comparação em Gráfico Radar (Valores Normalizados)",
-            height=500,
-            font=dict(size=12, family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)'
+    st.header("🔍 Análises Detalhadas - Comparações Personalizadas")
+    st.markdown("Selecione duas ou mais iniciativas para análises comparativas detalhadas.")
+    
+    if 'df_geral' not in st.session_state or st.session_state.df_geral.empty:
+        # Tentar carregar dados processados diretamente
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from data import load_data
+        df_loaded, metadata_loaded = load_data(
+            os.path.join("initiative_data", "initiatives_processed.csv"),
+            os.path.join("initiative_data", "metadata_processed.json")
         )
-        st.plotly_chart(fig_radar_multi, use_container_width=True)
-        safe_download_image(fig_radar_multi, "radar_multi_iniciativas.png", "⬇️ Baixar Radar (PNG)")
-        comp_cols_multi = ['Acurácia (%)', 'Resolução (m)', 'Classes', 'Frequência Temporal', 'Metodologia', 'Escopo', 'Anos Disponíveis']
-        valid_comp_cols_multi = [col for col in comp_cols_multi if col in df_filt.columns]
-        comp_df_multi = df_filt[df_filt['Nome'].isin(selected_inits_multi)][['Nome'] + valid_comp_cols_multi].set_index('Nome').T
-        st.markdown("### Tabela Comparativa (Multi-Iniciativas)")
-        st.dataframe(comp_df_multi.astype(str))
-        st.download_button("⬇️ Baixar Tabela (CSV)", data=comp_df_multi.to_csv().encode('utf-8'), file_name="tabela_comparativa_multi.csv", mime="text/csv")
-    elif selected_inits_multi and len(selected_inits_multi) < 2:
-        st.info("ℹ️ Selecione pelo menos duas iniciativas para a comparação.")
-    elif not selected_inits_multi:
-        st.info("ℹ️ Selecione iniciativas no menu acima para visualizar a comparação.")
+        if df_loaded is not None and not df_loaded.empty:
+            st.session_state.df_geral = df_loaded
+            st.session_state.metadata = metadata_loaded
+        else:
+            st.warning("⚠️ Dados não encontrados. Execute a página principal (app.py) primeiro.")
+            st.stop()
+    df_geral = st.session_state.df_geral
+    
+    # Seleção de iniciativas para comparação
+    selected_initiatives = st.multiselect(
+        "🎯 Selecione as iniciativas para comparar:",
+        options=df_geral["Nome"].tolist(),
+        default=df_geral["Nome"].tolist()[:min(3, len(df_geral))],
+        help="Escolha 2 ou mais iniciativas para análise comparativa detalhada"
+    )
+    
+    if len(selected_initiatives) < 2:
+        st.info("👈 Selecione pelo menos duas iniciativas no menu acima para começar a análise.")
+        return
+    
+    # Filtrar dados para as iniciativas selecionadas
+    df_filtered = df_geral[df_geral["Nome"].isin(selected_initiatives)].copy()
+
+    # Abas padronizadas
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "📊 Barras Duplas",
+        "🎯 Radar",
+        "🔥 Heatmap",
+        "📈 Tabela",
+        "📅 Cobertura Anual"
+    ])
+
+    with tab1:
+        # Barras Duplas
+        df_filtered['resolucao_norm'] = (1 / df_filtered['Resolução (m)']) / (1 / df_filtered['Resolução (m)']).max()
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            y=df_filtered['Nome'],
+            x=df_filtered['Acurácia (%)'],
+            name='Acurácia (%)',
+            orientation='h',
+            marker_color='royalblue'
+        ))
+        fig.add_trace(go.Bar(
+            y=df_filtered['Nome'],
+            x=df_filtered['resolucao_norm'] * 100,
+            name='Resolução (normalizada)',
+            orientation='h',
+            marker_color='orange'
+        ))
+        fig.update_layout(
+            barmode='group', 
+            xaxis_title='Valor (%)', 
+            yaxis_title='Produto',
+            title='Comparação: Acurácia vs Resolução',
+            height=max(400, len(df_filtered) * 25)
+        )
+        st.plotly_chart(fig, use_container_width=True)
+        safe_download_image(fig, "barras_duplas_detalhado.png", "⬇️ Baixar Gráfico")
+
+    with tab2:
+        # Radar
+        radar_columns = ['Acurácia (%)', 'Resolução (m)', 'Classes']
+        available_radar_cols = [col for col in radar_columns if col in df_filtered.columns]
+        if len(available_radar_cols) >= 2:
+            radar_df = df_filtered[['Nome'] + available_radar_cols].copy()
+            for col in available_radar_cols:
+                min_val, max_val = radar_df[col].min(), radar_df[col].max()
+                if max_val - min_val > 0:
+                    if col == 'Resolução (m)':
+                        radar_df[col] = 1 - (radar_df[col] - min_val) / (max_val - min_val)
+                    else:
+                        radar_df[col] = (radar_df[col] - min_val) / (max_val - min_val)
+                else:
+                    radar_df[col] = 0.5
+            fig_radar = go.Figure()
+            colors = px.colors.qualitative.Set1
+            for i, (idx, row) in enumerate(radar_df.iterrows()):
+                values = row[available_radar_cols].tolist()
+                values_closed = values + [values[0]]
+                theta_closed = available_radar_cols + [available_radar_cols[0]]
+                fig_radar.add_trace(go.Scatterpolar(
+                    r=values_closed,
+                    theta=theta_closed,
+                    fill='toself',
+                    name=row['Nome'],
+                    line_color=colors[i % len(colors)]
+                ))
+            fig_radar.update_layout(
+                polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
+                showlegend=True,
+                title='Comparação Multi-dimensional (Radar)',
+                height=600
+            )
+            st.plotly_chart(fig_radar, use_container_width=True)
+            safe_download_image(fig_radar, "radar_chart_detalhado.png", "⬇️ Baixar Gráfico")
+        else:
+            st.warning("Dados insuficientes para o gráfico de radar.")
+
+    with tab3:
+        # Heatmap
+        if len(available_radar_cols) >= 2:
+            heatmap_df = radar_df.set_index('Nome')[available_radar_cols]
+            fig_heatmap = px.imshow(
+                heatmap_df.values,
+                x=heatmap_df.columns,
+                y=heatmap_df.index,
+                color_continuous_scale='viridis',
+                aspect='auto',
+                title='Heatmap de Performance (valores normalizados)',
+                labels=dict(x='Métrica', y='Produto', color='Valor Normalizado')
+            )
+            st.plotly_chart(fig_heatmap, use_container_width=True)
+            safe_download_image(fig_heatmap, "heatmap_detalhado.png", "⬇️ Baixar Gráfico")
+        else:
+            st.warning("Dados insuficientes para o heatmap.")
+
+    with tab4:
+        # Tabela
+        st.dataframe(df_filtered, use_container_width=True)
+
+    with tab5:
+        st.subheader("Cobertura Anual por Iniciativa (Seleção Múltipla)")
+        meta = st.session_state.get('metadata', {})
+        if not selected_initiatives:
+            st.info("Selecione ao menos uma iniciativa para visualizar a cobertura anual.")
+        else:
+            from plots import plot_annual_coverage_multiselect
+            fig_annual = plot_annual_coverage_multiselect(meta, df_filtered, selected_initiatives)
+            st.plotly_chart(fig_annual, use_container_width=True)
+            safe_download_image(fig_annual, "cobertura_anual_detalhada.png", "⬇️ Baixar Cobertura (PNG)")

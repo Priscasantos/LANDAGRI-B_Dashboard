@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit as st
 from streamlit_option_menu import option_menu
 import os
 import warnings
@@ -12,12 +13,24 @@ os.environ["STREAMLIT_BROWSER_GATHER_USAGE_STATS"] = "false"
 # Suppress warnings to clean up output
 warnings.filterwarnings("ignore")
 
-# Configuração da página
+# Cache dos dados principais para melhor performance
+@st.cache_data(ttl=600)  # Cache por 10 minutos
+def load_cached_data():
+    """Carrega e cache os dados principais do dashboard"""
+    return load_data()
+
+# Configuração da página com otimizações de performance
 st.set_page_config(
-    page_title="LULC Dashboard", # Título mais genérico para a aba do navegador
+    page_title="LULC Dashboard", 
     layout="wide",
     page_icon="🌍",
     initial_sidebar_state="expanded",
+    # Otimizações de performance
+    menu_items={
+        'Report a bug': None,
+        'Get Help': None,
+        'About': None
+    }
 )
 
 # CSS customizado para fontes e layout moderno
@@ -120,18 +133,16 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- Sidebar customizado com ícones e tema moderno ---
+# --- Sidebar customizado com nova estrutura ---
 with st.sidebar:
     selected = option_menu(
         menu_title="🛰️ LULC Dashboard",
         options=[
             "Visão Geral",
             "Análises Comparativas", 
-            "Comparação Detalhada",
-            "Análise Temporal",
-            "Matriz Técnica"
+            "Análises Detalhadas"
         ],
-        icons=["globe-americas", "bar-chart-steps", "layers", "clock-history", "grid-3x3"],
+        icons=["globe-americas", "bar-chart-steps", "layers"],
         menu_icon="satellite",
         default_index=0,
         styles={
@@ -167,20 +178,23 @@ with st.sidebar:
             }
         }
     )
+    
+    # Removido: filtro de subcomparação, agora é feito apenas na página principal
 
-# --- Navegação entre páginas (usando nomes simplificados) ---
+# --- Navegação entre páginas com nova estrutura ---
 if selected == "Visão Geral":
     import pages.overview as overview
     overview.run()
+    
 elif selected == "Análises Comparativas":
+    st.markdown("---")
+    st.markdown("### 📊 Análises Comparativas")
+    # Removido: sub_selected = st.radio(...)
+    # O tipo de comparação é definido apenas pelo menu lateral, não precisa de filtro extra na página
+    
     import pages.comparison as comparison
-    comparison.run()
-elif selected == "Comparação Detalhada":
+    comparison.run()  # Por enquanto usar a mesma página, depois pode criar específica
+    
+elif selected == "Análises Detalhadas":
     import pages.detailed as detailed
     detailed.run()
-elif selected == "Análise Temporal":
-    import pages.temporal as temporal
-    temporal.run()
-elif selected == "Matriz Técnica":
-    import pages.matrix as matrix
-    matrix.run()
