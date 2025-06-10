@@ -7,79 +7,165 @@ import streamlit as st
 
 @st.cache_data(ttl=300)  # Cache por 5 minutos para melhor performance
 def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Figure:
-    """Plot a timeline using anos_disponiveis from metadata, with per-initiative color."""
-    blocos = []
-    for nome, meta in metadata.items():
-        if 'anos_disponiveis' in meta:
-            anos = sorted(meta['anos_disponiveis'])
-            tipo = filtered_df[filtered_df['Nome'] == nome]['Tipo'].iloc[0] if nome in filtered_df['Nome'].values else None
-            if not tipo:
-                continue
-            if anos:
-                bloco_inicio = anos[0]
-                bloco_fim = anos[0]
-                for i in range(1, len(anos)):
-                    if anos[i] == bloco_fim + 1:
-                        bloco_fim = anos[i]
-                    else:
-                        blocos.append({'Nome': nome, 'Ano Início': bloco_inicio, 'Ano Fim': bloco_fim, 'Tipo': tipo})
-                        bloco_inicio = anos[i]
-                        bloco_fim = anos[i]
-                blocos.append({'Nome': nome, 'Ano Início': bloco_inicio, 'Ano Fim': bloco_fim, 'Tipo': tipo})
-    blocos_df = pd.DataFrame(blocos)
-    if blocos_df.empty:
+    """Plot an improved timeline using anos_disponiveis from metadata, with enhanced visualization."""
+    if not metadata:
         return go.Figure()
-    min_year = blocos_df['Ano Início'].min()
-    max_year = blocos_df['Ano Fim'].max()
-    initiative_names = blocos_df['Nome'].unique().tolist()
-    color_map = get_initiative_color_map(initiative_names)
-    fig = px.timeline(
-        blocos_df,
-        x_start="Ano Início",
-        x_end="Ano Fim",
-        y="Nome",
-        color="Nome",
-        color_discrete_map=color_map,
-        title="📊 Timeline Comparativa das Iniciativas LULC - Períodos de Disponibilidade",
-        height=max(600, len(blocos_df['Nome'].unique()) * 35)
-    )
-    fig.update_layout(
-        font=dict(size=13, color="#F3F4F6", family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
-        xaxis_title="Ano",
-        yaxis_title="Iniciativa",
-        title_font_size=16,
+    
+    # Criar dados de disponibilidade ano a ano com informações adicionais
+    timeline_data = []
+    all_years = set()
+    
+    # Mapear produtos para obter características técnicas
+    produto_info = {}
+    if filtered_df is not None and not filtered_df.empty:
+        for _, row in filtered_df.iterrows():
+            produto_info[row['Nome']] = {
+                'metodologia': row.get('Metodologia', 'N/A'),
+                'escopo': row.get('Escopo', 'N/A'),
+                'acuracia': row.get('Acurácia (%)', 0),
+                'resolucao': row.get('Resolução (m)', 0)
+            }
+    
+    # Coletar todos os anos de todas as iniciativas
+    for nome, meta in metadata.items():
+        if 'anos_disponiveis' in meta and meta['anos_disponiveis']:
+            info = produto_info.get(nome, {})
+            for ano in meta['anos_disponiveis']:
+                timeline_data.append({
+                    'produto': nome,
+                    'ano': ano,
+                    'disponivel': 1,
+                    'metodologia': info.get('metodologia', 'N/A'),
+                    'escopo': info.get('escopo', 'N/A')
+                })
+                all_years.add(ano)
+    
+    if not timeline_data or not all_years:
+        return go.Figure()
+    
+    timeline_df = pd.DataFrame(timeline_data)
+    
+    # Criar range completo de anos (1985-2024 para manter escala consistente)
+    min_year, max_year = 1985, 2024
+    all_years_range = list(range(min_year, max_year + 1))
+    produtos_unicos = sorted(timeline_df['produto'].unique())
+    
+    # Criar matriz completa (produto x ano)
+    matrix_data = []
+    for produto in produtos_unicos:
+        produto_anos = timeline_df[timeline_df['produto'] == produto]['ano'].tolist()
+        produto_metodologia = timeline_df[timeline_df['produto'] == produto]['metodologia'].iloc[0]
+        for ano in all_years_range:
+            matrix_data.append({
+                'produto': produto,
+                'ano': ano,
+                'disponivel': 1 if ano in produto_anos else 0,
+                'metodologia': produto_metodologia
+            })
+    
+    matrix_df = pd.DataFrame(matrix_data)
+    
+    # Criar o gráfico de timeline como barras horizontais
+    fig_timeline = go.Figure()
+    
+    # Usar cores Set1 (padrão do sistema) e mapear por produto/iniciativa
+    colors = px.colors.qualitative.Set1
+    color_map = {produto: colors[i % len(colors)] for i, produto in enumerate(produtos_unicos)}
+    
+    # Adicionar uma legenda personalizada para cada iniciativa
+    legend_added = set()
+    
+    for i, produto in enumerate(produtos_unicos):
+        produto_data = matrix_df[matrix_df['produto'] == produto]
+        anos_disponiveis = produto_data[produto_data['disponivel'] == 1]['ano'].tolist()
+        metodologia = produto_data['metodologia'].iloc[0]
+        cor = color_map.get(produto, colors[0])
+        
+        if anos_disponiveis:
+            # Criar segmentos contínuos
+            segments = []
+            start = anos_disponiveis[0]
+            end = anos_disponiveis[0]
+            
+            for j in range(1, len(anos_disponiveis)):
+                if anos_disponiveis[j] == end + 1:
+                    end = anos_disponiveis[j]
+                else:
+                    segments.append((start, end))
+                    start = anos_disponiveis[j]
+                    end = anos_disponiveis[j]
+            
+            segments.append((start, end))
+            
+            # Plotar cada segmento
+            for seg_start, seg_end in segments:
+                # Adicionar legenda apenas uma vez por produto/iniciativa
+                show_legend = produto not in legend_added
+                if show_legend:
+                    legend_added.add(produto)
+                    
+                fig_timeline.add_trace(go.Scatter(
+                    x=[seg_start, seg_end + 1],
+                    y=[i, i],
+                    mode='lines',
+                    line=dict(
+                        color=cor,
+                        width=15
+                    ),
+                    name=produto if show_legend else None,
+                    showlegend=show_legend,
+                    legendgroup=produto,
+                    hovertemplate=f"<b>{produto}</b><br>Metodologia: {metodologia}<br>Anos: {seg_start}-{seg_end}<extra></extra>"
+                ))
+    
+    # Configurar layout com legenda e escala fixa
+    fig_timeline.update_layout(
+        title='📅 Timeline de Disponibilidade das Iniciativas LULC (1985-2024)',
+        xaxis_title='Ano',
+        yaxis_title='Produtos LULC',
+        height=max(600, len(produtos_unicos) * 30),
+        font=dict(size=16, color="#F3F4F6", family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
         plot_bgcolor="#18181b",
         paper_bgcolor="#18181b",
         margin=dict(l=200, r=50, t=80, b=50),
-        xaxis=dict(
-            gridcolor="#444",
-            gridwidth=1,
-            showgrid=True,
-            range=[min_year-0.5, max_year+0.5],
-            dtick=1,
-            tickmode='linear',
-            tick0=min_year,
-            color="#F3F4F6",
-            tickformat='d'
-        ),
         yaxis=dict(
-            gridcolor="#444",
-            gridwidth=1,
+            tickmode='array',
+            tickvals=list(range(len(produtos_unicos))),
+            ticktext=produtos_unicos,
             showgrid=True,
+            gridcolor='#444',
             color="#F3F4F6"
         ),
+        xaxis=dict(
+            range=[1985, 2024],  # Manter escala fixa
+            dtick=1,  # Mostrar todos os anos
+            gridcolor='#444',
+            gridwidth=1,
+            showgrid=True,
+            color="#F3F4F6",
+            tickformat='d',
+            tickangle=-45  # Anos "tombados" para caber todos
+        ),
+        hovermode='closest',
         showlegend=True,
         legend=dict(
             orientation="v",
             yanchor="top",
             y=1,
             xanchor="left",
-            x=1.01,
-            font=dict(color="#F3F4F6"),
-            title="Iniciativa"
-        )
+            x=1.02,
+            title="Iniciativas LULC",
+            font=dict(color="#F3F4F6", size=15),
+            itemsizing="constant",
+            traceorder="normal",
+            valign="top"
+        ),
+        legend_tracegroupgap=0,
+        legend_itemclick="toggleothers",
+        legend_itemdoubleclick="toggle"
     )
-    return fig
+    
+    return fig_timeline
 
 @st.cache_data(ttl=300)  # Cache por 5 minutos
 def plot_ano_overlap(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Figure:
@@ -169,7 +255,7 @@ def plot_resolucao_acuracia(filtered_df, viz_mode="parallel"):
             parallel_df = filtered_df[available_cols + ['Nome', 'Metodologia']].dropna()
             if len(parallel_df) > 30:
                 parallel_df = parallel_df.nlargest(30, 'Acurácia (%)')
-                st.info(f"ℹ️ Mostrando top 30 iniciativas para melhor performance na visualização paralela")
+                st.info("ℹ️ Mostrando top 30 iniciativas para melhor performance na visualização paralela")
             
             if not parallel_df.empty:
                 # Normalizar dados para melhor visualização
