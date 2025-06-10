@@ -161,7 +161,7 @@ def run():
             with col3_temp:
                 st.metric("🎯 Pico de Atividade", f"{max(year_counts.values)} iniciativas")
             with col4_temp:
-                st.metric("📈 Média por Ano", f"{np.mean(year_counts.values):.1f}")
+                st.metric("📈 Média por Ano", f"{np.mean(np.array(year_counts.values)):.1f}")
         else:
             st.info("Dados temporais não disponíveis nos metadados.")
     else:
