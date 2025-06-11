@@ -222,17 +222,16 @@ def run():
                         
                         fig_ranking.update_traces(
                             texttemplate='%{text:.1f}%', 
-                            textposition='outside',
-                            marker_line=dict(width=2, color='white')
+                            textposition='outside',                            marker_line=dict(width=2, color='white')
                         )
                         
                         fig_ranking.update_layout(
                             height=max(400, len(ranking_sorted) * 25),
                             xaxis_title='Acurácia (%)',
                             yaxis_title='Produtos LULC',
-                            font=dict(size=12, color="#F3F4F6"),
-                            plot_bgcolor="#18181b",
-                            paper_bgcolor="#18181b",
+                            font=dict(size=12, color="#2D3748"),
+                            plot_bgcolor="#FFFFFF",
+                            paper_bgcolor="#FFFFFF",
                             showlegend=True,
                             legend=dict(
                                 orientation="v",
@@ -241,7 +240,7 @@ def run():
                                 xanchor="left",
                                 x=1.02,
                                 title="Metodologia",
-                                font=dict(color="#F3F4F6")
+                                font=dict(color="#2D3748")
                             )
                         )
                         
@@ -365,17 +364,16 @@ def run():
                     color='metodologia',
                     title='📈 Evolução da Adoção de Metodologias LULC',
                     labels={'ano': 'Ano', 'count': 'Número de Produtos', 'metodologia': 'Metodologia'},
-                    color_discrete_sequence=px.colors.qualitative.Set1
-                )
+                    color_discrete_sequence=px.colors.qualitative.Set1                )
                 
                 fig_metodologia_evolucao.update_layout(
                     height=400,
-                    font=dict(size=12, color="#F3F4F6"),
-                    plot_bgcolor="#18181b",
-                    paper_bgcolor="#18181b",
-                    xaxis=dict(range=[min(anos_reais), max(anos_reais)], color="#F3F4F6"),
-                    yaxis=dict(color="#F3F4F6"),
-                    legend=dict(font=dict(color="#F3F4F6")),
+                    font=dict(size=12, color="#2D3748"),
+                    plot_bgcolor="#FFFFFF",
+                    paper_bgcolor="#FFFFFF",
+                    xaxis=dict(range=[min(anos_reais), max(anos_reais)], color="#2D3748"),
+                    yaxis=dict(color="#2D3748"),
+                    legend=dict(font=dict(color="#2D3748")),
                     hovermode='x unified'
                 )
                 
@@ -450,13 +448,13 @@ def run():
                         color_continuous_scale='Viridis',
                         title="📈 Cobertura Anual das Iniciativas",
                         labels={'Ano': 'Ano', 'iniciativas_totais': 'Número de Iniciativas'}
-                    )
+                    )   
                     fig_heatmap.update_layout(
-                        font=dict(color="#F3F4F6"),
-                        plot_bgcolor="#18181b",
-                        paper_bgcolor="#18181b",
-                        xaxis=dict(color="#F3F4F6"),
-                        yaxis=dict(color="#F3F4F6")
+                        font=dict(color="#2D3748"),
+                        plot_bgcolor="#FFFFFF",
+                        paper_bgcolor="#FFFFFF",
+                        xaxis=dict(color="#2D3748"),
+                        yaxis=dict(color="#2D3748")
                     )
                     st.plotly_chart(fig_heatmap, use_container_width=True, key="heatmap_cobertura_anual")
                     safe_download_image(fig_heatmap, "heatmap_cobertura_anual.png", "⬇️ Baixar Heatmap (PNG)")
@@ -476,17 +474,16 @@ def run():
                     tendencia_acuracia,
                     x='Ano',
                     y='acuracia_media',
-                    title="📉 Tendência da Acurácia Média ao Longo dos Anos",
-                    labels={"Ano": "Ano", "acuracia_media": "Acurácia Média (%)"},
+                    title="📉 Tendência da Acurácia Média ao Longo dos Anos",                    labels={"Ano": "Ano", "acuracia_media": "Acurácia Média (%)"},
                     markers=True
                 )
                 fig_tendencia_acuracia.update_traces(line=dict(width=2))
                 fig_tendencia_acuracia.update_layout(
-                    font=dict(color="#F3F4F6"),
-                    plot_bgcolor="#18181b",
-                    paper_bgcolor="#18181b",
-                    xaxis=dict(color="#F3F4F6"),
-                    yaxis=dict(color="#F3F4F6")
+                    font=dict(color="#2D3748"),
+                    plot_bgcolor="#FFFFFF",
+                    paper_bgcolor="#FFFFFF",
+                    xaxis=dict(color="#2D3748"),
+                    yaxis=dict(color="#2D3748")
                 )
                 st.plotly_chart(fig_tendencia_acuracia, use_container_width=True, key="tendencia_acuracia")
                 safe_download_image(fig_tendencia_acuracia, "tendencia_acuracia.png", "⬇️ Baixar Tendência (PNG)")
@@ -787,16 +784,15 @@ def run():
                         fig_ranking.update_traces(
                             texttemplate='%{text:.1f}%', 
                             textposition='outside',
-                            marker_line=dict(width=2, color='white')
-                        )
+                            marker_line=dict(width=2, color='white')                        )
                         
                         fig_ranking.update_layout(
                             height=max(400, len(ranking_sorted) * 25),
                             xaxis_title='Acurácia (%)',
                             yaxis_title='Produtos LULC',
-                            font=dict(size=12, color="#F3F4F6"),
-                            plot_bgcolor="#18181b",
-                            paper_bgcolor="#18181b",
+                            font=dict(size=12, color="#2D3748"),
+                            plot_bgcolor="#FFFFFF",
+                            paper_bgcolor="#FFFFFF",
                             showlegend=True,
                             legend=dict(
                                 orientation="v",
@@ -805,8 +801,9 @@ def run():
                                 xanchor="left",
                                 x=1.02,
                                 title="Metodologia",
-                                font=dict(color="#F3F4F6")
-                            )                        )
+                                font=dict(color="#2D3748")
+                            )
+                        )
                         
                         st.plotly_chart(fig_ranking, use_container_width=True, key="ranking_acuracia_tab6")
                         safe_download_image(fig_ranking, "ranking_acuracia_lulc.png", "⬇️ Baixar Ranking (PNG)")
@@ -874,15 +871,14 @@ def run():
                     labels={'ano': 'Ano', 'count': 'Número de Produtos', 'metodologia': 'Metodologia'},
                     color_discrete_sequence=px.colors.qualitative.Set1
                 )
-                
                 fig_metodologia_evolucao.update_layout(
                     height=400,
-                    font=dict(size=12, color="#F3F4F6"),
-                    plot_bgcolor="#18181b",
-                    paper_bgcolor="#18181b",
-                    xaxis=dict(range=[min(anos_reais), max(anos_reais)], color="#F3F4F6"),
-                    yaxis=dict(color="#F3F4F6"),
-                    legend=dict(font=dict(color="#F3F4F6")),
+                    font=dict(size=12, color="#2D3748"),
+                    plot_bgcolor="#FFFFFF",
+                    paper_bgcolor="#FFFFFF",
+                    xaxis=dict(range=[min(anos_reais), max(anos_reais)], color="#2D3748"),
+                    yaxis=dict(color="#2D3748"),
+                    legend=dict(font=dict(color="#2D3748")),
                     hovermode='x unified'
                 )
                 

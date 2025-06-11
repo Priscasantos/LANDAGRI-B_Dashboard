@@ -116,43 +116,42 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Fig
                     showlegend=show_legend,
                     legendgroup=produto,
                     hovertemplate=f"<b>{produto}</b><br>Metodologia: {metodologia}<br>Anos: {seg_start}-{seg_end}<extra></extra>"
-                ))    # Configurar layout com fundo escuro e sem legenda - mais compacto
+                ))    # Configurar layout com fundo claro e sem legenda - mais compacto
     fig_timeline.update_layout(
         title=dict(
             text='📅 Timeline de Disponibilidade das Iniciativas LULC (1985-2024)',
-            font=dict(size=22, color="#F3F4F6", family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif")
+            font=dict(size=22, color="#2D3748", family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif")
         ),
         xaxis_title=dict(
             text='Ano',
-            font=dict(size=20, color="#F3F4F6")
+            font=dict(size=16, color="#2D3748")
         ),
         yaxis_title=dict(
             text='Produtos LULC',
-            font=dict(size=20, color="#F3F4F6")
+            font=dict(size=16, color="#2D3748")
         ),
         height=max(600, len(produtos_unicos) * 35),  # Aumentar altura dos eixos
-        font=dict(size=20, color="#F3F4F6", family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
-        plot_bgcolor="#18181b",
-        paper_bgcolor="#18181b",
+        font=dict(size=16, color="#2D3748", family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
+        plot_bgcolor="#FFFFFF",
+        paper_bgcolor="#FFFFFF",
         margin=dict(l=200, r=30, t=100, b=80),  # Reduzir margens laterais
         yaxis=dict(
             tickmode='array',
             tickvals=list(range(len(produtos_unicos))),
             ticktext=produtos_unicos,
             showgrid=True,
-            gridcolor='#444',
-            color="#F3F4F6",
-            tickfont=dict(size=20)
+            gridcolor='#E2E8F0',
+            color="#2D3748",
+            tickfont=dict(size=16)
         ),        xaxis=dict(
             range=[1985, 2024],  # Manter escala fixa
             dtick=1,  # Mostrar todos os anos (de ano em ano)
-            gridcolor='#444',
-            gridwidth=1,
-            showgrid=True,
-            color="#F3F4F6",
+            gridcolor='#E2E8F0',
+            gridwidth=1,            showgrid=True,
+            color="#2D3748",
             tickformat='d',
             tickangle=-45,  # Anos "tombados" para caber todos
-            tickfont=dict(size=20),
+            tickfont=dict(size=16),
             categoryorder='category ascending'
         ),
         hovermode='closest',
@@ -181,15 +180,15 @@ def plot_ano_overlap(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.
         y='N iniciativas',
         title='Número de Iniciativas Disponíveis por Ano',
         color='N iniciativas',
-        color_continuous_scale='Blues',
-        height=350
+        color_continuous_scale='Blues',        height=350
     )
+    
     fig.update_layout(
-        plot_bgcolor="#18181b",
-        paper_bgcolor="#18181b",
-        font=dict(color="#F3F4F6"),
-        xaxis=dict(color="#F3F4F6"),
-        yaxis=dict(color="#F3F4F6")
+        plot_bgcolor="#FFFFFF",
+        paper_bgcolor="#FFFFFF",
+        font=dict(color="#2D3748"),
+        xaxis=dict(color="#2D3748"),
+        yaxis=dict(color="#2D3748")
     )
     return fig
 
@@ -208,18 +207,17 @@ def plot_heatmap(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Figu
     pivot = all_anos_df.pivot_table(index='Nome', columns='Ano', values='Tipo', aggfunc='count', fill_value=0)
     fig = px.imshow(
         pivot,
-        aspect='auto',
-        color_continuous_scale='Blues',
+        aspect='auto',        color_continuous_scale='Blues',
         labels=dict(color='Cobertura'),
         title='Cobertura Anual por Iniciativa',
         height=max(400, 20 * len(pivot))
     )
     fig.update_layout(
-        plot_bgcolor="#18181b",
-        paper_bgcolor="#18181b",
-        font=dict(color="#F3F4F6"),
-        xaxis=dict(color="#F3F4F6"),
-        yaxis=dict(color="#F3F4F6")
+        plot_bgcolor="#FFFFFF",
+        paper_bgcolor="#FFFFFF",
+        font=dict(color="#2D3748"),
+        xaxis=dict(color="#2D3748"),
+        yaxis=dict(color="#2D3748")
     )
     return fig
 
@@ -464,17 +462,17 @@ def plot_distribuicao_metodologias(method_counts):
     import plotly.express as px
     # Verificar se method_counts tem dados
     if method_counts is None or method_counts.empty:
-        # Retorna uma figura vazia ou uma mensagem, se preferir
-        fig = go.Figure()
+        # Retorna uma figura vazia ou uma mensagem, se preferir        fig = go.Figure()
         fig.update_layout(title="Distribuição das Metodologias Utilizadas (Dados insuficientes)")
         return fig
-
+    
     fig = px.pie(
         values=method_counts.values,  # Passar os valores explicitamente
         names=method_counts.index,    # Passar os índices (nomes das metodologias) explicitamente
         title="Distribuição das Metodologias Utilizadas",
         height=400
     )
+    
     fig.update_layout(
         font=dict(size=12, family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
         plot_bgcolor='rgba(0,0,0,0)',
@@ -557,9 +555,9 @@ def plot_heatmap_tecnico(filtered_df):
     )
     fig.update_xaxes(tickangle=45)
     fig.update_layout(
-        font=dict(size=12, family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)'
+        font=dict(size=12, family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif", color="#2D3748"),
+        plot_bgcolor='#FFFFFF',
+        paper_bgcolor='#FFFFFF'
     )
     return fig
 
@@ -597,27 +595,26 @@ def plot_annual_coverage_multiselect(metadata: Dict[str, Any], filtered_df: pd.D
             tickmode='linear',
             tick0=min_year,
             dtick=1,
-            range=[min_year-0.5, max_year+0.5],
-            title='Ano',
+            range=[min_year-0.5, max_year+0.5],            title='Ano',
             showgrid=True,
-            gridcolor="#444",
+            gridcolor="#E2E8F0",
             tickformat='d',
         )
+    
     fig.update_layout(
         title="Cobertura Anual das Iniciativas Selecionadas",
         xaxis_title="Ano",
         yaxis_title="Iniciativa",
-        yaxis=dict(type='category', categoryorder='array', categoryarray=selected_initiatives),
-        plot_bgcolor="#18181b",
-        paper_bgcolor="#18181b",
-        font=dict(color="#F3F4F6", size=13, family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
+        yaxis=dict(type='category', categoryorder='array', categoryarray=selected_initiatives),        plot_bgcolor="#FFFFFF",
+        paper_bgcolor="#FFFFFF",
+        font=dict(color="#2D3748", size=13, family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
         legend=dict(
             orientation="v",
             yanchor="top",
             y=1,
             xanchor="left",
             x=1.01,
-            font=dict(color="#F3F4F6"),
+            font=dict(color="#2D3748"),
             title="Iniciativa"
         ),
         margin=dict(l=120, r=50, t=60, b=50)

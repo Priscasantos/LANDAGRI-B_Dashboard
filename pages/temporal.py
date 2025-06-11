@@ -141,39 +141,38 @@ def show_timeline_chart(temporal_data):
                          f"Tipo: {row['Resource']}<extra></extra>",
             showlegend=False
         ))
-    
-    # Layout igual à imagem de referência - fundo escuro
+      # Layout com tema claro
     fig.update_layout(
         title={
             'text': "Timeline de Disponibilidade das Iniciativas LULC",
             'x': 0.02,
             'y': 0.95,
-            'font': {'size': 18, 'color': '#FFFFFF', 'family': 'Arial Black'}
+            'font': {'size': 18, 'color': '#2D3748', 'family': 'Arial Black'}
         },
-        plot_bgcolor='#1a1a1a',
-        paper_bgcolor='#1a1a1a',
-        font=dict(color='#FFFFFF', family='Arial'),
+        plot_bgcolor='#FFFFFF',
+        paper_bgcolor='#FFFFFF',
+        font=dict(color='#2D3748', family='Arial'),
         height=max(600, len(temporal_data) * 30),
         width=1000,
         xaxis=dict(
-            title=dict(text="Ano", font=dict(size=14, color='#FFFFFF')),
-            gridcolor='#333333',
+            title=dict(text="Ano", font=dict(size=14, color='#2D3748')),
+            gridcolor='#E2E8F0',
             gridwidth=0.5,
-            tickfont=dict(size=12, color='#FFFFFF'),
+            tickfont=dict(size=12, color='#2D3748'),
             showgrid=True,
             zeroline=False,
-            linecolor='#333333',
+            linecolor='#E2E8F0',
             tickmode='linear',
             dtick=2  # Tick a cada 2 anos
         ),
         yaxis=dict(
-            title=dict(text="Iniciativas", font=dict(size=14, color='#FFFFFF')),
-            gridcolor='#333333',
+            title=dict(text="Iniciativas", font=dict(size=14, color='#2D3748')),
+            gridcolor='#E2E8F0',
             gridwidth=0.5,
-            tickfont=dict(size=11, color='#FFFFFF'),
+            tickfont=dict(size=11, color='#2D3748'),
             showgrid=True,
             zeroline=False,
-            linecolor='#333333',
+            linecolor='#E2E8F0',
             categoryorder='array',
             categoryarray=temporal_data.sort_values('Primeiro_Ano')['Nome'].tolist()
         ),

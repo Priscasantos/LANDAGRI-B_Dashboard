@@ -18,10 +18,7 @@ __pycache__/
 *.~
 # Streamlit cache
 .streamlit/
-# Dados e outputs
-*.csv
-*.xlsx
-*.json
+
 # Instalações locais
 lulc_env/
 # Instalações Windows
