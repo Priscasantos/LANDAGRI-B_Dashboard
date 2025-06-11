@@ -20,57 +20,75 @@ def create_initiatives_dataset():
     Returns:
         pd.DataFrame: DataFrame com dados das iniciativas
     """
-    
-    # Dados das 14 principais iniciativas LULC
+      # Dados das principais iniciativas LULC baseadas nas tabelas atualizadas
     initiatives_data = {
         'Nome': [
             'Copernicus Global Land Cover Service (CGLS)',
             'Dynamic World (GDW)',
             'ESRI-10m Annual LULC',
             'FROM-GLC',
+            'Global LULC change 2000 and 2020',
+            'Global Pasture Watch (GPW)',
+            'South America Soybean Maps',
             'WorldCover 10m 2021',
+            'WorldCereal',
             'Land Cover CCI',
             'MODIS Land Cover',
             'GLC_FCS30',
             'MapBiomas Brasil',
             'PRODES Amazônia',
-            'DETER Amazônia',
+            'DETER Amazônia', 
             'PRODES Cerrado',
             'TerraClass Amazônia',
-            'IBGE Monitoramento'
+            'IBGE Monitoramento',
+            'Agricultural Mapping'
         ],
         'Tipo': [
-            'Global', 'Global', 'Global', 'Global', 'Global', 'Global', 'Global', 'Global',
-            'Nacional', 'Nacional', 'Nacional', 'Nacional', 'Nacional', 'Nacional'
+            'Global', 'Global', 'Global', 'Global', 'Global', 'Global', 'Regional',
+            'Global', 'Global', 'Global', 'Global', 'Global',
+            'Nacional', 'Regional', 'Regional', 'Regional', 'Regional', 'Nacional', 'Nacional'
         ],
         'Resolução (m)': [
-            100, 10, 10, 30, 10, 300, 500, 30, 30, 30, 250, 30, 30, 30
+            100, 10, 10, 30, 30, 30, 30, 10, 10, 300, 500, 30, 30, 25, 60, 10, 20, 30, 25
         ],
         'Acurácia (%)': [
-            75, 74, 76, 71, 77, 73, 67, 68, 89, 95, 85, 92, 88, 85
-        ],
+            80.3, 73.8, 85.0, 71, 85.0, 91.0, 94, 76.7, 97.8, 73, 67, 68, 90.0, 93.0, 93.0, 90.9, 93.9, 0, 0        ],
         'Classes': [
-            23, 9, 10, 10, 11, 37, 17, 29, 27, 2, 2, 2, 12, 15
+            10, 9, 15, 10, 7, 3, 2, 11, 5, 37, 17, 29, 29, 5, 3, 15, 18, 12, 8
         ],
         'Metodologia': [
-            'Machine Learning', 'Deep Learning', 'Deep Learning', 'Random Forest', 
-            'Machine Learning', 'Classificação Supervisionada', 'Decision Trees', 
-            'Random Forest', 'Random Forest', 'Interpretação Visual', 
-            'Detecção Automática', 'Interpretação Visual', 'Classificação Supervisionada',
-            'Interpretação Manual'
+            'Supervised Random Forest', 'Deep Learning', 'U-Net Deep Learning', 'Random Forest', 
+            'Supervised Machine Learning', 'Supervised Machine Learning', 'Combined Methods', 
+            'Gradient Boosting', 'CatBoost Gradient Boosting', 'Classificação Supervisionada', 'Boosted Decision Trees', 
+            'Random Forest', 'Supervised Random Forest and U-Net Deep Learning', 'Visual Interpretation and Linear Spectral Mixture Model', 
+            'Linear Spectral Mixture Model', 'Visual Interpretation and Deep Learning', 'Visual Interpretation and Deep Learning',
+            'Visual Interpretation', 'Machine Learning and Visual Interpretation'
         ],
         'Frequência Temporal': [
-            'Anual', 'Tempo Real', 'Anual', 'Multi-temporal', 'Anual', 'Anual', 'Anual',
-            'Pontual', 'Anual', 'Anual', 'Tempo Real', 'Bienal', 'Bienal', 'Bienal'
+            'Anual', 'Near real time', 'Annual or Sub-annual', 'Multi-temporal', 'Cada 4 anos', 'Bi-Annual', 'Anual',
+            'Anual', 'Annual and seasonal', 'Anual', 'Anual', 'Pontual', 'Anual', 'Anual', 'Annual since 2012', 'Bienal', 'Bienal', 'Biannual since 2010', 'By Crop Year'
         ],
         'Anos Disponíveis': [
-            '2015-2023', '2015-2024', '2017-2023', '2010-2017', '2021', '1992-2020',
-            '2001-2023', '2020', '1985-2023', '1988-2023', '2004-2024', '2000-2022',
-            '2008-2020', '2000-2022'
+            '2015,2016,2017,2018,2019', '2017,2018,2019,2020,2021,2022,2023,2024', '2017,2018,2019,2020,2021,2022,2023,2024', '2010,2015,2017', 
+            '2000,2005,2015,2020', '2000,2002,2004,2006,2008,2010,2012,2014,2016,2018,2020,2022', 
+            '2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023',
+            '2020,2021', '2021', '1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020',
+            '2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023', '2020', 
+            '1985,1986,1987,1988,1989,1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023',
+            '2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023', 
+            '2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023', '2018,2020,2022', 
+            '2008,2010,2012,2014,2016,2018,2020,2022', '2000,2002,2004,2006,2008,2010,2012,2014,2016,2018,2020', '2018,2019,2020,2021,2022,2023'
         ],
         'Escopo': [
-            'Global', 'Global', 'Global', 'Global', 'Global', 'Global', 'Global', 'Global',
-            'Brasil', 'Amazônia Legal', 'Amazônia Legal', 'Cerrado', 'Amazônia Legal', 'Brasil'
+            'Global', 'Global', 'Global', 'Global', 'Global', 'Global', 'Regional (South America)',
+            'Global', 'Global', 'Global', 'Global', 'Global',
+            'Nacional (Brasil)', 'Regional (Amazônia)', 'Regional (Amazônia)', 'Regional (Cerrado)', 'Regional (Amazônia e Cerrado)', 'Nacional (Brasil)', 'Nacional (Brasil)'
+        ],
+        'Provedor': [
+            'Copernicus European Union\'s Space Program', 'Google and World Resources Institute', 'Environmental Systems Research Institute (ESRI)', 'Tsinghua University',
+            'University of Maryland (UMD)', 'Land & Carbon Lab', 'University of Maryland (UMD)', 'European Space Agency (ESA)', 'European Space Agency (ESA)',
+            'ESA Climate Change Initiative', 'NASA', 'Chinese Academy of Sciences', 'Non-governmental Organizations', 'National Institute for Space Research (INPE)',
+            'National Institute for Space Research (INPE)', 'National Institute for Space Research (INPE)', 'National Institute for Space Research (INPE)', 'Brazilian Institute of Geography and Statistics (IBGE)', 'National Supply Company (Conab)'
         ]
     }
     

@@ -116,53 +116,47 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Fig
                     showlegend=show_legend,
                     legendgroup=produto,
                     hovertemplate=f"<b>{produto}</b><br>Metodologia: {metodologia}<br>Anos: {seg_start}-{seg_end}<extra></extra>"
-                ))
-    
-    # Configurar layout com legenda e escala fixa
+                ))    # Configurar layout com fundo escuro e sem legenda - mais compacto
     fig_timeline.update_layout(
-        title='📅 Timeline de Disponibilidade das Iniciativas LULC (1985-2024)',
-        xaxis_title='Ano',
-        yaxis_title='Produtos LULC',
-        height=max(600, len(produtos_unicos) * 30),
-        font=dict(size=16, color="#F3F4F6", family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
+        title=dict(
+            text='📅 Timeline de Disponibilidade das Iniciativas LULC (1985-2024)',
+            font=dict(size=22, color="#F3F4F6", family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif")
+        ),
+        xaxis_title=dict(
+            text='Ano',
+            font=dict(size=20, color="#F3F4F6")
+        ),
+        yaxis_title=dict(
+            text='Produtos LULC',
+            font=dict(size=20, color="#F3F4F6")
+        ),
+        height=max(600, len(produtos_unicos) * 35),  # Aumentar altura dos eixos
+        font=dict(size=20, color="#F3F4F6", family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
         plot_bgcolor="#18181b",
         paper_bgcolor="#18181b",
-        margin=dict(l=200, r=50, t=80, b=50),
+        margin=dict(l=200, r=30, t=100, b=80),  # Reduzir margens laterais
         yaxis=dict(
             tickmode='array',
             tickvals=list(range(len(produtos_unicos))),
             ticktext=produtos_unicos,
             showgrid=True,
             gridcolor='#444',
-            color="#F3F4F6"
-        ),
-        xaxis=dict(
+            color="#F3F4F6",
+            tickfont=dict(size=20)
+        ),        xaxis=dict(
             range=[1985, 2024],  # Manter escala fixa
-            dtick=1,  # Mostrar todos os anos
+            dtick=1,  # Mostrar todos os anos (de ano em ano)
             gridcolor='#444',
             gridwidth=1,
             showgrid=True,
             color="#F3F4F6",
             tickformat='d',
-            tickangle=-45  # Anos "tombados" para caber todos
+            tickangle=-45,  # Anos "tombados" para caber todos
+            tickfont=dict(size=20),
+            categoryorder='category ascending'
         ),
         hovermode='closest',
-        showlegend=True,
-        legend=dict(
-            orientation="v",
-            yanchor="top",
-            y=1,
-            xanchor="left",
-            x=1.02,
-            title="Iniciativas LULC",
-            font=dict(color="#F3F4F6", size=15),
-            itemsizing="constant",
-            traceorder="normal",
-            valign="top"
-        ),
-        legend_tracegroupgap=0,
-        legend_itemclick="toggleothers",
-        legend_itemdoubleclick="toggle"
+        showlegend=False  # Remover legenda
     )
     
     return fig_timeline
