@@ -7,13 +7,13 @@ def load_data(csv_path: str = None, json_path: str = None) -> Tuple[pd.DataFrame
     
     # Se os caminhos não forem fornecidos, usar os arquivos processados
     if csv_path is None:
-        csv_path = 'initiative_data/initiatives_processed.csv'
+        csv_path = 'data/processed/initiatives_processed.csv'
     if json_path is None:
-        json_path = 'initiative_data/initiative_meta.json'
+        json_path = 'data/processed/initiative_meta.json'
     
     # Verificar se existe o arquivo processado e usar ele prioritariamente
     try:
-        processed_csv = 'initiative_data/initiatives_processed.csv'
+        processed_csv = 'data/processed/initiatives_processed.csv'
         df = pd.read_csv(processed_csv)
         print(f"✅ Usando arquivo processado: {processed_csv}")
     except FileNotFoundError:
@@ -38,8 +38,7 @@ def load_data(csv_path: str = None, json_path: str = None) -> Tuple[pd.DataFrame
             print(f"⚠️ Usando arquivo original: {csv_path}")
         except FileNotFoundError:
             raise FileNotFoundError(f"Nenhum arquivo de dados encontrado. Verifique se existe {processed_csv} ou {csv_path}")
-    
-    # Carregar metadados
+      # Carregar metadados
     try:
         with open(json_path, 'r', encoding='utf-8') as f:
             metadata = json.load(f)
@@ -47,7 +46,7 @@ def load_data(csv_path: str = None, json_path: str = None) -> Tuple[pd.DataFrame
     except FileNotFoundError:
         # Fallback para metadados processados
         try:
-            processed_meta = 'initiative_data/metadata_processed.json'
+            processed_meta = 'data/processed/metadata_processed.json'
             with open(processed_meta, 'r', encoding='utf-8') as f:
                 metadata = json.load(f)
             print(f"⚠️ Usando metadados processados: {processed_meta}")

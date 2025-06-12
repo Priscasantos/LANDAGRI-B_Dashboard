@@ -4,6 +4,13 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
+import sys
+from pathlib import Path
+
+# Adicionar scripts ao path
+current_dir = Path(__file__).parent.parent.parent
+sys.path.append(str(current_dir / "scripts"))
+
 from utils import safe_download_image
 from config import get_initiative_color_map
 

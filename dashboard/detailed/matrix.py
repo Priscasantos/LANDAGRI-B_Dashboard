@@ -1,9 +1,23 @@
 import streamlit as st
 import pandas as pd
-from utils import safe_download_image
-from plots import plot_heatmap_tecnico
+import sys
+from pathlib import Path
 
 def run():
+    # Adicionar scripts ao path
+    current_dir = Path(__file__).parent.parent.parent
+    scripts_path = str(current_dir / "scripts")
+    if scripts_path not in sys.path:
+        sys.path.insert(0, scripts_path)
+    
+    # Importar módulos localmente
+    try:
+        from utils import safe_download_image
+        from generate_graphics import plot_heatmap_tecnico
+    except ImportError as e:
+        st.error(f"Erro ao importar módulos: {e}")
+        return
+    
     if 'filtered_df' not in st.session_state or st.session_state.filtered_df.empty:
         st.warning("⚠️ Nenhuma iniciativa corresponde aos filtros selecionados na página principal. Ajuste os filtros para visualizar os dados.")
         st.stop()

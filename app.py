@@ -1,10 +1,16 @@
 import streamlit as st
-import streamlit as st
 from streamlit_option_menu import option_menu
 import os
 import warnings
 import json
-from data import load_data, prepare_plot_data
+import sys
+from pathlib import Path
+
+# Adicionar diretório scripts ao path
+current_dir = Path(__file__).parent
+sys.path.append(str(current_dir / "scripts"))
+
+from data_processing import load_data, prepare_plot_data
 from utils import safe_download_image
 
 # Set environment variable to disable PyArrow optimization
@@ -183,7 +189,7 @@ with st.sidebar:
 
 # --- Navegação entre páginas com nova estrutura ---
 if selected == "Visão Geral":
-    import pages.overview as overview
+    import dashboard.detailed.overview as overview
     overview.run()
     
 elif selected == "Análises Comparativas":
@@ -192,9 +198,9 @@ elif selected == "Análises Comparativas":
     # Removido: sub_selected = st.radio(...)
     # O tipo de comparação é definido apenas pelo menu lateral, não precisa de filtro extra na página
     
-    import pages.comparison as comparison
+    import dashboard.comparisons.comparison as comparison
     comparison.run()  # Por enquanto usar a mesma página, depois pode criar específica
     
 elif selected == "Análises Detalhadas":
-    import pages.detailed as detailed
+    import dashboard.detailed.detailed as detailed
     detailed.run()

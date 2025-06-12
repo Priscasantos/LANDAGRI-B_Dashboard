@@ -3,17 +3,30 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 import numpy as np
-from utils import safe_download_image
-from tools.radar import plot_radar_comparacao
-from tools.tables import safe_dataframe_display
+import sys
+import os
+from pathlib import Path
 
 def run():
+    # Adicionar scripts ao path se necessário
+    current_dir = Path(__file__).parent.parent.parent
+    scripts_path = str(current_dir / "scripts")
+    if scripts_path not in sys.path:
+        sys.path.insert(0, scripts_path)
+    
+    # Importar módulos localmente
+    try:
+        from data_processing import load_data, prepare_plot_data
+        from utils import safe_download_image
+    except ImportError as e:
+        st.error(f"Erro ao importar módulos: {e}")
+        st.stop()
+    
     # Carregar dados originais e preparar para filtros
     if 'df_original' not in st.session_state or 'metadata' not in st.session_state:
-        from data import load_data, prepare_plot_data
         df_loaded, metadata_loaded = load_data(
-            "initiative_data/initiatives_processed.csv",
-            "initiative_data/metadata_processed.json"
+            "data/processed/initiatives_processed.csv",
+            "data/processed/metadata_processed.json"
         )
         st.session_state.df_original = df_loaded
         st.session_state.metadata = metadata_loaded
@@ -150,7 +163,12 @@ def run():
                 hovermode='x unified'
             )
             st.plotly_chart(fig_density_line, use_container_width=True)
-            safe_download_image(fig_density_line, "densidade_temporal_overview.png", "⬇️ Baixar Densidade Temporal (PNG)")
+            # Tentativa de download da imagem
+            try:
+                safe_download_image(fig_density_line, "densidade_temporal_overview.png", "⬇️ Baixar Densidade Temporal (PNG)")
+            except NameError:
+                # Fallback se safe_download_image não estiver disponível
+                st.info("Função de download não disponível")
             
             # Métricas de densidade temporal
             col1_temp, col2_temp, col3_temp, col4_temp = st.columns(4)

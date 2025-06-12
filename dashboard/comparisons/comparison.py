@@ -4,31 +4,71 @@ import plotly.graph_objects as go
 import plotly.express as px
 import numpy as np
 import ast
-from utils import safe_download_image
-from plots import (
-    plot_resolucao_acuracia,
-    plot_timeline,
-    plot_annual_coverage_multiselect,
-    plot_classes_por_iniciativa,
-    plot_distribuicao_classes,
-    plot_distribuicao_metodologias,
-    plot_acuracia_por_metodologia
-)
-from tools.charts import (
-    create_comparison_matrix,
-    create_improved_bubble_chart,
-    create_ranking_chart
-)
-from tools.tables import gap_analysis, safe_dataframe_display
+import sys
+from pathlib import Path
 
-def run():
-    # Carregar dados originais e preparar para filtros
+# Adicionar scripts ao path
+current_dir = Path(__file__).parent.parent.parent
+scripts_path = str(current_dir / "scripts")
+if scripts_path not in sys.path:
+    sys.path.insert(0, scripts_path)
+
+# Importar funções de forma segura
+try:
+    from utils import safe_download_image
+except ImportError:
+    def safe_download_image(fig, filename, button_text):
+        st.info(f"Download disponível: {filename}")
+
+try:
+    from generate_graphics import (
+        plot_resolucao_acuracia,
+        plot_timeline,
+        plot_annual_coverage_multiselect,
+        plot_classes_por_iniciativa,
+        plot_distribuicao_classes,
+        plot_distribuicao_metodologias,
+        plot_acuracia_por_metodologia
+    )
+except ImportError:
+    # Placeholders
+    def plot_resolucao_acuracia(*args): return go.Figure()
+    def plot_timeline(*args): return go.Figure()
+    def plot_annual_coverage_multiselect(*args): return go.Figure()
+    def plot_classes_por_iniciativa(*args): return go.Figure()
+    def plot_distribuicao_classes(*args): return go.Figure()
+    def plot_distribuicao_metodologias(*args): return go.Figure()
+    def plot_acuracia_por_metodologia(*args): return go.Figure()
+
+try:
+    from charts import (
+        create_comparison_matrix,
+        create_improved_bubble_chart,
+        create_ranking_chart
+    )
+except ImportError:
+    # Placeholders
+    def create_comparison_matrix(*args): return go.Figure()
+    def create_improved_bubble_chart(*args): return go.Figure()
+    def create_ranking_chart(*args): return go.Figure()
+
+try:
+    from tables import gap_analysis, safe_dataframe_display
+except ImportError:
+    def gap_analysis(*args): return pd.DataFrame()
+    def safe_dataframe_display(*args): pass
+
+def run():    # Carregar dados originais e preparar para filtros
     if 'df_original' not in st.session_state or 'metadata' not in st.session_state:
-        from data import load_data, prepare_plot_data
-        df_loaded, metadata_loaded = load_data(
-            "initiative_data/initiatives_processed.csv",
-            "initiative_data/metadata_processed.json"
-        )
+        try:
+            from data_processing import load_data, prepare_plot_data
+            df_loaded, metadata_loaded = load_data(
+                "data/processed/initiatives_processed.csv",
+                "data/processed/metadata_processed.json"
+            )
+        except ImportError:
+            st.error("Erro ao carregar dados. Verifique se os módulos estão disponíveis.")
+            return
         st.session_state.df_original = df_loaded
         st.session_state.metadata = metadata_loaded
         st.session_state.df_prepared_initial = prepare_plot_data(df_loaded.copy())
@@ -309,11 +349,14 @@ def run():
         )
         fig_scatter.update_traces(marker=dict(size=14, opacity=0.8, line=dict(width=2, color='white')))
         st.plotly_chart(fig_scatter, use_container_width=True, key="scatter_resolucao_acuracia")
-        safe_download_image(fig_scatter, "scatter_resolucao_acuracia.png", "⬇️ Baixar Scatter (PNG)")
-
-        st.subheader("Disponibilidade Temporal das Iniciativas")
-        from plots import plot_ano_overlap
-        fig_disp = plot_ano_overlap(meta_geral, df_filt_limited)
+        safe_download_image(fig_scatter, "scatter_resolucao_acuracia.png", "⬇️ Baixar Scatter (PNG)")        st.subheader("Disponibilidade Temporal das Iniciativas")
+        try:
+            from generate_graphics import plot_ano_overlap
+            fig_disp = plot_ano_overlap(meta_geral, df_filt_limited)
+        except ImportError:
+            fig_disp = go.Figure()
+            fig_disp.add_annotation(text="Função de sobreposição não disponível", 
+                                  xref="paper", yref="paper", x=0.5, y=0.5)
         st.plotly_chart(fig_disp, use_container_width=True, key="disponibilidade_temporal")
         safe_download_image(fig_disp, "disponibilidade_temporal.png", "⬇️ Baixar Disponibilidade (PNG)")
 

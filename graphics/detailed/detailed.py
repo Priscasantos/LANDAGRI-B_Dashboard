@@ -2,21 +2,32 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-from utils import safe_download_image
 import os
 import sys
+from pathlib import Path
 
 def run():
     st.header("🔍 Análises Detalhadas - Comparações Personalizadas")
     st.markdown("Selecione duas ou mais iniciativas para análises comparativas detalhadas.")
     
+    # Adicionar scripts ao path
+    current_dir = Path(__file__).parent.parent.parent
+    scripts_path = str(current_dir / "scripts")
+    if scripts_path not in sys.path:
+        sys.path.insert(0, scripts_path)
+    
+    # Importar módulos localmente
+    try:
+        from data_processing import load_data
+        from utils import safe_download_image
+    except ImportError as e:
+        st.error(f"Erro ao importar módulos: {e}")
+        return
     if 'df_geral' not in st.session_state or st.session_state.df_geral.empty:
         # Tentar carregar dados processados diretamente
-        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        from data import load_data
         df_loaded, metadata_loaded = load_data(
-            os.path.join("initiative_data", "initiatives_processed.csv"),
-            os.path.join("initiative_data", "metadata_processed.json")
+            "data/processed/initiatives_processed.csv",
+            "data/processed/metadata_processed.json"
         )
         if df_loaded is not None and not df_loaded.empty:
             st.session_state.df_geral = df_loaded
@@ -137,15 +148,18 @@ def run():
 
     with tab4:
         # Tabela
-        st.dataframe(df_filtered, use_container_width=True)
-
+        st.dataframe(df_filtered, use_container_width=True)    
     with tab5:
         st.subheader("Cobertura Anual por Iniciativa (Seleção Múltipla)")
         meta = st.session_state.get('metadata', {})
+        
         if not selected_initiatives:
             st.info("Selecione ao menos uma iniciativa para visualizar a cobertura anual.")
         else:
-            from plots import plot_annual_coverage_multiselect
-            fig_annual = plot_annual_coverage_multiselect(meta, df_filtered, selected_initiatives)
-            st.plotly_chart(fig_annual, use_container_width=True)
-            safe_download_image(fig_annual, "cobertura_anual_detalhada.png", "⬇️ Baixar Cobertura (PNG)")
+            try:
+                from generate_graphics import plot_annual_coverage_multiselect
+                fig_annual = plot_annual_coverage_multiselect(meta, df_filtered, selected_initiatives)
+                st.plotly_chart(fig_annual, use_container_width=True)
+                safe_download_image(fig_annual, "cobertura_anual_detalhada.png", "⬇️ Baixar Cobertura (PNG)")
+            except ImportError:
+                st.error("Função de cobertura anual não disponível")
