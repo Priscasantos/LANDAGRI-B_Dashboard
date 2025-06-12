@@ -1,5 +1,5 @@
 {
-    // --- Iniciativas de Mapeamento em nível Global ---
+    // --- Iniciativas de Mapeamento em nível Global e Continental ---
     // --- Copernicus Global Land Cover Service (CGLS) Dynamic Land Cover ---
     "Copernicus Global Land Cover Service (CGLS) Dynamic Land Cover": {
         "cobertura": "Global",
@@ -212,74 +212,15 @@
         "produtos_diponiveis": ["Annual", "Seasonal"],
         "acuracia_por_produto": ["97.8", "82.5"]
     },
-    // --- Iniciativas de Mapeamento em nível Nacional ---
+    // --- Iniciativas de Mapeamento em nível Nacional e Regional ---
     // --- PRODES and DETER ---
-    "PRODES AND DETER Deforestation, Warnings and Vegetation for Brazilian Biomes": {
+    "PRODES Deforestation, Warnings and Vegetation for Brazilian Biomes": {
         "cobertura": "Nacional",
-        "sigla": PRODES,
-        "provedor": "NASA",
-        "fonte": "MODIS Terra e Aqua, dados de reflectância de superfície.",
-        "resolucao_espacial": "500m",
-        "intervalo_temporal": [
-            2001,
-            2002,
-            2003,
-            2004,
-            2005,
-            2006,
-            2007,
-            2008,
-            2009,
-            2010,
-            2011,
-            2012,
-            2013,
-            2014,
-            2015,
-            2016,
-            2017,
-            2018,
-            2019,
-            2020,
-            2021,
-            2022,
-            2023
-        ],
-        "frequencia_temporal": "Anual",
-        "sistema_referencia": null,
-        "metodologia": "Algoritmo de classificação supervisionada baseado em boosted decision trees.",
-        "metodo_classificacao": "Boosted Decision Trees",
-        "qnt_classes": "17 classes",
-        "legenda_classes": null,
-        "acuracia_geral": "67%"
-    },
-    // --- GLC_FCS30 ---
-    "GLC_FCS30": {
-        "cobertura": "Cobertura global para 2020 com base em dados Landsat.",
-        "sigla": null,
-        "provedor": "Chinese Academy of Sciences",
-        "fonte": "Landsat-8 OLI, dados auxiliares de topografia.",
-        "resolucao_espacial": "30m",
-        "intervalo_temporal": [
-            2020
-        ],
-        "frequencia_temporal": "Pontual (2020)",
-        "sistema_referencia": null,
-        "metodologia": "Random Forest aplicado a métricas espectrais multi-temporais do Landsat.",
-        "metodo_classificacao": "Random Forest",
-        "qnt_classes": "29 classes",
-        "legenda_classes": null,
-        "acuracia_geral": "68%"
-    },
-    // --- PRODES Amazônia ---
-    "PRODES": {
-        "cobertura": "Brazilian Amazon region with annual monitoring since 2000-2023, DETER since 2012.",
         "sigla": "PRODES",
         "provedor": "National Institute for Space Research (INPE)",
-        "fonte": "IRS, Sentinel-2, Landsat series or CBERS-4/4A (PRODES), MODIS, CBERS series and Amazonia-1 (DETER).",
-        "resolucao_espacial": "20-30m (PRODES), 56-64m (DETER)",
+        "fonte": "IRS, Sentinel-2 MSI, Landsat series, CBERS-4/4A",
+        "resolucao_espacial": ["20-30"],
         "intervalo_temporal": [
-            2000,
             2001,
             2002,
             2003,
@@ -304,22 +245,35 @@
             2022,
             2023
         ],
-        "frequencia_temporal": "Annual (PRODES), Annual since 2012 (DETER)",
-        "sistema_referencia": null,
-        "metodologia": "Visual Interpretation (PRODES) and Linear Spectral Mixture Model (DETER) applied to multiple satellite data.",
-        "metodo_classificacao": "Visual Interpretation and Linear Spectral Mixture Model",
-        "qnt_classes": "5 (PRODES), 3 (DETER) classes",
-        "legenda_classes": "Deforestation in the year, residual in the year, hydrography, non-forest (only for legal amazon), natural vegetation/forest (PRODES); Deforestation (with bare soil, vegetation and mining), degradation (degradation, wildfire scar) and logging (selective cut type 1 - disordered and selective cut type 2 - geometric) (DETER)",
-        "acuracia_geral": "93.0%"
+        "frequencia_temporal": "Annual",
+        "frequencia_atualizacao": "Annual",
+        "sistema_referencia": "EPSG: 4674",
+        "metodologia": "Visual interpretation and Spectral Mixture Model applied to combined satellite data",
+        "metodo_classificacao": "Visual Interpretation",
+        "qnt_classes": "5",
+        "legenda_classes": "Deforestation In The Year, Residual In The Year, Hydrography, Non-Forest (Only For Legal Amazon), Natural Vegetation/Forest",
+        "acuracia_geral": "93"
     },
-    // --- DETER---
-    "DETER": {
-        "cobertura": "Brazilian Amazon region with annual monitoring since 2012.",
+       // --- Iniciativas de Mapeamento em nível Nacional e Regional ---
+    // --- PRODES and DETER ---
+    "DETER Deforestation, Warnings and Vegetation for Brazilian Biomes": {
+        "cobertura": "Nacional",
         "sigla": "DETER",
         "provedor": "National Institute for Space Research (INPE)",
-        "fonte": "MODIS, CBERS series and Amazonia-1 (DETER) satellite data.",
-        "resolucao_espacial": "56-64m",
+        "fonte": "MODIS Terra/Aqua, CBERS series, Amazônia-1",
+        "resolucao_espacial": ["56-64"],
         "intervalo_temporal": [
+            2001,
+            2002,
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009,
+            2010,
+            2011,
             2012,
             2013,
             2014,
@@ -333,18 +287,19 @@
             2022,
             2023
         ],
-        "frequencia_temporal": "Annual since 2012",
-        "sistema_referencia": null,
-        "metodologia": "Linear Spectral Mixture Model applied to MODIS, CBERS series and Amazonia-1 satellite data.",
-        "metodo_classificacao": "Linear Spectral Mixture Model",
-        "qnt_classes": "3 classes",
-        "legenda_classes": "Deforestation (with bare soil, vegetation and mining), degradation (degradation, wildfire scar) and logging (selective cut type 1 - disordered and selective cut type 2 - geometric)",
-        "acuracia_geral": "93.0%"
+        "frequencia_temporal": "Annual",
+        "frequencia_atualizacao": "Annual",
+        "sistema_referencia": "EPSG: 4674",
+        "metodologia": "Visual interpretation and Spectral Mixture Model applied to combined satellite data",
+        "metodo_classificacao": "Visual Interpretation and Spectral Mixture Model",
+        "qnt_classes": "3",
+        "legenda_classes": "Deforestation (With Bare Soil, Vegetation and Mining), Degradation (Degradation, Wildfire Scar), Logging (Selective Cut Type 1 - Disordered And Selective Cut Type 2 - Geometric)",
+        "acuracia_geral": "93"
     },
-    // --- TerraClass ---
-    "TerraClass": {
+    // --- TerraClass Amazônia ---
+    "TerraClass Amazonia": {
         "cobertura": "Regional",
-        "sigla": "TerraClass",
+        "sigla": "TerraClass Amazonia",
         "provedor": "National Institute for Space Research (INPE) and Brazilian Agricultural Research Corporation (Embrapa)",
         "fonte": "Sentinel-2 MSI",
         "fonte_old": "Landsat-5 TM and MODIS Terra/Aqua",
@@ -360,17 +315,25 @@
             2020,
             2022
         ],
-        "intervalo_temporal_Amazonia": [
-            2008,
-            2010,
-            2012,
-            2014,
-            2016,
-            2018,
-            2020,
-            2022
-        ],
-        "intervalo_temporal_cerrado": [
+        "frequencia_temporal": "Annual",
+        "frequencia_atualizacao": "Annual",
+        "sistema_referencia": "EPSG:4674",
+        "metodologia": "Visual interpretation, Supervised Bhattacharya classifier, time-series classification based on Random Forest and Deep Learning algorithms.",
+        "metodo_classificacao": "Visual Interpretation, Supervised Bhattacharya Classification, and Deep Learning",
+        "qnt_classes": "18",
+        "legenda_classes": "Primary Natural Forest Vegetation, Secondary Natural Forest Vegetation, Forestry, Shrub/Arboreal Pasture, Herbaceous Pasture, Perennial Agricultural Crops, Semi-Perennial Agricultural Crops, Temporary Agricultural Crops Of 1 Cycle, Temporary Agricultural Crops Of More Than 1 Cycle, Temporary Agricultural Crops, Mining, Urbanized, Other Uses, Not Observed, Deforestation In The Year, Non-Forest, Natural Non-Forest, Body Of Water",
+        "acuracia_geral": "93.9"
+    },
+    // --- TerraClass Cerrado ---
+    "TerraClass Cerrado": {
+        "cobertura": "Regional",
+        "sigla": "TerraClass Cerrado",
+        "provedor": "National Institute for Space Research (INPE) and Brazilian Agricultural Research Corporation (Embrapa)",
+        "fonte": "Sentinel-2 MSI",
+        "fonte_old": "Landsat-5 TM and MODIS Terra/Aqua",
+        "resolucao_espacial": "10",
+        "resolucao_espacial_old": "30",
+        "intervalo_temporal": [
             2018,
             2020,
             2022
@@ -380,9 +343,9 @@
         "sistema_referencia": "EPSG:4674",
         "metodologia": "Visual interpretation, Supervised Bhattacharya classifier, time-series classification based on Random Forest and Deep Learning algorithms.",
         "metodo_classificacao": "Visual Interpretation, Supervised Bhattacharya Classification, and Deep Learning",
-        "qnt_classes": "18 (Amazon), 15 (Cerrado) classes",
-        "legenda_classes": "Primary Natural Forest Vegetation, Secondary Natural Forest Vegetation, Forestry, Pasture, Shrub/Arboreal Pasture, Herbaceous Pasture, Perennial Agricultural Crops, Semi-Perennial Agricultural Crops, Temporary Agricultural Crops Of 1 Cycle, Temporary Agricultural Crops Of More Than 1 Cycle, Temporary Agricultural Crops, Mining, Urbanized, Other Built Areas, Other Uses, Not Observed, Deforestation In The Year, Non-Forest, Natural Non-Forest, Body Of Water",
-        "acuracia_geral": "93.9"
+        "qnt_classes": "15",
+        "legenda_classes": "Primary Natural Forest Vegetation, Secondary Natural Forest Vegetation, Forestry, Pasture, Perennial Agricultural Crops, Semi-Perennial Agricultural Crops, Temporary Agricultural Crops Of 1 Cycle, Temporary Agricultural Crops Of More Than 1 Cycle, Mining, Urbanized, Other Built Areas, Other Uses, Not Observed, Deforestation In The Year, Body Of Water",
+        "acuracia_geral": "90.9"
     },
         // --- MapBiomas Brasil ---
     "MapBiomas Brasil": {
