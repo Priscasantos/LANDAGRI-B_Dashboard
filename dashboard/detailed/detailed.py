@@ -15,15 +15,15 @@ def run():
     scripts_path = str(current_dir / "scripts")
     if scripts_path not in sys.path:
         sys.path.insert(0, scripts_path)
-    
-    # Importar módulos localmente
+      # Importar módulos localmente
     try:
         from data_processing import load_data
         from utils import safe_download_image
     except ImportError as e:
         st.error(f"Erro ao importar módulos: {e}")
         return
-      if 'df_geral' not in st.session_state or st.session_state.df_geral.empty:
+    
+    if 'df_geral' not in st.session_state or st.session_state.df_geral.empty:
         # Tentar carregar dados processados diretamente
         df_loaded, metadata_loaded = load_data(
             "data/processed/initiatives_processed.csv",
@@ -148,7 +148,8 @@ def run():
 
     with tab4:
         # Tabela
-        st.dataframe(df_filtered, use_container_width=True)    with tab5:
+        st.dataframe(df_filtered, use_container_width=True)   
+    with tab5:
         st.subheader("Cobertura Anual por Iniciativa (Seleção Múltipla)")
         meta = st.session_state.get('metadata', {})
         

@@ -349,7 +349,9 @@ def run():    # Carregar dados originais e preparar para filtros
         )
         fig_scatter.update_traces(marker=dict(size=14, opacity=0.8, line=dict(width=2, color='white')))
         st.plotly_chart(fig_scatter, use_container_width=True, key="scatter_resolucao_acuracia")
-        safe_download_image(fig_scatter, "scatter_resolucao_acuracia.png", "⬇️ Baixar Scatter (PNG)")        st.subheader("Disponibilidade Temporal das Iniciativas")
+        safe_download_image(fig_scatter, "scatter_resolucao_acuracia.png", "⬇️ Baixar Scatter (PNG)")
+        
+        st.subheader("Disponibilidade Temporal das Iniciativas")
         try:
             from generate_graphics import plot_ano_overlap
             fig_disp = plot_ano_overlap(meta_geral, df_filt_limited)
