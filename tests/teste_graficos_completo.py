@@ -11,8 +11,8 @@ import os
 # Adicionar o diretório pai ao path para importar módulos
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from data import load_data, prepare_plot_data
-from utils import safe_download_image
+from scripts.data_generation.data_processing import load_data, prepare_plot_data
+from scripts.utilities.utils import safe_download_image
 
 def main():
     st.set_page_config(

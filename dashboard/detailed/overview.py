@@ -13,11 +13,10 @@ def run():
     scripts_path = str(current_dir / "scripts")
     if scripts_path not in sys.path:
         sys.path.insert(0, scripts_path)
-    
-    # Importar módulos localmente
+      # Importar módulos localmente
     try:
-        from data_processing import load_data, prepare_plot_data
-        from utils import safe_download_image
+        from scripts.data_generation.data_processing import load_data, prepare_plot_data
+        from scripts.utilities.utils import safe_download_image
     except ImportError as e:
         st.error(f"Erro ao importar módulos: {e}")
         st.stop()

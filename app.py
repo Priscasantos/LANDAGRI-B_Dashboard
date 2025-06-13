@@ -10,8 +10,8 @@ from pathlib import Path
 current_dir = Path(__file__).parent
 sys.path.append(str(current_dir / "scripts"))
 
-from data_processing import load_data, prepare_plot_data
-from utils import safe_download_image
+from scripts.data_generation.data_processing import load_data, prepare_plot_data
+from scripts.utilities.utils import safe_download_image
 
 # Set environment variable to disable PyArrow optimization
 os.environ["STREAMLIT_BROWSER_GATHER_USAGE_STATS"] = "false"

@@ -38,7 +38,7 @@ def run_analysis_step(module_name, description):
     
     try:
         if module_name == "preview_dados":
-            from scripts.data_processing import load_data, prepare_plot_data
+            from scripts.data_generation.data_processing import load_data, prepare_plot_data
             # Preview dos dados carregados
             print("📊 Carregando dados das iniciativas LULC...")
             df, metadata = load_data()
@@ -46,15 +46,14 @@ def run_analysis_step(module_name, description):
             print(f"📋 Colunas disponíveis: {list(df.columns)}")
             print(f"🏷️ Tipos de iniciativas: {df['Tipo'].unique().tolist()}")
         elif module_name == "analise_comparativa":
-            from scripts.generate_graphics import (
+            from scripts.plotting.generate_graphics import (
                 plot_resolucao_acuracia,
                 plot_timeline,
                 plot_annual_coverage_multiselect,
                 plot_classes_por_iniciativa,
                 plot_distribuicao_classes,
-                plot_distribuicao_metodologias
-            )
-            from scripts.data_processing import load_data, prepare_plot_data
+                plot_distribuicao_metodologias            )
+            from scripts.data_generation.data_processing import load_data, prepare_plot_data
             # Executar todas as funções principais de comparação
             df, metadata = load_data()
             df_prepared = prepare_plot_data(df)
@@ -163,7 +162,7 @@ def main():
 
 def menu_analises_comparativas():
     """Menu para análises comparativas"""
-    from scripts import generate_graphics
+    from scripts.plotting import generate_graphics
     opcoes = [
         ("Resolução vs Acurácia", generate_graphics.plot_resolucao_acuracia),
         ("Timeline das iniciativas", generate_graphics.plot_timeline),
@@ -183,9 +182,8 @@ def menu_analises_comparativas():
         return
         
     indices = [int(i) for i in escolhas.split(",") if i.strip().isdigit() and 1 <= int(i) <= len(opcoes)]
-    
-    # Carregar dados uma vez
-    from scripts.data_processing import load_data, prepare_plot_data
+      # Carregar dados uma vez
+    from scripts.data_generation.data_processing import load_data, prepare_plot_data
     df, metadata = load_data()
     df_prepared = prepare_plot_data(df)
     

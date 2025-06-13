@@ -15,10 +15,32 @@ if scripts_path not in sys.path:
 
 # Importar funções de forma segura
 try:
-    from utils import safe_download_image
+    from scripts.utilities.utils import safe_download_image
 except ImportError:
     def safe_download_image(fig, filename, button_text):
-        st.info(f"Download disponível: {filename}")
+        st.info(f"Download available: {filename}")
+
+try:
+    from scripts.utilities.english_translations import (
+        translate_text, 
+        INTERFACE_TRANSLATIONS,
+        translate_chart_elements
+    )
+except ImportError:
+    def translate_text(text): return text
+    INTERFACE_TRANSLATIONS = {}
+    def translate_chart_elements(fig): return fig
+
+try:
+    from english_translations import (
+        translate_text, 
+        INTERFACE_TRANSLATIONS,
+        translate_chart_elements
+    )
+except ImportError:
+    def translate_text(text): return text
+    INTERFACE_TRANSLATIONS = {}
+    def translate_chart_elements(fig): return fig
 
 try:
     from generate_graphics import (
@@ -58,7 +80,8 @@ except ImportError:
     def gap_analysis(*args): return pd.DataFrame()
     def safe_dataframe_display(*args): pass
 
-def run():    # Carregar dados originais e preparar para filtros
+def run():
+    # Load original data and prepare for filters
     if 'df_original' not in st.session_state or 'metadata' not in st.session_state:
         try:
             from data_processing import load_data, prepare_plot_data
@@ -67,7 +90,7 @@ def run():    # Carregar dados originais e preparar para filtros
                 "data/processed/metadata_processed.json"
             )
         except ImportError:
-            st.error("Erro ao carregar dados. Verifique se os módulos estão disponíveis.")
+            st.error("Error loading data. Check if modules are available.")
             return
         st.session_state.df_original = df_loaded
         st.session_state.metadata = metadata_loaded
@@ -77,21 +100,31 @@ def run():    # Carregar dados originais e preparar para filtros
     meta_geral = st.session_state.metadata
     df_geral_original = st.session_state.df_original
 
-    # Filtros modernos no topo da página
-    st.markdown("### 🔎 Filtros de Iniciativas")
+    # Create nome to sigla mapping
+    nome_to_sigla = {}
+    if df_geral_original is not None and not df_geral_original.empty and 'Sigla' in df_geral_original.columns:
+        for _, row in df_geral_original.iterrows():
+            nome_to_sigla[row['Nome']] = row['Sigla']
+
+    # Add Display_Name column for consistent sigla usage
+    if 'Display_Name' not in df.columns:
+        df['Display_Name'] = df['Nome'].map(lambda x: nome_to_sigla.get(x, x[:10]))
+
+    # Modern filters at the top of the page (translated to English)
+    st.markdown("### 🔎 Initiative Filters")
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         tipos = df["Tipo"].unique().tolist()
-        selected_types = st.multiselect("Tipo", options=tipos, default=tipos)
+        selected_types = st.multiselect("Type", options=tipos, default=tipos)
     with col2:
         min_res, max_res = int(df["Resolução (m)"].min()), int(df["Resolução (m)"].max())
-        selected_res = st.slider("Resolução (m)", min_value=min_res, max_value=max_res, value=(min_res, max_res))
+        selected_res = st.slider("Resolution (m)", min_value=min_res, max_value=max_res, value=(min_res, max_res))
     with col3:
         min_acc, max_acc = int(df["Acurácia (%)"].min()), int(df["Acurácia (%)"].max())
-        selected_acc = st.slider("Acurácia (%)", min_value=min_acc, max_value=max_acc, value=(min_acc, max_acc))
+        selected_acc = st.slider("Accuracy (%)", min_value=min_acc, max_value=max_acc, value=(min_acc, max_acc))
     with col4:
         metodologias = df["Metodologia"].unique().tolist()
-        selected_methods = st.multiselect("Metodologia", options=metodologias, default=metodologias)    # Aplicar filtros
+        selected_methods = st.multiselect("Methodology", options=metodologias, default=metodologias)    # Apply filters
     filtered_df = df[
         (df["Tipo"].isin(selected_types)) &
         (df["Resolução (m)"].between(selected_res[0], selected_res[1])) &
@@ -101,54 +134,56 @@ def run():    # Carregar dados originais e preparar para filtros
     st.session_state.filtered_df = filtered_df
 
     if filtered_df.empty:
-        st.warning("⚠️ Nenhuma iniciativa corresponde aos filtros selecionados. Ajuste os filtros para visualizar os dados.")
+        st.warning("⚠️ No initiatives match the selected filters. Adjust filters to view data.")
         st.stop()
 
-    df_filt = filtered_df    # Aplicar filtros básicos
+    df_filt = filtered_df
+    # Apply basic filters
     df_filt_limited = df_filt.copy()
 
+    # Tabs with English translations
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-        "📊 Barras Duplas",
-        "🎯 Resolução vs Acurácia",
-        "📅 Cobertura Temporal",
-        "🏷️ Número de Classes",
-        "⚙️ Metodologias",
-        "🕸️ Análise Radar"
+        "📊 Dual Bars",
+        "🎯 Resolution vs Accuracy",
+        "📅 Temporal Coverage",
+        "🏷️ Number of Classes",
+        "⚙️ Methodologies",
+        "🕸️ Radar Analysis"
     ])
 
     with tab1:
-        st.subheader("Barras Duplas: Acurácia x Resolução")
+        st.subheader("Dual Bars: Accuracy x Resolution")
         df_filt_limited['resolucao_norm'] = (1 / df_filt_limited['Resolução (m)']) / (1 / df_filt_limited['Resolução (m)']).max()
         fig = go.Figure()
         fig.add_trace(go.Bar(
-            y=df_filt_limited['Nome'],
+            y=df_filt_limited['Display_Name'],  # Use siglas for y-axis
             x=df_filt_limited['Acurácia (%)'],
-            name='Acurácia (%)',
+            name='Accuracy (%)',
             orientation='h',
-            marker_color='royalblue'
-        ))
+            marker_color='royalblue'        ))
         fig.add_trace(go.Bar(
-            y=df_filt_limited['Nome'],
-            x=df_filt_limited['resolucao_norm'] * 100,  # Converter para porcentagem
-            name='Resolução (normalizada)',
+            y=df_filt_limited['Display_Name'],  # Use siglas for y-axis
+            x=df_filt_limited['resolucao_norm'] * 100,  # Convert to percentage
+            name='Resolution (normalized)',
             orientation='h',
             marker_color='orange'
         ))
         fig.update_layout(
             barmode='group',
-            xaxis_title='Valor (%)',
-            yaxis_title='Produto',
-            title='Comparação: Acurácia vs Resolução',
-            height=max(400, len(df_filt_limited) * 25)        )
-        st.plotly_chart(fig, use_container_width=True, key="barras_duplas_chart")
-        safe_download_image(fig, "barras_duplas_comparativo.png", "⬇️ Baixar Gráfico")
+            xaxis_title='Value (%)',
+            yaxis_title='Initiative',
+            title='Comparison: Accuracy vs Resolution',
+            height=max(400, len(df_filt_limited) * 25)
+        )
+        st.plotly_chart(fig, use_container_width=True, key="dual_bars_chart")
+        safe_download_image(fig, "dual_bars_comparison.png", "⬇️ Download Chart")
 
-        # Enhanced Analysis Features
+        # Enhanced Analysis Features (translated to English)
         st.markdown("---")
-        st.markdown("### 📊 Análises Avançadas")
+        st.markdown("### 📊 Advanced Analysis")
         
         # Methodology Comparative Analysis
-        st.markdown("#### 📈 Análise Comparativa por Metodologia")
+        st.markdown("#### 📈 Comparative Analysis by Methodology")
         
         if meta_geral:
             # Create timeline data for methodology analysis
@@ -326,51 +361,48 @@ def run():    # Carregar dados originais e preparar para filtros
             else:
                 st.info("ℹ️ Dados temporais insuficientes para análise de metodologia.")
         else:
-            st.warning("⚠️ Metadados não disponíveis para análise de metodologia.")
-
-    with tab2:
-        st.subheader("Resolução Espacial vs Acurácia (Scatter)")
-        # Scatterplot moderno
+            st.warning("⚠️ Metadados não disponíveis para análise de metodologia.")    with tab2:
+        st.subheader("Spatial Resolution vs Accuracy (Scatter)")
+        # Modern scatterplot with siglas
         fig_scatter = px.scatter(
             df_filt_limited,
             x='Resolução (m)',
             y='Acurácia (%)',
             color='Metodologia' if 'Metodologia' in df_filt_limited.columns else None,
-            hover_name='Nome',
+            hover_name='Display_Name',  # Use siglas for hover
             size='Classes' if 'Classes' in df_filt_limited.columns else None,
-            title="Acurácia vs Resolução Espacial",
+            title="Accuracy vs Spatial Resolution",
             labels={
-                'Resolução (m)': 'Resolução Espacial (m)',
-                'Acurácia (%)': 'Acurácia (%)',
-                'Metodologia': 'Metodologia',
-                'Classes': 'Nº de Classes'
+                'Resolução (m)': 'Spatial Resolution (m)',
+                'Acurácia (%)': 'Accuracy (%)',
+                'Metodologia': 'Methodology',
+                'Classes': 'No. of Classes'
             },
             height=500
         )
         fig_scatter.update_traces(marker=dict(size=14, opacity=0.8, line=dict(width=2, color='white')))
-        st.plotly_chart(fig_scatter, use_container_width=True, key="scatter_resolucao_acuracia")
-        safe_download_image(fig_scatter, "scatter_resolucao_acuracia.png", "⬇️ Baixar Scatter (PNG)")
+        st.plotly_chart(fig_scatter, use_container_width=True, key="scatter_resolution_accuracy")
+        safe_download_image(fig_scatter, "scatter_resolution_accuracy.png", "⬇️ Download Scatter (PNG)")
         
-        st.subheader("Disponibilidade Temporal das Iniciativas")
+        st.subheader("Temporal Availability of Initiatives")
         try:
             from generate_graphics import plot_ano_overlap
             fig_disp = plot_ano_overlap(meta_geral, df_filt_limited)
         except ImportError:
             fig_disp = go.Figure()
-            fig_disp.add_annotation(text="Função de sobreposição não disponível", 
+            fig_disp.add_annotation(text="Overlap function not available", 
                                   xref="paper", yref="paper", x=0.5, y=0.5)
-        st.plotly_chart(fig_disp, use_container_width=True, key="disponibilidade_temporal")
-        safe_download_image(fig_disp, "disponibilidade_temporal.png", "⬇️ Baixar Disponibilidade (PNG)")
+        st.plotly_chart(fig_disp, use_container_width=True, key="temporal_availability")
+        safe_download_image(fig_disp, "temporal_availability.png", "⬇️ Download Availability (PNG)")
 
     with tab3:
-        st.markdown('<div class="timeline-container"><h2 class="timeline-title">📅 Linha do Tempo Geral das Iniciativas</h2></div>', unsafe_allow_html=True)
-        fig_timeline = plot_timeline(meta_geral, df_geral_original)
-        st.plotly_chart(fig_timeline, use_container_width=True, key="timeline_geral")
-        safe_download_image(fig_timeline, "timeline_geral.png", "⬇️ Baixar Timeline (PNG)")
+        st.markdown('<div class="timeline-container"><h2 class="timeline-title">📅 General Timeline of Initiatives</h2></div>', unsafe_allow_html=True)        fig_timeline = plot_timeline(meta_geral, df_geral_original)
+        st.plotly_chart(fig_timeline, use_container_width=True, key="general_timeline")
+        safe_download_image(fig_timeline, "general_timeline.png", "⬇️ Download Timeline (PNG)")
         
-        # Methodology Evolution Over Time Chart
+        # Methodology Evolution Over Time Chart (translated to English)
         if meta_geral and df_geral_original is not None and not df_geral_original.empty:
-            st.markdown("#### ⏰ Evolução das Metodologias ao Longo do Tempo")
+            st.markdown("#### ⏰ Evolution of Methodologies Over Time")
             
             # Create enhanced timeline data for methodology analysis
             timeline_data = []
@@ -407,9 +439,10 @@ def run():    # Carregar dados originais e preparar para filtros
                     x='ano',
                     y='count',
                     color='metodologia',
-                    title='📈 Evolução da Adoção de Metodologias LULC',
-                    labels={'ano': 'Ano', 'count': 'Número de Produtos', 'metodologia': 'Metodologia'},
-                    color_discrete_sequence=px.colors.qualitative.Set1                )
+                    title='📈 Evolution of LULC Methodology Adoption',
+                    labels={'ano': 'Year', 'count': 'Number of Products', 'metodologia': 'Methodology'},
+                    color_discrete_sequence=px.colors.qualitative.Set1
+                )
                 
                 fig_metodologia_evolucao.update_layout(
                     height=400,
@@ -533,38 +566,36 @@ def run():    # Carregar dados originais e preparar para filtros
                 st.plotly_chart(fig_tendencia_acuracia, use_container_width=True, key="tendencia_acuracia")
                 safe_download_image(fig_tendencia_acuracia, "tendencia_acuracia.png", "⬇️ Baixar Tendência (PNG)")
             else:
-                st.info("Dados insuficientes para análise de tendência.")
-
-    with tab4:
-        st.subheader("Distribuição do Número de Classes")
+                st.info("Dados insuficientes para análise de tendência.")    with tab4:
+        st.subheader("Distribution of Number of Classes")
         col1_tab3, col2_tab3 = st.columns(2)
         with col1_tab3:
             fig_bar_classes = plot_classes_por_iniciativa(df_filt)
             st.plotly_chart(fig_bar_classes, use_container_width=True, key="bar_classes")
-            safe_download_image(fig_bar_classes, "classes_por_iniciativa.png", "⬇️ Baixar Gráfico Barras (PNG)")
+            safe_download_image(fig_bar_classes, "classes_per_initiative.png", "⬇️ Download Bar Chart (PNG)")
         with col2_tab3:
             fig_hist_classes = plot_distribuicao_classes(df_filt)
             st.plotly_chart(fig_hist_classes, use_container_width=True, key="hist_classes")
-            safe_download_image(fig_hist_classes, "distribuicao_classes.png", "⬇️ Baixar Histograma (PNG)")
+            safe_download_image(fig_hist_classes, "classes_distribution.png", "⬇️ Download Histogram (PNG)")
 
     with tab5:
-        st.subheader("Distribuição por Metodologias")
+        st.subheader("Distribution by Methodologies")
         col1_tab4, col2_tab4 = st.columns(2)
         with col1_tab4:
             method_counts = df_filt['Metodologia'].value_counts()
             fig_metodologias = plot_distribuicao_metodologias(method_counts)
-            st.plotly_chart(fig_metodologias, use_container_width=True, key="distribuicao_metodologias")
-            safe_download_image(fig_metodologias, "distribuicao_metodologias.png", "⬇️ Baixar Gráfico Metodologias (PNG)")
+            st.plotly_chart(fig_metodologias, use_container_width=True, key="methodology_distribution")
+            safe_download_image(fig_metodologias, "methodology_distribution.png", "⬇️ Download Methodology Chart (PNG)")
         
         with col2_tab4:
-            st.markdown("#### Acurácia por Metodologia")
+            st.markdown("#### Accuracy by Methodology")
             fig_acuracia_metodologia = plot_acuracia_por_metodologia(df_filt)
-            st.plotly_chart(fig_acuracia_metodologia, use_container_width=True, key="acuracia_metodologia")
-            safe_download_image(fig_acuracia_metodologia, "acuracia_por_metodologia.png", "⬇️ Baixar Acurácia Metodologia (PNG)")
+            st.plotly_chart(fig_acuracia_metodologia, use_container_width=True, key="accuracy_methodology")
+            safe_download_image(fig_acuracia_metodologia, "accuracy_by_methodology.png", "⬇️ Download Accuracy Methodology (PNG)")
 
     with tab6:
-        st.subheader("🕸️ Análise Radar - Comparação Multi-dimensional")
-          # Radar chart with top initiatives
+        st.subheader("🕸️ Radar Analysis - Multi-dimensional Comparison")
+        # Radar chart with top initiatives using siglas
         radar_columns = ['Acurácia (%)', 'Resolução (m)', 'Classes']
         available_radar_cols = [col for col in radar_columns if col in df_filt.columns]
         
@@ -575,25 +606,24 @@ def run():    # Carregar dados originais e preparar para filtros
                 max_initiatives = min(8, len(df_filt))
                 if max_initiatives > 2:
                     num_initiatives = st.slider(
-                        "Número de iniciativas no radar",
+                        "Number of initiatives in radar",
                         min_value=2,
                         max_value=max_initiatives,
                         value=min(5, max_initiatives),
-                        help="Selecione quantas iniciativas exibir no gráfico radar"
+                        help="Select how many initiatives to display in the radar chart"
                     )
                 else:
                     # If only 2 initiatives available, don't show slider
                     num_initiatives = max_initiatives
-                    st.info(f"Exibindo todas as {max_initiatives} iniciativas disponíveis")
-            
-            with col2_radar:
+                    st.info(f"Displaying all {max_initiatives} available initiatives")
+              with col2_radar:
                 sort_by = st.selectbox(
-                    "Ordenar por",
+                    "Sort by",
                     options=['Acurácia (%)', 'Resolução (m)', 'Classes'],
-                    help="Critério para selecionar as top iniciativas"
+                    help="Criteria to select top initiatives"
                 )
             
-            # Prepare radar data
+            # Prepare radar data with siglas
             if sort_by == 'Resolução (m)':
                 # For resolution, lower is better, so sort ascending
                 top_initiatives = df_filt.nsmallest(num_initiatives, sort_by)
@@ -601,7 +631,8 @@ def run():    # Carregar dados originais e preparar para filtros
                 # For others, higher is better
                 top_initiatives = df_filt.nlargest(num_initiatives, sort_by)
             
-            radar_df = top_initiatives[['Nome'] + available_radar_cols].copy()
+            # Use Display_Name (siglas) for radar chart
+            radar_df = top_initiatives[['Display_Name'] + available_radar_cols].copy()
             
             # Normalize data for radar chart (0-1 scale)
             for col in available_radar_cols:
@@ -615,7 +646,7 @@ def run():    # Carregar dados originais e preparar para filtros
                 else:
                     radar_df[col] = 0.5
             
-            # Create radar chart
+            # Create radar chart with siglas
             fig_radar = go.Figure()
             colors = px.colors.qualitative.Set1
             
@@ -628,7 +659,7 @@ def run():    # Carregar dados originais e preparar para filtros
                     r=values_closed,
                     theta=theta_closed,
                     fill='toself',
-                    name=row['Nome'],
+                    name=row['Display_Name'],  # Use siglas for legend
                     line_color=colors[i % len(colors)],
                     opacity=0.7
                 ))
@@ -640,18 +671,18 @@ def run():    # Carregar dados originais e preparar para filtros
                         range=[0, 1],
                         tickmode='array',
                         tickvals=[0, 0.25, 0.5, 0.75, 1],
-                        ticktext=['Baixo', 'Médio-Baixo', 'Médio', 'Médio-Alto', 'Alto']
+                        ticktext=['Low', 'Medium-Low', 'Medium', 'Medium-High', 'High']  # English labels
                     )
                 ),
                 showlegend=True,
-                title=f'🎯 Comparação Radar - Top {num_initiatives} por {sort_by}',
+                title=f'🎯 Radar Comparison - Top {num_initiatives} by {sort_by}',
                 height=600,
-                font=dict(size=12)            )
-            st.plotly_chart(fig_radar, use_container_width=True, key="radar_comparison")
-            safe_download_image(fig_radar, "radar_comparison.png", "⬇️ Baixar Gráfico Radar (PNG)")
+                font=dict(size=12)
+            )            st.plotly_chart(fig_radar, use_container_width=True, key="radar_comparison")
+            safe_download_image(fig_radar, "radar_comparison.png", "⬇️ Download Radar Chart (PNG)")
             
-            # Show normalized values table
-            st.markdown("#### 📊 Valores Normalizados (Escala 0-1)")
+            # Show normalized values table with siglas
+            st.markdown("#### 📊 Normalized Values (0-1 Scale)")
             display_df = radar_df.copy()
             for col in available_radar_cols:
                 display_df[col] = display_df[col].round(3)
@@ -661,42 +692,42 @@ def run():    # Carregar dados originais e preparar para filtros
                 use_container_width=True,
                 hide_index=True,
                 column_config={
-                    "Nome": st.column_config.TextColumn("Iniciativa", width="large"),
-                    "Acurácia (%)": st.column_config.NumberColumn("Acurácia (norm.)", format="%.3f"),
-                    "Resolução (m)": st.column_config.NumberColumn("Resolução (norm.)", format="%.3f", help="Invertido: 1 = melhor resolução"),
+                    "Display_Name": st.column_config.TextColumn("Initiative", width="large"),
+                    "Acurácia (%)": st.column_config.NumberColumn("Accuracy (norm.)", format="%.3f"),
+                    "Resolução (m)": st.column_config.NumberColumn("Resolution (norm.)", format="%.3f", help="Inverted: 1 = better resolution"),
                     "Classes": st.column_config.NumberColumn("Classes (norm.)", format="%.3f")
                 }
             )
             
-            # Insights section
-            st.markdown("#### 💡 Insights da Análise Radar")
+            # Insights section (translated to English)
+            st.markdown("#### 💡 Radar Analysis Insights")
             insights_col1, insights_col2 = st.columns(2)
             
             with insights_col1:
-                # Find best overall performer
+                # Find best overall performer using siglas
                 radar_df['score_total'] = radar_df[available_radar_cols].mean(axis=1)
-                best_overall = radar_df.loc[radar_df['score_total'].idxmax(), 'Nome']
-                st.success(f"🏆 **Melhor Performance Geral:** {best_overall}")
+                best_overall = radar_df.loc[radar_df['score_total'].idxmax(), 'Display_Name']
+                st.success(f"🏆 **Best Overall Performance:** {best_overall}")
                 
-                # Find specialist initiatives
+                # Find specialist initiatives using siglas
                 for col in available_radar_cols:
-                    specialist = radar_df.loc[radar_df[col].idxmax(), 'Nome']
-                    col_display = "Resolução" if col == "Resolução (m)" else col.replace(" (%)", "")
-                    st.info(f"🎯 **Especialista em {col_display}:** {specialist}")
+                    specialist = radar_df.loc[radar_df[col].idxmax(), 'Display_Name']
+                    col_display = "Resolution" if col == "Resolução (m)" else col.replace(" (%)", "")
+                    st.info(f"🎯 **Specialist in {col_display}:** {specialist}")
             
             with insights_col2:
-                # Performance distribution
-                st.markdown("**📈 Distribuição de Performance:**")
+                # Performance distribution (translated to English)
+                st.markdown("**📈 Performance Distribution:**")
                 for col in available_radar_cols:
                     avg_performance = radar_df[col].mean()
-                    col_display = "Resolução" if col == "Resolução (m)" else col.replace(" (%)", "")
-                    performance_level = "Alto" if avg_performance > 0.7 else "Médio" if avg_performance > 0.4 else "Baixo"
+                    col_display = "Resolution" if col == "Resolução (m)" else col.replace(" (%)", "")
+                    performance_level = "High" if avg_performance > 0.7 else "Medium" if avg_performance > 0.4 else "Low"
                     st.write(f"• **{col_display}:** {performance_level} ({avg_performance:.2f})")
                 
-                # Balance analysis
+                # Balance analysis using siglas
                 balance_scores = radar_df[available_radar_cols].std(axis=1)
-                most_balanced = radar_df.loc[balance_scores.idxmin(), 'Nome']
-                st.info(f"⚖️ **Mais Equilibrada:** {most_balanced}")
+                most_balanced = radar_df.loc[balance_scores.idxmin(), 'Display_Name']
+                st.info(f"⚖️ **Most Balanced:** {most_balanced}")
         
         else:
             if len(df_filt) < 2:
