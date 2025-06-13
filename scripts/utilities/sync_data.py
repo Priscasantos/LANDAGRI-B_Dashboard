@@ -6,9 +6,6 @@ Script para sincronizar e atualizar todos os dados do dashboard
 
 import pandas as pd
 import json
-import os
-from ..data_generation.generate_dataset import create_initiatives_dataset, add_derived_metrics
-from ..data_generation.generate_metadata import create_initiatives_metadata
 
 def process_years_data(metadata_dict):
     """Processa os anos disponíveis dos metadados para o formato do dashboard."""

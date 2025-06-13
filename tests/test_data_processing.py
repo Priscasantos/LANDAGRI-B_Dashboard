@@ -15,8 +15,6 @@ Date: 2024
 """
 
 import sys
-import os
-import json
 import traceback
 from pathlib import Path
 
@@ -95,7 +93,7 @@ def test_jsonc_data_loading():
                 if meta.get('gaps_temporais'):
                     temporal_stats['with_gaps'] += 1
                     
-            print(f'\n📈 Temporal derivation statistics:')
+            print('\n📈 Temporal derivation statistics:')
             for key, count in temporal_stats.items():
                 percentage = (count / len(metadata)) * 100
                 print(f'  {key}: {count}/{len(metadata)} ({percentage:.1f}%)')

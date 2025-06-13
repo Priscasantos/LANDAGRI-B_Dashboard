@@ -2,7 +2,6 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 import os
 import warnings
-import json
 import sys
 from pathlib import Path
 
@@ -10,8 +9,7 @@ from pathlib import Path
 current_dir = Path(__file__).parent
 sys.path.append(str(current_dir / "scripts"))
 
-from scripts.data_generation.data_processing import load_data, prepare_plot_data
-from scripts.utilities.utils import safe_download_image
+from scripts.data_generation.data_processor import load_data
 
 # Set environment variable to disable PyArrow optimization
 os.environ["STREAMLIT_BROWSER_GATHER_USAGE_STATS"] = "false"

@@ -1,5 +1,4 @@
 import plotly.graph_objects as go
-import pandas as pd
 
 def plot_radar_comparacao(data1, data2, filtered_df, init1, init2):
     categories = ['Acurácia (%)', 'Resolução (m)', 'Classes']

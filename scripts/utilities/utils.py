@@ -8,7 +8,7 @@ def safe_download_image(fig, filename, button_text="⬇️ Baixar Gráfico (PNG)
         fig.write_image(buf, format="png")
         st.download_button(button_text, data=buf.getvalue(), file_name=filename, mime="image/png")
         return True
-    except Exception as e:
+    except Exception:
         st.warning("⚠️ **Erro ao gerar PNG automaticamente**")
         st.info("💡 **Alternativas para salvar o gráfico:**\n"
                "1. Clique no ícone 📷 (câmera) no canto superior direito do gráfico\n"

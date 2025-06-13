@@ -136,17 +136,18 @@ def main():
     print("🌍 Comparação entre iniciativas de monitoramento")
     print("📅 Análises temporais e comparativas detalhadas")
     print("=" * 60)
-
+    
     if not check_dependencies():
         return False
-
+    
     print("\n📁 CRIANDO DIRETÓRIOS DE SAÍDA...")
     create_output_directories()
-
+    
     while True:
         print("\nMENU PRINCIPAL:")
         print("1. Gerar Análises Comparativas")
         print("2. Gerar Análises Temporais")
+        print("3. Gerar Apenas Dados Processados")
         print("0. Sair")
         opcao = input("Escolha uma opção: ").strip()
 
@@ -154,6 +155,8 @@ def main():
             menu_analises_comparativas()
         elif opcao == "2":
             menu_analises_temporais()
+        elif opcao == "3":
+            menu_gerar_dados_processados()
         elif opcao == "0":
             print("Saindo...")
             break
@@ -203,6 +206,73 @@ def menu_analises_temporais():
         run_analysis_step("analise_temporal", "Análises temporais das iniciativas")
     except Exception as e:
         print(f"❌ Erro nas análises temporais: {e}")
+
+def menu_gerar_dados_processados():
+    """Menu para gerar apenas dados processados"""
+    print("\n🔄 Executando geração de dados processados...")
+    print("💡 Esta opção gera apenas os dados necessários para o dashboard")
+    print("🚀 Processo otimizado - sem gráficos")
+    
+    try:
+        # Executar o script de processamento diretamente
+        import sys
+        import os
+        current_dir = os.getcwd()
+        sys.path.append(os.path.join(current_dir, 'scripts', 'data_generation'))
+        
+        # Executar geração de dataset
+        print("\n1️⃣ GERANDO DATASET PRINCIPAL...")
+        from generate_dataset import create_initiatives_dataset, add_derived_metrics
+        df = create_initiatives_dataset()
+        df = add_derived_metrics(df)
+        
+        # Adicionar coluna Sigla
+        sigla_map = {
+            'Copernicus Global Land Cover Service (CGLS)': 'CGLS',
+            'Dynamic World (GDW)': 'GDW',
+            'ESRI-10m Annual LULC': 'ESRI',
+            'FROM-GLC': 'FROM-GLC',
+            'Global LULC change 2000 and 2020': 'GLULC',
+            'Global Pasture Watch (GPW)': 'GPW',
+            'South America Soybean Maps': 'SASM',
+            'WorldCover 10m 2021': 'WorldCover',
+            'WorldCereal': 'WorldCereal',
+            'Land Cover CCI': 'CCI',
+            'MODIS Land Cover': 'MODIS',
+            'GLC_FCS30': 'GLC_FCS30',
+            'MapBiomas Brasil': 'MapBiomas',
+            'PRODES Amazônia': 'PRODES-AMZ',
+            'DETER Amazônia': 'DETER',
+            'PRODES Cerrado': 'PRODES-CER',
+            'TerraClass Amazônia': 'TerraClass',
+            'IBGE Monitoramento': 'IBGE',
+            'Agricultural Mapping': 'AgriMap'
+        }
+        df['Sigla'] = df['Nome'].map(sigla_map).fillna(df['Nome'].str[:8])
+        
+        # Salvar dataset
+        df.to_csv('data/processed/initiatives_processed.csv', index=False, encoding='utf-8')
+        print(f"✅ Dataset salvo: {len(df)} iniciativas")
+        
+        # Executar geração de metadados
+        print("\n2️⃣ GERANDO METADADOS PROCESSADOS...")
+        from generate_metadata import create_initiatives_metadata
+        import json
+        
+        metadata = create_initiatives_metadata()
+        output_path = 'data/processed/metadata_processed.json'
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(metadata, f, ensure_ascii=False, indent=2)
+        print(f"✅ Metadados salvos: {len(metadata)} iniciativas")
+        
+        print("\n🎉 DADOS PROCESSADOS GERADOS COM SUCESSO!")
+        print("💡 Os arquivos estão prontos para uso no dashboard")
+        print("📁 Localização: data/processed/")
+        
+    except Exception as e:
+        print(f"❌ Erro na geração de dados: {e}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     try:

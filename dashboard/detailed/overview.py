@@ -1,10 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-import plotly.express as px
 import numpy as np
 import sys
-import os
 from pathlib import Path
 
 def run():

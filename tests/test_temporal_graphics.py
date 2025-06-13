@@ -15,7 +15,6 @@ Date: 2024
 """
 
 import sys
-import os
 import traceback
 from pathlib import Path
 
@@ -32,7 +31,7 @@ def test_temporal_graphics():
         from scripts.data_generation.data_processing import load_data
         from scripts.plotting.generate_graphics import (
             plot_timeline, plot_annual_coverage_multiselect,
-            plot_ano_overlap, plot_heatmap
+            plot_heatmap
         )
         
         # Load data
@@ -150,7 +149,7 @@ def test_temporal_graphics():
         print(f'  ✅ {compatible_count}/{len(metadata)} initiatives are compatible with temporal graphics')
         
         if issues:
-            print(f'  ⚠️ Issues found:')
+            print('  ⚠️ Issues found:')
             for issue in issues[:5]:  # Show first 5 issues
                 print(f'    - {issue}')
             if len(issues) > 5:

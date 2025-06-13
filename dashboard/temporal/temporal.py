@@ -2,8 +2,6 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import numpy as np
 import sys
 from pathlib import Path
 
@@ -13,11 +11,6 @@ sys.path.append(str(current_dir / "scripts"))
 
 from scripts.utilities.utils import safe_download_image
 from scripts.utilities.config import get_initiative_color_map
-from scripts.utilities.english_translations import (
-    translate_text, 
-    INTERFACE_TRANSLATIONS,
-    translate_chart_elements
-)
 
 def run():
     st.header("⏳ Comprehensive Temporal Analysis of LULC Initiatives")

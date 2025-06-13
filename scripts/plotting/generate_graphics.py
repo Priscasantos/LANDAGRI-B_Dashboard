@@ -56,16 +56,15 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Fig
                     'ano': ano,
                     'disponivel': 1,
                     'metodologia': info.get('metodologia', 'N/A'),
-                    'escopo': info.get('escopo', 'N/A')
-                })
+                    'escopo': info.get('escopo', 'N/A')                })
                 all_years.add(ano)
     
     if not timeline_data or not all_years:
         fig = go.Figure()
         fig.update_layout(
-            title="Timeline das Iniciativas (Dados insuficientes)",
-            xaxis_title="Ano",
-            yaxis_title="Iniciativas",
+            title="Timeline of Initiatives (Insufficient data)",
+            xaxis_title="Year",
+            yaxis_title="Initiatives",
             height=400
         )
         return fig
@@ -145,17 +144,16 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Fig
                 ))
     
     # Configurar layout
-    fig_timeline.update_layout(
-        title=dict(
-            text='📅 Timeline de Disponibilidade das Iniciativas LULC (1985-2024)',
+    fig_timeline.update_layout(        title=dict(
+            text='📅 Timeline of LULC Initiatives Availability (1985-2024)',
             font=dict(size=22, color="#2D3748", family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif")
         ),
         xaxis_title=dict(
-            text='Ano',
+            text='Year',
             font=dict(size=16, color="#2D3748")
         ),
         yaxis_title=dict(
-            text='Produtos LULC',
+            text='LULC Products',
             font=dict(size=16, color="#2D3748")
         ),
         height=max(600, len(produtos_unicos) * 35),
@@ -195,23 +193,22 @@ def plot_distribuicao_classes(filtered_df):
     """Plot histogram distribution of number of classes with improved error handling."""
     if filtered_df is None or filtered_df.empty:
         fig = go.Figure()
-        fig.update_layout(title="Distribuição do Número de Classes (Dados insuficientes)")
+        fig.update_layout(title="Number of Classes Distribution (Insufficient data)")
         return fig
     
     # Verificar se a coluna 'Classes' existe e tem dados válidos
     if 'Classes' not in filtered_df.columns:
         fig = go.Figure()
-        fig.update_layout(title="Distribuição do Número de Classes (Coluna 'Classes' não encontrada)")
+        fig.update_layout(title="Number of Classes Distribution ('Classes' column not found)")
         return fig
     
     # Filtrar dados válidos (não nulos e numéricos)
     valid_data = filtered_df.dropna(subset=['Classes'])
     if valid_data.empty:
         fig = go.Figure()
-        fig.update_layout(title="Distribuição do Número de Classes (Nenhum dado válido)")
+        fig.update_layout(title="Number of Classes Distribution (No valid data)")
         return fig
-    
-    # Determinar cor baseada na coluna Tipo se existir
+      # Determinar cor baseada na coluna Tipo se existir
     color_column = 'Tipo' if 'Tipo' in valid_data.columns else None
     color_map = {'Global': '#ff6b6b', 'Nacional': '#4dabf7', 'Regional': '#51cf66'} if color_column else None
     
@@ -219,7 +216,7 @@ def plot_distribuicao_classes(filtered_df):
         valid_data,
         x='Classes',
         color=color_column,
-        title="Distribuição do Número de Classes",
+        title="Number of Classes Distribution",
         nbins=10,
         height=500,
         color_discrete_map=color_map
@@ -236,7 +233,7 @@ def plot_classes_por_iniciativa(filtered_df):
     """Plot number of classes per initiative using siglas for y-axis labels."""
     if filtered_df is None or filtered_df.empty:
         fig = go.Figure()
-        fig.update_layout(title="Número de Classes por Iniciativa (Dados insuficientes)")
+        fig.update_layout(title="Number of Classes per Initiative (Insufficient data)")
         return fig
     
     # Use siglas if available, otherwise truncate names
@@ -245,8 +242,7 @@ def plot_classes_por_iniciativa(filtered_df):
         display_names = filtered_df['Sigla'].tolist()
     else:
         display_names = [nome[:15] + '...' if len(nome) > 15 else nome for nome in filtered_df['Nome'].tolist()]
-    
-    # Create a copy of the dataframe with display names
+      # Create a copy of the dataframe with display names
     plot_df = filtered_df.copy()
     plot_df['Display_Name'] = display_names
     
@@ -256,7 +252,7 @@ def plot_classes_por_iniciativa(filtered_df):
         y='Display_Name',
         color='Tipo',
         orientation='h',
-        title="Número de Classes por Iniciativa",
+        title="Number of Classes per Initiative",
         height=500,
         color_discrete_map={'Global': '#ff6b6b', 'Nacional': '#4dabf7', 'Regional': '#51cf66'}
     )
@@ -264,7 +260,7 @@ def plot_classes_por_iniciativa(filtered_df):
         font=dict(size=12, family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        yaxis_title="Iniciativa"
+        yaxis_title="Initiative"
     )
     return fig
 
@@ -273,7 +269,7 @@ def plot_annual_coverage_multiselect(metadata: Dict[str, Any], filtered_df: pd.D
     """Plot annual coverage for selected initiatives using siglas."""
     if not selected_initiatives:
         fig = go.Figure()
-        fig.update_layout(title="Cobertura Anual (Nenhuma iniciativa selecionada)")
+        fig.update_layout(title="Annual Coverage (No initiative selected)")
         return fig
     
     # Create name to sigla mapping
@@ -281,8 +277,7 @@ def plot_annual_coverage_multiselect(metadata: Dict[str, Any], filtered_df: pd.D
     if filtered_df is not None and not filtered_df.empty and 'Sigla' in filtered_df.columns:
         for _, row in filtered_df.iterrows():
             nome_to_sigla[row['Nome']] = row['Sigla']
-    
-    # Prepare data for selected initiatives only
+      # Prepare data for selected initiatives only
     data = []
     for nome in selected_initiatives:
         meta = metadata.get(nome, {})
@@ -294,7 +289,7 @@ def plot_annual_coverage_multiselect(metadata: Dict[str, Any], filtered_df: pd.D
     
     if not data:
         fig = go.Figure()
-        fig.update_layout(title="Cobertura Anual (Nenhum dado temporal disponível)")
+        fig.update_layout(title="Annual Coverage (No temporal data available)")
         return fig
         
     df_anos = pd.DataFrame(data)
@@ -322,8 +317,7 @@ def plot_annual_coverage_multiselect(metadata: Dict[str, Any], filtered_df: pd.D
                 showlegend=True
             ))
     
-    # Fix x-axis to show all years in range
-    if not df_anos.empty:
+    # Fix x-axis to show all years in range    if not df_anos.empty:
         min_year = int(df_anos['Ano'].min())
         max_year = int(df_anos['Ano'].max())
         fig.update_xaxes(
@@ -331,16 +325,16 @@ def plot_annual_coverage_multiselect(metadata: Dict[str, Any], filtered_df: pd.D
             tick0=min_year,
             dtick=1,
             range=[min_year-0.5, max_year+0.5],
-            title='Ano',
+            title='Year',
             showgrid=True,
             gridcolor="#E2E8F0",
             tickformat='d',
         )
     
     fig.update_layout(
-        title="Cobertura Anual das Iniciativas Selecionadas",
-        xaxis_title="Ano",
-        yaxis_title="Iniciativa",
+        title="Annual Coverage of Selected Initiatives",
+        xaxis_title="Year",
+        yaxis_title="Initiative",
         yaxis=dict(type='category'),
         plot_bgcolor="#FFFFFF",
         paper_bgcolor="#FFFFFF",
@@ -427,13 +421,13 @@ def plot_distribuicao_metodologias(method_counts):
     import plotly.express as px
     if method_counts is None or method_counts.empty:
         fig = go.Figure()
-        fig.update_layout(title="Distribuição das Metodologias Utilizadas (Dados insuficientes)")
+        fig.update_layout(title="Distribution of Methodologies Used (Insufficient data)")
         return fig
     
     fig = px.pie(
         values=method_counts.values,
         names=method_counts.index,
-        title="Distribuição das Metodologias Utilizadas",
+        title="Distribution of Methodologies Used",
         height=400
     )
     
@@ -451,7 +445,7 @@ def plot_acuracia_por_metodologia(filtered_df):
         x='Metodologia',
         y='Acurácia (%)',
         color='Tipo',
-        title="Acurácia por Metodologia",
+        title="Accuracy by Methodology",
         height=400,
         color_discrete_map={'Global': '#ff6b6b', 'Nacional': '#4dabf7', 'Regional': '#51cf66'}
     )

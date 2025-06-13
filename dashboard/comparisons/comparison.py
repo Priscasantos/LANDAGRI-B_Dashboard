@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 import numpy as np
-import ast
 import sys
 from pathlib import Path
 
@@ -20,6 +19,7 @@ except ImportError:
     def safe_download_image(fig, filename, button_text):
         st.info(f"Download available: {filename}")
 
+# Import English translations
 try:
     from scripts.utilities.english_translations import (
         translate_text, 
@@ -31,19 +31,9 @@ except ImportError:
     INTERFACE_TRANSLATIONS = {}
     def translate_chart_elements(fig): return fig
 
+# Import graphics functions
 try:
-    from english_translations import (
-        translate_text, 
-        INTERFACE_TRANSLATIONS,
-        translate_chart_elements
-    )
-except ImportError:
-    def translate_text(text): return text
-    INTERFACE_TRANSLATIONS = {}
-    def translate_chart_elements(fig): return fig
-
-try:
-    from generate_graphics import (
+    from scripts.plotting.generate_graphics import (
         plot_resolucao_acuracia,
         plot_timeline,
         plot_annual_coverage_multiselect,
@@ -62,8 +52,9 @@ except ImportError:
     def plot_distribuicao_metodologias(*args): return go.Figure()
     def plot_acuracia_por_metodologia(*args): return go.Figure()
 
+# Import chart functions
 try:
-    from charts import (
+    from scripts.plotting.charts import (
         create_comparison_matrix,
         create_improved_bubble_chart,
         create_ranking_chart
@@ -74,8 +65,9 @@ except ImportError:
     def create_improved_bubble_chart(*args): return go.Figure()
     def create_ranking_chart(*args): return go.Figure()
 
+# Import table functions
 try:
-    from tables import gap_analysis, safe_dataframe_display
+    from scripts.utilities.tables import gap_analysis, safe_dataframe_display
 except ImportError:
     def gap_analysis(*args): return pd.DataFrame()
     def safe_dataframe_display(*args): pass
@@ -84,7 +76,7 @@ def run():
     # Load original data and prepare for filters
     if 'df_original' not in st.session_state or 'metadata' not in st.session_state:
         try:
-            from data_processing import load_data, prepare_plot_data
+            from scripts.data_generation.data_processing import load_data, prepare_plot_data
             df_loaded, metadata_loaded = load_data(
                 "data/processed/initiatives_processed.csv",
                 "data/processed/metadata_processed.json"
@@ -347,7 +339,7 @@ def run():
                         with ranking_col1:
                             st.metric("🏆 Melhor Acurácia", f"{ranking_df['acuracia'].max():.1f}%")
                         with ranking_col2:
-                            st.metric("📊 Acurácia Média", f"{ranking_df['acuracia'].mean():.1f}%")
+                            st.metric("📊 Acurácia Média", f"{ranking_df['acuracia'].mean():.1f}%")                        
                         with ranking_col3:
                             st.metric("📉 Menor Acurácia", f"{ranking_df['acuracia'].min():.1f}%")
                         with ranking_col4:
@@ -361,7 +353,9 @@ def run():
             else:
                 st.info("ℹ️ Dados temporais insuficientes para análise de metodologia.")
         else:
-            st.warning("⚠️ Metadados não disponíveis para análise de metodologia.")    with tab2:
+            st.warning("⚠️ Metadados não disponíveis para análise de metodologia.")
+    
+    with tab2:
         st.subheader("Spatial Resolution vs Accuracy (Scatter)")
         # Modern scatterplot with siglas
         fig_scatter = px.scatter(
@@ -386,7 +380,7 @@ def run():
         
         st.subheader("Temporal Availability of Initiatives")
         try:
-            from generate_graphics import plot_ano_overlap
+            from scripts.plotting.generate_graphics import plot_ano_overlap
             fig_disp = plot_ano_overlap(meta_geral, df_filt_limited)
         except ImportError:
             fig_disp = go.Figure()
@@ -396,7 +390,8 @@ def run():
         safe_download_image(fig_disp, "temporal_availability.png", "⬇️ Download Availability (PNG)")
 
     with tab3:
-        st.markdown('<div class="timeline-container"><h2 class="timeline-title">📅 General Timeline of Initiatives</h2></div>', unsafe_allow_html=True)        fig_timeline = plot_timeline(meta_geral, df_geral_original)
+        st.markdown('<div class="timeline-container"><h2 class="timeline-title">📅 General Timeline of Initiatives</h2></div>', unsafe_allow_html=True)
+        fig_timeline = plot_timeline(meta_geral, df_geral_original)
         st.plotly_chart(fig_timeline, use_container_width=True, key="general_timeline")
         safe_download_image(fig_timeline, "general_timeline.png", "⬇️ Download Timeline (PNG)")
         
@@ -566,7 +561,9 @@ def run():
                 st.plotly_chart(fig_tendencia_acuracia, use_container_width=True, key="tendencia_acuracia")
                 safe_download_image(fig_tendencia_acuracia, "tendencia_acuracia.png", "⬇️ Baixar Tendência (PNG)")
             else:
-                st.info("Dados insuficientes para análise de tendência.")    with tab4:
+                st.info("Dados insuficientes para análise de tendência.")
+    
+    with tab4:
         st.subheader("Distribution of Number of Classes")
         col1_tab3, col2_tab3 = st.columns(2)
         with col1_tab3:
@@ -616,12 +613,13 @@ def run():
                     # If only 2 initiatives available, don't show slider
                     num_initiatives = max_initiatives
                     st.info(f"Displaying all {max_initiatives} available initiatives")
-              with col2_radar:
-                sort_by = st.selectbox(
-                    "Sort by",
-                    options=['Acurácia (%)', 'Resolução (m)', 'Classes'],
-                    help="Criteria to select top initiatives"
-                )
+                
+                with col2_radar:
+                    sort_by = st.selectbox(
+                        "Sort by",
+                        options=['Acurácia (%)', 'Resolução (m)', 'Classes'],
+                        help="Criteria to select top initiatives"
+                    )
             
             # Prepare radar data with siglas
             if sort_by == 'Resolução (m)':
@@ -677,8 +675,8 @@ def run():
                 showlegend=True,
                 title=f'🎯 Radar Comparison - Top {num_initiatives} by {sort_by}',
                 height=600,
-                font=dict(size=12)
-            )            st.plotly_chart(fig_radar, use_container_width=True, key="radar_comparison")
+                font=dict(size=12)            )
+            st.plotly_chart(fig_radar, use_container_width=True, key="radar_comparison")
             safe_download_image(fig_radar, "radar_comparison.png", "⬇️ Download Radar Chart (PNG)")
             
             # Show normalized values table with siglas

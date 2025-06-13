@@ -16,7 +16,6 @@ sys.path.insert(0, current_dir)
 
 from scripts.data_generation.data_processing import load_data_from_jsonc
 from scripts.plotting.generate_graphics import plot_timeline, plot_distribuicao_classes, plot_annual_coverage_multiselect
-import plotly.graph_objects as go
 
 def test_all_graphics():
     """Test all graphics functions with the loaded data."""

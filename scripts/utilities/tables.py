@@ -1,7 +1,7 @@
 import pandas as pd
 import json
 import os
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 def load_processed_data():
     """Carrega dados processados do diretório initiative_data"""

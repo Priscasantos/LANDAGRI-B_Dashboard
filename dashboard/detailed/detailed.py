@@ -1,15 +1,10 @@
 import streamlit as st
-import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-import os
 import sys
 from pathlib import Path
 
 # Import English translations
-from scripts.utilities.english_translations import (
-    UI_TRANSLATIONS, METRICS_TRANSLATIONS, CHART_TRANSLATIONS
-)
 
 def run():
     st.header("🔍 Detailed Analysis - Custom Comparisons")
