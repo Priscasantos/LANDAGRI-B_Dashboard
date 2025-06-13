@@ -144,10 +144,9 @@ class UnifiedDataProcessor:
     def parse_temporal_data(self, temporal_interval: Union[List[int], str]) -> Dict[str, Any]:
         """Unified temporal data parsing function."""
         if isinstance(temporal_interval, str):
-            # Parse comma-separated string
-            try:
+            # Parse comma-separated string            try:
                 years = [int(y.strip()) for y in temporal_interval.split(',') if y.strip().isdigit()]
-            except:
+            except (ValueError, TypeError):
                 years = []
         elif isinstance(temporal_interval, list):
             years = [int(y) for y in temporal_interval if isinstance(y, (int, str)) and str(y).isdigit()]
@@ -796,12 +795,12 @@ class UnifiedDataProcessor:
             'temporal_coverage': {
                 'avg_span': df['Temporal Span'].mean() if 'Temporal Span' in df.columns else 0,
                 'max_span': df['Temporal Span'].max() if 'Temporal Span' in df.columns else 0,
-                'min_span': df['Temporal Span'].min() if 'Temporal Span' in df.columns else 0
-            }
+                'min_span': df['Temporal Span'].min() if 'Temporal Span' in df.columns else 0            }
         }
         
         return metrics
-      def _categorize_accuracy_compact(self, accuracy: float) -> str:
+    
+    def _categorize_accuracy_compact(self, accuracy: float) -> str:
         """Compact accuracy categorization."""
         if accuracy >= 90:
             return 'exc'
