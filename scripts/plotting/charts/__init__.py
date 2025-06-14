@@ -11,7 +11,7 @@ Date: 2024
 """
 
 # Import all chart functions for easy access
-from .timeline_chart import plot_timeline
+from .timeline_chart import plot_timeline, timeline_with_controls
 from .coverage_charts import plot_annual_coverage_multiselect, plot_ano_overlap, plot_heatmap
 from .distribution_charts import (
     plot_distribuicao_classes, 
@@ -31,6 +31,7 @@ from .comparison_charts import (
 __all__ = [
     # Timeline charts
     'plot_timeline',
+    'timeline_with_controls',
     # Coverage charts
     'plot_annual_coverage_multiselect', 
     'plot_ano_overlap', 

@@ -26,7 +26,7 @@ os.environ["STREAMLIT_BROWSER_GATHER_USAGE_STATS"] = "false"
 warnings.filterwarnings("ignore")
 
 # Cache dos dados principais para melhor performance
-@st.cache_data(ttl=600)  # Cache por 10 minutos
+
 def load_cached_data():
     """Carrega e cache os dados principais do dashboard"""
     return load_data()
@@ -148,11 +148,10 @@ st.markdown("""
 # --- Sidebar customizado com nova estrutura ---
 with st.sidebar:
     selected = option_menu(
-        menu_title="🛰️ LULC Dashboard",
-        options=[
-            "Visão Geral",
-            "Análises Comparativas", 
-            "Análises Detalhadas"
+        menu_title="🛰️ LULC Dashboard",        options=[
+            "Overview",
+            "Comparative Analysis", 
+            "Detailed Analysis"
         ],
         icons=["globe-americas", "bar-chart-steps", "layers"],
         menu_icon="satellite",
@@ -193,20 +192,20 @@ with st.sidebar:
     
     # Removido: filtro de subcomparação, agora é feito apenas na página principal
 
-# --- Navegação entre páginas com nova estrutura ---
-if selected == "Visão Geral":
+# --- Page navigation with new structure ---
+if selected == "Overview":
     import dashboard.detailed.overview as overview
     overview.run()
     
-elif selected == "Análises Comparativas":
+elif selected == "Comparative Analysis":
     st.markdown("---")
-    st.markdown("### 📊 Análises Comparativas")
-    # Removido: sub_selected = st.radio(...)
-    # O tipo de comparação é definido apenas pelo menu lateral, não precisa de filtro extra na página
+    st.markdown("### 📊 Comparative Analysis")
+    # Removed: sub_selected = st.radio(...)
+    # The comparison type is defined only by the sidebar menu, no need for extra filter on the page
     
     import dashboard.comparisons.comparison as comparison
-    comparison.run()  # Por enquanto usar a mesma página, depois pode criar específica
+    comparison.run()  # For now use the same page, later can create specific one
     
-elif selected == "Análises Detalhadas":
+elif selected == "Detailed Analysis":
     import dashboard.detailed.detailed as detailed
     detailed.run()

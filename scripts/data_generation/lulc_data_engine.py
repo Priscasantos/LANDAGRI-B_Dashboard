@@ -75,14 +75,13 @@ class UnifiedDataProcessor:
             'IBGE Monitoring': 'IBGE',
             'Agricultural Mapping': 'AgriMap'
         }
-        
-        # Unified temporal data mapping (single source of truth)
+          # Unified temporal data mapping (single source of truth)
         self.temporal_data = {
             'Copernicus Global Land Cover Service (CGLS)': [2015, 2016, 2017, 2018, 2019],
             'Dynamic World (GDW)': list(range(2017, 2025)),
             'ESRI-10m Annual LULC': list(range(2017, 2025)),
             'FROM-GLC': [2010, 2015, 2017],
-            'Global LULC change 2000 and 2020': [2000, 2005, 2015, 2020],
+            'Global LULC change 2000 and 2020': [2000, 2005, 2010, 2015, 2020],
             'Global Pasture Watch (GPW)': list(range(2000, 2023, 2)),
             'South America Soybean Maps': list(range(2001, 2024)),
             'WorldCover 10m 2021': [2020, 2021],
@@ -99,53 +98,208 @@ class UnifiedDataProcessor:
             'IBGE Monitoring': list(range(2000, 2021, 2)),
             'Agricultural Mapping': list(range(2018, 2024))
         }
-          # Coverage categorization mapping
+        # Coverage categorization mapping
         self.coverage_mapping = {
             'Global': 'Global',
             'Continental': 'Continental',
             'Nacional': 'National',
-            'National': 'National', 
+            'National': 'National',
             'Regional': 'Regional'
         }
-        
-    def parse_resolution(self, resolution_value: Union[str, List[str], int, float]) -> float:
-        """Unified resolution parsing function."""
-        if isinstance(resolution_value, (int, float)):
-            return float(resolution_value)
-        if isinstance(resolution_value, list):
-            resolution_value = resolution_value[0] if resolution_value else "30"
-        
-        if isinstance(resolution_value, str):
-            resolution_str = str(resolution_value).lower().replace('m', '').strip()
+    
+    def _parse_enhanced_accuracy(self, accuracy_value):
+        """Enhanced accuracy parsing to support both traditional and new structured formats."""
+        # Handle new structured accuracy format
+        if isinstance(accuracy_value, dict):
+            # Check if it's the new structured format with status
+            if 'status' in accuracy_value:
+                # Handle "not_available" status
+                if accuracy_value.get('status') == 'not_available':
+                    return 0.0
+                # Handle other statuses with overall value
+                return self._parse_enhanced_accuracy(accuracy_value.get('overall', 0))
             
-            # Handle ranges like "20-30"
-            if '-' in resolution_str:
-                parts = resolution_str.split('-')
-                try:
-                    return float(parts[0])  # Use better (smaller) resolution
-                except (ValueError, TypeError):
-                    return 30.0
+            # Handle new accuracy object format
+            if 'overall' in accuracy_value:
+                return self._parse_enhanced_accuracy(accuracy_value.get('overall', 0))
             
-            # Handle single values
-            try:
-                return float(resolution_str)
-            except (ValueError, TypeError):
-                return 30.0
-        
-        return 30.0
-    def parse_accuracy(self, accuracy_value: Union[str, int, float]) -> float:
-        """Unified accuracy parsing function."""
-        if isinstance(accuracy_value, (int, float)):
-            return float(accuracy_value)
-            
-        if not accuracy_value or accuracy_value in ['Not informed', 'Incomplete', 'N/A']:
+            # Fallback for unknown dict format
             return 0.0
         
+        # Handle traditional formats using existing parse_accuracy function
+        return self.parse_accuracy(accuracy_value)
+
+    def parse_accuracy(self, accuracy_value: Union[str, int, float, dict]) -> float:
+        """Parse accuracy value from various formats into a float percentage."""
+        if isinstance(accuracy_value, dict):
+            # Check if it's the new structured format
+            if 'status' in accuracy_value:
+                # Handle "not_available" status
+                if accuracy_value.get('status') == 'not_available':
+                    return 0.0
+                # Handle other statuses with overall value
+                return self.parse_accuracy(accuracy_value.get('overall', 0))
+            # Handle new accuracy object format
+            if 'overall' in accuracy_value:
+                return self.parse_accuracy(accuracy_value.get('overall', 0))
+            # Fallback for unknown dict format
+            return 0.0
+
+        # Handle traditional formats
+        if isinstance(accuracy_value, (int, float)):
+            return float(accuracy_value)
+
+        if not accuracy_value or accuracy_value in ['Not informed', 'Incomplete', 'N/A', 'Not available']:
+            return 0.0
+
         try:
             accuracy_str = re.sub(r'[^\d.]', '', str(accuracy_value))
             return float(accuracy_str) if accuracy_str else 0.0
         except (ValueError, TypeError):
             return 0.0
+
+    def _parse_enhanced_resolution(self, resolution_value):
+        """Enhanced resolution parsing to support both traditional and new structured formats."""
+        # Handle new structured resolution format (array of objects)
+        if isinstance(resolution_value, list):
+            # Find current resolution or use the first one
+            for res_obj in resolution_value:
+                if isinstance(res_obj, dict):
+                    if res_obj.get('current', False):
+                        return self._parse_enhanced_resolution(res_obj.get('resolution', 30))
+
+            # If no current resolution, use the first one
+            if resolution_value and isinstance(resolution_value[0], dict):
+                return self._parse_enhanced_resolution(resolution_value[0].get('resolution', 30))
+
+            # Fallback for mixed array formats
+            for res in resolution_value:
+                if isinstance(res, (int, float)):
+                    return float(res)
+
+            return 30.0
+
+        # Handle traditional formats using existing parse_resolution function
+        return self.parse_resolution(resolution_value)
+
+    def _parse_enhanced_reference_system(self, reference_system_value):
+        """Enhanced reference system parsing to support both traditional and new structured formats."""
+        # Handle new structured reference system format (array of objects)
+        if isinstance(reference_system_value, list):
+            # Extract EPSG codes and create a readable string
+            epsg_codes = []
+            for ref_obj in reference_system_value:
+                if isinstance(ref_obj, dict):
+                    epsg_code = ref_obj.get('epsg_code', '')
+                    hemisphere = ref_obj.get('hemisphere', '')
+                    if epsg_code:
+                        if hemisphere:
+                            epsg_codes.append(f"{epsg_code} ({hemisphere})")
+                        else:
+                            epsg_codes.append(epsg_code)
+
+            if epsg_codes:
+                return ', '.join(epsg_codes)
+            else:
+                return 'EPSG:4326'
+
+        # Handle traditional string format
+        if isinstance(reference_system_value, str):
+            return reference_system_value
+
+        return 'EPSG:4326'
+
+    def parse_resolution(self, resolution_value: Union[str, int, float, list]) -> float:
+        """Enhanced resolution parsing function to handle new structured formats."""
+        # Handle new structured resolution format (array of objects)
+        if isinstance(resolution_value, list):
+            # Find current resolution or use the first one
+            for res_obj in resolution_value:
+                if isinstance(res_obj, dict):
+                    if res_obj.get('current', False):
+                        return self.parse_resolution(res_obj.get('resolution', 30))
+            
+            # If no current resolution, use the first one
+            if resolution_value and isinstance(resolution_value[0], dict):
+                return self.parse_resolution(resolution_value[0].get('resolution', 30))
+            
+            # Fallback for mixed array formats
+            for res in resolution_value:
+                if isinstance(res, (int, float)):
+                    return float(res)
+            
+            return 30.0
+        
+        # Handle traditional formats
+        if isinstance(resolution_value, (int, float)):
+            return float(resolution_value)
+        
+        if not resolution_value:
+            return 30.0
+        
+        try:
+            resolution_str = re.sub(r'[^\d.]', '', str(resolution_value))
+            return float(resolution_str) if resolution_str else 30.0
+        except (ValueError, TypeError):
+            return 30.0
+    
+    def parse_reference_system(self, reference_system_value: Union[str, list]) -> str:
+        """Enhanced reference system parsing function to handle new structured formats."""
+        # Handle new structured reference system format (array of objects)
+        if isinstance(reference_system_value, list):
+            # Extract EPSG codes and create a readable string
+            epsg_codes = []
+            for ref_obj in reference_system_value:
+                if isinstance(ref_obj, dict):
+                    epsg_code = ref_obj.get('epsg_code', '')
+                    hemisphere = ref_obj.get('hemisphere', '')
+                    if epsg_code:
+                        if hemisphere:
+                            epsg_codes.append(f"{epsg_code} ({hemisphere})")
+                        else:
+                            epsg_codes.append(epsg_code)
+            
+            if epsg_codes:
+                return ', '.join(epsg_codes)
+            else:
+                return 'EPSG:4326'
+        
+        # Handle traditional string format
+        if isinstance(reference_system_value, str):
+            return reference_system_value
+        
+        return 'EPSG:4326'
+    
+    def get_accuracy_details(self, accuracy_value: Union[str, int, float, dict]) -> Dict[str, Any]:
+        """Extract detailed accuracy information from structured format."""
+        details = {
+            'overall': 0.0,
+            'has_multiple': False,
+            'by_collection': [],
+            'by_class': [],
+            'by_product': [],
+            'status': 'available'
+        }
+        
+        if isinstance(accuracy_value, dict):
+            if 'status' in accuracy_value:
+                details['status'] = accuracy_value.get('status', 'available')
+                details['overall'] = self.parse_accuracy(accuracy_value.get('overall', 0))
+            elif 'overall' in accuracy_value:
+                details['overall'] = self.parse_accuracy(accuracy_value.get('overall', 0))
+                details['has_multiple'] = True
+                
+                # Extract different types of detailed accuracy
+                if 'by_collection' in accuracy_value:
+                    details['by_collection'] = accuracy_value['by_collection']
+                if 'by_class' in accuracy_value:
+                    details['by_class'] = accuracy_value['by_class']
+                if 'by_product' in accuracy_value:
+                    details['by_product'] = accuracy_value['by_product']
+        else:
+            details['overall'] = self.parse_accuracy(accuracy_value)
+        
+        return details
     
     def parse_temporal_data(self, temporal_interval: Union[List[int], str, None]) -> Dict[str, Any]:
         """Unified temporal data parsing function."""
@@ -220,6 +374,36 @@ class UnifiedDataProcessor:
         else:
             return 'Combined'
     
+    def standardize_methodology(self, classification_method: str) -> str:
+        """Standardize methodology into broader categories for better chart visualization."""
+        if not classification_method:
+            return 'Unknown'
+            
+        method = classification_method.lower()
+        
+        # Deep Learning and Neural Networks
+        if any(word in method for word in ['deep learning', 'neural network', 'u-net', 'cnn', 'convolutional']):
+            return 'Deep Learning'
+        
+        # Machine Learning (traditional)
+        elif any(word in method for word in ['random forest', 'gradient boost', 'decision tree', 'machine learning', 'catboost']):
+            return 'Machine Learning'
+        
+        # Visual Interpretation with other methods = Hybrid
+        elif 'visual interpretation' in method:
+            if any(word in method for word in ['machine learning', 'spectral', 'classification', 'random forest', 'deep learning', 'bhattacharya']):
+                return 'Hybrid'
+            else:
+                return 'Visual Interpretation'
+        
+        # Combined methods
+        elif 'combined' in method or ',' in method:
+            return 'Hybrid'
+            
+        # Default fallback
+        else:
+            return 'Machine Learning'
+    
     def categorize_coverage(self, coverage: str) -> str:
         """Unified coverage categorization function."""
         return self.coverage_mapping.get(coverage, 'Regional')
@@ -283,18 +467,30 @@ class UnifiedDataProcessor:
                 initiative_data.get('available_years', [])
             )
             temporal_info = self.parse_temporal_data(temporal_years)
-            
-            # Handle multiple class versions - now using English field names
+              # Handle multiple class versions - now using English field names
             classes_main = initiative_data.get('number_of_classes', 1)
+            
+            # Handle ESRI-style detailed_products structure
+            if 'detailed_products' in initiative_data and classes_main == 1:
+                detailed_products = initiative_data['detailed_products']
+                if isinstance(detailed_products, list) and len(detailed_products) > 0:
+                    # Use the maximum number of classes from detailed products
+                    max_classes = max(
+                        product.get('number_of_classes', 1) 
+                        for product in detailed_products 
+                        if isinstance(product, dict)
+                    )
+                    classes_main = max_classes
+            
             final_classes = classes_main
             
             # Parse core metrics - now using English field names
-            resolution = self.parse_resolution(initiative_data.get('spatial_resolution', 30))
-            accuracy = self.parse_accuracy(initiative_data.get('overall_accuracy', 0))
-              # Create standardized row with English columns
+            resolution = self.parse_resolution(initiative_data.get('spatial_resolution', 30))            # Enhanced accuracy parsing - support both old and new formats
+            accuracy_raw = initiative_data.get('overall_accuracy', initiative_data.get('accuracy', 0))
+            accuracy = self._parse_enhanced_accuracy(accuracy_raw)# Create standardized row with English columns
             row = {
                 'Name': initiative_name,
-                'Acronym': self.name_to_acronym.get(initiative_name, initiative_name[:8]),
+                'Acronym': initiative_data.get('acronym', self.name_to_acronym.get(initiative_name, initiative_name[:8])),
                 'Type': self.categorize_coverage(initiative_data.get('coverage', 'Regional')),
                 'Scope': initiative_data.get('coverage', 'Regional'),
                 'Provider': initiative_data.get('provider', ''),
@@ -304,9 +500,9 @@ class UnifiedDataProcessor:
                 'Resolution Category': self.categorize_resolution(resolution),
                 'Reference System': initiative_data.get('reference_system', ''),
                 'Accuracy (%)': accuracy,
-                'Accuracy Category': self.categorize_accuracy(accuracy),
-                'Classes': int(final_classes) if isinstance(final_classes, (int, float)) else 1,
-                'Methodology': initiative_data.get('methodology', ''),
+                'Accuracy Category': self.categorize_accuracy(accuracy),                'Classes': int(final_classes) if isinstance(final_classes, (int, float)) else 1,
+                'Algorithm': initiative_data.get('methodology', ''),  # Detailed technical description
+                'Methodology': self.standardize_methodology(initiative_data.get('classification_method', '')),  # Standardized category
                 'Classification Method': initiative_data.get('classification_method', ''),
                 'Method Category': self.categorize_methodology(initiative_data.get('classification_method', '')),
                 'Temporal Frequency': initiative_data.get('temporal_frequency', ''),
@@ -336,12 +532,12 @@ class UnifiedDataProcessor:
         enhanced_metadata = {}
         for initiative_name, initiative_data in metadata.items():
             enhanced_data = initiative_data.copy()
-              # Add unified temporal data
+            # Add unified temporal data
             temporal_years = self.temporal_data.get(initiative_name, initiative_data.get('available_years', []))
             temporal_info = self.parse_temporal_data(temporal_years)
             
             enhanced_data.update({
-                'acronym': self.name_to_acronym.get(initiative_name, initiative_name[:8]),
+                'acronym': initiative_data.get('acronym', self.name_to_acronym.get(initiative_name, initiative_name[:8])),
                 'available_years': temporal_info['available_years'],
                 'start_year': temporal_info['start_year'],
                 'end_year': temporal_info['end_year'],

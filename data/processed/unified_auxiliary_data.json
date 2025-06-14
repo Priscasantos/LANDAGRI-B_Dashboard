@@ -1,176 +1,176 @@
 {
   "comparison_matrix": [
     {
-      "Acronym": "Copernic",
+      "Acronym": "CGLS",
       "Name": "Copernicus Global Land Cover Service (CGLS) Dynamic Land Cover",
       "Accuracy (%)": 80.3,
       "Resolution (m)": 100.0,
-      "Classes": 10,
+      "Classes": 1,
       "Accuracy (%)_normalized": 0.8210633946830266,
       "Resolution (m)_normalized": 0.0,
-      "Classes_normalized": 0.32142857142857145,
-      "Overall_Score": 0.3808306553705327
+      "Classes_normalized": NaN,
+      "Overall_Score": 0.4105316973415133
     },
     {
-      "Acronym": "Dynamic ",
+      "Acronym": "GDW",
       "Name": "Dynamic World V1",
       "Accuracy (%)": 73.8,
       "Resolution (m)": 10.0,
-      "Classes": 9,
+      "Classes": 1,
       "Accuracy (%)_normalized": 0.754601226993865,
       "Resolution (m)_normalized": 1.0,
-      "Classes_normalized": 0.2857142857142857,
-      "Overall_Score": 0.6801051709027169
+      "Classes_normalized": NaN,
+      "Overall_Score": 0.8773006134969326
     },
     {
-      "Acronym": "ESRI",
+      "Acronym": "ESRI-10 m LULC",
       "Name": "ESRI-10m Annual LULC",
       "Accuracy (%)": 85.0,
       "Resolution (m)": 10.0,
       "Classes": 1,
       "Accuracy (%)_normalized": 0.869120654396728,
       "Resolution (m)_normalized": 1.0,
-      "Classes_normalized": 0.0,
-      "Overall_Score": 0.6230402181322426
+      "Classes_normalized": NaN,
+      "Overall_Score": 0.934560327198364
     },
     {
-      "Acronym": "GLULC",
+      "Acronym": "UMD-GLC",
       "Name": "Global LULC change 2000 and 2020",
       "Accuracy (%)": 85.0,
       "Resolution (m)": 30.0,
-      "Classes": 7,
+      "Classes": 1,
       "Accuracy (%)_normalized": 0.869120654396728,
       "Resolution (m)_normalized": 0.7777777777777778,
-      "Classes_normalized": 0.21428571428571427,
-      "Overall_Score": 0.62039471548674
+      "Classes_normalized": NaN,
+      "Overall_Score": 0.8234492160872529
     },
     {
       "Acronym": "GPW",
       "Name": "Global Pasture Watch (GPW)",
       "Accuracy (%)": 91.0,
       "Resolution (m)": 30.0,
-      "Classes": 3,
+      "Classes": 1,
       "Accuracy (%)_normalized": 0.9304703476482618,
       "Resolution (m)_normalized": 0.7777777777777778,
-      "Classes_normalized": 0.07142857142857142,
-      "Overall_Score": 0.5932255656182036
+      "Classes_normalized": NaN,
+      "Overall_Score": 0.8541240627130198
     },
     {
-      "Acronym": "SASM",
+      "Acronym": "UMD-SASM",
       "Name": "South America Soybean Maps",
       "Accuracy (%)": 94.0,
       "Resolution (m)": 30.0,
-      "Classes": 2,
+      "Classes": 1,
       "Accuracy (%)_normalized": 0.9611451942740287,
       "Resolution (m)_normalized": 0.7777777777777778,
-      "Classes_normalized": 0.03571428571428571,
-      "Overall_Score": 0.5915457525886975
+      "Classes_normalized": NaN,
+      "Overall_Score": 0.8694614860259032
     },
     {
-      "Acronym": "WorldCover",
+      "Acronym": "ESA-WC",
       "Name": "WorldCover 10m 2021",
       "Accuracy (%)": 76.7,
       "Resolution (m)": 10.0,
-      "Classes": 11,
+      "Classes": 1,
       "Accuracy (%)_normalized": 0.7842535787321064,
       "Resolution (m)_normalized": 1.0,
-      "Classes_normalized": 0.35714285714285715,
-      "Overall_Score": 0.7137988119583212
+      "Classes_normalized": NaN,
+      "Overall_Score": 0.8921267893660532
     },
     {
-      "Acronym": "WorldCereal",
+      "Acronym": "ESA-WorldCereal",
       "Name": "WorldCereal",
       "Accuracy (%)": 97.8,
       "Resolution (m)": 10.0,
-      "Classes": 5,
+      "Classes": 1,
       "Accuracy (%)_normalized": 1.0,
       "Resolution (m)_normalized": 1.0,
-      "Classes_normalized": 0.14285714285714285,
-      "Overall_Score": 0.7142857142857143
+      "Classes_normalized": NaN,
+      "Overall_Score": 1.0
     },
     {
-      "Acronym": "PRODES D",
+      "Acronym": "PRODES",
       "Name": "PRODES Deforestation, Warnings and Vegetation for Brazilian Biomes",
       "Accuracy (%)": 93.0,
       "Resolution (m)": 30.0,
-      "Classes": 5,
+      "Classes": 1,
       "Accuracy (%)_normalized": 0.9509202453987731,
       "Resolution (m)_normalized": 0.7777777777777778,
-      "Classes_normalized": 0.14285714285714285,
-      "Overall_Score": 0.6238517220112313
+      "Classes_normalized": NaN,
+      "Overall_Score": 0.8643490115882755
     },
     {
-      "Acronym": "DETER De",
+      "Acronym": "DETER",
       "Name": "DETER Deforestation, Warnings and Vegetation for Brazilian Biomes",
       "Accuracy (%)": 93.0,
-      "Resolution (m)": 64.0,
-      "Classes": 3,
+      "Resolution (m)": 30.0,
+      "Classes": 1,
       "Accuracy (%)_normalized": 0.9509202453987731,
-      "Resolution (m)_normalized": 0.4,
-      "Classes_normalized": 0.07142857142857142,
-      "Overall_Score": 0.4741162722757815
+      "Resolution (m)_normalized": 0.7777777777777778,
+      "Classes_normalized": NaN,
+      "Overall_Score": 0.8643490115882755
     },
     {
-      "Acronym": "TerraCla",
+      "Acronym": "TerraClass Amazonia",
       "Name": "TerraClass Amazonia",
       "Accuracy (%)": 93.9,
       "Resolution (m)": 10.0,
-      "Classes": 18,
+      "Classes": 1,
       "Accuracy (%)_normalized": 0.9601226993865032,
       "Resolution (m)_normalized": 1.0,
-      "Classes_normalized": 0.6071428571428571,
-      "Overall_Score": 0.8557551855097868
+      "Classes_normalized": NaN,
+      "Overall_Score": 0.9800613496932515
     },
     {
-      "Acronym": "TerraCla",
+      "Acronym": "TerraClass Cerrado",
       "Name": "TerraClass Cerrado",
       "Accuracy (%)": 90.9,
       "Resolution (m)": 10.0,
-      "Classes": 15,
+      "Classes": 1,
       "Accuracy (%)_normalized": 0.9294478527607363,
       "Resolution (m)_normalized": 1.0,
-      "Classes_normalized": 0.5,
-      "Overall_Score": 0.8098159509202455
+      "Classes_normalized": NaN,
+      "Overall_Score": 0.9647239263803682
     },
     {
       "Acronym": "MapBiomas",
       "Name": "MapBiomas Brasil",
       "Accuracy (%)": 90.0,
       "Resolution (m)": 30.0,
-      "Classes": 29,
+      "Classes": 1,
       "Accuracy (%)_normalized": 0.9202453987730062,
       "Resolution (m)_normalized": 0.7777777777777778,
-      "Classes_normalized": 1.0,
-      "Overall_Score": 0.8993410588502613
+      "Classes_normalized": NaN,
+      "Overall_Score": 0.8490115882753919
     },
     {
-      "Acronym": "IBGE",
+      "Acronym": "IBGE-MLCU",
       "Name": "IBGE Monitoramento",
       "Accuracy (%)": 0.0,
       "Resolution (m)": 30.0,
-      "Classes": 12,
+      "Classes": 1,
       "Accuracy (%)_normalized": 0.0,
       "Resolution (m)_normalized": 0.7777777777777778,
-      "Classes_normalized": 0.39285714285714285,
-      "Overall_Score": 0.39021164021164023
+      "Classes_normalized": NaN,
+      "Overall_Score": 0.3888888888888889
     },
     {
-      "Acronym": "AgriMap",
+      "Acronym": "CONAB-AM",
       "Name": "Agricultural Mapping",
       "Accuracy (%)": 0.0,
-      "Resolution (m)": 25.0,
-      "Classes": 8,
+      "Resolution (m)": 30.0,
+      "Classes": 1,
       "Accuracy (%)_normalized": 0.0,
-      "Resolution (m)_normalized": 0.8333333333333334,
-      "Classes_normalized": 0.25,
-      "Overall_Score": 0.36111111111111116
+      "Resolution (m)_normalized": 0.7777777777777778,
+      "Classes_normalized": NaN,
+      "Overall_Score": 0.3888888888888889
     }
   ],
   "temporal_analysis": {
     "initiatives": [
       {
         "name": "Copernicus Global Land Cover Service (CGLS) Dynamic Land Cover",
-        "acronym": "Copernic",
+        "acronym": "CGLS",
         "years": [
           2015,
           2016,
@@ -186,7 +186,7 @@
       },
       {
         "name": "Dynamic World V1",
-        "acronym": "Dynamic ",
+        "acronym": "GDW",
         "years": [
           2017,
           2018,
@@ -205,7 +205,7 @@
       },
       {
         "name": "ESRI-10m Annual LULC",
-        "acronym": "ESRI",
+        "acronym": "ESRI-10 m LULC",
         "years": [
           2017,
           2018,
@@ -224,16 +224,17 @@
       },
       {
         "name": "Global LULC change 2000 and 2020",
-        "acronym": "GLULC",
+        "acronym": "UMD-GLC",
         "years": [
           2000,
           2005,
+          2010,
           2015,
           2020
         ],
         "start_year": 2000,
         "end_year": 2020,
-        "total_years": 4,
+        "total_years": 5,
         "coverage_span": 21,
         "gaps": [
           {
@@ -266,10 +267,6 @@
           },
           {
             "year": 2009,
-            "duration": 1
-          },
-          {
-            "year": 2010,
             "duration": 1
           },
           {
@@ -376,7 +373,7 @@
       },
       {
         "name": "South America Soybean Maps",
-        "acronym": "SASM",
+        "acronym": "UMD-SASM",
         "years": [
           2001,
           2002,
@@ -410,7 +407,7 @@
       },
       {
         "name": "WorldCover 10m 2021",
-        "acronym": "WorldCover",
+        "acronym": "ESA-WC",
         "years": [
           2020,
           2021
@@ -423,7 +420,7 @@
       },
       {
         "name": "WorldCereal",
-        "acronym": "WorldCereal",
+        "acronym": "ESA-WorldCereal",
         "years": [
           2021
         ],
@@ -435,7 +432,7 @@
       },
       {
         "name": "PRODES Deforestation, Warnings and Vegetation for Brazilian Biomes",
-        "acronym": "PRODES D",
+        "acronym": "PRODES",
         "years": [
           2001,
           2002,
@@ -469,7 +466,7 @@
       },
       {
         "name": "DETER Deforestation, Warnings and Vegetation for Brazilian Biomes",
-        "acronym": "DETER De",
+        "acronym": "DETER",
         "years": [
           2001,
           2002,
@@ -503,7 +500,7 @@
       },
       {
         "name": "TerraClass Amazonia",
-        "acronym": "TerraCla",
+        "acronym": "TerraClass Amazonia",
         "years": [
           2008,
           2010,
@@ -551,7 +548,7 @@
       },
       {
         "name": "TerraClass Cerrado",
-        "acronym": "TerraCla",
+        "acronym": "TerraClass Cerrado",
         "years": [
           2018,
           2020,
@@ -624,7 +621,7 @@
       },
       {
         "name": "IBGE Monitoramento",
-        "acronym": "IBGE",
+        "acronym": "IBGE-MLCU",
         "years": [
           2000,
           2002,
@@ -687,7 +684,7 @@
       },
       {
         "name": "Agricultural Mapping",
-        "acronym": "AgriMap",
+        "acronym": "CONAB-AM",
         "years": [
           2018,
           2019,
@@ -747,7 +744,7 @@
         2024
       ],
       "initiatives": {
-        "Copernic": {
+        "CGLS": {
           "availability": [
             0,
             0,
@@ -792,7 +789,7 @@
           ],
           "name": "Copernicus Global Land Cover Service (CGLS) Dynamic Land Cover"
         },
-        "Dynamic ": {
+        "GDW": {
           "availability": [
             0,
             0,
@@ -837,7 +834,7 @@
           ],
           "name": "Dynamic World V1"
         },
-        "ESRI": {
+        "ESRI-10 m LULC": {
           "availability": [
             0,
             0,
@@ -882,7 +879,7 @@
           ],
           "name": "ESRI-10m Annual LULC"
         },
-        "GLULC": {
+        "UMD-GLC": {
           "availability": [
             0,
             0,
@@ -909,7 +906,7 @@
             0,
             0,
             0,
-            0,
+            1,
             0,
             0,
             0,
@@ -972,7 +969,7 @@
           ],
           "name": "Global Pasture Watch (GPW)"
         },
-        "SASM": {
+        "UMD-SASM": {
           "availability": [
             0,
             0,
@@ -1017,7 +1014,7 @@
           ],
           "name": "South America Soybean Maps"
         },
-        "WorldCover": {
+        "ESA-WC": {
           "availability": [
             0,
             0,
@@ -1062,7 +1059,7 @@
           ],
           "name": "WorldCover 10m 2021"
         },
-        "WorldCereal": {
+        "ESA-WorldCereal": {
           "availability": [
             0,
             0,
@@ -1107,7 +1104,7 @@
           ],
           "name": "WorldCereal"
         },
-        "PRODES D": {
+        "PRODES": {
           "availability": [
             0,
             0,
@@ -1152,7 +1149,7 @@
           ],
           "name": "PRODES Deforestation, Warnings and Vegetation for Brazilian Biomes"
         },
-        "DETER De": {
+        "DETER": {
           "availability": [
             0,
             0,
@@ -1197,7 +1194,52 @@
           ],
           "name": "DETER Deforestation, Warnings and Vegetation for Brazilian Biomes"
         },
-        "TerraCla": {
+        "TerraClass Amazonia": {
+          "availability": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0
+          ],
+          "name": "TerraClass Amazonia"
+        },
+        "TerraClass Cerrado": {
           "availability": [
             0,
             0,
@@ -1287,7 +1329,7 @@
           ],
           "name": "MapBiomas Brasil"
         },
-        "IBGE": {
+        "IBGE-MLCU": {
           "availability": [
             0,
             0,
@@ -1332,7 +1374,7 @@
           ],
           "name": "IBGE Monitoramento"
         },
-        "AgriMap": {
+        "CONAB-AM": {
           "availability": [
             0,
             0,
@@ -1386,29 +1428,29 @@
         "span": 40
       },
       "by_initiative": {
-        "Copernic": {
+        "CGLS": {
           "coverage_percentage": 12.5,
           "total_years": 5,
           "span_years": 5,
           "efficiency": 100.0
         },
-        "Dynamic ": {
+        "GDW": {
           "coverage_percentage": 20.0,
           "total_years": 8,
           "span_years": 8,
           "efficiency": 100.0
         },
-        "ESRI": {
+        "ESRI-10 m LULC": {
           "coverage_percentage": 20.0,
           "total_years": 8,
           "span_years": 8,
           "efficiency": 100.0
         },
-        "GLULC": {
-          "coverage_percentage": 10.0,
-          "total_years": 4,
+        "UMD-GLC": {
+          "coverage_percentage": 12.5,
+          "total_years": 5,
           "span_years": 21,
-          "efficiency": 19.047619047619047
+          "efficiency": 23.809523809523807
         },
         "GPW": {
           "coverage_percentage": 30.0,
@@ -1416,37 +1458,43 @@
           "span_years": 23,
           "efficiency": 52.17391304347826
         },
-        "SASM": {
+        "UMD-SASM": {
           "coverage_percentage": 57.49999999999999,
           "total_years": 23,
           "span_years": 23,
           "efficiency": 100.0
         },
-        "WorldCover": {
+        "ESA-WC": {
           "coverage_percentage": 5.0,
           "total_years": 2,
           "span_years": 2,
           "efficiency": 100.0
         },
-        "WorldCereal": {
+        "ESA-WorldCereal": {
           "coverage_percentage": 2.5,
           "total_years": 1,
           "span_years": 1,
           "efficiency": 100.0
         },
-        "PRODES D": {
+        "PRODES": {
           "coverage_percentage": 57.49999999999999,
           "total_years": 23,
           "span_years": 23,
           "efficiency": 100.0
         },
-        "DETER De": {
+        "DETER": {
           "coverage_percentage": 57.49999999999999,
           "total_years": 23,
           "span_years": 23,
           "efficiency": 100.0
         },
-        "TerraCla": {
+        "TerraClass Amazonia": {
+          "coverage_percentage": 20.0,
+          "total_years": 8,
+          "span_years": 15,
+          "efficiency": 53.333333333333336
+        },
+        "TerraClass Cerrado": {
           "coverage_percentage": 7.5,
           "total_years": 3,
           "span_years": 5,
@@ -1458,13 +1506,13 @@
           "span_years": 39,
           "efficiency": 100.0
         },
-        "IBGE": {
+        "IBGE-MLCU": {
           "coverage_percentage": 27.500000000000004,
           "total_years": 11,
           "span_years": 21,
           "efficiency": 52.38095238095239
         },
-        "AgriMap": {
+        "CONAB-AM": {
           "coverage_percentage": 15.0,
           "total_years": 6,
           "span_years": 6,
@@ -1475,7 +1523,7 @@
     "gaps_analysis": {},
     "temporal_overlap": {}
   },
-  "generation_timestamp": "2025-06-13T20:25:37.351514",
+  "generation_timestamp": "2025-06-14T17:30:08.875198",
   "data_summary": {
     "total_initiatives": 15,
     "initiatives_with_temporal_data": 20,
@@ -1493,6 +1541,7 @@
       "Accuracy (%)",
       "Accuracy Category",
       "Classes",
+      "Algorithm",
       "Methodology",
       "Classification Method",
       "Method Category",

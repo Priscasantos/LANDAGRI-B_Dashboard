@@ -5,6 +5,7 @@ import plotly.express as px
 import numpy as np
 import sys
 from pathlib import Path
+from typing import Type, Union
 
 # Adicionar scripts ao path
 current_dir = Path(__file__).parent.parent.parent
@@ -16,18 +17,19 @@ if scripts_path not in sys.path:
 # Import graphics functions
 try:
     from scripts.plotting.generate_graphics import (
-        plot_timeline,
         plot_annual_coverage_multiselect,
         plot_classes_por_iniciativa,
         plot_distribuicao_classes,
         plot_distribuicao_metodologias,
         plot_acuracia_por_metodologia
     )
+    from scripts.plotting.charts.timeline_chart import timeline_with_controls
 except ImportError:
     # Placeholders otimizados
-    def plot_timeline(metadata, filtered_df):
-        """Placeholder para plot_timeline"""
-        return go.Figure().add_annotation(text="Função não disponível", xref="paper", yref="paper", x=0.5, y=0.5)
+    def timeline_with_controls(metadata, filtered_df):
+        """Placeholder para timeline_with_controls"""
+        fig = go.Figure().add_annotation(text="Função não disponível", xref="paper", yref="paper", x=0.5, y=0.5)
+        st.plotly_chart(fig, use_container_width=True)
     
     def plot_annual_coverage_multiselect(metadata, filtered_df, selected_initiatives):
         """Placeholder para plot_annual_coverage_multiselect"""
@@ -54,26 +56,7 @@ def plot_resolucao_acuracia(metadata, filtered_df):
     """Placeholder para plot_resolucao_acuracia"""
     return go.Figure().add_annotation(text="Função não disponível", xref="paper", yref="paper", x=0.5, y=0.5)
 
-# Import chart functions
-try:
-    from scripts.plotting.charts import (
-        create_comparison_matrix,
-        create_improved_bubble_chart,
-        create_ranking_chart
-    )
-except ImportError:
-    # Placeholders otimizados
-    def create_comparison_matrix(produtos):
-        """Placeholder para create_comparison_matrix"""
-        return go.Figure().add_annotation(text="Função não disponível", xref="paper", yref="paper", x=0.5, y=0.5)
-    
-    def create_improved_bubble_chart(produtos):
-        """Placeholder para create_improved_bubble_chart"""
-        return go.Figure().add_annotation(text="Função não disponível", xref="paper", yref="paper", x=0.5, y=0.5)
-    
-    def create_ranking_chart(produtos):
-        """Placeholder para create_ranking_chart"""
-        return go.Figure().add_annotation(text="Função não disponível", xref="paper", yref="paper", x=0.5, y=0.5)
+
 
 # Import table functions
 try:
@@ -83,76 +66,199 @@ except ImportError:
         """Placeholder para gap_analysis"""
         return pd.DataFrame()
 
+# Helper function to safely get min/max for sliders
+def get_slider_range(series_min: pd.Series, series_max: pd.Series, 
+                     default_min: Union[int, float], default_max: Union[int, float], 
+                     data_type: Union[Type[int], Type[float]] = int):
+    s_min = series_min.dropna()
+    s_max = series_max.dropna()
+    
+    if s_min.empty or s_max.empty:
+        return data_type(default_min), data_type(default_max), (data_type(default_min), data_type(default_max))
+    
+    try:
+        # Attempt to convert to float first for broader compatibility
+        overall_min_val = s_min.astype(float).min()
+        overall_max_val = s_max.astype(float).max()
+    except ValueError: # Fallback if astype(float) fails
+        return data_type(default_min), data_type(default_max), (data_type(default_min), data_type(default_max))
+
+    # Ensure values are not NaN before converting to the target data_type
+    if pd.isna(overall_min_val) or pd.isna(overall_max_val):
+        return data_type(default_min), data_type(default_max), (data_type(default_min), data_type(default_max))
+
+    overall_min = data_type(overall_min_val)
+    overall_max = data_type(overall_max_val)
+    
+    if overall_min > overall_max: # Fallback if data is inconsistent
+        overall_min, overall_max = data_type(default_min), data_type(default_max)
+
+    return overall_min, overall_max, (overall_min, overall_max)
+
 
 def run():
     # Load original data and prepare for filters
     if 'df_original' not in st.session_state or 'metadata' not in st.session_state:
         try:
-            # Import atualizado usando o wrapper
+            # Always use the wrapper for loading standardized data
             from scripts.data_generation.data_wrapper import load_data, prepare_plot_data
-            df_loaded, metadata_loaded = load_data()
-            
-            # Usar caminhos padrão se não conseguir carregar
-            if df_loaded.empty:
-                st.warning("⚠️ No data loaded from wrapper. Using fallback method.")
-                try:
-                    df_loaded = pd.read_csv("data/processed/initiatives_processed.csv")
-                    with open("data/processed/metadata_processed.json", 'r', encoding='utf-8') as f:
-                        import json
-                        metadata_loaded = json.load(f)
-                except Exception as e:
-                    st.error(f"❌ Error loading data: {e}")
-                    return
-                    
+            df_loaded, metadata_loaded, _ = load_data()
         except ImportError as e:
             st.error(f"❌ Error importing data modules: {e}")
             st.info("Please check if the data_wrapper module is available.")
             return
-        
         st.session_state.df_original = df_loaded
         st.session_state.metadata = metadata_loaded
-        st.session_state.df_prepared_initial = prepare_plot_data(df_loaded.copy())
+        # Ensure df_prepared_initial contains the necessary processed columns for filtering
+        st.session_state.df_prepared_initial = prepare_plot_data(df_loaded.copy())['data']
 
-    df = st.session_state.df_prepared_initial
-    meta_geral = st.session_state.metadata
-    df_geral_original = st.session_state.df_original    # Create nome to sigla mapping
+    # Initialize df and meta_geral safely
+    df = st.session_state.get('df_prepared_initial', pd.DataFrame())
+    meta_geral = st.session_state.get('metadata', {})
+    df_geral_original = st.session_state.get('df_original', pd.DataFrame())
+
+    if df.empty:
+        st.error("❌ Initial data is not loaded or is empty. Cannot proceed.")
+        return
+
     nome_to_sigla = {}
     if df_geral_original is not None and not df_geral_original.empty and 'Acronym' in df_geral_original.columns:
         for _, row in df_geral_original.iterrows():
             nome_to_sigla[row['Name']] = row['Acronym']
 
-    # Add Display_Name column for consistent sigla usage
-    if 'Display_Name' not in df.columns:
-        df['Display_Name'] = df['Name'].map(lambda x: nome_to_sigla.get(x, x[:10]))
+    if 'Display_Name' not in df.columns and 'Name' in df.columns:
+        df['Display_Name'] = df['Name'].map(lambda x: nome_to_sigla.get(x, str(x)[:10]))
 
-    # Modern filters at the top of the page (translated to English)
     st.markdown("### 🔎 Initiative Filters")
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        tipos = df["Type"].unique().tolist()
-        selected_types = st.multiselect("Type", options=tipos, default=tipos)
-    with col2:
-        min_res, max_res = int(df["Resolution (m)"].min()), int(df["Resolution (m)"].max())
-        selected_res = st.slider("Resolution (m)", min_value=min_res, max_value=max_res, value=(min_res, max_res))
-    with col3:
-        min_acc, max_acc = int(df["Accuracy (%)"].min()), int(df["Accuracy (%)"].max())
-        selected_acc = st.slider("Accuracy (%)", min_value=min_acc, max_value=max_acc, value=(min_acc, max_acc))
-    with col4:
-        metodologias = df["Methodology"].unique().tolist()
-        selected_methods = st.multiselect("Methodology", options=metodologias, default=metodologias)
+    
+    # Row 1 for filters
+    filter_col1, filter_col2 = st.columns(2)
+    with filter_col1:
+        tipos = sorted(df["Type"].dropna().unique().tolist()) if "Type" in df.columns else []
+        selected_types = st.multiselect("Type", options=tipos, default=tipos, key="type_filter")
+    
+    with filter_col2:
+        metodologias = sorted(df["Methodology"].dropna().unique().tolist()) if "Methodology" in df.columns else []
+        selected_methods = st.multiselect("Methodology", options=metodologias, default=metodologias, key="methodology_filter")
+
+    # Row 2 for filters - Resolution and Accuracy
+    filter_col3, filter_col4 = st.columns(2)
+    with filter_col3:
+        # Assumed processed columns: 'Resolution_min_val', 'Resolution_max_val'
+        res_min_series = df.get('Resolution_min_val', pd.Series(dtype=float))
+        res_max_series = df.get('Resolution_max_val', pd.Series(dtype=float))
+        min_r, max_r, default_r_val = get_slider_range(res_min_series, res_max_series, 0, 1000, data_type=int)
+        selected_res_range = st.slider("Resolution (m)", 
+                                       min_value=min_r, 
+                                       max_value=max_r, 
+                                       value=default_r_val,
+                                       # step=1, # Optional for integer steps
+                                       help="Filters initiatives whose resolution range overlaps with the selected range.",
+                                       key="resolution_filter")
+    
+    with filter_col4:
+        # Assumed processed columns: 'Accuracy_min_val', 'Accuracy_max_val'
+        acc_min_series = df.get('Accuracy_min_val', pd.Series(dtype=float))
+        acc_max_series = df.get('Accuracy_max_val', pd.Series(dtype=float))
+        min_a, max_a, default_a_val = get_slider_range(acc_min_series, acc_max_series, 0.0, 100.0, data_type=float)
+        selected_acc_range = st.slider("Accuracy (%)", 
+                                       min_value=min_a, 
+                                       max_value=max_a, 
+                                       value=default_a_val,
+                                       # step=0.1, # Optional for float steps
+                                       format="%.1f", # Display one decimal place
+                                       help="Filters initiatives whose accuracy range overlaps with the selected range.",
+                                       key="accuracy_filter")
+
+    # Row 3 for new filters - Reference System and Detailed Products
+    filter_col5, filter_col6 = st.columns(2)
+    with filter_col5:
+        # Assumed processed column: 'Reference_Systems' (list of strings or NaN)
+        all_ref_systems = set()
+        if 'Reference_Systems' in df.columns:
+            for item_list in df['Reference_Systems'].dropna():
+                if isinstance(item_list, list):
+                    all_ref_systems.update(item_list)
+                elif isinstance(item_list, str): 
+                    all_ref_systems.add(item_list)
+        unique_ref_systems = sorted(list(all_ref_systems))
+        selected_ref_systems = st.multiselect("Reference System", 
+                                              options=unique_ref_systems, 
+                                              default=unique_ref_systems,
+                                              help="Select one or more reference systems.",
+                                              key="ref_system_filter")
+    
+    with filter_col6:
+        # Assumed processed column: 'Has_Detailed_Products' (boolean)
+        has_detailed_options = ["Yes", "No"] 
+        selected_has_detailed_user = st.multiselect("Has Detailed Products?", 
+                                                options=has_detailed_options, 
+                                                default=has_detailed_options,
+                                                help="Filter by presence of detailed products.",
+                                                key="detailed_prod_filter")
     
     # Apply filters
-    filtered_df = df[
-        (df["Type"].isin(selected_types)) &
-        (df["Resolution (m)"].between(selected_res[0], selected_res[1])) &
-        (df["Accuracy (%)"].between(selected_acc[0], selected_acc[1])) &
-        (df["Methodology"].isin(selected_methods))
-    ]
+    filtered_df = df.copy()
+
+    if selected_types and 'Type' in filtered_df.columns:
+        filtered_df = filtered_df[filtered_df["Type"].isin(selected_types)]
+    
+    if selected_methods and 'Methodology' in filtered_df.columns:
+        filtered_df = filtered_df[filtered_df["Methodology"].isin(selected_methods)]
+
+    # Resolution filter (overlap logic)
+    if 'Resolution_min_val' in filtered_df.columns and 'Resolution_max_val' in filtered_df.columns:
+        filter_min_res, filter_max_res = selected_res_range
+        filtered_df = filtered_df[
+            ~( (filtered_df['Resolution_max_val'] < filter_min_res) | \
+               (filtered_df['Resolution_min_val'] > filter_max_res) ) & \
+            filtered_df['Resolution_min_val'].notna() & \
+            filtered_df['Resolution_max_val'].notna()
+        ]
+    
+    # Accuracy filter (overlap logic)
+    if 'Accuracy_min_val' in filtered_df.columns and 'Accuracy_max_val' in filtered_df.columns:
+        filter_min_acc, filter_max_acc = selected_acc_range
+        filtered_df = filtered_df[
+            ~( (filtered_df['Accuracy_max_val'] < filter_min_acc) | \
+               (filtered_df['Accuracy_min_val'] > filter_max_acc) ) & \
+            filtered_df['Accuracy_min_val'].notna() & \
+            filtered_df['Accuracy_max_val'].notna()
+        ]
+
+    # Reference System filter
+    if 'Reference_Systems' in filtered_df.columns and unique_ref_systems: # Check if there are options to filter by
+        # Apply only if not all unique systems are selected (otherwise no filtering needed)
+        if set(selected_ref_systems) != set(unique_ref_systems):
+            def check_ref_system(val_list):
+                if pd.isna(val_list): 
+                    return False
+                if isinstance(val_list, list):
+                    return any(rs in selected_ref_systems for rs in val_list)
+                if isinstance(val_list, str):
+                     return val_list in selected_ref_systems
+                return False
+            filtered_df = filtered_df[filtered_df['Reference_Systems'].apply(check_ref_system)]
+
+    # Has Detailed Products filter
+    if 'Has_Detailed_Products' in filtered_df.columns:
+        allowed_detailed_bools = []
+        if "Yes" in selected_has_detailed_user: 
+            allowed_detailed_bools.append(True)
+        if "No" in selected_has_detailed_user: 
+            allowed_detailed_bools.append(False)
+        
+        if len(allowed_detailed_bools) == 1: # Only if one option is chosen (e.g. only "Yes" or only "No")
+            filtered_df = filtered_df[filtered_df['Has_Detailed_Products'].isin(allowed_detailed_bools)]
+        # If len is 0 (user deselects both) or 2 (user selects both, default), no filtering on this criterion.
+
     st.session_state.filtered_df = filtered_df
 
     if filtered_df.empty:
         st.warning("⚠️ No initiatives match the selected filters. Adjust filters to view data.")
-        st.stop()
+        # Do not stop if you want to allow users to adjust filters without a full stop.
+        # Consider if st.stop() is appropriate or if just showing the warning is enough.
+        # For now, let it proceed to show empty tabs if that's the desired behavior.
 
     df_filt = filtered_df
     # Apply basic filters
@@ -170,34 +276,84 @@ def run():
 
     with tab1:
         st.subheader("Dual Bars: Accuracy x Resolution")
-        df_filt_limited['resolucao_norm'] = (1 / df_filt_limited['Resolution (m)']) / (1 / df_filt_limited['Resolution (m)']).max()
-        fig = go.Figure()
-        fig.add_trace(go.Bar(
-            y=df_filt_limited['Display_Name'],  # Use siglas for y-axis
-            x=df_filt_limited['Accuracy (%)'],
-            name='Accuracy (%)',
-            orientation='h',
-            marker_color='royalblue'        ))
-        fig.add_trace(go.Bar(
-            y=df_filt_limited['Display_Name'],  # Use siglas for y-axis
-            x=df_filt_limited['resolucao_norm'] * 100,  # Convert to percentage
-            name='Resolution (normalized)',
-            orientation='h',
-            marker_color='orange'
-        ))
-        fig.update_layout(
-            barmode='group',
-            xaxis_title='Value (%)',
-            yaxis_title='Initiative',
-            title='Comparison: Accuracy vs Resolution',            height=max(400, len(df_filt_limited) * 25)
-        )
-        st.plotly_chart(fig, use_container_width=True, key="dual_bars_chart")
+        # Ensure necessary columns exist before plotting
+        if 'Resolution_min_val' in df_filt_limited.columns and \
+           'Resolution_max_val' in df_filt_limited.columns and \
+           'Accuracy_min_val' in df_filt_limited.columns and \
+           'Accuracy_max_val' in df_filt_limited.columns and \
+           'Display_Name' in df_filt_limited.columns:
 
+            plot_df_tab1 = df_filt_limited.copy()
+
+            # Consolidate Resolution for plotting
+            if 'Resolution (m)' in plot_df_tab1.columns:
+                plot_df_tab1['Plot_Resolution'] = pd.to_numeric(plot_df_tab1['Resolution (m)'], errors='coerce')
+            elif 'Resolution_min_val' in plot_df_tab1.columns: # Fallback to min value if single value not present
+                plot_df_tab1['Plot_Resolution'] = pd.to_numeric(plot_df_tab1['Resolution_min_val'], errors='coerce')
+            else:
+                plot_df_tab1['Plot_Resolution'] = np.nan
+
+            # Consolidate Accuracy for plotting
+            if 'Accuracy (%)' in plot_df_tab1.columns:
+                plot_df_tab1['Plot_Accuracy'] = pd.to_numeric(plot_df_tab1['Accuracy (%)'], errors='coerce')
+            elif 'Accuracy_max_val' in plot_df_tab1.columns: # Fallback to max value
+                plot_df_tab1['Plot_Accuracy'] = pd.to_numeric(plot_df_tab1['Accuracy_max_val'], errors='coerce')
+            else:
+                plot_df_tab1['Plot_Accuracy'] = np.nan
+
+            plot_df_tab1.dropna(subset=['Plot_Resolution', 'Plot_Accuracy', 'Display_Name'], inplace=True)
+
+
+            if not plot_df_tab1.empty:
+                plot_df_tab1['resolucao_norm_temp'] = plot_df_tab1['Plot_Resolution'].replace(0, np.nan)
+                plot_df_tab1['resolucao_norm'] = (1 / plot_df_tab1['resolucao_norm_temp'])
+                
+                if plot_df_tab1['resolucao_norm'].notna().any() and plot_df_tab1['resolucao_norm'].nunique() > 1:
+                    max_norm_res = plot_df_tab1['resolucao_norm'].dropna().max()
+                    if max_norm_res > 0:
+                        plot_df_tab1['resolucao_norm'] = (plot_df_tab1['resolucao_norm'] / max_norm_res) * 100
+                    else:
+                        plot_df_tab1['resolucao_norm'] = 0
+                elif plot_df_tab1['resolucao_norm'].notna().any():
+                    plot_df_tab1['resolucao_norm'] = 50
+                else:
+                    plot_df_tab1['resolucao_norm'] = 0
+
+                fig = go.Figure()
+                fig.add_trace(go.Bar(
+                    y=plot_df_tab1['Display_Name'],
+                    x=plot_df_tab1['Plot_Accuracy'],
+                    name='Accuracy (%)',
+                    orientation='h',
+                    marker_color='royalblue'
+                ))
+                fig.add_trace(go.Bar(
+                    y=plot_df_tab1['Display_Name'],
+                    x=plot_df_tab1['resolucao_norm'],
+                    name='Resolution (normalized)',
+                    orientation='h',
+                    marker_color='orange'
+                ))
+                fig.update_layout(
+                    barmode='group',
+                    xaxis_title='Value (% for Accuracy, Normalized Score for Resolution)',
+                    yaxis_title='Initiative',
+                    title='Comparison: Accuracy vs Resolution',
+                    height=max(400, len(plot_df_tab1) * 25)
+                )
+                st.plotly_chart(fig, use_container_width=True, key="dual_bars_chart")
+            else:
+                st.info("Not enough data to display the dual bars chart after filtering for valid Resolution and Accuracy.")
+        elif df_filt_limited.empty:
+            st.info("No data to display after applying filters.")
+        else:
+            st.info("Required data columns (Display_Name, Resolution, Accuracy) are missing or insufficient for the dual bars chart.")
         # Enhanced Analysis Features (translated to English)
         st.markdown("---")
         st.markdown("### 📊 Advanced Analysis")
         
-        # Methodology Comparative Analysis        st.markdown("#### 📈 Comparative Analysis by Methodology")
+        # Methodology Comparative Analysis
+        st.markdown("#### 📈 Comparative Analysis by Methodology")
         
         if meta_geral:
             # Create timeline data for methodology analysis
@@ -239,7 +395,7 @@ def run():
                     'produto': 'nunique',
                     'ano': ['min', 'max', 'count']
                 }).round(1)
-                metod_stats.columns = ['Produtos', 'Primeiro Ano', 'Último Ano', 'Total Anos-Produto']
+                metod_stats.columns = ['Products', 'First Year', 'Last Year', 'Total Product-Years']
                 
                 # Calculate average coverage period
                 periodo_medio = {}
@@ -254,7 +410,7 @@ def run():
                         if anos_produto:
                             periodos.append(max(anos_produto) - min(anos_produto) + 1)
                     periodo_medio[metodologia] = np.mean(periodos) if periodos else 0
-                metod_stats['Período Médio'] = [periodo_medio.get(metod, 0) for metod in metod_stats.index]
+                metod_stats['Average Period'] = [periodo_medio.get(metod, 0) for metod in metod_stats.index]
                 
                 st.dataframe(metod_stats, use_container_width=True)
                 
@@ -395,8 +551,7 @@ def run():
                 'Methodology': 'Methodology',
                 'Classes': 'No. of Classes'
             },
-            height=500
-        )
+            height=500        )
         fig_scatter.update_traces(marker=dict(size=14, opacity=0.8, line=dict(width=2, color='white')))
         st.plotly_chart(fig_scatter, use_container_width=True, key="scatter_resolution_accuracy")
         
@@ -412,8 +567,7 @@ def run():
 
     with tab3:
         st.markdown('<div class="timeline-container"><h2 class="timeline-title">📅 General Timeline of Initiatives</h2></div>', unsafe_allow_html=True)
-        fig_timeline = plot_timeline(meta_geral, df_geral_original)
-        st.plotly_chart(fig_timeline, use_container_width=True, key="general_timeline")
+        timeline_with_controls(meta_geral, df_geral_original)
         
         # Methodology Evolution Over Time Chart (translated to English)
         if meta_geral and df_geral_original is not None and not df_geral_original.empty:
@@ -642,150 +796,181 @@ def run():
 
     with tab6:
         st.subheader("🕸️ Radar Analysis - Multi-dimensional Comparison")
-        # Radar chart with top initiatives using siglas
         radar_columns = ['Accuracy (%)', 'Resolution (m)', 'Classes']
-        available_radar_cols = [col for col in radar_columns if col in df_filt.columns]
+        df_radar_source = df_filt.copy() # Start with the filtered data for this tab
+
+        # Ensure Display_Name exists
+        if 'Display_Name' not in df_radar_source.columns and 'Name' in df_radar_source.columns:
+            # This mapping should ideally happen once after data loading
+            # Re-applying here for safety if df_filt was manipulated directly
+            nome_to_sigla_radar = {}
+            if df_geral_original is not None and not df_geral_original.empty and 'Acronym' in df_geral_original.columns:
+                 for _, row_orig in df_geral_original.iterrows():
+                    nome_to_sigla_radar[row_orig['Name']] = row_orig['Acronym']
+            df_radar_source['Display_Name'] = df_radar_source['Name'].map(lambda x: nome_to_sigla_radar.get(x, str(x)[:10]))
+        elif 'Display_Name' not in df_radar_source.columns:
+            df_radar_source['Display_Name'] = "Unknown Initiative" # Fallback
+
+        # Convert radar columns to numeric, coercing errors.
+        for col in radar_columns:
+            if col in df_radar_source.columns:
+                # If data comes from min/max columns, use those (e.g. 'Accuracy_max_val')
+                # This logic needs to be robust based on what data_wrapper provides.
+                # For now, assume direct columns or fallbacks are handled by data_wrapper into these names.
+                df_radar_source[col] = pd.to_numeric(df_radar_source[col], errors='coerce')
+            else:
+                df_radar_source[col] = np.nan
         
-        if len(available_radar_cols) >= 2 and len(df_filt) >= 2:
-            # Allow users to select number of initiatives to compare
+        df_radar_source.dropna(subset=radar_columns + ['Display_Name'], how='any', inplace=True)
+
+        available_radar_cols = [col for col in radar_columns if col in df_radar_source.columns and df_radar_source[col].notna().any()]
+        
+
+        top_iniciativas_for_radar = pd.DataFrame()
+        sort_by_radar = None # Initialize
+
+        if len(available_radar_cols) >= 2 and len(df_radar_source) >= 2:
             col1_radar, col2_radar = st.columns(2)
             with col1_radar:
-                max_initiatives = min(8, len(df_filt))
-                if max_initiatives > 2:
-                    num_initiatives = st.slider(
-                        "Number of initiatives in radar",
-                        min_value=2,
-                        max_value=max_initiatives,
-                        value=min(5, max_initiatives),
-                        help="Select how many initiatives to display in the radar chart"
+                max_slider_val = min(8, len(df_radar_source))
+                # Since len(df_radar_source) >= 2 (from the outer if condition),
+                # max_slider_val will also be >= 2.
+                # Thus, the slider is always appropriate here to set num_iniciativas_for_radar.
+                num_iniciativas_for_radar = st.slider(
+                    "Number of initiatives in radar",
+                    min_value=2, max_value=max_slider_val,
+                    value=min(5, max_slider_val), # Default to 5 or fewer if less are available
+                    help="Select how many initiatives to display in the radar chart",
+                    key="radar_num_iniciativas_slider"
+                )
+            
+            with col2_radar:
+                sort_options = [col for col in ['Accuracy (%)', 'Resolution (m)', 'Classes'] if col in available_radar_cols]
+                if sort_options:
+                    sort_by_radar = st.selectbox(
+                        "Sort by for Radar", options=sort_options,
+                        help="Criteria to select top initiatives for radar",
+                        key="radar_sort_by_selectbox"
                     )
                 else:
-                    # If only 2 initiatives available, don't show slider
-                    num_initiatives = max_initiatives
-                    st.info(f"Displaying all {max_initiatives} available initiatives")
-                
-                with col2_radar:
-                    sort_by = st.selectbox(
-                        "Sort by",
-                        options=['Accuracy (%)', 'Resolution (m)', 'Classes'],
-                        help="Criteria to select top initiatives"                    )
-                
-                # Prepare radar data with siglas
-            if sort_by == 'Resolution (m)':
-                # For resolution, lower is better, so sort ascending
-                top_iniciativas = df_filt.nsmallest(num_initiatives, sort_by)
-            else:
-                # For others, higher is better
-                top_iniciativas = df_filt.nlargest(num_initiatives, sort_by)
-            
-            # Use Display_Name (siglas) for radar chart
-            radar_df = top_iniciativas[['Display_Name'] + available_radar_cols].copy()
-            
-            # Normalize data for radar chart (0-1 scale)
-            for col in available_radar_cols:
-                min_val, max_val = df_filt[col].min(), df_filt[col].max()
-                if max_val - min_val > 0:
-                    if col == 'Resolution (m)':
-                        # Invert resolution (lower is better)
-                        radar_df[col] = 1 - (radar_df[col] - min_val) / (max_val - min_val)
-                    else:
-                        radar_df[col] = (radar_df[col] - min_val) / (max_val - min_val)
+                    st.warning("No valid columns available for sorting radar iniciativas.")
+
+            if num_iniciativas_for_radar > 0 and sort_by_radar and sort_by_radar in df_radar_source.columns:
+                if sort_by_radar == 'Resolution (m)':
+                    top_iniciativas_for_radar = df_radar_source.nsmallest(num_iniciativas_for_radar, sort_by_radar)
                 else:
-                    radar_df[col] = 0.5
-            
-            # Create radar chart with siglas
-            fig_radar = go.Figure()
-            colors = px.colors.qualitative.Set1
-            
-            for i, (idx, row) in enumerate(radar_df.iterrows()):
-                values = row[available_radar_cols].tolist()
-                values_closed = values + [values[0]]  # Close the radar
-                theta_closed = available_radar_cols + [available_radar_cols[0]]
+                    top_iniciativas_for_radar = df_radar_source.nlargest(num_iniciativas_for_radar, sort_by_radar)
+            elif num_iniciativas_for_radar > 0: 
+                st.warning(f"Could not sort by '{sort_by_radar if sort_by_radar else 'N/A'}'. Using first {num_iniciativas_for_radar} available initiatives.")
+                top_iniciativas_for_radar = df_radar_source.head(num_iniciativas_for_radar)
+            # If num_iniciativas_for_radar is 0, top_iniciativas_for_radar remains an empty DataFrame
+
+            if not top_iniciativas_for_radar.empty:
+                radar_df_plot = top_iniciativas_for_radar[['Display_Name'] + available_radar_cols].copy()
                 
-                fig_radar.add_trace(go.Scatterpolar(
-                    r=values_closed,
-                    theta=theta_closed,
-                    fill='toself',
-                    name=row['Display_Name'],  # Use siglas for legend
-                    line_color=colors[i % len(colors)],
-                    opacity=0.7
-                ))
-            
-            fig_radar.update_layout(
-                polar=dict(
-                    radialaxis=dict(
-                        visible=True,
-                        range=[0, 1],
-                        tickmode='array',
-                        tickvals=[0, 0.25, 0.5, 0.75, 1],
-                        ticktext=['Low', 'Medium-Low', 'Medium', 'Medium-High', 'High']  # English labels
-                    )
-                ),
-                showlegend=True,
-                title=f'🎯 Radar Comparison - Top {num_initiatives} by {sort_by}',
-                height=600,
-                font=dict(size=12)            )
-            st.plotly_chart(fig_radar, use_container_width=True, key="radar_comparison")
-            
-            # Show normalized values table with siglas
-            st.markdown("#### 📊 Normalized Values (0-1 Scale)")
-            display_df = radar_df.copy()
-            for col in available_radar_cols:
-                display_df[col] = display_df[col].round(3)
-            
-            st.dataframe(
-                display_df,
-                use_container_width=True,
-                hide_index=True,
-                column_config={
-                    "Display_Name": st.column_config.TextColumn("Initiative", width="large"),
-                    "Accuracy (%)": st.column_config.NumberColumn("Accuracy (norm.)", format="%.3f"),
-                    "Resolution (m)": st.column_config.NumberColumn("Resolution (norm.)", format="%.3f", help="Inverted: 1 = better resolution"),
-                    "Classes": st.column_config.NumberColumn("Classes (norm.)", format="%.3f")
-                }
-            )
-            
-            # Insights section (translated to English)
-            st.markdown("#### 💡 Radar Analysis Insights")
-            insights_col1, insights_col2 = st.columns(2)
-            
-            with insights_col1:
-                # Find best overall performer using siglas
-                radar_df['score_total'] = radar_df[available_radar_cols].mean(axis=1)
-                best_overall = radar_df.loc[radar_df['score_total'].idxmax(), 'Display_Name']
-                st.success(f"🏆 **Best Overall Performance:** {best_overall}")
+                for col_norm in available_radar_cols:
+                    min_val_norm, max_val_norm = df_radar_source[col_norm].min(), df_radar_source[col_norm].max()
+                    if pd.notna(min_val_norm) and pd.notna(max_val_norm) and (max_val_norm - min_val_norm > 0):
+                        if col_norm == 'Resolution (m)':
+                            radar_df_plot[col_norm] = 1 - (radar_df_plot[col_norm] - min_val_norm) / (max_val_norm - min_val_norm)
+                        else:
+                            radar_df_plot[col_norm] = (radar_df_plot[col_norm] - min_val_norm) / (max_val_norm - min_val_norm)
+                    elif pd.notna(min_val_norm) and pd.notna(max_val_norm) and (max_val_norm - min_val_norm == 0):
+                        radar_df_plot[col_norm] = 0.5 
+                    else: 
+                        radar_df_plot[col_norm] = 0.5 
                 
-                # Find specialist initiatives using siglas
-                for col in available_radar_cols:
-                    specialist = radar_df.loc[radar_df[col].idxmax(), 'Display_Name']
-                    col_display = "Resolution" if col == "Resolution (m)" else col.replace(" (%)", "")
-                    st.info(f"🎯 **Specialist in {col_display}:** {specialist}")
-            
-            with insights_col2:
-                # Performance distribution (translated to English)
-                st.markdown("**📈 Performance Distribution:**")
-                for col in available_radar_cols:
-                    avg_performance = radar_df[col].mean()
-                    col_display = "Resolution" if col == "Resolution (m)" else col.replace(" (%)", "")
-                    performance_level = "High" if avg_performance > 0.7 else "Medium" if avg_performance > 0.4 else "Low"
-                    st.write(f"• **{col_display}:** {performance_level} ({avg_performance:.2f})")
+                fig_radar = go.Figure()
+                colors = px.colors.qualitative.Set1
                 
-                # Balance analysis using siglas
-                balance_scores = radar_df[available_radar_cols].std(axis=1)
-                most_balanced = radar_df.loc[balance_scores.idxmin(), 'Display_Name']
-                st.info(f"⚖️ **Most Balanced:** {most_balanced}")
-        
-        else:
-            if len(df_filt) < 2:
-                st.warning("⚠️ São necessárias pelo menos 2 iniciativas para comparação em radar.")
+                for i, (idx, row_radar) in enumerate(radar_df_plot.iterrows()):
+                    values_radar = row_radar[available_radar_cols].tolist()
+                    values_closed_radar = values_radar + ([values_radar[0]] if values_radar else []) 
+                    theta_closed_radar = available_radar_cols + ([available_radar_cols[0]] if available_radar_cols else [])
+                    
+                    fig_radar.add_trace(go.Scatterpolar(
+                        r=values_closed_radar,
+                        theta=theta_closed_radar,
+                        fill='toself',
+                        name=row_radar['Display_Name'],
+                        line_color=colors[i % len(colors)],
+                        opacity=0.7
+                    ))
+                
+                fig_radar.update_layout(
+                    polar=dict(
+                        radialaxis=dict(
+                            visible=True, range=[0, 1], tickmode='array',
+                            tickvals=[0, 0.25, 0.5, 0.75, 1],
+                            ticktext=['Low', 'Medium-Low', 'Medium', 'Medium-High', 'High']
+                        )
+                    ),
+                    showlegend=True,
+                    title=f'🎯 Radar Comparison - Top {num_iniciativas_for_radar} by {sort_by_radar if sort_by_radar else "N/A"}',
+                    height=600, font=dict(size=12)
+                )
+                st.plotly_chart(fig_radar, use_container_width=True, key="radar_comparison_chart")
+                
+                st.markdown("#### 📊 Normalized Values (0-1 Scale)")
+                display_df_radar = radar_df_plot.copy()
+                for col_disp_radar in available_radar_cols:
+                    display_df_radar[col_disp_radar] = display_df_radar[col_disp_radar].round(3)
+                
+                st.dataframe(
+                    display_df_radar, use_container_width=True, hide_index=True,
+                    column_config={
+                        "Display_Name": st.column_config.TextColumn("Initiative", width="large"),
+                        "Accuracy (%)": st.column_config.NumberColumn("Accuracy (norm.)", format="%.3f"),
+                        "Resolution (m)": st.column_config.NumberColumn("Resolution (norm.)", format="%.3f", help="Inverted: 1 = better resolution"),
+                        "Classes": st.column_config.NumberColumn("Classes (norm.)", format="%.3f")}
+                )
+                
+                st.markdown("#### 💡 Radar Analysis Insights")
+                insights_col1, insights_col2 = st.columns(2)
+                
+                with insights_col1:
+                    if not radar_df_plot.empty and available_radar_cols:
+                        radar_df_plot['score_total'] = radar_df_plot[available_radar_cols].mean(axis=1)
+                        if not radar_df_plot.empty and 'score_total' in radar_df_plot.columns and radar_df_plot['score_total'].notna().any():
+                             best_overall = radar_df_plot.loc[radar_df_plot['score_total'].idxmax(), 'Display_Name']
+                             st.success(f"🏆 **Best Overall Performance:** {best_overall}")
+
+                        for col_insight in available_radar_cols:
+                            if col_insight in radar_df_plot.columns and radar_df_plot[col_insight].notna().any():
+                                specialist = radar_df_plot.loc[radar_df_plot[col_insight].idxmax(), 'Display_Name']
+                                col_display_insight = "Resolution" if col_insight == "Resolution (m)" else col_insight.replace(" (%)", "")
+                                st.info(f"🎯 **Specialist in {col_display_insight}:** {specialist}")
+                
+                with insights_col2:
+                    if not radar_df_plot.empty and available_radar_cols:
+                        st.markdown("**📈 Performance Distribution:**")
+                        for col_perf in available_radar_cols:
+                            if col_perf in radar_df_plot.columns and radar_df_plot[col_perf].notna().any():
+                                avg_performance = radar_df_plot[col_perf].mean()
+                                col_display_perf = "Resolution" if col_perf == "Resolution (m)" else col_perf.replace(" (%)", "")
+                                performance_level = "High" if avg_performance > 0.7 else "Medium" if avg_performance > 0.4 else "Low"
+                                st.write(f"• **{col_display_perf}:** {performance_level} ({avg_performance:.2f})")
+                        
+                        if available_radar_cols: 
+                            balance_scores = radar_df_plot[available_radar_cols].std(axis=1)
+                            if not balance_scores.empty and balance_scores.notna().any():
+                                most_balanced = radar_df_plot.loc[balance_scores.idxmin(), 'Display_Name']
+                                st.info(f"⚖️ **Most Balanced:** {most_balanced}")
+            elif num_iniciativas_for_radar > 0:
+                 st.warning(f"⚠️ Could not select top {num_iniciativas_for_radar} iniciativas for radar. Check data availability and filters.")
+
+        else: # Conditions for radar chart not met
+            if len(df_radar_source) < 2 :
+                st.warning("⚠️ At least 2 initiatives with complete data are needed for radar comparison after filtering.")
+            elif len(available_radar_cols) < 2:
+                 st.warning("⚠️ At least 2 valid data dimensions (e.g., Accuracy, Resolution) are needed for radar. Check data and filters.")
             else:
-                st.warning("⚠️ Dados insuficientes para gráfico radar. Verifique se as colunas necessárias estão disponíveis.")
-            
-            # Show available data info
-            st.info("📋 **Dados disponíveis:**")
-            st.write(f"• Iniciativas filtradas: {len(df_filt)}")
-            st.write(f"• Colunas para radar disponíveis: {available_radar_cols}")
-            st.write(f"• Colunas necessárias: {radar_columns}")
+                st.warning("⚠️ Insufficient data for radar chart. Verify data and selected filters.")
+
+            st.info("📋 **Radar Data Info:**")
+            st.write(f"• Initiatives with complete radar data after filtering: {len(df_radar_source)}")
+            st.write(f"• Available numeric columns for radar: {available_radar_cols}")
+            st.write(f"• Required columns for radar: {radar_columns}")
         
         # Enhanced Timeline Analysis - Additional Features
         st.markdown("---")
@@ -833,7 +1018,7 @@ def run():
                     'produto': 'nunique',
                     'ano': ['min', 'max', 'count']
                 }).round(1)
-                metod_stats.columns = ['Produtos', 'Primeiro Ano', 'Último Ano', 'Total Anos-Produto']
+                metod_stats.columns = ['Products', 'First Year', 'Last Year', 'Total Product-Years']
                 
                 # Calculate average coverage period
                 periodo_medio = {}
@@ -848,7 +1033,7 @@ def run():
                         if anos_produto:
                             periodos.append(max(anos_produto) - min(anos_produto) + 1)
                     periodo_medio[metodologia] = np.mean(periodos) if periodos else 0
-                metod_stats['Período Médio'] = [periodo_medio.get(metod, 0) for metod in metod_stats.index]
+                metod_stats['Average Period'] = [periodo_medio.get(metod, 0) for metod in metod_stats.index]
                 
                 st.dataframe(metod_stats, use_container_width=True)
                 
@@ -1006,4 +1191,4 @@ def run():
                     hovermode='x unified'
                 )
                 
-                st.plotly_chart(fig_metodologia_evolucao, use_container_width=True, key="metodologia_evolucao")
+                st.plotly_chart(fig_metodologia_evolucao, use_container_width=True, key="metodologia_evolucao_tab6")

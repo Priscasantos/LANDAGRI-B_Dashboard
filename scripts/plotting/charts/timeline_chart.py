@@ -13,7 +13,8 @@ Date: 2024
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from typing import Dict, Any
+import streamlit as st
+from typing import Dict, Any, Optional
 from scripts.utilities.config import get_initiative_color_map
 from scripts.plotting.chart_core import add_display_names_to_df, apply_standard_layout
 from scripts.plotting.universal_cache import smart_cache_data
@@ -21,8 +22,20 @@ from scripts.plotting.universal_cache import smart_cache_data
 # If this function is also used by Streamlit pages, keep the cache decorator.
 # Otherwise, if it's only for non-Streamlit generation, it can be removed.
 @smart_cache_data(ttl=300) 
-def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Figure:
-    """Plot an improved timeline using anos_disponiveis from metadata, with acronyms from DataFrame."""
+def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame, 
+                 chart_height: Optional[int] = None, item_spacing: int = 25, 
+                 line_width: int = 15, margin_config: Optional[Dict] = None) -> go.Figure:
+    """
+    Plot an improved timeline using anos_disponiveis from metadata, with acronyms from DataFrame.
+    
+    Args:
+        metadata: Initiative metadata
+        filtered_df: Filtered DataFrame
+        chart_height: Custom chart height (None for auto)
+        item_spacing: Vertical spacing between items (pixels)
+        line_width: Width of timeline bars
+        margin_config: Custom margins dict
+    """
     if not metadata or filtered_df is None or filtered_df.empty:
         return go.Figure().update_layout(title="Timeline of Initiatives (Insufficient data)")
 
@@ -111,7 +124,7 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Fig
     unique_original_names_for_colors = produtos_unicos_df['produto'].unique()
     color_map = get_initiative_color_map(unique_original_names_for_colors.tolist())
     
-    legend_added = set()
+    
 
     for current_display_name in display_names_unicos_sorted: # Iterate using sorted display names
         produto_data_plot = matrix_df[matrix_df['produto_display_name'] == current_display_name]
@@ -138,26 +151,32 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Fig
             segments.append((start_year_segment, end_year_segment))
 
             for seg_start, seg_end in segments:
-                show_legend = current_display_name not in legend_added
-                if show_legend:
-                    legend_added.add(current_display_name)
-
+                # Add a line segment for each continuous range of years
                 fig_timeline.add_trace(go.Scatter(
-                    x=[seg_start, seg_end + 0.9], 
+                    x=[seg_start, seg_end + 1], # Use seg_end + 1 to extend the line to the next year
                     y=[current_display_name, current_display_name], 
                     mode='lines',
-                    line=dict(color=cor, width=20), # Increased width for better visibility
-                    name=current_display_name if show_legend else None,
-                    showlegend=show_legend,
+                    line=dict(color=cor, width=line_width),  # Use parametrized width 
+                    name=current_display_name if current_display_name else original_name_for_color_key,
+                    showlegend=False,  # Remove legend
                     legendgroup=current_display_name,
                     hovertemplate=f"<b>{current_display_name}</b><br>Metodologia: {metodologia}<br>Anos: {seg_start}-{seg_end}<extra></extra>"
-                ))
-                
-    apply_standard_layout(fig_timeline, "📅 Timeline of LULC Initiatives Availability (1985-2024)", "Year", "LULC Products", "timeline")
+                ))                
+    apply_standard_layout(fig_timeline, "📅 Timeline of LULC Initiatives Availability (1985-2024)", "Year", "Initiatives", "timeline")
+    
+    # Default margins
+    default_margins = dict(l=220, r=30, t=60, b=40)
+    margins = margin_config if margin_config else default_margins
+    
+    # Calculate height
+    if chart_height is None:
+        calculated_height = max(300, len(display_names_unicos_sorted) * item_spacing)
+    else:
+        calculated_height = chart_height
     
     fig_timeline.update_layout(
-        height=max(600, len(display_names_unicos_sorted) * 40), # Increased per-initiative height
-        margin=dict(l=220, r=30, t=100, b=80), # Adjusted left margin
+        height=calculated_height,
+        margin=margins,
         yaxis=dict(
             tickmode='array',
             tickvals=display_names_unicos_sorted, 
@@ -165,7 +184,8 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Fig
             type='category', 
             categoryorder='array', 
             categoryarray=display_names_unicos_sorted, 
-            tickfont=dict(size=12) # Slightly smaller font if many items
+            tickfont=dict(size=11), # Slightly smaller font if many items
+            showgrid=False
         ),
         xaxis=dict(
             range=[chart_min_year - 0.5, chart_max_year + 0.5], 
@@ -180,3 +200,96 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Fig
         legend=dict(traceorder='normal') # Ensure legend order matches y-axis if possible
     )
     return fig_timeline
+
+
+def timeline_with_controls(metadata: Dict[str, Any], filtered_df: pd.DataFrame):
+    """Timeline chart with interactive controls for Streamlit."""
+    
+    st.sidebar.subheader("📐 Timeline Dimensions")
+    
+    # Controles de dimensão
+    chart_height = st.sidebar.slider(
+        "Chart Height", 
+        min_value=200, 
+        max_value=1200, 
+        value=600, 
+        step=50,
+        help="Total height of the chart in pixels"
+    )
+    
+    item_spacing = st.sidebar.slider(
+        "Item Spacing", 
+        min_value=15, 
+        max_value=50, 
+        value=25, 
+        step=5,
+        help="Vertical spacing between timeline items"
+    )
+    
+    line_width = st.sidebar.slider(
+        "Line Width", 
+        min_value=5, 
+        max_value=30, 
+        value=15, 
+        step=2,
+        help="Width of the timeline bars"
+    )
+    
+    # Controles de margem
+    with st.sidebar.expander("🔧 Advanced Margins"):
+        margin_left = st.number_input(
+            "Left Margin", 
+            value=220, 
+            min_value=50, 
+            max_value=400,
+            help="Space for initiative names on the left"
+        )
+        margin_right = st.number_input(
+            "Right Margin", 
+            value=30, 
+            min_value=10, 
+            max_value=100
+        )
+        margin_top = st.number_input(
+            "Top Margin", 
+            value=60, 
+            min_value=20, 
+            max_value=150,
+            help="Space for title at the top"
+        )
+        margin_bottom = st.number_input(
+            "Bottom Margin", 
+            value=40, 
+            min_value=20, 
+            max_value=100,
+            help="Space for year labels at the bottom"
+        )
+    
+    margin_config = {
+        'l': margin_left,
+        'r': margin_right, 
+        't': margin_top,
+        'b': margin_bottom
+    }
+    
+    # Gerar gráfico com configurações
+    fig = plot_timeline(
+        metadata, 
+        filtered_df,
+        chart_height=chart_height,
+        item_spacing=item_spacing,
+        line_width=line_width,
+        margin_config=margin_config
+    )
+    
+    # Display chart
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Show current settings
+    with st.sidebar.expander("📊 Current Settings"):
+        st.json({
+            "chart_height": chart_height,
+            "item_spacing": item_spacing,
+            "line_width": line_width,
+            "margins": margin_config
+        })
