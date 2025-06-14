@@ -28,9 +28,9 @@ import pandas as pd
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 try:
-    from .data_processor import UnifiedDataProcessor
+    from .lulc_data_engine import UnifiedDataProcessor
 except ImportError:
-    from data_processor import UnifiedDataProcessor
+    from lulc_data_engine import UnifiedDataProcessor
 
 def setup_environment():
     """Setup required directories and environment."""
@@ -113,16 +113,16 @@ def generate_processing_summary(df: pd.DataFrame, metadata: Dict[str, Any],
                                                  if metadata[name].get('available_years', [])]),
             'column_count': len(df.columns),
             'unique_providers': df['Provider'].nunique() if 'Provider' in df.columns else 0,
-            'coverage_types': df['Type'].unique().tolist() if 'Type' in df.columns else [],
+            'coverage_types': df['Coverage'].unique().tolist() if 'Coverage' in df.columns else [], # Changed 'Type' to 'Coverage'
             'resolution_range': {
-                'min': float(df['Resolution (m)'].min()) if 'Resolution (m)' in df.columns else 0,
-                'max': float(df['Resolution (m)'].max()) if 'Resolution (m)' in df.columns else 0,
-                'mean': float(df['Resolution (m)'].mean()) if 'Resolution (m)' in df.columns else 0
+                'min': float(df['Spatial Resolution (m)'].min()) if 'Spatial Resolution (m)' in df.columns else 0, # Changed 'Resolution (m)' to 'Spatial Resolution (m)'
+                'max': float(df['Spatial Resolution (m)'].max()) if 'Spatial Resolution (m)' in df.columns else 0, # Changed 'Resolution (m)' to 'Spatial Resolution (m)'
+                'mean': float(df['Spatial Resolution (m)'].mean()) if 'Spatial Resolution (m)' in df.columns else 0 # Changed 'Resolution (m)' to 'Spatial Resolution (m)'
             },
             'accuracy_range': {
-                'min': float(df['Accuracy (%)'].min()) if 'Accuracy (%)' in df.columns else 0,
-                'max': float(df['Accuracy (%)'].max()) if 'Accuracy (%)' in df.columns else 0,
-                'mean': float(df['Accuracy (%)'].mean()) if 'Accuracy (%)' in df.columns else 0
+                'min': float(df['Overall Accuracy (%)'].min()) if 'Overall Accuracy (%)' in df.columns else 0, # Changed 'Accuracy (%)' to 'Overall Accuracy (%)'
+                'max': float(df['Overall Accuracy (%)'].max()) if 'Overall Accuracy (%)' in df.columns else 0, # Changed 'Accuracy (%)' to 'Overall Accuracy (%)'
+                'mean': float(df['Overall Accuracy (%)'].mean()) if 'Overall Accuracy (%)' in df.columns else 0 # Changed 'Accuracy (%)' to 'Overall Accuracy (%)'
             }
         },
         'auxiliary_data_status': {

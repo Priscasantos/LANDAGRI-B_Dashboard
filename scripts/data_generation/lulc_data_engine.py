@@ -23,7 +23,7 @@ import pandas as pd
 import numpy as np
 import json
 import re
-from typing import Dict, List, Tuple, Any, Union
+from typing import Dict, List, Tuple, Any, Union, Optional
 from pathlib import Path
 from datetime import datetime
 import warnings
@@ -33,7 +33,13 @@ warnings.filterwarnings('ignore')
 
 # Add project root to path
 sys.path.append(str(Path(__file__).parent.parent.parent))
-from scripts.utilities.config import standardize_dataframe_columns
+
+try:
+    from scripts.utilities.config import standardize_dataframe_columns
+except ImportError:
+    # Fallback if config module is not available
+    def standardize_dataframe_columns(df):
+        return df
 
 class UnifiedDataProcessor:
     """Unified data processor that consolidates all data processing functionality."""
@@ -93,8 +99,7 @@ class UnifiedDataProcessor:
             'IBGE Monitoring': list(range(2000, 2021, 2)),
             'Agricultural Mapping': list(range(2018, 2024))
         }
-        
-        # Coverage categorization mapping
+          # Coverage categorization mapping
         self.coverage_mapping = {
             'Global': 'Global',
             'Continental': 'Continental',
@@ -107,7 +112,6 @@ class UnifiedDataProcessor:
         """Unified resolution parsing function."""
         if isinstance(resolution_value, (int, float)):
             return float(resolution_value)
-            
         if isinstance(resolution_value, list):
             resolution_value = resolution_value[0] if resolution_value else "30"
         
@@ -119,17 +123,16 @@ class UnifiedDataProcessor:
                 parts = resolution_str.split('-')
                 try:
                     return float(parts[0])  # Use better (smaller) resolution
-                except:
+                except (ValueError, TypeError):
                     return 30.0
             
             # Handle single values
             try:
                 return float(resolution_str)
-            except:
+            except (ValueError, TypeError):
                 return 30.0
         
         return 30.0
-    
     def parse_accuracy(self, accuracy_value: Union[str, int, float]) -> float:
         """Unified accuracy parsing function."""
         if isinstance(accuracy_value, (int, float)):
@@ -141,16 +144,18 @@ class UnifiedDataProcessor:
         try:
             accuracy_str = re.sub(r'[^\d.]', '', str(accuracy_value))
             return float(accuracy_str) if accuracy_str else 0.0
-        except:
+        except (ValueError, TypeError):
             return 0.0
     
-    def parse_temporal_data(self, temporal_interval: Union[List[int], str]) -> Dict[str, Any]:
+    def parse_temporal_data(self, temporal_interval: Union[List[int], str, None]) -> Dict[str, Any]:
         """Unified temporal data parsing function."""
-        if isinstance(temporal_interval, str):
+        if temporal_interval is None:
+            years = []
+        elif isinstance(temporal_interval, str):
             # Parse comma-separated string
             try:
                 years = [int(y.strip()) for y in temporal_interval.split(',') if y.strip().isdigit()]
-            except:
+            except (ValueError, AttributeError):
                 years = []
         elif isinstance(temporal_interval, list):
             years = [int(y) for y in temporal_interval if isinstance(y, (int, str)) and str(y).isdigit()]
@@ -241,7 +246,7 @@ class UnifiedDataProcessor:
         else:
             return 'Low'
     
-    def load_data_from_jsonc(self, jsonc_path: str = None) -> Tuple[pd.DataFrame, Dict[str, Any]]:
+    def load_data_from_jsonc(self, jsonc_path: Optional[str] = None) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """Unified data loading from JSONC with comprehensive processing."""
         
         if jsonc_path is None:
@@ -268,48 +273,45 @@ class UnifiedDataProcessor:
             raise FileNotFoundError(f"Metadata file not found: {jsonc_path}")
         except json.JSONDecodeError as e:
             raise ValueError(f"JSON parsing error: {e}")
-        
-        # Convert metadata to standardized DataFrame
+          # Convert metadata to standardized DataFrame
         df_data = []
         
         for initiative_name, initiative_data in metadata.items():
             # Get temporal data from mapping or parse from metadata
             temporal_years = self.temporal_data.get(
                 initiative_name, 
-                initiative_data.get('intervalo_temporal', [])
+                initiative_data.get('available_years', [])
             )
             temporal_info = self.parse_temporal_data(temporal_years)
             
-            # Handle multiple class versions
-            classes_main = initiative_data.get('qnt_classes', '1')
-            classes_alt = initiative_data.get('qnt_classes_2', None)
+            # Handle multiple class versions - now using English field names
+            classes_main = initiative_data.get('number_of_classes', 1)
             final_classes = classes_main
             
-            # Parse core metrics
-            resolution = self.parse_resolution(initiative_data.get('resolucao_espacial', '30'))
-            accuracy = self.parse_accuracy(initiative_data.get('acuracia_geral', '0'))
-            
-            # Create standardized row with English columns
+            # Parse core metrics - now using English field names
+            resolution = self.parse_resolution(initiative_data.get('spatial_resolution', 30))
+            accuracy = self.parse_accuracy(initiative_data.get('overall_accuracy', 0))
+              # Create standardized row with English columns
             row = {
                 'Name': initiative_name,
                 'Acronym': self.name_to_acronym.get(initiative_name, initiative_name[:8]),
-                'Type': self.categorize_coverage(initiative_data.get('cobertura', 'Regional')),
-                'Scope': initiative_data.get('cobertura', 'Regional'),
-                'Provider': initiative_data.get('provedor', ''),
-                'Provider Type': self.categorize_provider(initiative_data.get('provedor', '')),
-                'Source': initiative_data.get('fonte', ''),
+                'Type': self.categorize_coverage(initiative_data.get('coverage', 'Regional')),
+                'Scope': initiative_data.get('coverage', 'Regional'),
+                'Provider': initiative_data.get('provider', ''),
+                'Provider Type': self.categorize_provider(initiative_data.get('provider', '')),
+                'Source': initiative_data.get('source', ''),
                 'Resolution (m)': resolution,
                 'Resolution Category': self.categorize_resolution(resolution),
-                'Reference System': initiative_data.get('sistema_referencia', ''),
+                'Reference System': initiative_data.get('reference_system', ''),
                 'Accuracy (%)': accuracy,
                 'Accuracy Category': self.categorize_accuracy(accuracy),
-                'Classes': int(final_classes) if str(final_classes).isdigit() else 1,
-                'Methodology': initiative_data.get('metodologia', ''),
-                'Classification Method': initiative_data.get('metodo_classificacao', ''),
-                'Method Category': self.categorize_methodology(initiative_data.get('metodo_classificacao', '')),
-                'Temporal Frequency': initiative_data.get('frequencia_temporal', ''),
-                'Update Frequency': initiative_data.get('frequencia_atualizacao', ''),
-                'Classes Legend': initiative_data.get('legenda_classes', ''),
+                'Classes': int(final_classes) if isinstance(final_classes, (int, float)) else 1,
+                'Methodology': initiative_data.get('methodology', ''),
+                'Classification Method': initiative_data.get('classification_method', ''),
+                'Method Category': self.categorize_methodology(initiative_data.get('classification_method', '')),
+                'Temporal Frequency': initiative_data.get('temporal_frequency', ''),
+                'Update Frequency': initiative_data.get('update_frequency', ''),
+                'Classes Legend': initiative_data.get('class_legend', ''),
                 
                 # Temporal data (unified)
                 'Start Year': temporal_info['start_year'],
@@ -334,9 +336,8 @@ class UnifiedDataProcessor:
         enhanced_metadata = {}
         for initiative_name, initiative_data in metadata.items():
             enhanced_data = initiative_data.copy()
-            
-            # Add unified temporal data
-            temporal_years = self.temporal_data.get(initiative_name, initiative_data.get('intervalo_temporal', []))
+              # Add unified temporal data
+            temporal_years = self.temporal_data.get(initiative_name, initiative_data.get('available_years', []))
             temporal_info = self.parse_temporal_data(temporal_years)
             
             enhanced_data.update({
@@ -799,25 +800,32 @@ class UnifiedDataProcessor:
             'temporal_coverage': {
                 'avg_span': df['Temporal Span'].mean() if 'Temporal Span' in df.columns else 0,
                 'max_span': df['Temporal Span'].max() if 'Temporal Span' in df.columns else 0,
-                'min_span': df['Temporal Span'].min() if 'Temporal Span' in df.columns else 0
-            }
+                'min_span': df['Temporal Span'].min() if 'Temporal Span' in df.columns else 0            }
         }
         
         return metrics
     
     def _categorize_accuracy_compact(self, accuracy: float) -> str:
         """Compact accuracy categorization."""
-        if accuracy >= 90: return 'exc'
-        elif accuracy >= 80: return 'good'
-        elif accuracy >= 70: return 'fair'
-        else: return 'low'
+        if accuracy >= 90: 
+            return 'exc'
+        elif accuracy >= 80: 
+            return 'good'
+        elif accuracy >= 70: 
+            return 'fair'
+        else: 
+            return 'low'
     
     def _categorize_resolution_compact(self, resolution: float) -> str:
         """Compact resolution categorization."""
-        if resolution <= 10: return 'vh'
-        elif resolution <= 30: return 'h'
-        elif resolution <= 100: return 'm'
-        else: return 'l'
+        if resolution <= 10: 
+            return 'vh'
+        elif resolution <= 30: 
+            return 'h'
+        elif resolution <= 100: 
+            return 'm'
+        else: 
+            return 'l'
     
     def _identify_top_performers(self, df: pd.DataFrame) -> Dict[str, str]:
         """Identify top performing initiatives."""
@@ -918,14 +926,17 @@ class UnifiedDataProcessor:
             Path(filepath).parent.mkdir(parents=True, exist_ok=True)
             
             if data_type.upper() == "JSON":
-                # Convert DataFrames to dict if present
-                if isinstance(data, dict):
-                    data_to_save = data.copy()
-                    for key, value in data_to_save.items():
-                        if hasattr(value, 'to_dict'):
-                            data_to_save[key] = value.to_dict('records')
-                else:
-                    data_to_save = data
+                # Convert DataFrames to dict if present, recursively
+                def convert_df_to_dict_recursive(item):
+                    if isinstance(item, pd.DataFrame):
+                        return item.to_dict('records')
+                    elif isinstance(item, dict):
+                        return {k: convert_df_to_dict_recursive(v) for k, v in item.items()}
+                    elif isinstance(item, list):
+                        return [convert_df_to_dict_recursive(i) for i in item]
+                    return item
+
+                data_to_save = convert_df_to_dict_recursive(data)
                 
                 with open(filepath, 'w', encoding='utf-8') as f:
                     json.dump(data_to_save, f, ensure_ascii=False, indent=2, default=str)
@@ -1009,7 +1020,7 @@ class UnifiedDataProcessor:
         return validation_results
 
 # Convenience functions for backward compatibility
-def load_data(csv_path: str = None, json_path: str = None) -> Tuple[pd.DataFrame, Dict[str, Any]]:
+def load_data(csv_path: Optional[str] = None, json_path: Optional[str] = None) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """Load data using the unified processor."""
     processor = UnifiedDataProcessor()
     return processor.load_data_from_jsonc()
@@ -1019,7 +1030,7 @@ def generate_all_auxiliary_data(df: pd.DataFrame, metadata: Dict[str, Any]) -> D
     processor = UnifiedDataProcessor()
     return processor.create_comprehensive_auxiliary_data(df, metadata)
 
-def save_auxiliary_data(auxiliary_data: Dict[str, Any], filepath: str = None) -> bool:
+def save_auxiliary_data(auxiliary_data: Dict[str, Any], filepath: Optional[str] = None) -> bool:
     """Save auxiliary data using the unified processor."""
     if filepath is None:
         filepath = "data/processed/auxiliary_data.json"

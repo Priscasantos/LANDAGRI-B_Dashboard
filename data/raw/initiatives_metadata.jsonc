@@ -2,35 +2,35 @@
     // --- Iniciativas de Mapeamento em nível Global e Continental ---
     // --- Copernicus Global Land Cover Service (CGLS) Dynamic Land Cover ---
     "Copernicus Global Land Cover Service (CGLS) Dynamic Land Cover": {
-        "cobertura": "Global",
-        "sigla": "CGLS",
-        "provedor": "Copernicus European Union's Space Program",
-        "fonte": "PROBA-V",
-        "resolucao_espacial": "100m",
-        "intervalo_temporal": [
+        "coverage": "Global",
+        "acronym": "CGLS",
+        "provider": "Copernicus European Union's Space Program",
+        "source": "PROBA-V",
+        "spatial_resolution": 100,
+        "available_years": [
             2015,
             2016,
             2017,
             2018,
             2019
         ],
-        "frequencia_temporal": "Annual",
-        "frequencia_atualizacao":  "Annual",
-        "sistema_referencia": "EPSG: 4326",
-        "metodologia": "Supervised random forest classification/regression using PROBA-V data",
-        "metodo_classificacao": "Supervised Random Forest",
-        "qnt_classes": "10",
-        "legenda_classes": "Forest, Shrubland, Herbaceous Vegetation, Herbaceous Wetland, Moss And Lichen, Bare/Sparse Vegetation, Cropland, Urban/Built-Up, Snow And Ice, Permanent Water Bodies",
-        "acuracia_geral": "80.3"
+        "temporal_frequency": "Annual",
+        "update_frequency": "Annual",
+        "reference_system": "EPSG:4326",
+        "methodology": "Supervised random forest classification/regression using PROBA-V data",
+        "classification_method": "Supervised Random Forest",
+        "number_of_classes": 10,
+        "class_legend": "Forest, Shrubland, Herbaceous Vegetation, Herbaceous Wetland, Moss And Lichen, Bare/Sparse Vegetation, Cropland, Urban/Built-Up, Snow And Ice, Permanent Water Bodies",
+        "overall_accuracy": 80.3
     },
     // --- Dynamic World V1 ---
     "Dynamic World V1": {
-        "cobertura": "Global",
-        "sigla": "GDW",
-        "provedor": "Google and World Resources Institute",
-        "fonte": "Sentinel-2 MSI",
-        "resolucao_espacial": "10m",
-        "intervalo_temporal": [
+        "coverage": "Global",
+        "acronym": "GDW",
+        "provider": "Google and World Resources Institute",
+        "source": "Sentinel-2 MSI",
+        "spatial_resolution": 10,
+        "available_years": [
             2017,
             2018,
             2019,
@@ -40,23 +40,23 @@
             2023,
             2024
         ],
-        "frequencia_temporal": "Annual",
-        "frequencia_atualizacao":  "Near real time",
-        "sistema_referencia": "Not informed",
-        "metodologia": "Deep learning fully convolutional network applied to Sentinel-2 MSI data",
-        "metodo_classificacao": "Deep Learning",
-        "qnt_classes": "9",
-        "legenda_classes": "Water, Trees, Grass, Flooded Vegetation, Crops, Shrub and Scrub, Built, Bare, Snow, Ice",
-        "acuracia_geral": "73.8"
+        "temporal_frequency": "Annual",
+        "update_frequency": "Near real time",
+        "reference_system": "EPSG:4326",
+        "methodology": "Deep learning fully convolutional network applied to Sentinel-2 MSI data",
+        "classification_method": "Deep Learning",
+        "number_of_classes": 9,
+        "class_legend": "Water, Trees, Grass, Flooded Vegetation, Crops, Shrub and Scrub, Built, Bare, Snow and Ice",
+        "overall_accuracy": 73.8
     },
     // --- ESRI-10m Annual LULC ---
     "ESRI-10m Annual LULC": {
-        "cobertura": "Global",
-        "sigla": "ESRI-10 m LULC",
-        "provedor": "Environmental Systems Research Institute (ESRI), Impact Observatory, and Microsoft Maps for Good Initiative",
-        "fonte": "Sentinel-2 MSI",
-        "resolucao_espacial": "10m",
-        "intervalo_temporal": [
+        "coverage": "Global",
+        "acronym": "ESRI-10m LULC",
+        "provider": "Environmental Systems Research Institute (ESRI), Impact Observatory, and Microsoft Maps for Good Initiative",
+        "source": "Sentinel-2 MSI",
+        "spatial_resolution": 10,
+        "available_years": [
             2017,
             2018,
             2019,
@@ -66,48 +66,56 @@
             2023,
             2024
         ],
-        "frequencia_temporal": "Annual",
-        "frequencia_atualizacao": "Annual or Sub-annual",
-        "sistema_referencia": "EPSG: 32600 (North Hemisphere), EPSG: 32700 (South Hemisphere)",
-        "metodologia": "U-Net convolutional neural network applied to Sentinel-2 MSI data.",
-        "metodo_classificacao": "Convolutional Neural Network",
-        "qnt_classes": "9",
-        "qnt_classes_2": "15",
-        "legenda_classes": "Built, Crops, Trees, Water, Rangeland, Flooded Vegetation, Snow/Ice, Bare Ground, Clouds",
-        "legenda_classes_2": "Water Channel Extent, Variable Water, Persistent Water, Dense Trees, Sparse Trees, Dense Rangeland, Sparse Rangeland, Flooded Vegetation, Inactive Cropland, Active Cropland, High Density Built, Low Density Built, Bare Ground, Snow/Ice, Cloud",
-        "acuracia_geral": "85.0"
+        "temporal_frequency": "Annual",
+        "update_frequency": "Annual or Sub-annual",
+        "reference_system": "EPSG:32600 (North Hemisphere), EPSG:32700 (South Hemisphere)",
+        "methodology": "U-Net convolutional neural network applied to Sentinel-2 MSI data",
+        "classification_method": "Convolutional Neural Network",
+        "overall_accuracy": 85.0,
+        "detailed_products": [
+            {
+                "product_name": "Open Data Product",
+                "number_of_classes": 9,
+                "class_legend": "Built, Crops, Trees, Water, Rangeland, Flooded Vegetation, Snow/Ice, Bare Ground, Clouds"
+            },
+            {
+                "product_name": "Private Data Product",
+                "number_of_classes": 15,
+                "class_legend": "Water Channel Extent, Variable Water, Persistent Water, Dense Trees, Sparse Trees, Dense Rangeland, Sparse Rangeland, Flooded Vegetation, Inactive Cropland, Active Cropland, High Density Built, Low Density Built, Bare Ground, Snow/Ice, Cloud"
+            }
+        ]
     },
     // --- Global LULC change 2000 and 2020 ---
     "Global LULC change 2000 and 2020": {
-        "cobertura": "Global",
-        "sigla": "UMD-GLC",
-        "provedor": "University of Maryland (UMD) Global Land Analysis and Discovery (GLAD) laboratory",
-        "fonte": "Landsat series",
-        "resolucao_espacial": "30m",
-        "intervalo_temporal": [
+        "coverage": "Global",
+        "acronym": "UMD-GLC",
+        "provider": "University of Maryland (UMD) Global Land Analysis and Discovery (GLAD) laboratory",
+        "source": "Landsat series",
+        "spatial_resolution": 30,
+        "available_years": [
             2000,
             2005,
             2010,
             2015,
             2020
         ],
-        "frequencia_temporal": "Quadriennial",
-        "frequencia_atualizacao": "Quadriennial",
-        "sistema_referencia": "EPSG:4326",
-        "metodologia": "Supervised machine learning methods (decision and regression trees, U-Net convolutional neural network) applied to Landsat series data",
-        "metodo_classificacao": "Supervised Machine Learning",
-        "qnt_classes": "7",
-        "legenda_classes": "Terra Firma Vegetation Cover, Wetland, Open Surface Water, Snow/Ice, Cropland, Built-Up And Ocean",
-        "acuracia_geral": "85.0"
+        "temporal_frequency": "Quadriennial",
+        "update_frequency": "Quadriennial",
+        "reference_system": "EPSG:4326",
+        "methodology": "Supervised machine learning methods (decision and regression trees, U-Net convolutional neural network) applied to Landsat series data",
+        "classification_method": "Supervised Machine Learning",
+        "number_of_classes": 7,
+        "class_legend": "Terra Firma Vegetation Cover, Wetland, Open Surface Water, Snow/Ice, Cropland, Built-Up And Ocean",
+        "overall_accuracy": 85.0
     },
     // --- Global Pasture Watch (GPW) ---
     "Global Pasture Watch (GPW)": {
-        "cobertura": "Global",
-        "sigla": "GPW",
-        "provedor": "Land & Carbon Lab",
-        "fonte": "Landsat series",
-        "resolucao_espacial": "30m",
-        "intervalo_temporal": [
+        "coverage": "Global",
+        "acronym": "GPW",
+        "provider": "Land & Carbon Lab",
+        "source": "Landsat series",
+        "spatial_resolution": 30,
+        "available_years": [
             2000,
             2002,
             2004,
@@ -121,24 +129,28 @@
             2020,
             2022
         ],
-        "frequencia_temporal": "Biennial",
-        "frequencia_atualizacao": "Biennial",
-        "sistema_referencia": "EPSG: 4326",
-        "metodologia": "Supervised Machine Learning (random forest, gradient boosted trees, and artificial neural network).",
-        "metodo_classificacao": "Supervised Machine Learning",
-        "qnt_classes": "3",
-        "legenda_classes": "Cultivated Grassland (CG), Natural/Semi-Natural Grassland (NSG), \"Other Land Cover\" (OLC)",
-        "acuracia_geral": "91.0",
-        "acuracia_por_classe": "64.0, NSG: 76.0, OLC: 91.0"
+        "temporal_frequency": "Biennial",
+        "update_frequency": "Biennial",
+        "reference_system": "EPSG:4326",
+        "methodology": "Supervised Machine Learning (random forest, gradient boosted trees, and artificial neural network)",
+        "classification_method": "Supervised Machine Learning",
+        "number_of_classes": 3,
+        "class_legend": "Cultivated Grassland (CG), Natural/Semi-Natural Grassland (NSG), Other Land Cover (OLC)",
+        "overall_accuracy": 91.0,
+        "detailed_accuracy": {
+            "CG": 64.0,
+            "NSG": 76.0,
+            "OLC": 91.0
+        }
     },
     // --- South America Soybean Maps ---
     "South America Soybean Maps": {
-        "cobertura": "Continental",
-        "sigla": "UMD-SASM",
-        "provedor": "University of Maryland (UMD) Global Land Analysis and Discovery (GLAD) laboratory",
-        "fonte": "Landsat and MODIS series",
-        "resolucao_espacial": "30m",
-        "intervalo_temporal": [
+        "coverage": "Continental",
+        "acronym": "UMD-SASM",
+        "provider": "University of Maryland (UMD) Global Land Analysis and Discovery (GLAD) laboratory",
+        "source": "Landsat and MODIS series",
+        "spatial_resolution": 30,
+        "available_years": [
             2001,
             2002,
             2003,
@@ -163,65 +175,81 @@
             2022,
             2023
         ],
-        "frequencia_temporal": "Annual",
-        "sistema_referencia": "EPSG: 4326",
-        "metodologia": "Regression, visual interpretation, and decision tree methods.",
-        "metodo_classificacao": "Combined",
-        "qnt_classes": "2",
-        "legenda_classes": "Soybean, No Data",
-        "acuracia_geral": "94"
+        "temporal_frequency": "Annual",
+        "reference_system": "EPSG:4326",
+        "methodology": "Regression, visual interpretation, and decision tree methods",
+        "classification_method": "Combined",
+        "number_of_classes": 2,
+        "class_legend": "Soybean, No Data",
+        "overall_accuracy": 94.0
     },
     // --- ESA World Cover ---
     "WorldCover 10m 2021": {
-        "cobertura": "Global",
-        "sigla": "ESA-WC",
-        "provedor": "European Space Agency (ESA)",
-        "fonte": "Sentinel-1 and Sentinel-2 MSI",
-        "resolucao_espacial": "10m",
-        "intervalo_temporal": [
+        "coverage": "Global",
+        "acronym": "ESA-WC",
+        "provider": "European Space Agency (ESA)",
+        "source": "Sentinel-1 and Sentinel-2 MSI",
+        "spatial_resolution": 10,
+        "available_years": [
             2020,
             2021
         ],
-        "frequencia_temporal": "Annual",
-        "sistema_referencia": "EPSG: 4326",
-        "metodologia": "Gradient boosting decision tree algorithm applied to Sentinel-1 and Sentinel-2 MSI combined data.",
-        "metodo_classificacao": "Gradient Boosting Decision Tree Algorithm",
-        "qnt_classes": "11",
-        "legenda_classes": "Tree Cover, Shrubland, Grassland, Cropland, Built-Up, Bare/Sparse Vegetation, Snow and Ice, Permanent Water Bodies, Herbaceous Wetland, Mangroves, Moss, Lichen",
-        "acuracia_geral": "76.7",
-        "produtos_disponiveis": ["2020 v100", "2021 v200"],
-        "acuracia_por_produto": ["74.4", "76.7"]
+        "temporal_frequency": "Annual",
+        "reference_system": "EPSG:4326",
+        "methodology": "Gradient boosting decision tree algorithm applied to Sentinel-1 and Sentinel-2 MSI combined data",
+        "classification_method": "Gradient Boosting Decision Tree Algorithm",
+        "number_of_classes": 11,
+        "class_legend": "Tree Cover, Shrubland, Grassland, Cropland, Built-Up, Bare/Sparse Vegetation, Snow and Ice, Permanent Water Bodies, Herbaceous Wetland, Mangroves, Moss, Lichen",
+        "overall_accuracy": 76.7,
+        "detailed_products": [
+            {
+                "product_name": "2020 v100",
+                "product_accuracy": 74.4
+            },
+            {
+                "product_name": "2021 v200",
+                "product_accuracy": 76.7
+            }
+        ]
     },
     // --- WorldCereal ---
     "WorldCereal": {
-        "cobertura": "Global",
-        "sigla": "ESA-WorldCereal",
-        "provedor": "European Space Agency (ESA)",
-        "fonte": "Sentinel-1, Sentinel-2, and Landsat-8",
-        "resolucao_espacial": "10m",
-        "intervalo_temporal": [
+        "coverage": "Global",
+        "acronym": "ESA-WorldCereal",
+        "provider": "European Space Agency (ESA)",
+        "source": "Sentinel-1, Sentinel-2, and Landsat-8",
+        "spatial_resolution": 10,
+        "available_years": [
             2021
         ],
-        "frequencia_temporal": "Annual and Seasonal",
-        "frequencia_atualizacao": "Annual",
-        "sistema_referencia": "EPSG: 4326",
-        "metodologia": "CatBoost algorithm (gradient boosting on decision trees) applied to Sentinel-1, Sentinel-2 and Landsat-8 data.",
-        "metodo_classificacao": "Gradient Boosting on decision trees",
-        "qnt_classes": "5",
-        "legenda_classes": "Temporary (One-Year Cycle) Crops, Winter Cereals, Spring Cereals, Maize Season Maize And Second Season Maize",
-        "acuracia_geral": "97.8",
-        "produtos_diponiveis": ["Annual", "Seasonal"],
-        "acuracia_por_produto": ["97.8", "82.5"]
+        "temporal_frequency": "Annual and Seasonal",
+        "update_frequency": "Annual",
+        "reference_system": "EPSG:4326",
+        "methodology": "CatBoost algorithm (gradient boosting on decision trees) applied to Sentinel-1, Sentinel-2 and Landsat-8 data",
+        "classification_method": "Gradient Boosting on decision trees",
+        "number_of_classes": 5,
+        "class_legend": "Temporary (One-Year Cycle) Crops, Winter Cereals, Spring Cereals, Maize Season Maize And Second Season Maize",
+        "overall_accuracy": 97.8,
+        "detailed_products": [
+            {
+                "product_name": "Annual",
+                "product_accuracy": 97.8
+            },
+            {
+                "product_name": "Seasonal",
+                "product_accuracy": 82.5
+            }
+        ]
     },
     // --- Iniciativas de Mapeamento em nível Nacional e Regional ---
     // --- PRODES and DETER ---
     "PRODES Deforestation, Warnings and Vegetation for Brazilian Biomes": {
-        "cobertura": "Nacional",
-        "sigla": "PRODES",
-        "provedor": "National Institute for Space Research (INPE)",
-        "fonte": "IRS, Sentinel-2 MSI, Landsat series, CBERS-4/4A",
-        "resolucao_espacial": ["20-30"],
-        "intervalo_temporal": [
+        "coverage": "National",
+        "acronym": "PRODES",
+        "provider": "National Institute for Space Research (INPE)",
+        "source": "IRS, Sentinel-2 MSI, Landsat series, CBERS-4/4A",
+        "spatial_resolution": 30,
+        "available_years": [
             2001,
             2002,
             2003,
@@ -246,24 +274,23 @@
             2022,
             2023
         ],
-        "frequencia_temporal": "Annual",
-        "frequencia_atualizacao": "Annual",
-        "sistema_referencia": "EPSG: 4674",
-        "metodologia": "Visual interpretation and Spectral Mixture Model applied to combined satellite data",
-        "metodo_classificacao": "Visual Interpretation",
-        "qnt_classes": "5",
-        "legenda_classes": "Deforestation In The Year, Residual In The Year, Hydrography, Non-Forest (Only For Legal Amazon), Natural Vegetation/Forest",
-        "acuracia_geral": "93"
+        "temporal_frequency": "Annual",
+        "update_frequency": "Annual",
+        "reference_system": "EPSG:4674",
+        "methodology": "Visual interpretation and Spectral Mixture Model applied to combined satellite data",
+        "classification_method": "Visual Interpretation",
+        "number_of_classes": 5,
+        "class_legend": "Deforestation In The Year, Residual In The Year, Hydrography, Non-Forest (Only For Legal Amazon), Natural Vegetation/Forest",
+        "overall_accuracy": 93.0
     },
-       // --- Iniciativas de Mapeamento em nível Nacional e Regional ---
-    // --- PRODES and DETER ---
+    // --- DETER ---
     "DETER Deforestation, Warnings and Vegetation for Brazilian Biomes": {
-        "cobertura": "Nacional",
-        "sigla": "DETER",
-        "provedor": "National Institute for Space Research (INPE)",
-        "fonte": "MODIS Terra/Aqua, CBERS series, Amazônia-1",
-        "resolucao_espacial": ["56-64"],
-        "intervalo_temporal": [
+        "coverage": "National",
+        "acronym": "DETER",
+        "provider": "National Institute for Space Research (INPE)",
+        "source": "MODIS Terra/Aqua, CBERS series, Amazônia-1",
+        "spatial_resolution": 64,
+        "available_years": [
             2001,
             2002,
             2003,
@@ -288,25 +315,25 @@
             2022,
             2023
         ],
-        "frequencia_temporal": "Annual",
-        "frequencia_atualizacao": "Annual",
-        "sistema_referencia": "EPSG: 4674",
-        "metodologia": "Visual interpretation and Spectral Mixture Model applied to combined satellite data",
-        "metodo_classificacao": "Visual Interpretation and Spectral Mixture Model",
-        "qnt_classes": "3",
-        "legenda_classes": "Deforestation (With Bare Soil, Vegetation and Mining), Degradation (Degradation, Wildfire Scar), Logging (Selective Cut Type 1 - Disordered And Selective Cut Type 2 - Geometric)",
-        "acuracia_geral": "93"
+        "temporal_frequency": "Annual",
+        "update_frequency": "Annual",
+        "reference_system": "EPSG:4674",
+        "methodology": "Visual interpretation and Spectral Mixture Model applied to combined satellite data",
+        "classification_method": "Visual Interpretation and Spectral Mixture Model",
+        "number_of_classes": 3,
+        "class_legend": "Deforestation (With Bare Soil, Vegetation and Mining), Degradation (Degradation, Wildfire Scar), Logging (Selective Cut Type 1 - Disordered And Selective Cut Type 2 - Geometric)",
+        "overall_accuracy": 93.0
     },
     // --- TerraClass Amazônia ---
     "TerraClass Amazonia": {
-        "cobertura": "Regional",
-        "sigla": "TerraClass Amazonia",
-        "provedor": "National Institute for Space Research (INPE) and Brazilian Agricultural Research Corporation (Embrapa)",
-        "fonte": "Sentinel-2 MSI",
-        "fonte_old": "Landsat-5 TM and MODIS Terra/Aqua",
-        "resolucao_espacial": "10",
-        "resolucao_espacial_old": "30",
-        "intervalo_temporal": [
+        "coverage": "Regional",
+        "acronym": "TerraClass Amazonia",
+        "provider": "National Institute for Space Research (INPE) and Brazilian Agricultural Research Corporation (Embrapa)",
+        "source": "Sentinel-2 MSI",
+        "previous_source": "Landsat-5 TM and MODIS Terra/Aqua",
+        "spatial_resolution": 10,
+        "previous_spatial_resolution": 30,
+        "available_years": [
             2008,
             2010,
             2012,
@@ -316,46 +343,46 @@
             2020,
             2022
         ],
-        "frequencia_temporal": "Annual",
-        "frequencia_atualizacao": "Annual",
-        "sistema_referencia": "EPSG:4674",
-        "metodologia": "Visual interpretation, Supervised Bhattacharya classifier, time-series classification based on Random Forest and Deep Learning algorithms.",
-        "metodo_classificacao": "Visual Interpretation, Supervised Bhattacharya Classification, and Deep Learning",
-        "qnt_classes": "18",
-        "legenda_classes": "Primary Natural Forest Vegetation, Secondary Natural Forest Vegetation, Forestry, Shrub/Arboreal Pasture, Herbaceous Pasture, Perennial Agricultural Crops, Semi-Perennial Agricultural Crops, Temporary Agricultural Crops Of 1 Cycle, Temporary Agricultural Crops Of More Than 1 Cycle, Temporary Agricultural Crops, Mining, Urbanized, Other Uses, Not Observed, Deforestation In The Year, Non-Forest, Natural Non-Forest, Body Of Water",
-        "acuracia_geral": "93.9"
+        "temporal_frequency": "Annual",
+        "update_frequency": "Annual",
+        "reference_system": "EPSG:4674",
+        "methodology": "Visual interpretation, Supervised Bhattacharya classifier, time-series classification based on Random Forest and Deep Learning algorithms",
+        "classification_method": "Visual Interpretation, Supervised Bhattacharya Classification, and Deep Learning",
+        "number_of_classes": 18,
+        "class_legend": "Primary Natural Forest Vegetation, Secondary Natural Forest Vegetation, Forestry, Shrub/Arboreal Pasture, Herbaceous Pasture, Perennial Agricultural Crops, Semi-Perennial Agricultural Crops, Temporary Agricultural Crops Of 1 Cycle, Temporary Agricultural Crops Of More Than 1 Cycle, Temporary Agricultural Crops, Mining, Urbanized, Other Uses, Not Observed, Deforestation In The Year, Non-Forest, Natural Non-Forest, Body Of Water",
+        "overall_accuracy": 93.9
     },
     // --- TerraClass Cerrado ---
     "TerraClass Cerrado": {
-        "cobertura": "Regional",
-        "sigla": "TerraClass Cerrado",
-        "provedor": "National Institute for Space Research (INPE) and Brazilian Agricultural Research Corporation (Embrapa)",
-        "fonte": "Sentinel-2 MSI",
-        "fonte_old": "Landsat-5 TM and MODIS Terra/Aqua",
-        "resolucao_espacial": "10",
-        "resolucao_espacial_old": "30",
-        "intervalo_temporal": [
+        "coverage": "Regional",
+        "acronym": "TerraClass Cerrado",
+        "provider": "National Institute for Space Research (INPE) and Brazilian Agricultural Research Corporation (Embrapa)",
+        "source": "Sentinel-2 MSI",
+        "previous_source": "Landsat-5 TM and MODIS Terra/Aqua",
+        "spatial_resolution": 10,
+        "previous_spatial_resolution": 30,
+        "available_years": [
             2018,
             2020,
             2022
         ],
-        "frequencia_temporal": "Annual",
-        "frequencia_atualizacao": "Annual",
-        "sistema_referencia": "EPSG:4674",
-        "metodologia": "Visual interpretation, Supervised Bhattacharya classifier, time-series classification based on Random Forest and Deep Learning algorithms.",
-        "metodo_classificacao": "Visual Interpretation, Supervised Bhattacharya Classification, and Deep Learning",
-        "qnt_classes": "15",
-        "legenda_classes": "Primary Natural Forest Vegetation, Secondary Natural Forest Vegetation, Forestry, Pasture, Perennial Agricultural Crops, Semi-Perennial Agricultural Crops, Temporary Agricultural Crops Of 1 Cycle, Temporary Agricultural Crops Of More Than 1 Cycle, Mining, Urbanized, Other Built Areas, Other Uses, Not Observed, Deforestation In The Year, Body Of Water",
-        "acuracia_geral": "90.9"
+        "temporal_frequency": "Annual",
+        "update_frequency": "Annual",
+        "reference_system": "EPSG:4674",
+        "methodology": "Visual interpretation, Supervised Bhattacharya classifier, time-series classification based on Random Forest and Deep Learning algorithms",
+        "classification_method": "Visual Interpretation, Supervised Bhattacharya Classification, and Deep Learning",
+        "number_of_classes": 15,
+        "class_legend": "Primary Natural Forest Vegetation, Secondary Natural Forest Vegetation, Forestry, Pasture, Perennial Agricultural Crops, Semi-Perennial Agricultural Crops, Temporary Agricultural Crops Of 1 Cycle, Temporary Agricultural Crops Of More Than 1 Cycle, Mining, Urbanized, Other Built Areas, Other Uses, Not Observed, Deforestation In The Year, Body Of Water",
+        "overall_accuracy": 90.9
     },
-        // --- MapBiomas Brasil ---
+    // --- MapBiomas Brasil ---
     "MapBiomas Brasil": {
-        "cobertura": "National",
-        "sigla": "MapBiomas",
-        "provedor": "Non-governmental Organizations (NGO's), Universities and Technology Companies",
-        "fonte": "Landsat series",
-        "resolucao_espacial": "30",
-        "intervalo_temporal": [
+        "coverage": "National",
+        "acronym": "MapBiomas",
+        "provider": "Non-governmental Organizations (NGO's), Universities and Technology Companies",
+        "source": "Landsat series",
+        "spatial_resolution": 30,
+        "available_years": [
             1985,
             1986,
             1987,
@@ -396,25 +423,33 @@
             2022,
             2023
         ],
-        "frequencia_temporal": "Annual",
-        "frequencia_atualizacao": "Annual",
-        "sistema_referencia": "EPSG: 4326",
-        "metodologia": "Supervised Random Forest and U-Net Deep learning algorithms applied to Landsat series data.",
-        "metodo_classificacao": "Supervised Random Forest and Deep Learning",
-        "qnt_classes": "29",
-        "legenda_classes": "Forest, Non-Forest Natural Formation, Farming, Non-Vegetated Area, Water And Not Observed, And More",
-        "acuracia_geral": "90.0",
-        "produtos_disponiveis": ["Collection 8 (c.8)", "Collection 9 (c.9)"],
-        "acuracia_por_produto": ["86.0","90.0"]
+        "temporal_frequency": "Annual",
+        "update_frequency": "Annual",
+        "reference_system": "EPSG:4326",
+        "methodology": "Supervised Random Forest and U-Net Deep learning algorithms applied to Landsat series data",
+        "classification_method": "Supervised Random Forest and Deep Learning",
+        "number_of_classes": 29,
+        "class_legend": "Forest, Non-Forest Natural Formation, Farming, Non-Vegetated Area, Water And Not Observed, And More",
+        "overall_accuracy": 90.0,
+        "detailed_products": [
+            {
+                "product_name": "Collection 8 (c.8)",
+                "product_accuracy": 86.0
+            },
+            {
+                "product_name": "Collection 9 (c.9)",
+                "product_accuracy": 90.0
+            }
+        ]
     },
     // --- IBGE Monitoramento ---
     "IBGE Monitoramento": {
-        "cobertura": "National",
-        "sigla": "IBGE-MLCU",
-        "provedor": "Brazilian Institute of Geography and Statistics (IBGE)",
-        "fonte": "Landsat-8 OLI.",
-        "resolucao_espacial": "30",
-        "intervalo_temporal": [
+        "coverage": "National",
+        "acronym": "IBGE-MLCU",
+        "provider": "Brazilian Institute of Geography and Statistics (IBGE)",
+        "source": "Landsat-8 OLI",
+        "spatial_resolution": 30,
+        "available_years": [
             2000,
             2002,
             2004,
@@ -427,23 +462,23 @@
             2018,
             2020
         ],
-        "frequencia_temporal": "Biennial since 2010",
-        "frequencia_atualizacao": "Biennial",
-        "sistema_referencia": "EPSG:4674",
-        "metodologia": "Visual Interpretation applied to Landsat-8 satellite data.",
-        "metodo_classificacao": "Visual Interpretation",
-        "qnt_classes": "12",
-        "legenda_classes": "Artificial Area, Cropland, Managed Pasture, Mosaic Of Uses In Forest Area, Forestry, Forest Vegetation, Wetland, Grassland Vegetation, Mosaic Of Uses In Grassland, Inland Water Body, Coastal Water Body, Bare Area",
-        "acuracia_geral": "Not informed"
+        "temporal_frequency": "Biennial since 2010",
+        "update_frequency": "Biennial",
+        "reference_system": "EPSG:4674",
+        "methodology": "Visual Interpretation applied to Landsat-8 satellite data",
+        "classification_method": "Visual Interpretation",
+        "number_of_classes": 12,
+        "class_legend": "Artificial Area, Cropland, Managed Pasture, Mosaic Of Uses In Forest Area, Forestry, Forest Vegetation, Wetland, Grassland Vegetation, Mosaic Of Uses In Grassland, Inland Water Body, Coastal Water Body, Bare Area",
+        "overall_accuracy": "Not available"
     },
     // --- CONAB Agricultural Mapping ---
     "Agricultural Mapping": {
-        "cobertura": "National",
-        "sigla": "CONAB-AM",
-        "provedor": "National Supply Company (Conab)",
-        "fonte": "MODIS, Sentinel-2 MSI, and Landsat series",
-        "resolucao_espacial": ["20", "30"],
-        "intervalo_temporal": [
+        "coverage": "National",
+        "acronym": "CONAB-AM",
+        "provider": "National Supply Company (Conab)",
+        "source": "MODIS, Sentinel-2 MSI, and Landsat series",
+        "spatial_resolution": 25,
+        "available_years": [
             2018,
             2019,
             2020,
@@ -451,13 +486,13 @@
             2022,
             2023
         ],
-        "frequencia_temporal": "By Crop Year",
-        "frequencia_atualizacao": "Annual",
-        "sistema_referencia": "EPSG:4674",
-        "metodologia": "Machine Learning, regression, principal component analysis, and visual interpretation applied to multiple satellite data.",
-        "metodo_classificacao": "Machine Learning, Statistical Methods, Visual Interpretation",
-        "qnt_classes": "8",
-        "legenda_classes": "Cotton, irrigated rice, coffee, sugarcane, corn, soybean, others Summer and Winter crops (peanut, oat, canola, rye, barley, beans, sesame, sunflower, castor bean, sorghum, wheat, and triticale), and sugarcane mill",
-        "acuracia_geral": "Incomplete"
+        "temporal_frequency": "By Crop Year",
+        "update_frequency": "Annual",
+        "reference_system": "EPSG:4674",
+        "methodology": "Machine Learning, regression, principal component analysis, and visual interpretation applied to multiple satellite data",
+        "classification_method": "Machine Learning, Statistical Methods, Visual Interpretation",
+        "number_of_classes": 8,
+        "class_legend": "Cotton, irrigated rice, coffee, sugarcane, corn, soybean, others Summer and Winter crops (peanut, oat, canola, rye, barley, beans, sesame, sunflower, castor bean, sorghum, wheat, and triticale), and sugarcane mill",
+        "overall_accuracy": "Not available"
     }
 }

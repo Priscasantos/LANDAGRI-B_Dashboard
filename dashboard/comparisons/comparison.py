@@ -12,29 +12,10 @@ scripts_path = str(current_dir / "scripts")
 if scripts_path not in sys.path:
     sys.path.insert(0, scripts_path)
 
-# Importar funções de forma segura
-try:
-    from scripts.utilities.utils import safe_download_image
-except ImportError:
-    def safe_download_image(fig, filename, button_text):
-        st.info(f"Download available: {filename}")
-
-# Import English translations
-try:
-    from scripts.utilities.english_translations import (
-        translate_text, 
-        INTERFACE_TRANSLATIONS,
-        translate_chart_elements
-    )
-except ImportError:
-    def translate_text(text): return text
-    INTERFACE_TRANSLATIONS = {}
-    def translate_chart_elements(fig): return fig
 
 # Import graphics functions
 try:
     from scripts.plotting.generate_graphics import (
-        plot_resolucao_acuracia,
         plot_timeline,
         plot_annual_coverage_multiselect,
         plot_classes_por_iniciativa,
@@ -43,14 +24,35 @@ try:
         plot_acuracia_por_metodologia
     )
 except ImportError:
-    # Placeholders
-    def plot_resolucao_acuracia(*args): return go.Figure()
-    def plot_timeline(*args): return go.Figure()
-    def plot_annual_coverage_multiselect(*args): return go.Figure()
-    def plot_classes_por_iniciativa(*args): return go.Figure()
-    def plot_distribuicao_classes(*args): return go.Figure()
-    def plot_distribuicao_metodologias(*args): return go.Figure()
-    def plot_acuracia_por_metodologia(*args): return go.Figure()
+    # Placeholders otimizados
+    def plot_timeline(metadata, filtered_df):
+        """Placeholder para plot_timeline"""
+        return go.Figure().add_annotation(text="Função não disponível", xref="paper", yref="paper", x=0.5, y=0.5)
+    
+    def plot_annual_coverage_multiselect(metadata, filtered_df, selected_initiatives):
+        """Placeholder para plot_annual_coverage_multiselect"""
+        return go.Figure().add_annotation(text="Função não disponível", xref="paper", yref="paper", x=0.5, y=0.5)
+    
+    def plot_classes_por_iniciativa(filtered_df):
+        """Placeholder para plot_classes_por_iniciativa"""
+        return go.Figure().add_annotation(text="Função não disponível", xref="paper", yref="paper", x=0.5, y=0.5)
+    
+    def plot_distribuicao_classes(filtered_df):
+        """Placeholder para plot_distribuicao_classes"""
+        return go.Figure().add_annotation(text="Função não disponível", xref="paper", yref="paper", x=0.5, y=0.5)
+    
+    def plot_distribuicao_metodologias(method_counts):
+        """Placeholder para plot_distribuicao_metodologias"""
+        return go.Figure().add_annotation(text="Função não disponível", xref="paper", yref="paper", x=0.5, y=0.5)
+    
+    def plot_acuracia_por_metodologia(filtered_df):
+        """Placeholder para plot_acuracia_por_metodologia"""
+        return go.Figure().add_annotation(text="Função não disponível", xref="paper", yref="paper", x=0.5, y=0.5)
+
+# Add standalone placeholder for plot_resolucao_acuracia (not available in module)
+def plot_resolucao_acuracia(metadata, filtered_df):
+    """Placeholder para plot_resolucao_acuracia"""
+    return go.Figure().add_annotation(text="Função não disponível", xref="paper", yref="paper", x=0.5, y=0.5)
 
 # Import chart functions
 try:
@@ -60,68 +62,91 @@ try:
         create_ranking_chart
     )
 except ImportError:
-    # Placeholders
-    def create_comparison_matrix(*args): return go.Figure()
-    def create_improved_bubble_chart(*args): return go.Figure()
-    def create_ranking_chart(*args): return go.Figure()
+    # Placeholders otimizados
+    def create_comparison_matrix(produtos):
+        """Placeholder para create_comparison_matrix"""
+        return go.Figure().add_annotation(text="Função não disponível", xref="paper", yref="paper", x=0.5, y=0.5)
+    
+    def create_improved_bubble_chart(produtos):
+        """Placeholder para create_improved_bubble_chart"""
+        return go.Figure().add_annotation(text="Função não disponível", xref="paper", yref="paper", x=0.5, y=0.5)
+    
+    def create_ranking_chart(produtos):
+        """Placeholder para create_ranking_chart"""
+        return go.Figure().add_annotation(text="Função não disponível", xref="paper", yref="paper", x=0.5, y=0.5)
 
 # Import table functions
 try:
-    from scripts.utilities.tables import gap_analysis, safe_dataframe_display
+    from scripts.utilities.tables import gap_analysis
 except ImportError:
-    def gap_analysis(*args): return pd.DataFrame()
-    def safe_dataframe_display(*args): pass
+    def gap_analysis(metadata, filtered_df):
+        """Placeholder para gap_analysis"""
+        return pd.DataFrame()
+
 
 def run():
     # Load original data and prepare for filters
     if 'df_original' not in st.session_state or 'metadata' not in st.session_state:
         try:
-            from scripts.data_generation.data_processing import load_data, prepare_plot_data
-            df_loaded, metadata_loaded = load_data(
-                "data/processed/initiatives_processed.csv",
-                "data/processed/metadata_processed.json"
-            )
-        except ImportError:
-            st.error("Error loading data. Check if modules are available.")
+            # Import atualizado usando o wrapper
+            from scripts.data_generation.data_wrapper import load_data, prepare_plot_data
+            df_loaded, metadata_loaded = load_data()
+            
+            # Usar caminhos padrão se não conseguir carregar
+            if df_loaded.empty:
+                st.warning("⚠️ No data loaded from wrapper. Using fallback method.")
+                try:
+                    df_loaded = pd.read_csv("data/processed/initiatives_processed.csv")
+                    with open("data/processed/metadata_processed.json", 'r', encoding='utf-8') as f:
+                        import json
+                        metadata_loaded = json.load(f)
+                except Exception as e:
+                    st.error(f"❌ Error loading data: {e}")
+                    return
+                    
+        except ImportError as e:
+            st.error(f"❌ Error importing data modules: {e}")
+            st.info("Please check if the data_wrapper module is available.")
             return
+        
         st.session_state.df_original = df_loaded
         st.session_state.metadata = metadata_loaded
         st.session_state.df_prepared_initial = prepare_plot_data(df_loaded.copy())
 
     df = st.session_state.df_prepared_initial
     meta_geral = st.session_state.metadata
-    df_geral_original = st.session_state.df_original
-
-    # Create nome to sigla mapping
+    df_geral_original = st.session_state.df_original    # Create nome to sigla mapping
     nome_to_sigla = {}
-    if df_geral_original is not None and not df_geral_original.empty and 'Sigla' in df_geral_original.columns:
+    if df_geral_original is not None and not df_geral_original.empty and 'Acronym' in df_geral_original.columns:
         for _, row in df_geral_original.iterrows():
-            nome_to_sigla[row['Nome']] = row['Sigla']
+            nome_to_sigla[row['Name']] = row['Acronym']
 
     # Add Display_Name column for consistent sigla usage
     if 'Display_Name' not in df.columns:
-        df['Display_Name'] = df['Nome'].map(lambda x: nome_to_sigla.get(x, x[:10]))
+        df['Display_Name'] = df['Name'].map(lambda x: nome_to_sigla.get(x, x[:10]))
 
     # Modern filters at the top of the page (translated to English)
     st.markdown("### 🔎 Initiative Filters")
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        tipos = df["Tipo"].unique().tolist()
+        tipos = df["Type"].unique().tolist()
         selected_types = st.multiselect("Type", options=tipos, default=tipos)
     with col2:
-        min_res, max_res = int(df["Resolução (m)"].min()), int(df["Resolução (m)"].max())
+        min_res, max_res = int(df["Resolution (m)"].min()), int(df["Resolution (m)"].max())
         selected_res = st.slider("Resolution (m)", min_value=min_res, max_value=max_res, value=(min_res, max_res))
     with col3:
-        min_acc, max_acc = int(df["Acurácia (%)"].min()), int(df["Acurácia (%)"].max())
+        min_acc, max_acc = int(df["Accuracy (%)"].min()), int(df["Accuracy (%)"].max())
         selected_acc = st.slider("Accuracy (%)", min_value=min_acc, max_value=max_acc, value=(min_acc, max_acc))
     with col4:
-        metodologias = df["Metodologia"].unique().tolist()
-        selected_methods = st.multiselect("Methodology", options=metodologias, default=metodologias)    # Apply filters
+        metodologias = df["Methodology"].unique().tolist()
+        selected_methods = st.multiselect("Methodology", options=metodologias, default=metodologias)
+    
+    # Apply filters
     filtered_df = df[
-        (df["Tipo"].isin(selected_types)) &
-        (df["Resolução (m)"].between(selected_res[0], selected_res[1])) &
-        (df["Acurácia (%)"].between(selected_acc[0], selected_acc[1])) &
-        (df["Metodologia"].isin(selected_methods))
+        (df["Type"].isin(selected_types)) &
+        (df["Resolution (m)"].between(selected_res[0], selected_res[1])) &
+        (df["Accuracy (%)"].between(selected_acc[0], selected_acc[1])) &
+        (df["Methodology"].isin(selected_methods))
     ]
     st.session_state.filtered_df = filtered_df
 
@@ -145,11 +170,11 @@ def run():
 
     with tab1:
         st.subheader("Dual Bars: Accuracy x Resolution")
-        df_filt_limited['resolucao_norm'] = (1 / df_filt_limited['Resolução (m)']) / (1 / df_filt_limited['Resolução (m)']).max()
+        df_filt_limited['resolucao_norm'] = (1 / df_filt_limited['Resolution (m)']) / (1 / df_filt_limited['Resolution (m)']).max()
         fig = go.Figure()
         fig.add_trace(go.Bar(
             y=df_filt_limited['Display_Name'],  # Use siglas for y-axis
-            x=df_filt_limited['Acurácia (%)'],
+            x=df_filt_limited['Accuracy (%)'],
             name='Accuracy (%)',
             orientation='h',
             marker_color='royalblue'        ))
@@ -164,18 +189,15 @@ def run():
             barmode='group',
             xaxis_title='Value (%)',
             yaxis_title='Initiative',
-            title='Comparison: Accuracy vs Resolution',
-            height=max(400, len(df_filt_limited) * 25)
+            title='Comparison: Accuracy vs Resolution',            height=max(400, len(df_filt_limited) * 25)
         )
         st.plotly_chart(fig, use_container_width=True, key="dual_bars_chart")
-        safe_download_image(fig, "dual_bars_comparison.png", "⬇️ Download Chart")
 
         # Enhanced Analysis Features (translated to English)
         st.markdown("---")
         st.markdown("### 📊 Advanced Analysis")
         
-        # Methodology Comparative Analysis
-        st.markdown("#### 📈 Comparative Analysis by Methodology")
+        # Methodology Comparative Analysis        st.markdown("#### 📈 Comparative Analysis by Methodology")
         
         if meta_geral:
             # Create timeline data for methodology analysis
@@ -185,18 +207,20 @@ def run():
             # Map products to get technical characteristics
             if df_geral_original is not None and not df_geral_original.empty:
                 for _, row in df_geral_original.iterrows():
-                    produto_info[row['Nome']] = {
-                        'metodologia': row.get('Metodologia', 'N/A'),
-                        'escopo': row.get('Escopo', 'N/A'),
-                        'acuracia': row.get('Acurácia (%)', 0),
-                        'resolucao': row.get('Resolução (m)', 0)
+                    produto_info[row['Name']] = {
+                        'metodologia': row.get('Methodology', 'N/A'),
+                        'escopo': row.get('Scope', 'N/A'),
+                        'acuracia': row.get('Accuracy (%)', 0),
+                        'resolucao': row.get('Resolution (m)', 0)
                     }
             
             # Collect all years from all initiatives
             for nome, meta in meta_geral.items():
-                if 'anos_disponiveis' in meta and meta['anos_disponiveis']:
+                # Try both possible keys for temporal data
+                years_key = 'available_years' if 'available_years' in meta else 'anos_disponiveis'
+                if years_key in meta and meta[years_key]:
                     info = produto_info.get(nome, {})
-                    for ano in meta['anos_disponiveis']:
+                    for ano in meta[years_key]:
                         timeline_data.append({
                             'produto': nome,
                             'ano': ano,
@@ -235,7 +259,7 @@ def run():
                 st.dataframe(metod_stats, use_container_width=True)
                 
                 # LULC Products Accuracy Ranking
-                if df_geral_original is not None and not df_geral_original.empty and 'Acurácia (%)' in df_geral_original.columns:
+                if df_geral_original is not None and not df_geral_original.empty and 'Accuracy (%)' in df_geral_original.columns:
                     st.markdown("#### 🏆 Ranking de Acurácia dos Produtos LULC")
                     
                     # Create ranking data
@@ -245,10 +269,10 @@ def run():
                         metodologia = produto_timeline['metodologia']
                         
                         # Get accuracy data
-                        produto_row = df_geral_original[df_geral_original['Nome'] == produto]
+                        produto_row = df_geral_original[df_geral_original['Name'] == produto]
                         if not produto_row.empty:
-                            acuracia = produto_row['Acurácia (%)'].iloc[0] if pd.notna(produto_row['Acurácia (%)'].iloc[0]) else 0
-                            resolucao = produto_row['Resolução (m)'].iloc[0] if 'Resolução (m)' in produto_row.columns and pd.notna(produto_row['Resolução (m)'].iloc[0]) else 0
+                            acuracia = produto_row['Accuracy (%)'].iloc[0] if pd.notna(produto_row['Accuracy (%)'].iloc[0]) else 0
+                            resolucao = produto_row['Resolution (m)'].iloc[0] if 'Resolution (m)' in produto_row.columns and pd.notna(produto_row['Resolution (m)'].iloc[0]) else 0
                         else:
                             acuracia = 0
                             resolucao = 0
@@ -282,19 +306,20 @@ def run():
                             color='metodologia',
                             orientation='h',
                             title='🏆 Ranking de Acurácia dos Produtos LULC',
-                            labels={'acuracia': 'Acurácia (%)', 'produto': 'Produto'},
+                            labels={'acuracia': 'Accuracy (%)', 'produto': 'Produto'},
                             color_discrete_sequence=px.colors.qualitative.Set1,
                             text='acuracia'
                         )
                         
                         fig_ranking.update_traces(
                             texttemplate='%{text:.1f}%', 
-                            textposition='outside',                            marker_line=dict(width=2, color='white')
+                            textposition='outside',
+                            marker_line=dict(width=2, color='white')
                         )
                         
                         fig_ranking.update_layout(
                             height=max(400, len(ranking_sorted) * 25),
-                            xaxis_title='Acurácia (%)',
+                            xaxis_title='Accuracy (%)',
                             yaxis_title='Produtos LULC',
                             font=dict(size=12, color="#2D3748"),
                             plot_bgcolor="#FFFFFF",
@@ -312,7 +337,6 @@ def run():
                         )
                         
                         st.plotly_chart(fig_ranking, use_container_width=True, key="ranking_acuracia_tab1")
-                        safe_download_image(fig_ranking, "ranking_acuracia_lulc.png", "⬇️ Baixar Ranking (PNG)")
                         
                         # Top 5 and Bottom 5
                         col1, col2 = st.columns(2)
@@ -356,27 +380,25 @@ def run():
             st.warning("⚠️ Metadados não disponíveis para análise de metodologia.")
     
     with tab2:
-        st.subheader("Spatial Resolution vs Accuracy (Scatter)")
-        # Modern scatterplot with siglas
+        st.subheader("Spatial Resolution vs Accuracy (Scatter)")        # Modern scatterplot with siglas
         fig_scatter = px.scatter(
             df_filt_limited,
-            x='Resolução (m)',
-            y='Acurácia (%)',
-            color='Metodologia' if 'Metodologia' in df_filt_limited.columns else None,
+            x='Resolution (m)',
+            y='Accuracy (%)',
+            color='Methodology' if 'Methodology' in df_filt_limited.columns else None,
             hover_name='Display_Name',  # Use siglas for hover
             size='Classes' if 'Classes' in df_filt_limited.columns else None,
             title="Accuracy vs Spatial Resolution",
             labels={
-                'Resolução (m)': 'Spatial Resolution (m)',
-                'Acurácia (%)': 'Accuracy (%)',
-                'Metodologia': 'Methodology',
+                'Resolution (m)': 'Spatial Resolution (m)',
+                'Accuracy (%)': 'Accuracy (%)',
+                'Methodology': 'Methodology',
                 'Classes': 'No. of Classes'
             },
             height=500
         )
         fig_scatter.update_traces(marker=dict(size=14, opacity=0.8, line=dict(width=2, color='white')))
         st.plotly_chart(fig_scatter, use_container_width=True, key="scatter_resolution_accuracy")
-        safe_download_image(fig_scatter, "scatter_resolution_accuracy.png", "⬇️ Download Scatter (PNG)")
         
         st.subheader("Temporal Availability of Initiatives")
         try:
@@ -387,13 +409,11 @@ def run():
             fig_disp.add_annotation(text="Overlap function not available", 
                                   xref="paper", yref="paper", x=0.5, y=0.5)
         st.plotly_chart(fig_disp, use_container_width=True, key="temporal_availability")
-        safe_download_image(fig_disp, "temporal_availability.png", "⬇️ Download Availability (PNG)")
 
     with tab3:
         st.markdown('<div class="timeline-container"><h2 class="timeline-title">📅 General Timeline of Initiatives</h2></div>', unsafe_allow_html=True)
         fig_timeline = plot_timeline(meta_geral, df_geral_original)
         st.plotly_chart(fig_timeline, use_container_width=True, key="general_timeline")
-        safe_download_image(fig_timeline, "general_timeline.png", "⬇️ Download Timeline (PNG)")
         
         # Methodology Evolution Over Time Chart (translated to English)
         if meta_geral and df_geral_original is not None and not df_geral_original.empty:
@@ -402,19 +422,19 @@ def run():
             # Create enhanced timeline data for methodology analysis
             timeline_data = []
             produto_info = {}
-            
-            # Map products to get methodology information
+              # Map products to get methodology information
             for _, row in df_geral_original.iterrows():
-                produto_info[row['Nome']] = {
-                    'metodologia': row.get('Metodologia', 'N/A'),
-                    'escopo': row.get('Escopo', 'N/A')
+                produto_info[row['Name']] = {
+                    'metodologia': row.get('Methodology', 'N/A'),
+                    'escopo': row.get('Scope', 'N/A')
                 }
-            
-            # Collect all years from all initiatives with methodology info
+              # Collect all years from all initiatives with methodology info
             for nome, meta in meta_geral.items():
-                if 'anos_disponiveis' in meta and meta['anos_disponiveis']:
+                # Try both possible keys for temporal data
+                years_key = 'available_years' if 'available_years' in meta else 'anos_disponiveis'
+                if years_key in meta and meta[years_key]:
                     info = produto_info.get(nome, {})
-                    for ano in meta['anos_disponiveis']:
+                    for ano in meta[years_key]:
                         timeline_data.append({
                             'produto': nome,
                             'ano': ano,
@@ -451,7 +471,6 @@ def run():
                 )
                 
                 st.plotly_chart(fig_metodologia_evolucao, use_container_width=True, key="metodologia_evolucao_tab3")
-                safe_download_image(fig_metodologia_evolucao, "evolucao_metodologias_tab3.png", "⬇️ Baixar Evolução (PNG)")
             else:
                 st.info("Dados insuficientes para análise de evolução de metodologias.")
         
@@ -491,26 +510,28 @@ def run():
             if meta_geral:
                 yearly_data = []
                 for nome, meta in meta_geral.items():
-                    if 'anos_disponiveis' in meta and meta['anos_disponiveis']:
+                    # Try both possible keys for temporal data
+                    years_key = 'available_years' if 'available_years' in meta else 'anos_disponiveis'
+                    if years_key in meta and meta[years_key]:
                         # Get accuracy from df_geral_original
-                        produto_row = df_geral_original[df_geral_original['Nome'] == nome]
-                        acuracia = produto_row['Acurácia (%)'].iloc[0] if not produto_row.empty and pd.notna(produto_row['Acurácia (%)'].iloc[0]) else 0
-                        resolucao = produto_row['Resolução (m)'].iloc[0] if not produto_row.empty and 'Resolução (m)' in produto_row.columns and pd.notna(produto_row['Resolução (m)'].iloc[0]) else 0
+                        produto_row = df_geral_original[df_geral_original['Name'] == nome]
+                        acuracia = produto_row['Accuracy (%)'].iloc[0] if not produto_row.empty and pd.notna(produto_row['Accuracy (%)'].iloc[0]) else 0
+                        resolucao = produto_row['Resolution (m)'].iloc[0] if not produto_row.empty and 'Resolution (m)' in produto_row.columns and pd.notna(produto_row['Resolution (m)'].iloc[0]) else 0
                         
-                        for ano in meta['anos_disponiveis']:
+                        for ano in meta[years_key]:
                             yearly_data.append({
                                 'Ano': ano,
-                                'Nome': nome,
-                                'Acurácia (%)': acuracia,
-                                'Resolução (m)': resolucao
+                                'Name': nome,
+                                'Accuracy (%)': acuracia,
+                                'Resolution (m)': resolucao
                             })
                 
                 if yearly_data:
                     yearly_df = pd.DataFrame(yearly_data)
                     cobertura_anual = yearly_df.groupby('Ano').agg(
-                        iniciativas_totais=('Nome', 'count'),
-                        acuracia_media=('Acurácia (%)', 'mean'),
-                        resolucao_media=('Resolução (m)', 'mean')
+                        iniciativas_totais=('Name', 'count'),
+                        acuracia_media=('Accuracy (%)', 'mean'),
+                        resolucao_media=('Resolution (m)', 'mean')
                     ).reset_index()
                     
                     fig_heatmap = px.bar(
@@ -526,11 +547,10 @@ def run():
                         font=dict(color="#2D3748"),
                         plot_bgcolor="#FFFFFF",
                         paper_bgcolor="#FFFFFF",
-                        xaxis=dict(color="#2D3748"),
+                        xaxis=dict(color="#2D3748"),                        
                         yaxis=dict(color="#2D3748")
                     )
                     st.plotly_chart(fig_heatmap, use_container_width=True, key="heatmap_cobertura_anual")
-                    safe_download_image(fig_heatmap, "heatmap_cobertura_anual.png", "⬇️ Baixar Heatmap (PNG)")
                 else:
                     st.info("Dados insuficientes para criar heatmap de cobertura anual.")
             else:
@@ -538,16 +558,51 @@ def run():
         
         with col2:
             st.markdown("##### Tendência da Acurácia ao Longo dos Anos")
-            if meta_geral and 'yearly_df' in locals() and not yearly_df.empty:
+            # Verificar se yearly_df foi criado adequadamente 
+            yearly_df = None
+            if meta_geral:
+                try:
+                    # Criar yearly_df novamente se necessário
+                    yearly_data = []
+                    for nome, meta in meta_geral.items():
+                        years = meta.get('available_years', [])
+                        if isinstance(years, str):
+                            try:
+                                years = [int(y.strip()) for y in years.split(',') if y.strip().isdigit()]
+                            except (ValueError, AttributeError):
+                                years = []
+                        elif not isinstance(years, list):
+                            years = []
+                        
+                        for year in years:
+                            # Buscar acurácia no DataFrame principal
+                            matching_row = df[df['Name'] == nome] if 'Name' in df.columns else pd.DataFrame()
+                            if not matching_row.empty:
+                                accuracy_col = 'Accuracy (%)' if 'Accuracy (%)' in matching_row.columns else 'Acuracia'
+                                accuracy = matching_row.iloc[0].get(accuracy_col, 0)
+                                yearly_data.append({
+                                    'Name': nome,
+                                    'Ano': year,
+                                    'Accuracy (%)': accuracy
+                                })
+                    
+                    if yearly_data:
+                        yearly_df = pd.DataFrame(yearly_data)
+                        
+                except Exception as e:
+                    st.warning(f"Erro ao processar dados temporais: {e}")
+            
+            if yearly_df is not None and not yearly_df.empty:
                 tendencia_acuracia = yearly_df.groupby('Ano').agg(
-                    acuracia_media=('Acurácia (%)', 'mean')
+                    acuracia_media=('Accuracy (%)', 'mean')
                 ).reset_index()
                 
                 fig_tendencia_acuracia = px.line(
                     tendencia_acuracia,
                     x='Ano',
                     y='acuracia_media',
-                    title="📉 Tendência da Acurácia Média ao Longo dos Anos",                    labels={"Ano": "Ano", "acuracia_media": "Acurácia Média (%)"},
+                    title="📉 Tendência da Acurácia Média ao Longo dos Anos",
+                    labels={"Ano": "Ano", "acuracia_media": "Acurácia Média (%)"},
                     markers=True
                 )
                 fig_tendencia_acuracia.update_traces(line=dict(width=2))
@@ -559,7 +614,6 @@ def run():
                     yaxis=dict(color="#2D3748")
                 )
                 st.plotly_chart(fig_tendencia_acuracia, use_container_width=True, key="tendencia_acuracia")
-                safe_download_image(fig_tendencia_acuracia, "tendencia_acuracia.png", "⬇️ Baixar Tendência (PNG)")
             else:
                 st.info("Dados insuficientes para análise de tendência.")
     
@@ -569,31 +623,27 @@ def run():
         with col1_tab3:
             fig_bar_classes = plot_classes_por_iniciativa(df_filt)
             st.plotly_chart(fig_bar_classes, use_container_width=True, key="bar_classes")
-            safe_download_image(fig_bar_classes, "classes_per_initiative.png", "⬇️ Download Bar Chart (PNG)")
         with col2_tab3:
             fig_hist_classes = plot_distribuicao_classes(df_filt)
             st.plotly_chart(fig_hist_classes, use_container_width=True, key="hist_classes")
-            safe_download_image(fig_hist_classes, "classes_distribution.png", "⬇️ Download Histogram (PNG)")
 
     with tab5:
         st.subheader("Distribution by Methodologies")
         col1_tab4, col2_tab4 = st.columns(2)
         with col1_tab4:
-            method_counts = df_filt['Metodologia'].value_counts()
+            method_counts = df_filt['Methodology'].value_counts()
             fig_metodologias = plot_distribuicao_metodologias(method_counts)
             st.plotly_chart(fig_metodologias, use_container_width=True, key="methodology_distribution")
-            safe_download_image(fig_metodologias, "methodology_distribution.png", "⬇️ Download Methodology Chart (PNG)")
         
         with col2_tab4:
             st.markdown("#### Accuracy by Methodology")
             fig_acuracia_metodologia = plot_acuracia_por_metodologia(df_filt)
             st.plotly_chart(fig_acuracia_metodologia, use_container_width=True, key="accuracy_methodology")
-            safe_download_image(fig_acuracia_metodologia, "accuracy_by_methodology.png", "⬇️ Download Accuracy Methodology (PNG)")
 
     with tab6:
         st.subheader("🕸️ Radar Analysis - Multi-dimensional Comparison")
         # Radar chart with top initiatives using siglas
-        radar_columns = ['Acurácia (%)', 'Resolução (m)', 'Classes']
+        radar_columns = ['Accuracy (%)', 'Resolution (m)', 'Classes']
         available_radar_cols = [col for col in radar_columns if col in df_filt.columns]
         
         if len(available_radar_cols) >= 2 and len(df_filt) >= 2:
@@ -617,26 +667,25 @@ def run():
                 with col2_radar:
                     sort_by = st.selectbox(
                         "Sort by",
-                        options=['Acurácia (%)', 'Resolução (m)', 'Classes'],
-                        help="Criteria to select top initiatives"
-                    )
-            
-            # Prepare radar data with siglas
-            if sort_by == 'Resolução (m)':
+                        options=['Accuracy (%)', 'Resolution (m)', 'Classes'],
+                        help="Criteria to select top initiatives"                    )
+                
+                # Prepare radar data with siglas
+            if sort_by == 'Resolution (m)':
                 # For resolution, lower is better, so sort ascending
-                top_initiatives = df_filt.nsmallest(num_initiatives, sort_by)
+                top_iniciativas = df_filt.nsmallest(num_initiatives, sort_by)
             else:
                 # For others, higher is better
-                top_initiatives = df_filt.nlargest(num_initiatives, sort_by)
+                top_iniciativas = df_filt.nlargest(num_initiatives, sort_by)
             
             # Use Display_Name (siglas) for radar chart
-            radar_df = top_initiatives[['Display_Name'] + available_radar_cols].copy()
+            radar_df = top_iniciativas[['Display_Name'] + available_radar_cols].copy()
             
             # Normalize data for radar chart (0-1 scale)
             for col in available_radar_cols:
                 min_val, max_val = df_filt[col].min(), df_filt[col].max()
                 if max_val - min_val > 0:
-                    if col == 'Resolução (m)':
+                    if col == 'Resolution (m)':
                         # Invert resolution (lower is better)
                         radar_df[col] = 1 - (radar_df[col] - min_val) / (max_val - min_val)
                     else:
@@ -677,7 +726,6 @@ def run():
                 height=600,
                 font=dict(size=12)            )
             st.plotly_chart(fig_radar, use_container_width=True, key="radar_comparison")
-            safe_download_image(fig_radar, "radar_comparison.png", "⬇️ Download Radar Chart (PNG)")
             
             # Show normalized values table with siglas
             st.markdown("#### 📊 Normalized Values (0-1 Scale)")
@@ -691,8 +739,8 @@ def run():
                 hide_index=True,
                 column_config={
                     "Display_Name": st.column_config.TextColumn("Initiative", width="large"),
-                    "Acurácia (%)": st.column_config.NumberColumn("Accuracy (norm.)", format="%.3f"),
-                    "Resolução (m)": st.column_config.NumberColumn("Resolution (norm.)", format="%.3f", help="Inverted: 1 = better resolution"),
+                    "Accuracy (%)": st.column_config.NumberColumn("Accuracy (norm.)", format="%.3f"),
+                    "Resolution (m)": st.column_config.NumberColumn("Resolution (norm.)", format="%.3f", help="Inverted: 1 = better resolution"),
                     "Classes": st.column_config.NumberColumn("Classes (norm.)", format="%.3f")
                 }
             )
@@ -710,7 +758,7 @@ def run():
                 # Find specialist initiatives using siglas
                 for col in available_radar_cols:
                     specialist = radar_df.loc[radar_df[col].idxmax(), 'Display_Name']
-                    col_display = "Resolution" if col == "Resolução (m)" else col.replace(" (%)", "")
+                    col_display = "Resolution" if col == "Resolution (m)" else col.replace(" (%)", "")
                     st.info(f"🎯 **Specialist in {col_display}:** {specialist}")
             
             with insights_col2:
@@ -718,7 +766,7 @@ def run():
                 st.markdown("**📈 Performance Distribution:**")
                 for col in available_radar_cols:
                     avg_performance = radar_df[col].mean()
-                    col_display = "Resolution" if col == "Resolução (m)" else col.replace(" (%)", "")
+                    col_display = "Resolution" if col == "Resolution (m)" else col.replace(" (%)", "")
                     performance_level = "High" if avg_performance > 0.7 else "Medium" if avg_performance > 0.4 else "Low"
                     st.write(f"• **{col_display}:** {performance_level} ({avg_performance:.2f})")
                 
@@ -751,17 +799,19 @@ def run():
             # Map products to get technical characteristics
             if df_geral_original is not None and not df_geral_original.empty:
                 for _, row in df_geral_original.iterrows():
-                    produto_info[row['Nome']] = {
-                        'metodologia': row.get('Metodologia', 'N/A'),
-                        'escopo': row.get('Escopo', 'N/A'),
-                        'acuracia': row.get('Acurácia (%)', 0),
-                        'resolucao': row.get('Resolução (m)', 0)
+                    produto_info[row['Name']] = {
+                        'metodologia': row.get('Methodology', 'N/A'),
+                        'escopo': row.get('Scope', 'N/A'),
+                        'acuracia': row.get('Accuracy (%)', 0),
+                        'resolucao': row.get('Resolution (m)', 0)
                     }
               # Collect all years from all initiatives
             for nome, meta in meta_geral.items():
-                if 'anos_disponiveis' in meta and meta['anos_disponiveis']:
+                # Try both possible keys for temporal data
+                years_key = 'available_years' if 'available_years' in meta else 'anos_disponiveis'
+                if years_key in meta and meta[years_key]:
                     info = produto_info.get(nome, {})
-                    for ano in meta['anos_disponiveis']:
+                    for ano in meta[years_key]:
                         timeline_data.append({
                             'produto': nome,
                             'ano': ano,
@@ -803,7 +853,7 @@ def run():
                 st.dataframe(metod_stats, use_container_width=True)
                 
                 # LULC Products Accuracy Ranking
-                if df_geral_original is not None and not df_geral_original.empty and 'Acurácia (%)' in df_geral_original.columns:
+                if df_geral_original is not None and not df_geral_original.empty and 'Accuracy (%)' in df_geral_original.columns:
                     st.markdown("#### 🏆 Ranking de Acurácia dos Produtos LULC")
                     
                     # Create ranking data
@@ -813,10 +863,10 @@ def run():
                         metodologia = produto_timeline['metodologia']
                         
                         # Get accuracy data
-                        produto_row = df_geral_original[df_geral_original['Nome'] == produto]
+                        produto_row = df_geral_original[df_geral_original['Name'] == produto]
                         if not produto_row.empty:
-                            acuracia = produto_row['Acurácia (%)'].iloc[0] if pd.notna(produto_row['Acurácia (%)'].iloc[0]) else 0
-                            resolucao = produto_row['Resolução (m)'].iloc[0] if 'Resolução (m)' in produto_row.columns and pd.notna(produto_row['Resolução (m)'].iloc[0]) else 0
+                            acuracia = produto_row['Accuracy (%)'].iloc[0] if pd.notna(produto_row['Accuracy (%)'].iloc[0]) else 0
+                            resolucao = produto_row['Resolution (m)'].iloc[0] if 'Resolution (m)' in produto_row.columns and pd.notna(produto_row['Resolution (m)'].iloc[0]) else 0
                         else:
                             acuracia = 0
                             resolucao = 0
@@ -850,7 +900,7 @@ def run():
                             color='metodologia',
                             orientation='h',
                             title='🏆 Ranking de Acurácia dos Produtos LULC',
-                            labels={'acuracia': 'Acurácia (%)', 'produto': 'Produto'},
+                            labels={'acuracia': 'Accuracy (%)', 'produto': 'Produto'},
                             color_discrete_sequence=px.colors.qualitative.Set1,
                             text='acuracia'
                         )
@@ -858,11 +908,12 @@ def run():
                         fig_ranking.update_traces(
                             texttemplate='%{text:.1f}%', 
                             textposition='outside',
-                            marker_line=dict(width=2, color='white')                        )
+                            marker_line=dict(width=2, color='white')
+                        )
                         
                         fig_ranking.update_layout(
                             height=max(400, len(ranking_sorted) * 25),
-                            xaxis_title='Acurácia (%)',
+                            xaxis_title='Accuracy (%)',
                             yaxis_title='Produtos LULC',
                             font=dict(size=12, color="#2D3748"),
                             plot_bgcolor="#FFFFFF",
@@ -880,7 +931,6 @@ def run():
                         )
                         
                         st.plotly_chart(fig_ranking, use_container_width=True, key="ranking_acuracia_tab6")
-                        safe_download_image(fig_ranking, "ranking_acuracia_lulc.png", "⬇️ Baixar Ranking (PNG)")
                         
                         # Top 5 and Bottom 5
                         col1, col2 = st.columns(2)
@@ -957,4 +1007,3 @@ def run():
                 )
                 
                 st.plotly_chart(fig_metodologia_evolucao, use_container_width=True, key="metodologia_evolucao")
-                safe_download_image(fig_metodologia_evolucao, "evolucao_metodologias.png", "⬇️ Baixar Evolução (PNG)")

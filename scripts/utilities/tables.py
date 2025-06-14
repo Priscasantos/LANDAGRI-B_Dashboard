@@ -4,10 +4,11 @@ import os
 from typing import Dict, Any
 
 def load_processed_data():
-    """Carrega dados processados do diretório initiative_data"""
+    """Carrega dados processados do diretório data/processed"""
     try:
         base_path = os.path.dirname(os.path.abspath(__file__))
-        data_path = os.path.join(base_path, '..', 'initiative_data')
+        # Corrected path to go up two levels to workspace root, then to data/processed
+        data_path = os.path.join(base_path, '..', '..', 'data', 'processed')
         
         # Carregar metadados processados  
         meta_path = os.path.join(data_path, 'metadata_processed.json')
@@ -33,8 +34,8 @@ def gap_analysis(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> pd.Data
     gap_data = []
     
     # Usar nomes das iniciativas do filtered_df se disponível, senão usar todos
-    if filtered_df is not None and not filtered_df.empty and 'Nome' in filtered_df.columns:
-        nomes_filtrados = filtered_df['Nome'].tolist()
+    if filtered_df is not None and not filtered_df.empty and 'Name' in filtered_df.columns:  # Changed 'Nome' to 'Name'
+        nomes_filtrados = filtered_df['Name'].tolist() # Changed 'Nome' to 'Name'
     else:
         nomes_filtrados = list(processed_metadata.keys())
     
@@ -43,18 +44,18 @@ def gap_analysis(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> pd.Data
             meta_info = processed_metadata[nome]
             
             gap_data.append({
-                'Nome': nome,
-                'Primeiro Ano': meta_info.get('primeiro_ano'),
-                'Último Ano': meta_info.get('ultimo_ano'), 
-                'Número de anos com lacuna temporal': meta_info.get('anos_com_lacuna', 0),
-                'Maior lacuna temporal': meta_info.get('maior_lacuna', 0),
-                'Tipo': meta_info.get('tipo', 'Desconhecido')
+                'Name': nome, # Changed 'Nome' to 'Name'
+                'First Year': meta_info.get('first_year'), # Changed 'primeiro_ano' to 'first_year'
+                'Last Year': meta_info.get('last_year'), # Changed 'ultimo_ano' to 'last_year'
+                'Number of years with temporal gap': meta_info.get('years_with_gap', 0), # Changed 'anos_com_lacuna' to 'years_with_gap'
+                'Largest temporal gap': meta_info.get('largest_gap', 0), # Changed 'maior_lacuna' to 'largest_gap'
+                'Type': meta_info.get('type', 'Unknown') # Changed 'tipo' to 'type' and 'Desconhecido' to 'Unknown'
             })
     
     gap_df = pd.DataFrame(gap_data)
     
     # Retornar apenas iniciativas com dados temporais válidos
-    return gap_df[gap_df['Primeiro Ano'].notna()].copy()
+    return gap_df[gap_df['First Year'].notna()].copy() # Changed 'Primeiro Ano' to 'First Year'
 
 def safe_dataframe_display(df: pd.DataFrame) -> str:
     """Convert DataFrame to HTML table for Streamlit display."""

@@ -1,27 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Generate Graphics Module - Import Hub
-=====================================
+Charts Package
+==============
 
-Central import hub for all chart generation functions.
-All chart functions have been modularized into separate files for better organization.
+Modular chart generation functions organized by category.
 
 Author: Dashboard Iniciativas LULC
 Date: 2024
 """
 
-# Import modularized chart functions
-from scripts.plotting.charts.timeline_chart import plot_timeline
-from scripts.plotting.charts.coverage_charts import plot_annual_coverage_multiselect, plot_ano_overlap, plot_heatmap
-from scripts.plotting.charts.distribution_charts import (
+# Import all chart functions for easy access
+from .timeline_chart import plot_timeline
+from .coverage_charts import plot_annual_coverage_multiselect, plot_ano_overlap, plot_heatmap
+from .distribution_charts import (
     plot_distribuicao_classes, 
     plot_classes_por_iniciativa, 
     plot_distribuicao_metodologias,
     plot_acuracia_por_metodologia,
     plot_resolution_accuracy
 )
-from scripts.plotting.charts.comparison_charts import (
+from .comparison_charts import (
     plot_scatter_resolution_accuracy,
     plot_comparison_matrix,
     plot_initiative_ranking,
@@ -29,7 +28,6 @@ from scripts.plotting.charts.comparison_charts import (
     plot_radar_comparison
 )
 
-# Re-export all functions for backward compatibility
 __all__ = [
     # Timeline charts
     'plot_timeline',

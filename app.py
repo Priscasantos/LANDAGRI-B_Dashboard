@@ -9,7 +9,15 @@ from pathlib import Path
 current_dir = Path(__file__).parent
 sys.path.append(str(current_dir / "scripts"))
 
-from scripts.data_generation.data_processor import load_data
+# Import atualizado usando o wrapper
+try:
+    from scripts.data_generation.data_wrapper import load_data
+except ImportError:
+    try:
+        from scripts.data_generation.lulc_data_engine import load_data
+    except ImportError:
+        st.error("❌ Error importing data loading functions. Please check module structure.")
+        st.stop()
 
 # Set environment variable to disable PyArrow optimization
 os.environ["STREAMLIT_BROWSER_GATHER_USAGE_STATS"] = "false"

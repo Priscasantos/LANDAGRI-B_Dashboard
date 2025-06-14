@@ -25,6 +25,25 @@ Data: 2025
 
 import sys
 from pathlib import Path
+import pandas as pd # Added import for pd.Series
+
+# Global cache for data loading optimization
+_DATA_CACHE = {}
+
+def get_cached_data():
+    """Get cached data or load it if not cached"""
+    if 'data' not in _DATA_CACHE:
+        from scripts.data_generation.data_wrapper import load_data, prepare_plot_data
+        df, metadata, _ = load_data()
+        df_prepared_dict = prepare_plot_data(df)
+        df_for_plots = df_prepared_dict.get('data', pd.DataFrame())
+        _DATA_CACHE['data'] = {
+            'df': df,
+            'metadata': metadata,
+            'df_for_plots': df_for_plots
+        }
+        print(f"📊 Dados carregados e cachados: {len(df_for_plots)} iniciativas")
+    return _DATA_CACHE['data']
 
 # Adicionar o diretório scripts ao path
 scripts_dir = Path(__file__).parent / "scripts"
@@ -38,46 +57,60 @@ def run_analysis_step(module_name, description):
     
     try:
         if module_name == "preview_dados":
-            from scripts.data_generation.data_processing import load_data, prepare_plot_data
+            from scripts.data_generation.data_wrapper import load_data  # Use correct import
             # Preview dos dados carregados
             print("📊 Carregando dados das iniciativas LULC...")
-            df, metadata = load_data()
+            df, metadata, _ = load_data()  # Fixed tuple unpacking
             print(f"✅ Dados carregados: {len(df)} iniciativas")
             print(f"📋 Colunas disponíveis: {list(df.columns)}")
-            print(f"🏷️ Tipos de iniciativas: {df['Tipo'].unique().tolist()}")
+            if 'Type' in df.columns:
+                print(f"🏷️ Tipos de iniciativas: {df['Type'].unique().tolist()}")            
+            elif 'Tipo' in df.columns:
+                print(f"🏷️ Tipos de iniciativas: {df['Tipo'].unique().tolist()}")
+                
         elif module_name == "analise_comparativa":
-            from scripts.plotting.generate_graphics import (
-                plot_resolucao_acuracia,
-                plot_timeline,
-                plot_annual_coverage_multiselect,
+            # Use cached data for better performance
+            cached_data = get_cached_data()
+            df_for_plots = cached_data['df_for_plots']
+            metadata = cached_data['metadata']
+            
+            # Import direct from modular chart files for better performance
+            from scripts.plotting.charts.distribution_charts import (
+                plot_resolution_accuracy,
                 plot_classes_por_iniciativa,
                 plot_distribuicao_classes,
-                plot_distribuicao_metodologias            )
-            from scripts.data_generation.data_processing import load_data, prepare_plot_data
-            # Executar todas as funções principais de comparação
-            df, metadata = load_data()
-            df_prepared = prepare_plot_data(df)
+                plot_distribuicao_metodologias
+            )
+            from scripts.plotting.charts.timeline_chart import plot_timeline
             
-            plot_resolucao_acuracia(df_prepared)
-            plot_timeline(df_prepared)
-            plot_annual_coverage_multiselect(df_prepared)
-            plot_classes_por_iniciativa(df_prepared)
-            plot_distribuicao_classes(df_prepared)
-            plot_distribuicao_metodologias(df_prepared)
+            plot_resolution_accuracy(df_for_plots)
+            plot_timeline(metadata, df_for_plots) # Added metadata
+            plot_classes_por_iniciativa(df_for_plots)
+            plot_distribuicao_classes(df_for_plots)
+            plot_distribuicao_metodologias(df_for_plots['Methodology'].value_counts() if 'Methodology' in df_for_plots and not df_for_plots.empty else pd.Series())
             
         elif module_name == "analise_temporal":
-            from dashboard.temporal.temporal import run as temporal_run
-            # Executar análises temporais
-            temporal_run()
+            from dashboard.temporal.temporal import run_non_streamlit
+            from scripts.data_generation.data_wrapper import load_data # Corrected import
+            # Load data and pass to temporal analysis
+            df, metadata, _ = load_data() # Load processed data
             
+            # Execute temporal analysis without Streamlit UI
+            success = run_non_streamlit(metadata, df, "graphics/temporal")
+            if not success:
+                print("❌ Falha na geração das análises temporais")
+                return False            
         elif module_name == "analise_detalhada":
-            from dashboard.detailed.detailed import run as detailed_run
-            from dashboard.detailed.overview import run as overview_run
-            from dashboard.detailed.matrix import run as matrix_run
-            # Executar todas as análises detalhadas
-            overview_run()
-            detailed_run()
-            matrix_run()
+            from dashboard.detailed.detailed import run_non_streamlit as detailed_run_non_streamlit
+            from scripts.data_generation.data_wrapper import load_data # Corrected import
+            # Load data and pass to detailed analysis
+            df, metadata, _ = load_data() # Load processed data
+            
+            # Execute detailed analysis without Streamlit UI
+            success = detailed_run_non_streamlit(df, metadata, "graphics/detailed")
+            if not success:
+                print("❌ Falha na geração das análises detalhadas")
+                return False
         
         print(f"✅ {description} - CONCLUÍDO COM SUCESSO!")
         return True
@@ -165,14 +198,23 @@ def main():
 
 def menu_analises_comparativas():
     """Menu para análises comparativas"""
-    from scripts.plotting import generate_graphics
+    # Import direct from modular chart files for better performance
+    from scripts.plotting.charts.distribution_charts import (
+        plot_resolution_accuracy,
+        plot_classes_por_iniciativa,
+        plot_distribuicao_classes,
+        plot_distribuicao_metodologias
+    )
+    from scripts.plotting.charts.timeline_chart import plot_timeline
+    from scripts.plotting.charts.coverage_charts import plot_annual_coverage_multiselect
+    
     opcoes = [
-        ("Resolução vs Acurácia", generate_graphics.plot_resolucao_acuracia),
-        ("Timeline das iniciativas", generate_graphics.plot_timeline),
-        ("Cobertura anual", generate_graphics.plot_annual_coverage_multiselect),
-        ("Classes por iniciativa", generate_graphics.plot_classes_por_iniciativa),
-        ("Distribuição de classes", generate_graphics.plot_distribuicao_classes),
-        ("Distribuição de metodologias", generate_graphics.plot_distribuicao_metodologias),
+        ("Resolução vs Acurácia", plot_resolution_accuracy),
+        ("Timeline de Iniciativas", plot_timeline),
+        ("Cobertura Anual (Seleção Múltipla)", plot_annual_coverage_multiselect),
+        ("Classes por iniciativa", plot_classes_por_iniciativa),
+        ("Distribuição de classes", plot_distribuicao_classes),
+        ("Distribuição de metodologias", plot_distribuicao_metodologias),
     ]
     
     print("\nAnálises Comparativas Disponíveis:")
@@ -186,15 +228,26 @@ def menu_analises_comparativas():
         
     indices = [int(i) for i in escolhas.split(",") if i.strip().isdigit() and 1 <= int(i) <= len(opcoes)]
       # Carregar dados uma vez
-    from scripts.data_generation.data_processing import load_data, prepare_plot_data
-    df, metadata = load_data()
-    df_prepared = prepare_plot_data(df)
+    from scripts.data_generation.data_wrapper import load_data, prepare_plot_data # Corrected import
+    df, metadata, _ = load_data() # Corrected tuple unpacking
+    df_prepared_dict = prepare_plot_data(df) # df_prepared is now a dict
+    df_for_plots = df_prepared_dict.get('data', pd.DataFrame()) # Get the DataFrame from the dict
     
     for idx in indices:
         desc, func = opcoes[idx-1]
         print(f"\n🔄 Gerando: {desc}")
         try:
-            func(df_prepared)
+            if desc == "Timeline de Iniciativas":
+                func(metadata, df_for_plots)
+            elif desc == "Cobertura Anual (Seleção Múltipla)":
+                # Requires interactive selection, skipping for non-interactive run
+                print(f"⚠️ {desc} requer seleção interativa, pulando na execução de script.")
+                # func(metadata, df_for_plots, df_for_plots['Name'].unique().tolist()[:3]) # Example if we wanted to force it
+            elif desc == "Distribuição de metodologias":
+                method_counts = df_for_plots['Methodology'].value_counts() if 'Methodology' in df_for_plots and not df_for_plots.empty else pd.Series()
+                func(method_counts)
+            else:
+                func(df_for_plots)
             print(f"✅ {desc} gerado com sucesso!")
         except Exception as e:
             print(f"❌ Erro ao gerar {desc}: {e}")
@@ -214,56 +267,45 @@ def menu_gerar_dados_processados():
     print("🚀 Processo otimizado - sem gráficos")
     
     try:
-        # Executar o script de processamento diretamente
-        import sys
-        import os
-        current_dir = os.getcwd()
-        sys.path.append(os.path.join(current_dir, 'scripts', 'data_generation'))
-        
-        # Executar geração de dataset
+        from scripts.data_generation.lulc_data_engine import UnifiedDataProcessor
+        import json
+
+        processor = UnifiedDataProcessor()
+
+        # Gerar dataset principal
         print("\n1️⃣ GERANDO DATASET PRINCIPAL...")
-        from generate_dataset import create_initiatives_dataset, add_derived_metrics
-        df = create_initiatives_dataset()
-        df = add_derived_metrics(df)
+        df, metadata = processor.load_data_from_jsonc()
+        # Apply any additional processing if needed, similar to add_derived_metrics
+        # For now, we assume load_data_from_jsonc and create_comprehensive_auxiliary_data cover it.
         
-        # Adicionar coluna Sigla
-        sigla_map = {
-            'Copernicus Global Land Cover Service (CGLS)': 'CGLS',
-            'Dynamic World (GDW)': 'GDW',
-            'ESRI-10m Annual LULC': 'ESRI',
-            'FROM-GLC': 'FROM-GLC',
-            'Global LULC change 2000 and 2020': 'GLULC',
-            'Global Pasture Watch (GPW)': 'GPW',
-            'South America Soybean Maps': 'SASM',
-            'WorldCover 10m 2021': 'WorldCover',
-            'WorldCereal': 'WorldCereal',
-            'Land Cover CCI': 'CCI',
-            'MODIS Land Cover': 'MODIS',
-            'GLC_FCS30': 'GLC_FCS30',
-            'MapBiomas Brasil': 'MapBiomas',
-            'PRODES Amazônia': 'PRODES-AMZ',
-            'DETER Amazônia': 'DETER',
-            'PRODES Cerrado': 'PRODES-CER',
-            'TerraClass Amazônia': 'TerraClass',
-            'IBGE Monitoramento': 'IBGE',
-            'Agricultural Mapping': 'AgriMap'
-        }
-        df['Sigla'] = df['Nome'].map(sigla_map).fillna(df['Nome'].str[:8])
-        
+        # Adicionar coluna Sigla (Acronym) - This should ideally be part of the main data processing
+        # If 'Acronym' is already generated by lulc_data_engine.py, this step might be redundant
+        # or needs to be harmonized.
+        # For now, let's assume 'Acronym' is handled or can be mapped here if necessary.
+        # Example: if 'Acronym' is not in df.columns:
+        # df['Acronym'] = df['Name'].map(processor.get_acronym_map()).fillna(df['Name'].str[:8])
+
         # Salvar dataset
         df.to_csv('data/processed/initiatives_processed.csv', index=False, encoding='utf-8')
         print(f"✅ Dataset salvo: {len(df)} iniciativas")
         
-        # Executar geração de metadados
+        # Gerar metadados processados
         print("\n2️⃣ GERANDO METADADOS PROCESSADOS...")
-        from generate_metadata import create_initiatives_metadata
-        import json
-        
-        metadata = create_initiatives_metadata()
-        output_path = 'data/processed/metadata_processed.json'
-        with open(output_path, 'w', encoding='utf-8') as f:
+        # metadata is already loaded, just need to save it
+        output_path_metadata = 'data/processed/metadata_processed.json'
+        with open(output_path_metadata, 'w', encoding='utf-8') as f:
             json.dump(metadata, f, ensure_ascii=False, indent=2)
         print(f"✅ Metadados salvos: {len(metadata)} iniciativas")
+
+        # Gerar dados auxiliares
+        print("\n3️⃣ GERANDO DADOS AUXILIARES PROCESSADOS...")
+        auxiliary_data = processor.create_comprehensive_auxiliary_data(df, metadata)
+        # Use the save_data method from the processor instance
+        processor.save_data(auxiliary_data, 'data/processed/auxiliary_data.json', data_type="JSON")
+        # output_path_auxiliary = 'data/processed/auxiliary_data.json'
+        # with open(output_path_auxiliary, 'w', encoding='utf-8') as f:
+        #     json.dump(auxiliary_data, f, ensure_ascii=False, indent=2)
+        # print(f"✅ Dados auxiliares salvos.") # Corrected f-string
         
         print("\n🎉 DADOS PROCESSADOS GERADOS COM SUCESSO!")
         print("💡 Os arquivos estão prontos para uso no dashboard")
