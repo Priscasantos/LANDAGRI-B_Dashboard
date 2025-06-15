@@ -8,13 +8,9 @@ import re
 from pathlib import Path
 
 # Define the path to the metadata file relative to this script or project root
-# Corrected path to be relative to the project root where the script is expected to be run from,
-# or assuming the script is in the root of 'dashboard-iniciativas'
-PROJECT_ROOT = Path(__file__).resolve().parent # Assuming script is in the root
-METADATA_FILE_PATH = PROJECT_ROOT / "data" / "raw" / "initiatives_metadata.jsonc"
-# If the script is in a 'scripts' subdirectory, it would be:
-# PROJECT_ROOT = Path(__file__).resolve().parent.parent
-# METADATA_FILE_PATH = PROJECT_ROOT / "data" / "raw" / "initiatives_metadata.jsonc"
+PROJECT_ROOT = Path(__file__).resolve().parent 
+# Adjusted path: removed "raw"
+METADATA_FILE_PATH = PROJECT_ROOT / "data" / "initiatives_metadata.jsonc"
 
 
 def standardize_methodology_term(classification_method):

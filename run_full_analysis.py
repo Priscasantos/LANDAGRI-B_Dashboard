@@ -81,7 +81,7 @@ def run_analysis_step(module_name, description):
                 plot_distribuicao_classes,
                 plot_distribuicao_metodologias
             )
-            from scripts.plotting.charts.timeline_chart import plot_timeline
+            from scripts.plotting.charts.temporal_charts import plot_timeline
             
             plot_resolution_accuracy(df_for_plots)
             plot_timeline(metadata, df_for_plots) 
@@ -90,7 +90,7 @@ def run_analysis_step(module_name, description):
             plot_distribuicao_metodologias(df_for_plots['Methodology'].value_counts() if 'Methodology' in df_for_plots and not df_for_plots.empty else pd.Series())
             
         elif module_name == "analise_temporal":
-            from dashboard.temporal.temporal import prepare_temporal_data 
+            from dashboard.temporal import prepare_temporal_data 
             from scripts.plotting.charts.temporal_charts_offline import (
                 create_gaps_chart_non_streamlit,
                 create_evolution_charts_non_streamlit

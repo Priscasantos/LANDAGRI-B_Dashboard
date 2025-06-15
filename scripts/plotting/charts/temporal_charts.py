@@ -11,17 +11,15 @@ Date: 2024
 """
 
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
+import plotly.express as px # Ensure px is imported
+import plotly.graph_objects as go # Ensure go is imported
 import streamlit as st
 from typing import Dict, Any, Optional
 from scripts.utilities.config import get_initiative_color_map
-from scripts.plotting.chart_core import add_display_names_to_df, apply_standard_layout
+from scripts.plotting.chart_core import add_display_names_to_df, apply_standard_layout, CHART_CONFIG # Import CHART_CONFIG
 
-
-# If this function is also used by Streamlit pages, keep the cache decorator.
-# Otherwise, if it's only for non-Streamlit generation, it can be removed.
-def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame, 
+# Renamed from plot_timeline to plot_timeline_chart
+def plot_timeline_chart(metadata: Dict[str, Any], filtered_df: pd.DataFrame, 
                  chart_height: Optional[int] = None, chart_width: Optional[int] = None,
                  item_spacing: int = 25, line_width: int = 15, 
                  margin_config: Optional[Dict] = None) -> go.Figure:    
@@ -309,7 +307,8 @@ def timeline_with_controls(metadata: Dict[str, Any], filtered_df: pd.DataFrame):
     }
     
     # Gerar gráfico com configurações
-    fig = plot_timeline(
+    # Updated to call the renamed function
+    fig = plot_timeline_chart(
         metadata, 
         filtered_df,
         chart_height=chart_height,
@@ -329,3 +328,43 @@ def timeline_with_controls(metadata: Dict[str, Any], filtered_df: pd.DataFrame):
             "line_width": line_width,
             "margins": margin_config
         })
+
+# Placeholder functions for missing charts
+
+def plot_coverage_heatmap_chart(temporal_data: pd.DataFrame) -> go.Figure:
+    """Generates the Plotly figure for the coverage heatmap."""
+    fig = go.Figure()
+    apply_standard_layout(fig, "Coverage Heatmap (Not Implemented)", "Year", "Initiative Type")
+    fig.add_annotation(text="plot_coverage_heatmap_chart - Not Implemented", showarrow=False)
+    if temporal_data.empty: # Basic check to use the parameter and avoid unused warning
+        pass
+    return fig
+
+def plot_gaps_bar_chart(gaps_data: pd.DataFrame) -> go.Figure:
+    """Generates the Plotly bar chart for temporal gaps analysis."""
+    fig = go.Figure()
+    apply_standard_layout(fig, "Temporal Gaps (Not Implemented)", "Missing Years", "Initiative")
+    fig.add_annotation(text="plot_gaps_bar_chart - Not Implemented", showarrow=False)
+    if gaps_data.empty: # Basic check
+        pass
+    return fig
+
+def plot_evolution_line_chart(years_df: pd.DataFrame) -> go.Figure:
+    """Generates the Plotly line chart for evolution analysis."""
+    fig = go.Figure()
+    apply_standard_layout(fig, "Initiative Evolution (Not Implemented)", "Year", "Number of Initiatives")
+    fig.add_annotation(text="plot_evolution_line_chart - Not Implemented", showarrow=False)
+    if years_df.empty: # Basic check
+        pass
+    return fig
+
+def plot_evolution_heatmap_chart(temporal_data_for_evolution: pd.DataFrame) -> go.Figure:
+    """Generates the Plotly heatmap for evolution analysis."""
+    fig = go.Figure()
+    apply_standard_layout(fig, "Evolution Heatmap (Not Implemented)", "Year", "Initiative Type")
+    fig.add_annotation(text="plot_evolution_heatmap_chart - Not Implemented", showarrow=False)
+    if temporal_data_for_evolution.empty: # Basic check
+        pass
+    return fig
+
+

@@ -23,6 +23,9 @@ def _load_jsonc_file(file_path: Union[str, Path]) -> Dict[str, Any]:
     """Loads a JSONC file, stripping comments before parsing."""
     lines: List[str] = [] # Initialize lines
     try:
+        # Adjusted path: removed "raw" - this change is applied where _load_jsonc_file is CALLED,
+        # not inside _load_jsonc_file itself, as it's a generic loader.
+        # The calling functions (like interpret_initiatives_metadata) will construct the path without "raw".
         with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
         # Remove single-line comments (//...)

@@ -4,20 +4,15 @@ import plotly.graph_objects as go
 import sys
 from pathlib import Path
 import json # Ensure json is imported
+from scripts.utilities.ui_elements import setup_download_form 
 
 # Add scripts to path if necessary
-current_dir = Path(__file__).parent.parent.parent
+# Correct current_dir to point to the project root (dashboard-iniciativas)
+current_dir = Path(__file__).parent.parent # This should be dashboard-iniciativas/
 scripts_path = str(current_dir / "scripts")
 if scripts_path not in sys.path:
     sys.path.insert(0, scripts_path)
 
-# Import modules locally
-try:
-    from scripts.utilities.json_interpreter import interpret_initiatives_metadata, _load_jsonc_file
-    from scripts.utilities.ui_elements import setup_download_form 
-except ImportError as e:
-    st.error(f"Error importing modules: {e}")
-    st.stop()
 
 def _format_year_ranges(years_list: list) -> str:
     """Formats a list of years into a string with consecutive years as ranges."""
@@ -56,31 +51,38 @@ def _format_year_ranges(years_list: list) -> str:
 
 def run():
     # Load data using the new JSON interpreter system
-    if 'df_interpreted' not in st.session_state:
-        try:
-            metadata_file_path = current_dir / "data" / "raw" / "initiatives_metadata.jsonc"
-            df_interpreted = interpret_initiatives_metadata(metadata_file_path)
-            if df_interpreted.empty:
-                st.error("❌ Data interpretation resulted in an empty DataFrame.")
-                return
-            st.session_state.df_interpreted = df_interpreted
-            
-            # Also load raw metadata for temporal analysis and sensor details
-            raw_metadata = _load_jsonc_file(metadata_file_path)
-            st.session_state.metadata = raw_metadata
-
-            # Load sensors metadata
-            sensors_metadata_file_path = current_dir / "data" / "raw" / "sensors_metadata.jsonc"
-            sensors_metadata_content = _load_jsonc_file(sensors_metadata_file_path)
-            st.session_state.sensors_meta = sensors_metadata_content
-            
-        except Exception as e:
-            st.error(f"❌ Error loading data: {e}")
-            return
+    # Rely on app.py to load and cache data into st.session_state.df_interpreted
+    if 'df_interpreted' not in st.session_state or st.session_state.df_interpreted.empty:
+        st.error("❌ Interpreted data not found in session state. Ensure app.py loads data correctly.")
+        # Fallback or attempt to load if necessary, though app.py should be the source of truth
+        # For now, we assume app.py handles it. If direct loading is needed here, add similar try-except as in comparison.py
+        # and ensure path is correct (current_dir / "data" / "initiatives_metadata.jsonc")
+        return # Stop if data isn't loaded
 
     df = st.session_state.get('df_interpreted', pd.DataFrame())
     meta = st.session_state.get('metadata', {})
-    sensors_meta = st.session_state.get('sensors_meta', {}) # Retrieve sensors metadata
+    
+    # --- Load Sensor Metadata ---
+    sensors_meta = {}
+    try:
+        from scripts.utilities.json_interpreter import _load_jsonc_file
+        # Correct path to sensors_metadata.jsonc relative to app.py or a known base directory
+        # Assuming current_dir is dashboard-iniciativas/
+        sensors_metadata_path = current_dir / "data" / "sensors_metadata.jsonc"
+        if sensors_metadata_path.exists():
+            sensors_meta_loaded = _load_jsonc_file(sensors_metadata_path)
+            if isinstance(sensors_meta_loaded, dict): # Ensure it loaded as a dictionary
+                sensors_meta = sensors_meta_loaded
+                st.session_state.sensors_meta = sensors_meta # Store in session state if needed by other parts
+            else:
+                st.warning(f"⚠️ Sensor metadata at {sensors_metadata_path} did not load as a dictionary.")
+        else:
+            st.warning(f"⚠️ Sensor metadata file not found at {sensors_metadata_path}")
+    except ImportError:
+        st.error("❌ Error importing _load_jsonc_file. Sensor metadata cannot be loaded.")
+    except Exception as e_sensor_load:
+        st.error(f"❌ Error loading sensor metadata: {e_sensor_load}")
+    # --- End Load Sensor Metadata ---
 
     if df.empty:
         st.error("❌ No data available. Please check the data loading process.")
@@ -504,26 +506,69 @@ def run():
             
             if isinstance(sensors_referenced_list_for_display, list) and sensors_referenced_list_for_display:
                 sensor_badges_html_parts = [] # Keep using badges for individual sensors within the section
-                for sensor_ref in sensors_referenced_list_for_display:
-                    if isinstance(sensor_ref, dict):
-                        sensor_key = sensor_ref.get('sensor_key')
-                        years_used = sensor_ref.get('years_used')
-                        
-                        sensor_details_from_meta = sensors_meta.get(sensor_key, {})
-                        display_name = sensor_details_from_meta.get('display_name', sensor_key)
+                sensor_details_expanders = [] # For expanders
 
-                        sensor_display_text = display_name
-                        if years_used and isinstance(years_used, list):
-                            years_used_str = ", ".join(map(str, sorted(list(set(years_used)))))
-                            sensor_display_text += f" (Years: {years_used_str})"
+                for sensor_ref_obj in sensors_referenced_list_for_display:
+                    current_sensor_key_str = None # Initialize
+                    years_used_list = []
+                    
+                    if isinstance(sensor_ref_obj, dict):
+                        _key_from_dict = sensor_ref_obj.get('sensor_key')
+                        if _key_from_dict is not None:
+                            current_sensor_key_str = str(_key_from_dict) # Ensure string
+                        years_used_list = sensor_ref_obj.get('years_used', [])
+                    elif isinstance(sensor_ref_obj, str):
+                        current_sensor_key_str = sensor_ref_obj # Already a string
+                    
+                    # Proceed only if current_sensor_key_str is a valid (non-empty) string
+                    if current_sensor_key_str:
+                        sensor_info_from_meta = sensors_meta.get(current_sensor_key_str, {}) 
+                        display_name = sensor_info_from_meta.get('display_name', current_sensor_key_str.replace("_", " ").title())
                         
-                        sensor_badges_html_parts.append(f'<span class="badge badge-sensor">{sensor_display_text}</span>')
-                
+                        sensor_display_text_for_badge = display_name
+                        if years_used_list and isinstance(years_used_list, list):
+                            years_used_str = _format_year_ranges(years_used_list) # Use the formatter
+                            sensor_display_text_for_badge += f" (Years: {years_used_str})"
+                        sensor_badges_html_parts.append(f'<span class="badge badge-sensor">{sensor_display_text_for_badge}</span>')
+
+                        # Prepare content for expander
+                        expander_title = f"🛰️ {display_name} Details"
+                        expander_content = f"**Sensor Key:** `{current_sensor_key_str}`\\n\\n"
+                        if years_used_list:
+                            expander_content += f"**Years Used in this Initiative:** {_format_year_ranges(years_used_list)}\\n\\n"
+                        
+                        # Add all details from sensors_meta for this sensor
+                        if sensor_info_from_meta: # Check if sensor_info_from_meta is not empty
+                            expander_content += "**General Specifications:**\\n"
+                            for spec_key, spec_value in sensor_info_from_meta.items():
+                                if spec_key not in ['display_name', 'notes']: 
+                                    if isinstance(spec_value, list):
+                                        expander_content += f"  - **{spec_key.replace('_', ' ').title()}:** {', '.join(map(str, spec_value))}\\n"
+                                    elif isinstance(spec_value, dict):
+                                        expander_content += f"  - **{spec_key.replace('_', ' ').title()}:**\\n"
+                                        for sub_k, sub_v in spec_value.items():
+                                            expander_content += f"    - {sub_k.replace('_', ' ').title()}: {sub_v}\\n"
+                                    else:
+                                        expander_content += f"  - **{spec_key.replace('_', ' ').title()}:** {spec_value}\\n"
+                            if 'notes' in sensor_info_from_meta:
+                                 expander_content += f"\\n**Notes:** {sensor_info_from_meta['notes']}\\n"
+                        else:
+                            expander_content += "_No detailed specifications found in sensor metadata._\\n"
+                        
+                        sensor_details_expanders.append((expander_title, expander_content))
+                    # else: current_sensor_key_str was None or empty, so this sensor_ref_obj is skipped
+
                 if sensor_badges_html_parts:
-                    tech_info_html_parts.append(f'''<div class="info-section" style="border-left-color: #007bff;">
-                                                    <div class="info-title">🛰️ Sensors Referenced</div>
-                                                    <div>{"".join(sensor_badges_html_parts)}</div>
-                                                 </div>''')
+                    tech_info_html_parts.append(f'''<div class="info-section" style="border-left-color: #00bcd4;">
+                                                        <div class="info-title">🛰️ Sensors Referenced</div>
+                                                        <p>{" ".join(sensor_badges_html_parts)}</p></div>''')
+                
+                # Display expanders for sensor details
+                if sensor_details_expanders:
+                    st.markdown("#### 🛰️ Detailed Sensor Specifications")
+                    for title, content in sensor_details_expanders:
+                        with st.expander(title):
+                            st.markdown(content, unsafe_allow_html=True) # Allow markdown for formatting
 
             if tech_info_html_parts:
                 st.markdown(f'''<div style="margin: 1rem 0;">{"".join(tech_info_html_parts)}</div>''', unsafe_allow_html=True)
@@ -615,12 +660,18 @@ def run():
                         status = sensor_details_from_meta.get('status')
                         revisit = sensor_details_from_meta.get('revisit_time_days')
                         
-                        if family: detailed_sensor_info_html.append(f"<li><strong>Family:</strong> {family}</li>")
-                        if platform: detailed_sensor_info_html.append(f"<li><strong>Platform:</strong> {platform}</li>")
-                        if sensor_type: detailed_sensor_info_html.append(f"<li><strong>Type:</strong> {sensor_type}</li>")
-                        if agency: detailed_sensor_info_html.append(f"<li><strong>Agency:</strong> {agency}</li>")
-                        if status: detailed_sensor_info_html.append(f"<li><strong>Status:</strong> {status}</li>")
-                        if revisit: detailed_sensor_info_html.append(f"<li><strong>Revisit Time:</strong> {revisit} days</li>")
+                        if family:
+                            detailed_sensor_info_html.append(f"<li><strong>Family:</strong> {family}</li>")
+                        if platform:
+                            detailed_sensor_info_html.append(f"<li><strong>Platform:</strong> {platform}</li>")
+                        if sensor_type:
+                            detailed_sensor_info_html.append(f"<li><strong>Type:</strong> {sensor_type}</li>")
+                        if agency:
+                            detailed_sensor_info_html.append(f"<li><strong>Agency:</strong> {agency}</li>")
+                        if status:
+                            detailed_sensor_info_html.append(f"<li><strong>Status:</strong> {status}</li>")
+                        if revisit:
+                            detailed_sensor_info_html.append(f"<li><strong>Revisit Time:</strong> {revisit} days</li>")
                         
                         detailed_sensor_info_html.append("</ul>")
                 detailed_sensor_info_html.append("</div>")

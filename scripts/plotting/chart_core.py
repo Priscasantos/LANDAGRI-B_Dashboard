@@ -35,9 +35,9 @@ CHART_CONFIG = {
         'y_position': 0.95,
     },
     'axis': {
-        'title_font_size': 14,
-        'tick_font_size': 12,
-        'tick_font_size_small': 11,
+        'title_font_size': 18,
+        'tick_font_size': 16,
+        'tick_font_size_small': 14,
     },
     'margins': {
         'left': 180,
@@ -191,39 +191,63 @@ def apply_standard_layout(fig, title: str, xaxis_title: str = "", yaxis_title: s
             title=dict(
                 text=xaxis_title,
                 font=dict(
-                    size=config['axis']['title_font_size'],
+                    size=config['axis']['title_font_size'], # Uses updated CHART_CONFIG
                     color=config['theme']['font_color']
                 )
             ),
             gridcolor=config['theme']['grid_color'],
             gridwidth=config['theme']['grid_width'],
             tickfont=dict(
-                size=config['axis']['tick_font_size'],
+                size=config['axis']['tick_font_size'], # Uses updated CHART_CONFIG
                 color=config['theme']['font_color']
             ),
-            showgrid=True,
-            zeroline=False,
-            linecolor=config['theme']['line_color']
+            showline=True, 
+            linewidth=1, 
+            linecolor=config['theme']['line_color'],
+            mirror=True
         )
         
         fig.update_yaxes(
             title=dict(
                 text=yaxis_title,
                 font=dict(
-                    size=config['axis']['title_font_size'],
+                    size=config['axis']['title_font_size'], # Uses updated CHART_CONFIG
                     color=config['theme']['font_color']
                 )
             ),
             gridcolor=config['theme']['grid_color'],
             gridwidth=config['theme']['grid_width'],
             tickfont=dict(
-                size=config['axis']['tick_font_size_small'],
+                size=config['axis']['tick_font_size'], # Uses updated CHART_CONFIG
                 color=config['theme']['font_color']
             ),
-            showgrid=True,
-            zeroline=False,
-            linecolor=config['theme']['line_color']
+            showline=True, 
+            linewidth=1, 
+            linecolor=config['theme']['line_color'],
+            mirror=True
         )
+
+    # Specific adjustments for timeline y-axis ticks if needed
+    if chart_type == 'timeline':
+        fig.update_yaxes(
+            tickfont=dict(
+                size=config['axis']['tick_font_size_small'] # Smaller ticks for potentially many items
+            )
+        )
+    elif chart_type == 'small': # Example for another chart type needing smaller ticks
+        fig.update_xaxes(
+            tickfont=dict(
+                size=config['axis']['tick_font_size_small']
+            )
+        )
+        fig.update_yaxes(
+            tickfont=dict(
+                size=config['axis']['tick_font_size_small']
+            )
+        )
+
+    # Add more specific styling based on chart_type if needed
+    # e.g., fig.update_layout(legend_orientation='h') for certain charts
 
 
 def get_color_mapping(names_list: list) -> Dict[str, str]:

@@ -36,22 +36,13 @@ def run():
         return
     
     # Load data using the new JSON interpreter system
-    if 'df_interpreted' not in st.session_state:
-        try:
-            metadata_file_path = current_dir / "data" / "raw" / "initiatives_metadata.jsonc"
-            df_interpreted = interpret_initiatives_metadata(metadata_file_path)
-            if df_interpreted.empty:
-                st.error("❌ Data interpretation resulted in an empty DataFrame.")
-                return
-            st.session_state.df_interpreted = df_interpreted
-            
-            # Also load raw metadata for any analysis that needs it
-            raw_metadata = _load_jsonc_file(metadata_file_path)
-            st.session_state.metadata = raw_metadata
-            
-        except Exception as e:
-            st.error(f"❌ Error loading data: {e}")
-            return
+    # Rely on app.py to load and cache data into st.session_state.df_interpreted
+    if 'df_interpreted' not in st.session_state or st.session_state.df_interpreted.empty:
+        st.error("❌ Interpreted data not found in session state. Ensure app.py loads data correctly.")
+        # Fallback or attempt to load if necessary, though app.py should be the source of truth
+        # For now, we assume app.py handles it. If direct loading is needed here, add similar try-except as in comparison.py
+        # and ensure path is correct (current_dir / "data" / "initiatives_metadata.jsonc")
+        return # Stop if data isn't loaded
             
     df_geral = st.session_state.get('df_interpreted', pd.DataFrame())
     if df_geral.empty:
@@ -236,11 +227,13 @@ def run_non_streamlit(df, metadata, output_dir="graphics/detailed"):
     Used when called from command-line scripts like run_full_analysis.py
     """
     from pathlib import Path
-    import sys
     
     # Add scripts to path
-    current_dir = Path(__file__).parent.parent.parent
-    sys.path.append(str(current_dir / "scripts"))
+    # current_dir is defined at the module level in detailed.py
+    # For non-streamlit runs, ensure PROJECT_ROOT is correctly determined if current_dir is not suitable.
+    # Assuming PROJECT_ROOT is dashboard-iniciativas/
+    project_root_for_script = Path(__file__).resolve().parent.parent.parent 
+    sys.path.append(str(project_root_for_script / "scripts"))
     
     from scripts.utilities.chart_saver import save_chart_robust
     

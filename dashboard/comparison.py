@@ -1,14 +1,13 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-import plotly.express as px
+# import plotly.express as px # This line can be removed if px is not directly used in this file
 import sys
 from pathlib import Path
 from typing import Type, Union
-from scripts.utilities.ui_elements import setup_download_form # Import the new function
 
-# Add scripts to path
-current_dir = Path(__file__).parent.parent.parent
+# Original sys.path logic
+current_dir = Path(__file__).parent.parent # Should be dashboard-iniciativas
 scripts_path = str(current_dir / "scripts")
 if scripts_path not in sys.path:
     sys.path.insert(0, scripts_path)
@@ -23,13 +22,49 @@ except ImportError as e:
         st.warning("JSON interpreter could not be loaded. Using empty DataFrame.")
         return pd.DataFrame()
 
-# Import graphics functions
+# --- Attempt to import plotting functions with detailed error reporting ---
+st.write("Attempting to import plotting functions...") # Debug message
+plotting_functions_loaded = False
 try:
-    from scripts.plotting.generate_graphics import plot_resolution_accuracy
-except ImportError:
-    def plot_resolution_accuracy(_filtered_df, _x_col='Resolution', _y_col='Accuracy', _text_col='Display_Name'):
-        st.warning("Debug: plot_resolution_accuracy (placeholder from generate_graphics import error) called.")
-        return go.Figure().add_annotation(text="Function plot_resolution_accuracy not available", xref="paper", yref="paper", x=0.5, y=0.5)
+    from scripts.plotting.generate_graphics import (
+        plot_resolution_accuracy_scatter, 
+        plot_classes_frequency_boxplot,
+        plot_spatial_resolution_comparison,
+        plot_global_accuracy_comparison,
+        plot_temporal_evolution_frequency,
+        plot_class_diversity_focus,
+        plot_classification_methodology
+    )
+    st.success("SUCCESS: Plotting functions imported from scripts.plotting.generate_graphics!")
+    plotting_functions_loaded = True
+except ImportError as e_graphics_detail:
+    st.error("CRITICAL IMPORT ERROR: Failed to import from scripts.plotting.generate_graphics.")
+    st.exception(e_graphics_detail) # Display the full exception
+    # Define placeholders if import fails
+    def plot_resolution_accuracy_scatter(_filtered_df):
+        st.warning("Placeholder: plot_resolution_accuracy_scatter not loaded due to import error.")
+        return go.Figure().add_annotation(text="plot_resolution_accuracy_scatter not available", showarrow=False)
+    def plot_classes_frequency_boxplot(_filtered_df):
+        st.warning("Placeholder: plot_classes_frequency_boxplot not loaded due to import error.")
+        return go.Figure().add_annotation(text="plot_classes_frequency_boxplot not available", showarrow=False)
+    def plot_spatial_resolution_comparison(_filtered_df): # Added placeholder
+        st.warning("Placeholder: plot_spatial_resolution_comparison not loaded due to import error.")
+        return go.Figure().add_annotation(text="plot_spatial_resolution_comparison not available", showarrow=False)
+    def plot_global_accuracy_comparison(_filtered_df): # Added placeholder
+        st.warning("Placeholder: plot_global_accuracy_comparison not loaded due to import error.")
+        return go.Figure().add_annotation(text="plot_global_accuracy_comparison not available", showarrow=False)
+    def plot_temporal_evolution_frequency(_filtered_df): # Added placeholder
+        st.warning("Placeholder: plot_temporal_evolution_frequency not loaded due to import error.")
+        return go.Figure().add_annotation(text="plot_temporal_evolution_frequency not available", showarrow=False)
+    def plot_class_diversity_focus(_filtered_df): # Added placeholder
+        st.warning("Placeholder: plot_class_diversity_focus not loaded due to import error.")
+        return go.Figure().add_annotation(text="plot_class_diversity_focus not available", showarrow=False)
+    def plot_classification_methodology(_filtered_df, chart_type='pie'): # Added placeholder
+        st.warning("Placeholder: plot_classification_methodology not loaded due to import error.")
+        return go.Figure().add_annotation(text="plot_classification_methodology not available", showarrow=False)
+
+# --- End of plotting function import attempt ---
+
 
 # Import table functions
 try:
@@ -79,8 +114,8 @@ def run():
     # Load data using the new JSON interpreter
     if 'df_interpreted' not in st.session_state:
         try:
-            # Path to the metadata file - adjust if necessary
-            metadata_file_path = current_dir / "data" / "raw" / "initiatives_metadata.jsonc"
+            # Path to the metadata file
+            metadata_file_path = current_dir / "data" / "initiatives_metadata.jsonc"
             df_interpreted = interpret_initiatives_metadata(metadata_file_path)
             if df_interpreted.empty:
                 st.error("❌ Data interpretation resulted in an empty DataFrame. Please check the interpreter and data file.")
@@ -193,108 +228,121 @@ def run():
             if isinstance(row_val, list):
                 return any(rs in selected_ref_systems for rs in row_val)
             elif isinstance(row_val, str):
-                # Check if any of the selected systems are in the (potentially comma-separated) string
-                return any(sel_rs in row_val for sel_rs in selected_ref_systems)
+                return any(rs in selected_ref_systems for rs in row_val.split(', ')) # Simple split
             return False
         filtered_df = filtered_df[filtered_df['Reference_System'].apply(check_ref_system)]
 
-
-    st.markdown("---")
-    st.markdown("### 📊 Comparative Visualizations")
-
     if filtered_df.empty:
         st.warning("⚠️ No initiatives match the current filter criteria.")
-    else:
-        st.markdown(f"**Displaying {len(filtered_df)} of {len(df)} initiatives.**")
+        # Display tabs even if filtered_df is empty, charts will show their own "no data" messages
+    
+    st.markdown("---")
+    st.markdown("### 📊 Comparison Charts")
 
-        tab1, tab2, tab3 = st.tabs([
-            "Resolution vs. Accuracy", 
-            "Classes vs. Frequency", 
-            "Methodology by Type"
-        ])
+    tab_spatial, tab_accuracy, tab_temporal, tab_diversity, tab_methodology = st.tabs([
+        "Spatial Resolution", 
+        "Global Accuracy", 
+        "Temporal Evolution", 
+        "Class Diversity", 
+        "Methodology Distribution"
+    ])
 
-        with tab1:
-            st.markdown("#### Resolution vs. Accuracy")
-            plot_df_res_acc = filtered_df.copy()
-            rename_map = {}
-            if 'Resolution' in plot_df_res_acc.columns and 'Resolution (m)' not in plot_df_res_acc.columns:
-                rename_map['Resolution'] = 'Resolution (m)'
-            if 'Accuracy' in plot_df_res_acc.columns and 'Accuracy (%)' not in plot_df_res_acc.columns:
-                rename_map['Accuracy'] = 'Accuracy (%)'
-            if 'Number_of_Classes' in plot_df_res_acc.columns and 'Classes' not in plot_df_res_acc.columns:
-                rename_map['Number_of_Classes'] = 'Classes'
-            
-            if rename_map:
-                plot_df_res_acc.rename(columns=rename_map, inplace=True)
-
-            if all(col in plot_df_res_acc.columns for col in ['Resolution (m)', 'Accuracy (%)', 'Display_Name', 'Classes']):
-                fig_res_acc = plot_resolution_accuracy(plot_df_res_acc)
-                st.plotly_chart(fig_res_acc, use_container_width=True)
-                # Use the new download form setup
-                setup_download_form(fig_res_acc, default_filename="resolution_accuracy_comparison", key_prefix="res_acc")
-            else:
-                st.warning("Required columns (Display_Name, Resolution, Accuracy, Classes) not available for Resolution vs. Accuracy chart.")
-
-        with tab2:
-            st.markdown("#### Number of Classes by Temporal Frequency")
-            if 'Number_of_Classes' in filtered_df.columns and 'Temporal_Frequency' in filtered_df.columns:
-                plot_df_classes_freq = filtered_df.dropna(subset=['Number_of_Classes', 'Temporal_Frequency']).copy()
-                plot_df_classes_freq['Temporal_Frequency'] = plot_df_classes_freq['Temporal_Frequency'].astype(str)
-                
-                if not plot_df_classes_freq.empty:
-                    fig_classes_freq = px.box(
-                        plot_df_classes_freq,
-                        x='Temporal_Frequency',
-                        y='Number_of_Classes',
-                        color='Type' if 'Type' in plot_df_classes_freq.columns else None,
-                        labels={'Number_of_Classes': 'Number of Classes', 'Temporal_Frequency': 'Temporal Frequency'},
-                        title='Distribution of Number of Classes by Temporal Frequency',
-                        points="all"
-                    )
-                    fig_classes_freq.update_layout(xaxis={'categoryorder':'total descending'})
-                    st.plotly_chart(fig_classes_freq, use_container_width=True)
-                    
-                    # Use the new download form setup
-                    setup_download_form(fig_classes_freq, default_filename="classes_vs_frequency", key_prefix="classes_freq")
-                else:
-                    st.info("Not enough data to display Number of Classes vs. Temporal Frequency chart after filtering.")
-            else:
-                st.warning("Required columns ('Number_of_Classes', 'Temporal_Frequency') not available for this chart.")
-
-        with tab3:
-            st.markdown("#### Methodology Breakdown by Type")
-            if 'Methodology' in filtered_df.columns and 'Type' in filtered_df.columns:
-                plot_df_method_type = filtered_df.groupby(['Type', 'Methodology']).size().reset_index(name='Count')
-                if not plot_df_method_type.empty:
-                    fig_method_type = px.bar(
-                        plot_df_method_type,
-                        x='Type',
-                        y='Count',
-                        color='Methodology',
-                        barmode='group',
-                        labels={'Count': 'Number of Initiatives', 'Type': 'Initiative Type', 'Methodology': 'Methodology'},
-                        title='Methodology Breakdown by Initiative Type'
-                    )
-                    st.plotly_chart(fig_method_type, use_container_width=True)
-
-                    # Use the new download form setup
-                    setup_download_form(fig_method_type, default_filename="methodology_by_type", key_prefix="method_type")
-                else:
-                    st.info("Not enough data to display Methodology Breakdown by Type chart after filtering.")
-            else:
-                st.warning("Required columns ('Methodology', 'Type') not available for this chart.")
-
-        st.markdown("---") # Separator after tabs
-        st.markdown("#### Selected Initiatives Data")
-        display_cols = ['Display_Name', 'Type', 'Methodology', 'Resolution', 'Accuracy', 'Number_of_Classes', 'Temporal_Frequency']
-        # Filter display_cols to only those present in filtered_df
-        existing_display_cols = [col for col in display_cols if col in filtered_df.columns]
-        if existing_display_cols:
-            st.dataframe(filtered_df[existing_display_cols])
+    with tab_spatial:
+        st.markdown("#### Spatial Resolution Overview")
+        st.write("This chart compares the spatial resolution (in meters) of the selected LULC initiatives. Lower values indicate finer (better) resolution.")
+        if not filtered_df.empty:
+            try:
+                spatial_res_fig = plot_spatial_resolution_comparison(filtered_df)
+                st.plotly_chart(spatial_res_fig, use_container_width=True, key="spatial_res_chart_comp")
+            except Exception as e:
+                st.error(f"❌ Error generating spatial resolution chart: {e}")
+        elif not plotting_functions_loaded:
+            st.warning("Spatial resolution chart cannot be loaded because plotting functions failed to import.")
         else:
-            st.warning("No data to display in table based on available columns.")
+            st.info("No data to display based on current filters.")
 
-if __name__ == "__main__":
+    with tab_accuracy:
+        st.markdown("#### Global Accuracy Overview")
+        st.write("This chart compares the global accuracy (in %) of the selected LULC initiatives. Higher values indicate better accuracy.")
+        if not filtered_df.empty:
+            try:
+                global_acc_fig = plot_global_accuracy_comparison(filtered_df)
+                st.plotly_chart(global_acc_fig, use_container_width=True, key="global_acc_chart_comp")
+            except Exception as e:
+                st.error(f"❌ Error generating global accuracy chart: {e}")
+        elif not plotting_functions_loaded:
+            st.warning("Global accuracy chart cannot be loaded because plotting functions failed to import.")
+        else:
+            st.info("No data to display based on current filters.")
+
+    with tab_temporal:
+        st.markdown("#### Temporal Evolution & Update Frequency")
+        st.write("This timeline chart shows the operational period (start to end year) of selected LULC initiatives, colored by their update frequency.")
+        if not filtered_df.empty:
+            try:
+                temporal_evo_fig = plot_temporal_evolution_frequency(filtered_df)
+                st.plotly_chart(temporal_evo_fig, use_container_width=True, key="temporal_evo_chart_comp")
+            except Exception as e:
+                st.error(f"❌ Error generating temporal evolution chart: {e}")
+        elif not plotting_functions_loaded:
+            st.warning("Temporal evolution chart cannot be loaded because plotting functions failed to import.")
+        else:
+            st.info("No data to display based on current filters.")
+
+    with tab_diversity:
+        st.markdown("#### Class Diversity and Agricultural Focus")
+        st.write("This chart compares the total number of classes versus the number of agricultural-specific classes for each initiative.")
+        if not filtered_df.empty:
+            try:
+                class_diversity_fig = plot_class_diversity_focus(filtered_df)
+                st.plotly_chart(class_diversity_fig, use_container_width=True, key="class_div_chart_comp")
+            except Exception as e:
+                st.error(f"❌ Error generating class diversity chart: {e}")
+        elif not plotting_functions_loaded:
+            st.warning("Class diversity chart cannot be loaded because plotting functions failed to import.")
+        else:
+            st.info("No data to display based on current filters.")
+
+    with tab_methodology:
+        st.markdown("#### Classification Methodology Distribution")
+        st.write("This chart shows the distribution of different classification methodologies used across the selected initiatives.")
+        
+        methodology_chart_type = st.radio(
+            "Select Methodology Chart Type:", 
+            ('Pie Chart', 'Bar Chart'), 
+            key='methodology_chart_type_comparison_tab' # Unique key for radio in tab
+        )
+        chart_type_param = 'pie' if methodology_chart_type == 'Pie Chart' else 'bar'
+        
+        if not filtered_df.empty:
+            try:
+                methodology_fig = plot_classification_methodology(filtered_df, chart_type=chart_type_param)
+                st.plotly_chart(methodology_fig, use_container_width=True, key="methodology_chart_comp")
+            except Exception as e:
+                st.error(f"❌ Error generating classification methodology chart: {e}")
+        elif not plotting_functions_loaded:
+            st.warning("Classification methodology chart cannot be loaded because plotting functions failed to import.")
+        else:
+            st.info("No data to display based on current filters.")
+
+    st.markdown("---")
+    st.markdown("### 📋 Detailed Data Table")
+    st.dataframe(filtered_df, use_container_width=True)
+    
+    # Correct way to download DataFrame as CSV
+    if not filtered_df.empty:
+        csv = filtered_df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="Download Filtered Data as CSV",
+            data=csv,
+            file_name="filtered_initiatives_comparison.csv",
+            mime="text/csv",
+            key="download-comparison-csv"
+        )
+    else:
+        st.info("No data to download based on current filters.")
+
+if __name__ == '__main__':
     run()
 
 
