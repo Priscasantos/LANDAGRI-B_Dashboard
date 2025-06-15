@@ -1,9 +1,11 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.express as px
 import sys
 from pathlib import Path
 from typing import Type, Union
+from scripts.utilities.ui_elements import setup_download_form # Import the new function
 
 # Add scripts to path
 current_dir = Path(__file__).parent.parent.parent
@@ -28,29 +30,6 @@ except ImportError:
     def plot_resolution_accuracy(_filtered_df, _x_col='Resolution', _y_col='Accuracy', _text_col='Display_Name'):
         st.warning("Debug: plot_resolution_accuracy (placeholder from generate_graphics import error) called.")
         return go.Figure().add_annotation(text="Function plot_resolution_accuracy not available", xref="paper", yref="paper", x=0.5, y=0.5)
-
-# Import UI and chart saving utilities
-try:
-    from scripts.utilities.ui_elements import get_chart_save_params
-except ImportError:
-    def get_chart_save_params(default_filename="chart", key_prefix="") -> tuple[str, str, int, int, float, bool]:
-        st.warning(f"Debug: get_chart_save_params (placeholder from ui_elements import error) called with prefix {key_prefix}.")
-        return default_filename, "png", 1200, 800, 2.0, False
-
-try:
-    from scripts.utilities.chart_saver import save_chart_robust
-except ImportError:
-    def save_chart_robust(
-        fig,
-        file_path,
-        file_name_base,
-        width: int = 1200,
-        height: int = 800,
-        scale: float = 2,
-        file_format: str = "png"
-    ) -> tuple[bool, str | None, str | None]:
-        st.warning("Debug: save_chart_robust (placeholder from chart_saver import error) called.")
-        return False, None, None
 
 # Import table functions
 try:
@@ -226,46 +205,86 @@ def run():
     if filtered_df.empty:
         st.warning("⚠️ No initiatives match the current filter criteria.")
     else:
-        # Display selected initiatives
         st.markdown(f"**Displaying {len(filtered_df)} of {len(df)} initiatives.**")
-        
-        
-        st.markdown("#### Resolution vs. Accuracy")
-        # The new interpreter provides 'Resolution' and 'Accuracy' as primary numeric fields
-        # and 'Display_Name'. The _min_val/_max_val are for filtering.
-          # Prepare a copy for plotting with specific column names expected by plot_resolution_accuracy
-        plot_df_res_acc = filtered_df.copy()
-        rename_map = {}
-        if 'Resolution' in plot_df_res_acc.columns and 'Resolution (m)' not in plot_df_res_acc.columns:
-            rename_map['Resolution'] = 'Resolution (m)'
-        if 'Accuracy' in plot_df_res_acc.columns and 'Accuracy (%)' not in plot_df_res_acc.columns:
-            rename_map['Accuracy'] = 'Accuracy (%)'
-        if 'Number_of_Classes' in plot_df_res_acc.columns and 'Classes' not in plot_df_res_acc.columns:
-            rename_map['Number_of_Classes'] = 'Classes'
-        
-        if rename_map:
-            plot_df_res_acc.rename(columns=rename_map, inplace=True)
 
-        if all(col in plot_df_res_acc.columns for col in ['Resolution (m)', 'Accuracy (%)', 'Display_Name', 'Classes']):
-            fig_res_acc = plot_resolution_accuracy(plot_df_res_acc) # Pass the potentially renamed DataFrame
-            st.plotly_chart(fig_res_acc, use_container_width=True)
-            # Add save chart UI
-            save_params_res_acc = get_chart_save_params(default_filename="resolution_accuracy_comparison", key_prefix="res_acc")
-            file_name_base, file_format, width, height, scale, save_button = save_params_res_acc
-            if save_button: # If save button is pressed
-                save_chart_robust(
-                    fig_res_acc,
-                    Path(current_dir, "graphics", "comparisons"),
-                    file_name_base,
-                    width,
-                    height,
-                    scale,
-                    file_format
-                )
-        else:
-            st.warning("Required columns (Display_Name, Resolution, Accuracy) not available for Resolution vs. Accuracy chart.")
+        tab1, tab2, tab3 = st.tabs([
+            "Resolution vs. Accuracy", 
+            "Classes vs. Frequency", 
+            "Methodology by Type"
+        ])
 
-        # Example: Table of initiatives
+        with tab1:
+            st.markdown("#### Resolution vs. Accuracy")
+            plot_df_res_acc = filtered_df.copy()
+            rename_map = {}
+            if 'Resolution' in plot_df_res_acc.columns and 'Resolution (m)' not in plot_df_res_acc.columns:
+                rename_map['Resolution'] = 'Resolution (m)'
+            if 'Accuracy' in plot_df_res_acc.columns and 'Accuracy (%)' not in plot_df_res_acc.columns:
+                rename_map['Accuracy'] = 'Accuracy (%)'
+            if 'Number_of_Classes' in plot_df_res_acc.columns and 'Classes' not in plot_df_res_acc.columns:
+                rename_map['Number_of_Classes'] = 'Classes'
+            
+            if rename_map:
+                plot_df_res_acc.rename(columns=rename_map, inplace=True)
+
+            if all(col in plot_df_res_acc.columns for col in ['Resolution (m)', 'Accuracy (%)', 'Display_Name', 'Classes']):
+                fig_res_acc = plot_resolution_accuracy(plot_df_res_acc)
+                st.plotly_chart(fig_res_acc, use_container_width=True)
+                # Use the new download form setup
+                setup_download_form(fig_res_acc, default_filename="resolution_accuracy_comparison", key_prefix="res_acc")
+            else:
+                st.warning("Required columns (Display_Name, Resolution, Accuracy, Classes) not available for Resolution vs. Accuracy chart.")
+
+        with tab2:
+            st.markdown("#### Number of Classes by Temporal Frequency")
+            if 'Number_of_Classes' in filtered_df.columns and 'Temporal_Frequency' in filtered_df.columns:
+                plot_df_classes_freq = filtered_df.dropna(subset=['Number_of_Classes', 'Temporal_Frequency']).copy()
+                plot_df_classes_freq['Temporal_Frequency'] = plot_df_classes_freq['Temporal_Frequency'].astype(str)
+                
+                if not plot_df_classes_freq.empty:
+                    fig_classes_freq = px.box(
+                        plot_df_classes_freq,
+                        x='Temporal_Frequency',
+                        y='Number_of_Classes',
+                        color='Type' if 'Type' in plot_df_classes_freq.columns else None,
+                        labels={'Number_of_Classes': 'Number of Classes', 'Temporal_Frequency': 'Temporal Frequency'},
+                        title='Distribution of Number of Classes by Temporal Frequency',
+                        points="all"
+                    )
+                    fig_classes_freq.update_layout(xaxis={'categoryorder':'total descending'})
+                    st.plotly_chart(fig_classes_freq, use_container_width=True)
+                    
+                    # Use the new download form setup
+                    setup_download_form(fig_classes_freq, default_filename="classes_vs_frequency", key_prefix="classes_freq")
+                else:
+                    st.info("Not enough data to display Number of Classes vs. Temporal Frequency chart after filtering.")
+            else:
+                st.warning("Required columns ('Number_of_Classes', 'Temporal_Frequency') not available for this chart.")
+
+        with tab3:
+            st.markdown("#### Methodology Breakdown by Type")
+            if 'Methodology' in filtered_df.columns and 'Type' in filtered_df.columns:
+                plot_df_method_type = filtered_df.groupby(['Type', 'Methodology']).size().reset_index(name='Count')
+                if not plot_df_method_type.empty:
+                    fig_method_type = px.bar(
+                        plot_df_method_type,
+                        x='Type',
+                        y='Count',
+                        color='Methodology',
+                        barmode='group',
+                        labels={'Count': 'Number of Initiatives', 'Type': 'Initiative Type', 'Methodology': 'Methodology'},
+                        title='Methodology Breakdown by Initiative Type'
+                    )
+                    st.plotly_chart(fig_method_type, use_container_width=True)
+
+                    # Use the new download form setup
+                    setup_download_form(fig_method_type, default_filename="methodology_by_type", key_prefix="method_type")
+                else:
+                    st.info("Not enough data to display Methodology Breakdown by Type chart after filtering.")
+            else:
+                st.warning("Required columns ('Methodology', 'Type') not available for this chart.")
+
+        st.markdown("---") # Separator after tabs
         st.markdown("#### Selected Initiatives Data")
         display_cols = ['Display_Name', 'Type', 'Methodology', 'Resolution', 'Accuracy', 'Number_of_Classes', 'Temporal_Frequency']
         # Filter display_cols to only those present in filtered_df

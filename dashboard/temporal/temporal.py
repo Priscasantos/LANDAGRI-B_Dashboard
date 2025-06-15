@@ -1,24 +1,22 @@
 import sys
 from pathlib import Path
-
-# Add scripts to path - This should be at the very top
-_project_root = Path(__file__).resolve().parent.parent.parent
-if str(_project_root) not in sys.path:
-    sys.path.insert(0, str(_project_root))
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
+# Local application imports should come after third-party libraries
 from scripts.utilities.config import get_initiative_color_map
-from scripts.utilities.ui_elements import get_chart_save_params
-from scripts.utilities.chart_saver import save_chart_robust
-
+from scripts.utilities.ui_elements import setup_download_form
 from scripts.plotting.chart_core import (
     apply_standard_layout,
     prepare_temporal_display_data
 )
+
+# Add scripts to path - This should be at the very top
+_project_root = Path(__file__).resolve().parent.parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
 
 def run(metadata=None, df_original=None):
     """
@@ -81,6 +79,12 @@ def prepare_temporal_data(meta_geral, df_original=None):
     
     if temporal_df.empty:
         return pd.DataFrame()
+
+    # Ensure 'Tipo' (Type) column exists and fill missing values
+    if 'Tipo' not in temporal_df.columns:
+        temporal_df['Tipo'] = "Uncategorized"
+    else:
+        temporal_df['Tipo'] = temporal_df['Tipo'].fillna("Uncategorized")
 
     temporal_df['Cobertura_Anos'] = temporal_df['Anos_Lista'].apply(lambda x: len(x) if isinstance(x, list) else 0)
     temporal_df['Periodo_Total_Anos'] = temporal_df['Ultimo_Ano'] - temporal_df['Primeiro_Ano'] + 1
@@ -164,12 +168,9 @@ def show_timeline_chart(temporal_data):
     )
     
     st.plotly_chart(fig, use_container_width=True)
-    # safe_download_image(fig, "timeline_iniciatives.png", "⬇️ Download Timeline (PNG)") # Replaced by new UI
+    # Use the new download form setup
     if fig:
-        save_filename, save_format, save_width, save_height, save_scale, save_button = get_chart_save_params(default_filename="timeline_iniciatives", key_prefix="timeline_tab1")
-        if save_button:
-            save_chart_robust(fig, "graphics/temporal", save_filename, save_width, save_height, save_scale, file_format=save_format)
-            st.toast(f"Chart '{save_filename}.{save_format}' saved!")
+        setup_download_form(fig, default_filename="timeline_iniciatives", key_prefix="timeline_tab1")
     
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -226,12 +227,10 @@ def show_coverage_heatmap(temporal_data):
     apply_standard_layout(fig_heatmap, "Heatmap of Initiative Availability by Type & Year", "Year", "Initiative Type")
     fig_heatmap.update_layout(height=max(400, len(pivot_table.index) * 50)) 
     st.plotly_chart(fig_heatmap, use_container_width=True)
-    # safe_download_image(fig_heatmap, "heatmap_type_year.png", "⬇️ Download Heatmap (PNG)") # Replaced
+    # Use the new download form setup
     if fig_heatmap:
-        save_filename, save_format, save_width, save_height, save_scale, save_button = get_chart_save_params(default_filename="heatmap_type_year", key_prefix="heatmap_tab4")
-        if save_button:
-            save_chart_robust(fig_heatmap, "graphics/temporal", save_filename, save_width, save_height, save_scale, file_format=save_format)
-            st.toast(f"Chart '{save_filename}.{save_format}' saved!")
+        setup_download_form(fig_heatmap, default_filename="heatmap_type_year", key_prefix="heatmap_tab4")
+
 
 def show_gaps_analysis(temporal_data):
     """Temporal gaps analysis using display names"""
@@ -242,7 +241,12 @@ def show_gaps_analysis(temporal_data):
         st.info("No data to display for gaps analysis.")
         return
 
+    # Ensure 'Tipo' column is handled if it was potentially created/filled in prepare_temporal_data
     gaps_data = temporal_data[temporal_data['Anos_Faltando'] > 0].copy()
+    if 'Tipo' not in gaps_data.columns:
+        gaps_data['Tipo'] = "Uncategorized" # Should not happen if prepare_temporal_data is called first
+    else:
+        gaps_data['Tipo'] = gaps_data['Tipo'].fillna("Uncategorized")
     
     if gaps_data.empty:
         st.success("🎉 Excellent! No initiatives have significant temporal gaps.")
@@ -266,16 +270,13 @@ def show_gaps_analysis(temporal_data):
         apply_standard_layout(fig_gaps, "Missing Years by Initiative", "Missing Years", "Initiative")
         fig_gaps.update_layout(yaxis={'categoryorder': 'total ascending'}, height=max(400, len(gaps_data) * 25))
         st.plotly_chart(fig_gaps, use_container_width=True)
-        # safe_download_image(fig_gaps, "temporal_gaps.png", "⬇️ Download Gaps (PNG)") # Replaced
+        # Use the new download form setup
         if fig_gaps:
-            save_filename, save_format, save_width, save_height, save_scale, save_button = get_chart_save_params(default_filename="temporal_gaps", key_prefix="gaps_tab2")
-            if save_button:
-                save_chart_robust(fig_gaps, "graphics/temporal", save_filename, save_width, save_height, save_scale, file_format=save_format)
-                st.toast(f"Chart '{save_filename}.{save_format}' saved!")
+            setup_download_form(fig_gaps, default_filename="temporal_gaps", key_prefix="gaps_tab2")
     
     with col2:
         st.markdown("#### Summary of Gaps by Type")
-        if not gaps_data.empty and 'Tipo' in gaps_data.columns:
+        if not gaps_data.empty: # 'Tipo' is now guaranteed to exist
             gaps_by_type = gaps_data.groupby('Tipo').agg(
                 Avg_Missing_Years=('Anos_Faltando', 'mean'),
                 Avg_Largest_Gap=('Maior_Lacuna', 'mean'),
@@ -302,8 +303,15 @@ def show_evolution_analysis(temporal_data):
         st.info("No data to display for evolution analysis.")
         return
 
+    # Ensure 'Tipo' column is handled
+    temporal_data_for_evolution = temporal_data.copy()
+    if 'Tipo' not in temporal_data_for_evolution.columns:
+        temporal_data_for_evolution['Tipo'] = "Uncategorized"
+    else:
+        temporal_data_for_evolution['Tipo'] = temporal_data_for_evolution['Tipo'].fillna("Uncategorized")
+
     all_years = []
-    for _, row in temporal_data.iterrows():
+    for _, row in temporal_data_for_evolution.iterrows():
         if isinstance(row['Anos_Lista'], list):
             all_years.extend(row['Anos_Lista'])
     
@@ -330,22 +338,19 @@ def show_evolution_analysis(temporal_data):
         fig_evolution.update_traces(line_color='#1f77b4', marker_size=8)
         apply_standard_layout(fig_evolution, "Number of Initiatives with Data by Year", "Year", "Number of Initiatives")
         st.plotly_chart(fig_evolution, use_container_width=True)
-        # safe_download_image(fig_evolution, "availability_evolution.png", "⬇️ Download Evolution (PNG)") # Replaced
+        # Use the new download form setup
         if fig_evolution:
-            save_filename, save_format, save_width, save_height, save_scale, save_button = get_chart_save_params(default_filename="availability_evolution", key_prefix="evolution_tab3_line")
-            if save_button:
-                save_chart_robust(fig_evolution, "graphics/temporal", save_filename, save_width, save_height, save_scale, file_format=save_format)
-                st.toast(f"Chart '{save_filename}.{save_format}' saved!")
+            setup_download_form(fig_evolution, default_filename="availability_evolution", key_prefix="evolution_tab3_line")
     
     with col2:
         st.markdown("#### Availability by Type and Year (Heatmap)")
         heatmap_data_evolution = []
-        for _, row in temporal_data.iterrows():
+        for _, row in temporal_data_for_evolution.iterrows(): # Use the copied and potentially modified dataframe
             if isinstance(row['Anos_Lista'], list):
                 for ano in row['Anos_Lista']:
                     heatmap_data_evolution.append({
                         'Year': ano,
-                        'Type': row['Tipo'],
+                        'Type': row['Tipo'], # This will now use 'Uncategorized' if original was NaN
                         'Initiative': row['Display_Name'] 
                     })
         
@@ -363,11 +368,8 @@ def show_evolution_analysis(temporal_data):
                 apply_standard_layout(fig_heatmap_evolution, "Heatmap of Initiative Availability by Type & Year", "Year", "Initiative Type")
                 fig_heatmap_evolution.update_layout(height=max(400, len(pivot_table_evolution.index) * 40))
                 st.plotly_chart(fig_heatmap_evolution, use_container_width=True)
-                # safe_download_image(fig_heatmap_evolution, "heatmap_type_year_evolution.png", "⬇️ Download Heatmap (PNG)") # Replaced
+                # Use the new download form setup
                 if fig_heatmap_evolution:
-                    save_filename, save_format, save_width, save_height, save_scale, save_button = get_chart_save_params(default_filename="heatmap_type_year_evolution", key_prefix="evolution_tab3_heatmap")
-                    if save_button:
-                        save_chart_robust(fig_heatmap_evolution, "graphics/temporal", save_filename, save_width, save_height, save_scale, file_format=save_format)
-                        st.toast(f"Chart '{save_filename}.{save_format}' saved!")
+                    setup_download_form(fig_heatmap_evolution, default_filename="heatmap_type_year_evolution", key_prefix="evolution_tab3_heatmap")
             else:
                 st.info("Pivot table for evolution heatmap is empty.")

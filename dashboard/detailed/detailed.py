@@ -5,6 +5,9 @@ import plotly.express as px
 import sys
 from pathlib import Path
 
+# Import the new setup_download_form function
+from scripts.utilities.ui_elements import setup_download_form
+
 # Add scripts to path for imports
 current_dir = Path(__file__).parent.parent.parent
 scripts_path = str(current_dir / "scripts")
@@ -28,8 +31,6 @@ def run():
         sys.path.insert(0, scripts_path)    # Import modules locally
     try:
         from scripts.utilities.json_interpreter import interpret_initiatives_metadata, _load_jsonc_file
-        from scripts.utilities.ui_elements import get_chart_save_params
-        from scripts.utilities.chart_saver import save_chart_robust
     except ImportError as e:
         st.error(f"Error importing modules: {e}")
         return
@@ -51,13 +52,13 @@ def run():
         except Exception as e:
             st.error(f"❌ Error loading data: {e}")
             return
-
+            
     df_geral = st.session_state.get('df_interpreted', pd.DataFrame())
-    
     if df_geral.empty:
         st.error("❌ No data available. Please check the data loading process.")
         return
-      # Create name to sigla mapping from DataFrame
+    
+    # Create name to sigla mapping from DataFrame
     nome_to_sigla = {}
     if 'Acronym' in df_geral.columns:
         for _, row in df_geral.iterrows():
@@ -68,7 +69,8 @@ def run():
     df_geral['Display_Name'] = df_geral.apply(
         lambda row: nome_to_sigla.get(row['Name'], row['Name'][:10]), axis=1
     )
-      # Initiative selection for comparison
+    
+    # Initiative selection for comparison
     selected_initiatives = st.multiselect(
         "🎯 Select initiatives to compare:",
         options=df_geral["Name"].tolist(),
@@ -79,7 +81,8 @@ def run():
     if len(selected_initiatives) < 2:
         st.info("👈 Select at least two initiatives in the menu above to start analysis.") # Translated
         return
-      # Filter data for selected initiatives
+    
+    # Filter data for selected initiatives
     df_filtered = df_geral[df_geral["Name"].isin(selected_initiatives)].copy()
 
     # Standardized tabs with English translations
@@ -90,15 +93,14 @@ def run():
         "📈 Data Table", # Translated
         "📅 Annual Coverage"
     ])
-    
     with tab1:
         st.subheader("Accuracy vs. Resolution (Normalized)") # Added subheader
         # Dual Bars using siglas
-        df_filtered['resolution_norm'] = (1 / df_filtered['Resolution (m)']) / (1 / df_filtered['Resolution (m)']).max()
+        df_filtered['resolution_norm'] = (1 / df_filtered['Resolution']) / (1 / df_filtered['Resolution']).max()
         fig = go.Figure()
         fig.add_trace(go.Bar(
             y=df_filtered['Display_Name'],  # Use siglas
-            x=df_filtered['Accuracy (%)'],
+            x=df_filtered['Accuracy'],
             name='Accuracy (%)',
             orientation='h',
             marker_color='royalblue'
@@ -118,27 +120,14 @@ def run():
             height=max(400, len(df_filtered) * 30 + 100) # Adjusted height for better readability
         )
         st.plotly_chart(fig, use_container_width=True)
-        # safe_download_image(fig, "dual_bars_detailed.png", "⬇️ Download Chart") # Removed old download
-        filename_db, format_db, width_db, height_db, scale_db, save_clicked_db = get_chart_save_params(
-            default_filename="dual_bars_detailed", 
-            key_prefix="dual_bars"
-        )
-        if save_clicked_db:
-            output_dir = Path(current_dir) / "graphics" / "detailed"
-            output_dir.mkdir(parents=True, exist_ok=True)
-            success, message, _ = save_chart_robust(
-                fig, str(output_dir), filename_db, 
-                width=width_db, height=height_db, scale=scale_db, file_format=format_db.lower()
-            )
-            if success:
-                st.success(f"Chart saved: {message}")
-            else:
-                st.error(f"Failed to save chart: {message}")
+        # Use the new download form setup
+        if fig:
+            setup_download_form(fig, default_filename="dual_bars_detailed", key_prefix="dual_bars")
 
     with tab2:  
-        st.subheader("Multi-dimensional Performance Radar") # Added subheader      
+        st.subheader("Multi-dimensional Performance Radar") # Added subheader
         # Radar using siglas
-        radar_columns = ['Accuracy (%)', 'Resolution (m)', 'Classes']
+        radar_columns = ['Accuracy', 'Resolution', 'Number_of_Classes']
         available_radar_cols = [col for col in radar_columns if col in df_filtered.columns]
         radar_df = None  # Initialize radar_df
         
@@ -147,7 +136,7 @@ def run():
             for col in available_radar_cols:
                 min_val, max_val = radar_df[col].min(), radar_df[col].max()
                 if max_val - min_val > 0:
-                    if col == 'Resolution (m)': # Lower is better for resolution, so invert normalization
+                    if col == 'Resolution': # Lower is better for resolution, so invert normalization
                         radar_df[col] = 1 - (radar_df[col] - min_val) / (max_val - min_val)
                     else: # Higher is better for accuracy and classes
                         radar_df[col] = (radar_df[col] - min_val) / (max_val - min_val)
@@ -173,22 +162,9 @@ def run():
                 height=600
             )
             st.plotly_chart(fig_radar, use_container_width=True)
-            # safe_download_image(fig_radar, "radar_chart_detailed.png", "⬇️ Download Chart") # Removed old download
-            filename_radar, format_radar, width_radar, height_radar, scale_radar, save_clicked_radar = get_chart_save_params(
-                default_filename="radar_chart_detailed", 
-                key_prefix="radar_chart"
-            )
-            if save_clicked_radar:
-                output_dir = Path(current_dir) / "graphics" / "detailed"
-                output_dir.mkdir(parents=True, exist_ok=True)
-                success, message, _ = save_chart_robust(
-                    fig_radar, str(output_dir), filename_radar, 
-                    width=width_radar, height=height_radar, scale=scale_radar, file_format=format_radar.lower()
-                )
-                if success:
-                    st.success(f"Chart saved: {message}")
-                else:
-                    st.error(f"Failed to save chart: {message}")
+            # Use the new download form setup
+            if fig_radar:
+                setup_download_form(fig_radar, default_filename="radar_chart_detailed", key_prefix="radar_chart")
         else:
             st.warning("Insufficient data for radar chart. Select more metrics or initiatives.") # Translated
 
@@ -201,7 +177,7 @@ def run():
             for col in available_radar_cols:
                 min_val, max_val = radar_df[col].min(), radar_df[col].max()
                 if max_val - min_val > 0:
-                    if col == 'Resolution (m)':
+                    if col == 'Resolution':
                         radar_df[col] = 1 - (radar_df[col] - min_val) / (max_val - min_val)
                     else:
                         radar_df[col] = (radar_df[col] - min_val) / (max_val - min_val)
@@ -221,22 +197,9 @@ def run():
             )
             fig_heatmap.update_layout(height=max(400, len(df_filtered) * 30 + 100))
             st.plotly_chart(fig_heatmap, use_container_width=True)
-            # safe_download_image(fig_heatmap, "heatmap_detailed.png", "⬇️ Download Chart") # Removed old download
-            filename_heatmap, format_heatmap, width_heatmap, height_heatmap, scale_heatmap, save_clicked_heatmap = get_chart_save_params(
-                default_filename="heatmap_detailed", 
-                key_prefix="heatmap_detailed"
-            )
-            if save_clicked_heatmap:
-                output_dir = Path(current_dir) / "graphics" / "detailed"
-                output_dir.mkdir(parents=True, exist_ok=True)
-                success, message, _ = save_chart_robust(
-                    fig_heatmap, str(output_dir), filename_heatmap, 
-                    width=width_heatmap, height=height_heatmap, scale=scale_heatmap, file_format=format_heatmap.lower()
-                )
-                if success:
-                    st.success(f"Chart saved: {message}")
-                else:
-                    st.error(f"Failed to save chart: {message}")
+            # Use the new download form setup
+            if fig_heatmap:
+                setup_download_form(fig_heatmap, default_filename="heatmap_detailed", key_prefix="heatmap_detailed")
         else:
             st.warning("Insufficient data for heatmap. Select more metrics or initiatives.") # Translated
 
@@ -257,22 +220,9 @@ def run():
                 # Ensure df_filtered contains the 'Name' column for plot_annual_coverage_multiselect
                 fig_annual = plot_annual_coverage_multiselect(meta, df_filtered, selected_initiatives)
                 st.plotly_chart(fig_annual, use_container_width=True)
-                # safe_download_image(fig_annual, "annual_coverage_detailed.png", "⬇️ Download Coverage (PNG)") # Removed old download
-                filename_annual, format_annual, width_annual, height_annual, scale_annual, save_clicked_annual = get_chart_save_params(
-                    default_filename="annual_coverage_detailed", 
-                    key_prefix="annual_coverage"
-                )
-                if save_clicked_annual:
-                    output_dir = Path(current_dir) / "graphics" / "detailed"
-                    output_dir.mkdir(parents=True, exist_ok=True)
-                    success, message, _ = save_chart_robust(
-                        fig_annual, str(output_dir), filename_annual, 
-                        width=width_annual, height=height_annual, scale=scale_annual, file_format=format_annual.lower()
-                    )
-                    if success:
-                        st.success(f"Chart saved: {message}")
-                    else:
-                        st.error(f"Failed to save chart: {message}")
+                # Use the new download form setup
+                if fig_annual:
+                    setup_download_form(fig_annual, default_filename="annual_coverage_detailed", key_prefix="annual_coverage")
 
             except ImportError:
                 st.error("Annual coverage function not available.") # Translated
@@ -315,7 +265,8 @@ def run_non_streamlit(df, metadata, output_dir="graphics/detailed"):
         df_for_analysis['Display_Name'] = df_for_analysis.apply(
             lambda row: nome_to_sigla.get(row['Name'], row['Name'][:10]), axis=1
         )
-          # Use first few initiatives for analysis
+        
+        # Use first few initiatives for analysis
         selected_initiatives_names = df_for_analysis["Name"].tolist()[:min(5, len(df_for_analysis))]
         df_filtered_non_st = df_for_analysis[df_for_analysis["Name"].isin(selected_initiatives_names)].copy()
         
@@ -379,11 +330,11 @@ def create_dual_bars_chart(df_filtered_chart):
     """Create dual bars chart without Streamlit dependencies"""
     try:
         df_filtered_chart = df_filtered_chart.copy() # Avoid SettingWithCopyWarning
-        df_filtered_chart['resolution_norm'] = (1 / df_filtered_chart['Resolution (m)']) / (1 / df_filtered_chart['Resolution (m)']).max()
+        df_filtered_chart['resolution_norm'] = (1 / df_filtered_chart['Resolution']) / (1 / df_filtered_chart['Resolution']).max()
         fig = go.Figure()
         fig.add_trace(go.Bar(
-            y=df_filtered_chart['Display_Name'],
-            x=df_filtered_chart['Accuracy (%)'],
+            y=df_filtered_chart['Display_Name'], 
+            x=df_filtered_chart['Accuracy'],
             name='Accuracy (%)',
             orientation='h',
             marker_color='royalblue'
@@ -417,7 +368,7 @@ def create_dual_bars_chart(df_filtered_chart):
 def create_radar_chart(df_filtered_chart):
     """Create radar chart without Streamlit dependencies"""
     try:
-        radar_columns = ['Accuracy (%)', 'Resolution (m)', 'Classes']
+        radar_columns = ['Accuracy', 'Resolution', 'Number_of_Classes']
         available_radar_cols_chart = [col for col in radar_columns if col in df_filtered_chart.columns]
         
         if len(available_radar_cols_chart) < 2:
@@ -428,7 +379,7 @@ def create_radar_chart(df_filtered_chart):
         for col in available_radar_cols_chart:
             min_val, max_val = radar_df_chart[col].min(), radar_df_chart[col].max()
             if max_val - min_val > 0:
-                if col == 'Resolution (m)':
+                if col == 'Resolution':
                     radar_df_chart[col] = 1 - (radar_df_chart[col] - min_val) / (max_val - min_val)
                 else:
                     radar_df_chart[col] = (radar_df_chart[col] - min_val) / (max_val - min_val)
@@ -467,7 +418,7 @@ def create_radar_chart(df_filtered_chart):
 def create_heatmap_chart(df_filtered_chart):
     """Create heatmap chart without Streamlit dependencies"""
     try:
-        radar_columns = ['Accuracy (%)', 'Resolution (m)', 'Classes']
+        radar_columns = ['Accuracy', 'Resolution', 'Number_of_Classes']
         available_radar_cols_chart = [col for col in radar_columns if col in df_filtered_chart.columns]
         
         if len(available_radar_cols_chart) < 2:
@@ -479,7 +430,7 @@ def create_heatmap_chart(df_filtered_chart):
         for col in available_radar_cols_chart:
             min_val, max_val = radar_df_chart[col].min(), radar_df_chart[col].max()
             if max_val - min_val > 0:
-                if col == 'Resolution (m)':
+                if col == 'Resolution':
                     radar_df_chart[col] = 1 - (radar_df_chart[col] - min_val) / (max_val - min_val)
                 else:
                     radar_df_chart[col] = (radar_df_chart[col] - min_val) / (max_val - min_val)

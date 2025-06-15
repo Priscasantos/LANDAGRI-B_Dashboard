@@ -17,7 +17,7 @@ import streamlit as st
 from typing import Dict, Any, Optional
 from scripts.utilities.config import get_initiative_color_map
 from scripts.plotting.chart_core import add_display_names_to_df, apply_standard_layout
-from scripts.plotting.universal_cache import smart_cache_data
+
 
 # If this function is also used by Streamlit pages, keep the cache decorator.
 # Otherwise, if it's only for non-Streamlit generation, it can be removed.

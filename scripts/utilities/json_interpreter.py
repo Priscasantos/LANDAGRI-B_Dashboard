@@ -315,7 +315,9 @@ def interpret_initiatives_metadata(file_path: Optional[Union[str, Path]] = None)
         accuracy_data = parse_accuracy(_get_safe_value(details, 'overall_accuracy') or _get_safe_value(details, 'accuracy')) # Check both keys
         available_years_list = _parse_available_years(_get_safe_value(details, 'available_years'))
         available_years_str = f"{min(available_years_list)}-{max(available_years_list)}" if available_years_list else "N/A"
-        
+        sensors_referenced_list = _get_safe_value(details, 'sensors_referenced', [])
+        class_legend_data = _get_safe_value(details, 'class_legend') # Get class legend data
+
         initiative_dict = {
             'Name': initiative_name,
             'Acronym': acronym,
@@ -330,34 +332,25 @@ def interpret_initiatives_metadata(file_path: Optional[Union[str, Path]] = None)
             'Methodology': _standardize_methodology(
                 _get_safe_value(details, 'methodology'),
                 _get_safe_value(details, 'classification_method')
-            ),            'Available_Years': available_years_str,
-            'Temporal_Frequency': _get_safe_value(details, 'temporal_frequency'),
-            'Number_of_Classes': _get_safe_value(details, 'number_of_classes'),
+            ),
+            'Coverage': _get_safe_value(details, 'coverage'),
             'Provider': _get_safe_value(details, 'provider'),
             'Source': _get_safe_value(details, 'source'),
-            'Reference_System': parse_reference_system(_get_safe_value(details, 'reference_system')),
             'Update_Frequency': _get_safe_value(details, 'update_frequency'),
-            'Class_Legend': _get_safe_value(details, 'class_legend'),
+            'Temporal_Frequency': _get_safe_value(details, 'update_frequency'), # Add Temporal_Frequency column
+            'Temporal_Coverage_Start': _get_safe_value(details, 'temporal_coverage_start_date'),
+            'Temporal_Coverage_End': _get_safe_value(details, 'temporal_coverage_end_date'),
+            'Available_Years_Str': available_years_str,
+            'Available_Years_List': json.dumps(available_years_list), # Convert list to JSON string
+            'Number_of_Classes': _get_safe_value(details, 'number_of_classes'),
+            'Class_Legend': json.dumps(class_legend_data) if isinstance(class_legend_data, list) else class_legend_data, # Convert to JSON string if it's a list
             'Algorithm': _get_safe_value(details, 'algorithm'),
             'Classification_Method': _get_safe_value(details, 'classification_method'),
-            # New technical fields following remote sensing best practices
-            'Spectral_Bands': _get_safe_value(details, 'spectral_bands'),
-            'Revisit_Time': _get_safe_value(details, 'revisit_time'),
-            'Preprocessing_Level': _get_safe_value(details, 'preprocessing_level'),
-            'Atmospheric_Correction': _get_safe_value(details, 'atmospheric_correction'),
-            'Validation_Method': _get_safe_value(details, 'validation_method'),
-            'Data_Format': _get_safe_value(details, 'data_format'),
-            'Minimum_Mapping_Unit': _get_safe_value(details, 'minimum_mapping_unit'),
-            'Platform': _get_safe_value(details, 'platform'),
-            'Sensor_Type': _get_safe_value(details, 'sensor_type'),
-            'Geometric_Correction': _get_safe_value(details, 'geometric_correction'),
-            'Cloud_Masking': _get_safe_value(details, 'cloud_masking')
+            'Sensors_Referenced': json.dumps(sensors_referenced_list) # Already a JSON string
         }
         processed_initiatives.append(initiative_dict)
 
-    df = pd.DataFrame(processed_initiatives)
-    
-    # Post-processing: Ensure essential numeric columns are float, fill NaNs if necessary
+    df = pd.DataFrame(processed_initiatives)    # Post-processing: Ensure essential numeric columns are float, fill NaNs if necessary
     numeric_cols = ['Resolution', 'Resolution_min_val', 'Resolution_max_val', 
                     'Accuracy', 'Accuracy_min_val', 'Accuracy_max_val', 'Number_of_Classes']
     for col in numeric_cols:
