@@ -197,9 +197,9 @@ def parse_accuracy(accuracy_field: Any) -> Dict[str, Optional[float]]:
 
     return {'value': final_value, 'min_val': min_val, 'max_val': max_val}
 
-def parse_reference_system(reference_system_field: Any) -> List[str]:
+def parse_reference_system(reference_system_field: Any) -> str:
     """
-    Parses the 'reference_system' field to ensure it's a list of strings.
+    Parses the 'reference_system' field and returns a string representation.
     Handles strings, lists of strings, or lists containing dictionaries.
     """
     parsed_systems: List[str] = []
@@ -215,12 +215,15 @@ def parse_reference_system(reference_system_field: Any) -> List[str]:
                 parsed_systems.append(item.strip())
             elif isinstance(item, dict):
                 # Try to extract a common key for the system name
-                for key in ['name', 'value', 'id', 'system']: # Common keys
-                    if isinstance(item.get(key), str):
-                        parsed_systems.append(item[key].strip())
-                        break # Found a name, move to next item
-    # Remove duplicates and ensure all are non-empty
-    return sorted(list(set(s for s in parsed_systems if s)))
+                epsg_code = item.get('epsg_code', '')
+                description = item.get('description', '')
+                if epsg_code:
+                    parsed_systems.append(f"{epsg_code} ({description})" if description else epsg_code)
+                elif description:
+                    parsed_systems.append(description)
+    # Remove duplicates and return as comma-separated string
+    unique_systems = sorted(list(set(s for s in parsed_systems if s)))
+    return ', '.join(unique_systems) if unique_systems else 'Not specified'
 
 
 def _generate_display_name(name: str, acronym: Optional[str]) -> str:
@@ -290,12 +293,11 @@ def interpret_initiatives_metadata(file_path: Optional[Union[str, Path]] = None)
     Reads initiatives_metadata.jsonc, processes it, and returns a Pandas DataFrame.
     """
     actual_file_path: Path
-    if file_path is None:
-        # Default path relative to this script's parent's parent directory (project root)
+    if file_path is None:        # Default path relative to this script's parent's parent directory (project root)
         actual_file_path = Path(__file__).resolve().parent.parent.parent / "data" / "raw" / "initiatives_metadata.jsonc"
     else:
         actual_file_path = Path(file_path)
-
+        
     raw_data = _load_jsonc_file(actual_file_path)
     if not raw_data:
         return pd.DataFrame() # Return empty DataFrame if loading failed
@@ -311,6 +313,8 @@ def interpret_initiatives_metadata(file_path: Optional[Union[str, Path]] = None)
         
         resolution_data = parse_resolution(_get_safe_value(details, 'spatial_resolution'))
         accuracy_data = parse_accuracy(_get_safe_value(details, 'overall_accuracy') or _get_safe_value(details, 'accuracy')) # Check both keys
+        available_years_list = _parse_available_years(_get_safe_value(details, 'available_years'))
+        available_years_str = f"{min(available_years_list)}-{max(available_years_list)}" if available_years_list else "N/A"
         
         initiative_dict = {
             'Name': initiative_name,
@@ -326,8 +330,7 @@ def interpret_initiatives_metadata(file_path: Optional[Union[str, Path]] = None)
             'Methodology': _standardize_methodology(
                 _get_safe_value(details, 'methodology'),
                 _get_safe_value(details, 'classification_method')
-            ),
-            'Available_Years': _parse_available_years(_get_safe_value(details, 'available_years')),
+            ),            'Available_Years': available_years_str,
             'Temporal_Frequency': _get_safe_value(details, 'temporal_frequency'),
             'Number_of_Classes': _get_safe_value(details, 'number_of_classes'),
             'Provider': _get_safe_value(details, 'provider'),
@@ -336,7 +339,19 @@ def interpret_initiatives_metadata(file_path: Optional[Union[str, Path]] = None)
             'Update_Frequency': _get_safe_value(details, 'update_frequency'),
             'Class_Legend': _get_safe_value(details, 'class_legend'),
             'Algorithm': _get_safe_value(details, 'algorithm'),
-            'Classification_Method': _get_safe_value(details, 'classification_method')
+            'Classification_Method': _get_safe_value(details, 'classification_method'),
+            # New technical fields following remote sensing best practices
+            'Spectral_Bands': _get_safe_value(details, 'spectral_bands'),
+            'Revisit_Time': _get_safe_value(details, 'revisit_time'),
+            'Preprocessing_Level': _get_safe_value(details, 'preprocessing_level'),
+            'Atmospheric_Correction': _get_safe_value(details, 'atmospheric_correction'),
+            'Validation_Method': _get_safe_value(details, 'validation_method'),
+            'Data_Format': _get_safe_value(details, 'data_format'),
+            'Minimum_Mapping_Unit': _get_safe_value(details, 'minimum_mapping_unit'),
+            'Platform': _get_safe_value(details, 'platform'),
+            'Sensor_Type': _get_safe_value(details, 'sensor_type'),
+            'Geometric_Correction': _get_safe_value(details, 'geometric_correction'),
+            'Cloud_Masking': _get_safe_value(details, 'cloud_masking')
         }
         processed_initiatives.append(initiative_dict)
 

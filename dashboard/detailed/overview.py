@@ -62,18 +62,16 @@ def run():
         # Ensure df is not empty and 'Type' column exists before accessing unique values
         tipos = df["Type"].unique().tolist() if not df.empty and "Type" in df.columns else []
         selected_types = st.multiselect("Type", options=tipos, default=tipos)
-    with col2:
-        # Ensure df is not empty and 'Resolution (m)' column exists
-        if not df.empty and "Resolution (m)" in df.columns and df["Resolution (m)"].notna().any():
-            min_res, max_res = int(df["Resolution (m)"].min()), int(df["Resolution (m)"].max())
+    with col2:        # Ensure df is not empty and 'Resolution' column exists  
+        if not df.empty and "Resolution" in df.columns and df["Resolution"].notna().any():
+            min_res, max_res = int(df["Resolution"].min()), int(df["Resolution"].max())
             selected_res = st.slider("Resolution (m)", min_value=min_res, max_value=max_res, value=(min_res, max_res))
         else:
             selected_res = st.slider("Resolution (m)", min_value=0, max_value=1000, value=(0, 1000), disabled=True)
             st.caption("Resolution data not available for current selection.")
-    with col3:
-        # Ensure df is not empty and 'Accuracy (%)' column exists
-        if not df.empty and "Accuracy (%)" in df.columns and df["Accuracy (%)"].notna().any():
-            min_acc, max_acc = int(df["Accuracy (%)"].min()), int(df["Accuracy (%)"].max())
+    with col3:        # Ensure df is not empty and 'Accuracy' column exists
+        if not df.empty and "Accuracy" in df.columns and df["Accuracy"].notna().any():
+            min_acc, max_acc = int(df["Accuracy"].min()), int(df["Accuracy"].max())
             selected_acc = st.slider("Accuracy (%)", min_value=min_acc, max_value=max_acc, value=(min_acc, max_acc))
         else:
             selected_acc = st.slider("Accuracy (%)", min_value=0, max_value=100, value=(0,100), disabled=True)
@@ -81,12 +79,11 @@ def run():
     with col4:
         # Ensure df is not empty and 'Methodology' column exists
         metodologias = df["Methodology"].unique().tolist() if not df.empty and "Methodology" in df.columns else []
-        selected_methods = st.multiselect("Methodology", options=metodologias, default=metodologias)
-    # Apply filters
+        selected_methods = st.multiselect("Methodology", options=metodologias, default=metodologias)    # Apply filters
     filtered_df = df[
         (df["Type"].isin(selected_types)) &
-        (df["Resolution (m)"].between(selected_res[0], selected_res[1])) &
-        (df["Accuracy (%)"].between(selected_acc[0], selected_acc[1])) &
+        (df["Resolution"].between(selected_res[0], selected_res[1])) &
+        (df["Accuracy"].between(selected_acc[0], selected_acc[1])) &
         (df["Methodology"].isin(selected_methods))
     ]
     st.session_state.filtered_df = filtered_df
@@ -149,7 +146,7 @@ def run():
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        avg_accuracy = filtered_df["Accuracy (%)"].mean()
+        avg_accuracy = filtered_df["Accuracy"].mean()
         accuracy_value = f"{avg_accuracy:.1f}" if pd.notna(avg_accuracy) else "N/A"
         st.markdown(f"""
         <div class="metric-card accuracy">
@@ -161,7 +158,7 @@ def run():
         """, unsafe_allow_html=True)
     
     with col2:
-        avg_resolution = filtered_df["Resolution (m)"].mean()
+        avg_resolution = filtered_df["Resolution"].mean()
         resolution_value = f"{avg_resolution:.0f}" if pd.notna(avg_resolution) else "N/A"
         st.markdown(f"""
         <div class="metric-card resolution">
@@ -297,8 +294,7 @@ def run():
             <h2 class="initiative-title">🛰️ {initiative_acronym}</h2>
             <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">{selected_initiative_detailed}</p>
         </div>
-        """, unsafe_allow_html=True)
-
+        """, unsafe_allow_html=True)        
         st.markdown("""
         <div class="detail-card">
         """, unsafe_allow_html=True)
@@ -309,10 +305,10 @@ def run():
             st.markdown("#### 📊 Key Metrics")
             
             # Modern metric grid
-            accuracy_val = init_data.get('Accuracy (%)', 'N/A')
-            resolution_val = init_data.get('Resolution (m)', 'N/A')
+            accuracy_val = init_data.get('Accuracy', 'N/A')
+            resolution_val = init_data.get('Resolution', 'N/A')
             classes_val = init_data.get("Classes", init_data.get("Number_of_Classes", "N/A"))
-            frequency_val = init_data.get("Temporal Frequency", "N/A")
+            frequency_val = init_data.get("Temporal_Frequency", "N/A")
             
             st.markdown(f"""
             <div class="metric-grid">
@@ -335,13 +331,11 @@ def run():
             </div>
             """, unsafe_allow_html=True)
             
-            st.markdown("#### ⚙️ Technical Information")
-            
-            # Modern badges for technical info
+            st.markdown("#### ⚙️ Technical Information")            # Modern badges for technical info
             type_val = init_data.get('Type', 'N/A')
             methodology_val = init_data.get('Methodology', 'N/A')
-            scope_val = init_data.get('Scope', 'N/A')
-            years_val = init_data.get('Available Years', 'N/A')
+            scope_val = init_data.get('Type', 'N/A')  # Using Type as scope
+            years_val = init_data.get('Available_Years', 'N/A')  # Now it's a string
             
             st.markdown(f"""
             <div style="margin: 1rem 0;">
@@ -391,7 +385,7 @@ def run():
             <div class="info-section" style="border-left-color: #17a2b8;">
                 <div class="info-title">�️ Technical Specifications</div>
                 <p><strong>Reference System:</strong> {reference_sys_info if isinstance(reference_sys_info, str) else 'Multiple systems'}</p>
-                <p><strong>Resolution:</strong> {init_data.get('Resolution (m)', 'N/A')} meters</p>
+                <p><strong>Resolution:</strong> {init_data.get('Resolution', 'N/A')} meters</p>
             </div>
             """, unsafe_allow_html=True)
         
@@ -412,14 +406,77 @@ def run():
             classes_html = ""
             for i, cls in enumerate(classes_list):
                 color = ["#e3f2fd", "#f3e5f5", "#e8f5e8", "#fff3e0", "#fce4ec", "#e0f2f1"][i % 6]
-                classes_html += f'<span class="badge" style="background: {color}; margin: 0.2rem;">{cls}</span>'
-            
+                classes_html += f'<span class="badge" style="background: {color}; margin: 0.2rem;">{cls}</span>'            
             st.markdown(f"""
                 <p style="line-height: 2;">
                     {classes_html}
                 </p>
             </div>
             """, unsafe_allow_html=True)
+
+        # New Technical Specifications Section - following remote sensing best practices
+        st.markdown("#### 🛰️ Technical Specifications")
+        
+        # Sensor and Data Acquisition Information
+        technical_info = []
+        if init_data.get('Spectral_Bands') and init_data['Spectral_Bands'] != 'None':
+            technical_info.append(f"**Spectral Bands:** {init_data['Spectral_Bands']}")
+        if init_data.get('Platform') and init_data['Platform'] != 'None':
+            technical_info.append(f"**Platform:** {init_data['Platform']}")
+        if init_data.get('Sensor_Type') and init_data['Sensor_Type'] != 'None':
+            technical_info.append(f"**Sensor Type:** {init_data['Sensor_Type']}")
+        if init_data.get('Revisit_Time') and init_data['Revisit_Time'] != 'None':
+            technical_info.append(f"**Revisit Time:** {init_data['Revisit_Time']}")
+            
+        if technical_info:
+            st.markdown("""
+            <div class="info-section" style="margin-top: 1rem;">
+                <div class="info-title">🛰️ Sensor & Data Acquisition</div>
+            """, unsafe_allow_html=True)
+            
+            for info in technical_info:
+                st.markdown(f"• {info}")
+            st.markdown("</div>", unsafe_allow_html=True)
+        
+        # Processing and Quality Information
+        processing_info = []
+        if init_data.get('Preprocessing_Level') and init_data['Preprocessing_Level'] != 'None':
+            processing_info.append(f"**Preprocessing Level:** {init_data['Preprocessing_Level']}")
+        if init_data.get('Atmospheric_Correction') and init_data['Atmospheric_Correction'] != 'None':
+            processing_info.append(f"**Atmospheric Correction:** {init_data['Atmospheric_Correction']}")
+        if init_data.get('Geometric_Correction') and init_data['Geometric_Correction'] != 'None':
+            processing_info.append(f"**Geometric Correction:** {init_data['Geometric_Correction']}")
+        if init_data.get('Cloud_Masking') and init_data['Cloud_Masking'] != 'None':
+            processing_info.append(f"**Cloud Masking:** {init_data['Cloud_Masking']}")
+            
+        if processing_info:
+            st.markdown("""
+            <div class="info-section" style="margin-top: 1rem;">
+                <div class="info-title">⚙️ Processing & Quality Control</div>
+            """, unsafe_allow_html=True)
+            
+            for info in processing_info:
+                st.markdown(f"• {info}")
+            st.markdown("</div>", unsafe_allow_html=True)
+        
+        # Validation and Data Characteristics
+        validation_info = []
+        if init_data.get('Validation_Method') and init_data['Validation_Method'] != 'None':
+            validation_info.append(f"**Validation Method:** {init_data['Validation_Method']}")
+        if init_data.get('Minimum_Mapping_Unit') and init_data['Minimum_Mapping_Unit'] != 'None':
+            validation_info.append(f"**Minimum Mapping Unit:** {init_data['Minimum_Mapping_Unit']}")
+        if init_data.get('Data_Format') and init_data['Data_Format'] != 'None':
+            validation_info.append(f"**Data Format:** {init_data['Data_Format']}")
+            
+        if validation_info:
+            st.markdown("""
+            <div class="info-section" style="margin-top: 1rem;">
+                <div class="info-title">📊 Validation & Data Characteristics</div>
+            """, unsafe_allow_html=True)
+            
+            for info in validation_info:
+                st.markdown(f"• {info}")
+            st.markdown("</div>", unsafe_allow_html=True)
     
     # Link to detailed comparisons
     st.markdown("---")
