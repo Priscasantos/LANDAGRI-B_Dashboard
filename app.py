@@ -9,15 +9,12 @@ from pathlib import Path
 current_dir = Path(__file__).parent
 sys.path.append(str(current_dir / "scripts"))
 
-# Updated import using the wrapper
+# Updated import using the new JSON interpreter
 try:
-    from scripts.data_generation.data_wrapper import load_data
+    from scripts.utilities.json_interpreter import interpret_initiatives_metadata
 except ImportError:
-    try:
-        from scripts.data_generation.lulc_data_engine import load_data
-    except ImportError:
-        st.error("❌ Error importing data loading functions. Please check module structure.")
-        st.stop()
+    st.error("❌ Error importing JSON interpreter. Please check module structure.")
+    st.stop()
 
 # Set environment variable to disable PyArrow optimization
 os.environ["STREAMLIT_BROWSER_GATHER_USAGE_STATS"] = "false"
@@ -26,10 +23,19 @@ os.environ["STREAMLIT_BROWSER_GATHER_USAGE_STATS"] = "false"
 warnings.filterwarnings("ignore")
 
 # Cache main data for better performance
-
+@st.cache_data
 def load_cached_data():
-    """Loads and caches the main dashboard data"""
-    return load_data()
+    """Loads and caches the main dashboard data using JSON interpreter"""
+    try:
+        metadata_file_path = current_dir / "data" / "raw" / "initiatives_metadata.jsonc"
+        df = interpret_initiatives_metadata(metadata_file_path)
+        if df.empty:
+            st.error("❌ No data loaded from JSON interpreter.")
+            return None
+        return df
+    except Exception as e:
+        st.error(f"❌ Error loading data: {e}")
+        return None
 
 # Page configuration with performance optimizations
 st.set_page_config(
