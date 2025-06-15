@@ -11,21 +11,14 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-# from scripts.utilities.utils import safe_download_image # Commented out as it's replaced by new UI
 from scripts.utilities.config import get_initiative_color_map
-from scripts.utilities.ui_elements import get_chart_save_params # Added import
-from scripts.utilities.chart_saver import save_chart_robust # Added import
+from scripts.utilities.ui_elements import get_chart_save_params
+from scripts.utilities.chart_saver import save_chart_robust
 
 from scripts.plotting.chart_core import (
     apply_standard_layout,
     prepare_temporal_display_data
 )
-# Import non-Streamlit functions for potential direct call or reference if needed
-# from scripts.plotting.charts.temporal_charts_offline import (
-#     create_timeline_chart_non_streamlit,
-#     create_gaps_chart_non_streamlit,
-#     create_evolution_charts_non_streamlit
-# )
 
 def run(metadata=None, df_original=None):
     """
@@ -114,59 +107,59 @@ def calculate_largest_gap(anos_list):
     return max_gap
 
 def show_timeline_chart(temporal_data):
-    """Gantt-style timeline chart showing coverage of each initiative using display names"""
-    st.subheader("📊 LULC Initiatives Timeline Comparison - Availability Periods")
+    """Timeline chart showing discrete years for each initiative with proper gaps"""
+    st.subheader("📊 LULC Initiatives Timeline - Discrete Years Availability")
     fig = None # Initialize fig
     
     if temporal_data.empty:
         st.info("No data to display for the timeline chart.")
         return
 
-    gantt_data = []
     # Ensure 'Nome' column exists for color mapping, fallback to Display_Name if not
     name_column_for_color = 'Nome' if 'Nome' in temporal_data.columns else 'Display_Name'
     color_map = get_initiative_color_map(temporal_data[name_column_for_color].tolist())
     
-    for idx, row in temporal_data.iterrows():
-        gantt_data.append({
-            'Task': row['Display_Name'],  
-            'FullName': row.get('Nome', row['Display_Name']), # Fallback for FullName
-            'Start': f"{row['Primeiro_Ano']}-01-01",
-            'Finish': f"{row['Ultimo_Ano']}-12-31",
-            'Resource': row['Tipo'],
-            'Description': f"{row['Display_Name']} ({row['Primeiro_Ano']}-{row['Ultimo_Ano']})",
-            'Color': color_map.get(row[name_column_for_color], '#3B82F6')
-        })
-    
-    if not gantt_data:
-        st.info("No data prepared for Gantt chart.")
-        return
-
-    gantt_df = pd.DataFrame(gantt_data)
     fig = go.Figure()
     
-    for idx, row in gantt_df.iterrows():
-        fig.add_trace(go.Scatter(
-            x=[row['Start'], row['Finish']],
-            y=[row['Task'], row['Task']],
-            mode='lines',
-            line=dict(color=row['Color'], width=20),
-            name=row['Task'],
-            hovertemplate=f"<b>{row['Task']}</b><br>" +
-                         f"Start: {row['Start'][:4]}<br>" +
-                         f"End: {row['Finish'][:4]}<br>" +
-                         f"Type: {row['Resource']}<extra></extra>",
-            showlegend=False
-        ))
+    # Sort initiatives by first year for better visualization
+    temporal_data_sorted = temporal_data.sort_values('Primeiro_Ano')
     
-    apply_standard_layout(fig, "LULC Initiatives Availability Timeline", "Year", "Initiatives", "timeline")
+    for idx, row in temporal_data_sorted.iterrows():
+        if 'Anos_Lista' in row and isinstance(row['Anos_Lista'], list):
+            years_list = row['Anos_Lista']
+            initiative_name = row['Display_Name']
+            color = color_map.get(row[name_column_for_color], '#3B82F6')
+            
+            # Create a separate trace for each year to show discrete points
+            fig.add_trace(go.Scatter(
+                x=years_list,
+                y=[initiative_name] * len(years_list),
+                mode='markers',
+                marker=dict(
+                    color=color,
+                    size=12,
+                    symbol='square',
+                    line=dict(width=1, color='white')
+                ),
+                name=initiative_name,
+                hovertemplate=f"<b>{initiative_name}</b><br>" +
+                             "Year: %{x}<br>" +
+                             f"Type: {row.get('Tipo', 'N/A')}<extra></extra>",
+                showlegend=False
+            ))
+    
+    apply_standard_layout(fig, "LULC Initiatives Timeline - Discrete Years", "Year", "Initiatives", "timeline")
     
     fig.update_layout(
-        height=max(600, len(temporal_data) * 30),
-        xaxis=dict(tickmode='linear', dtick=2),  
+        height=max(600, len(temporal_data) * 35),
+        xaxis=dict(
+            tickmode='linear', 
+            dtick=2,
+            range=[temporal_data['Primeiro_Ano'].min() - 1, temporal_data['Ultimo_Ano'].max() + 1]
+        ),  
         yaxis=dict(
             categoryorder='array',
-            categoryarray=temporal_data.sort_values('Primeiro_Ano')['Display_Name'].tolist() 
+            categoryarray=temporal_data_sorted['Display_Name'].tolist()
         )
     )
     

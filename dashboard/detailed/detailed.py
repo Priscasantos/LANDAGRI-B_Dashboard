@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 import sys
@@ -24,26 +25,38 @@ def run():
     current_dir = Path(__file__).parent.parent.parent
     scripts_path = str(current_dir / "scripts")
     if scripts_path not in sys.path:
-        sys.path.insert(0, scripts_path)
-      # Import modules locally
+        sys.path.insert(0, scripts_path)    # Import modules locally
     try:
-        from scripts.data_generation.data_wrapper import load_data
-        # from scripts.utilities.utils import safe_download_image # Removed old import
-        from scripts.utilities.ui_elements import get_chart_save_params # Added import
-        from scripts.utilities.chart_saver import save_chart_robust # Added import
+        from scripts.utilities.json_interpreter import interpret_initiatives_metadata, _load_jsonc_file
+        from scripts.utilities.ui_elements import get_chart_save_params
+        from scripts.utilities.chart_saver import save_chart_robust
     except ImportError as e:
-        st.error(f"Error importing modules: {e}") # Translated
-        return    
-    if 'df_geral' not in st.session_state or st.session_state.df_geral.empty:
-        # Try to load processed data directly
-        df_loaded, metadata_loaded, _ = load_data()  # Fixed tuple unpacking for 3 values
-        if df_loaded is not None and not df_loaded.empty:
-            st.session_state.df_geral = df_loaded
-            st.session_state.metadata = metadata_loaded
-        else:
-            st.warning("⚠️ Data not found. Run the main page (app.py) first.") # Translated
-            st.stop()
-    df_geral = st.session_state.df_geral
+        st.error(f"Error importing modules: {e}")
+        return
+    
+    # Load data using the new JSON interpreter system
+    if 'df_interpreted' not in st.session_state:
+        try:
+            metadata_file_path = current_dir / "data" / "raw" / "initiatives_metadata.jsonc"
+            df_interpreted = interpret_initiatives_metadata(metadata_file_path)
+            if df_interpreted.empty:
+                st.error("❌ Data interpretation resulted in an empty DataFrame.")
+                return
+            st.session_state.df_interpreted = df_interpreted
+            
+            # Also load raw metadata for any analysis that needs it
+            raw_metadata = _load_jsonc_file(metadata_file_path)
+            st.session_state.metadata = raw_metadata
+            
+        except Exception as e:
+            st.error(f"❌ Error loading data: {e}")
+            return
+
+    df_geral = st.session_state.get('df_interpreted', pd.DataFrame())
+    
+    if df_geral.empty:
+        st.error("❌ No data available. Please check the data loading process.")
+        return
       # Create name to sigla mapping from DataFrame
     nome_to_sigla = {}
     if 'Acronym' in df_geral.columns:

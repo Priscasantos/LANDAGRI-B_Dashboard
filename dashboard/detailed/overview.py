@@ -502,31 +502,35 @@ def run():
             density_df = pd.DataFrame(density_data)
             year_counts = density_df['ano'].value_counts().sort_index()
             
-            # Density chart by year (line + area)
+            # Density chart by year (discrete bars)
             fig_density_line = go.Figure()
-            fig_density_line.add_trace(go.Scatter(
+            fig_density_line.add_trace(go.Bar(
                 x=year_counts.index,
                 y=year_counts.values,
-                mode='lines+markers',
-                fill='tonexty',
-                name='Active Initiatives', # Translated
-                line=dict(color='rgba(0,150,136,0.8)', width=3),
-                marker=dict(size=8, color='rgba(0,150,136,1)')
+                name='Active Initiatives',
+                marker=dict(
+                    color='rgba(0,150,136,0.8)',
+                    line=dict(color='rgba(0,150,136,1)', width=1)
+                ),
+                hovertemplate='<b>Year: %{x}</b><br>' +
+                             'Active Initiatives: %{y}<extra></extra>'
             ))
             
             fig_density_line.update_layout(
-                title='📊 Temporal Density: Number of Initiatives per Year', # Simplified title
-                xaxis_title='Year', # Translated
-                yaxis_title='Number of Active Initiatives', # Translated
+                title='📊 Temporal Density: Number of Initiatives per Year',
+                xaxis_title='Year',
+                yaxis_title='Number of Active Initiatives',
                 height=450,
                 hovermode='x unified',
-                showlegend=True,
+                showlegend=False,
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 xaxis=dict(
                     showgrid=True,
                     gridwidth=1,
-                    gridcolor='rgba(128,128,128,0.2)'
+                    gridcolor='rgba(128,128,128,0.2)',
+                    tickmode='linear',
+                    dtick=2
                 ),
                 yaxis=dict(
                     showgrid=True,
