@@ -1,53 +1,62 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-import numpy as np
 import sys
 from pathlib import Path
 
+# Add scripts to path if necessary
+current_dir = Path(__file__).parent.parent.parent
+scripts_path = str(current_dir / "scripts")
+if scripts_path not in sys.path:
+    sys.path.insert(0, scripts_path)
+
+# Import modules locally
+try:
+    from scripts.utilities.json_interpreter import interpret_initiatives_metadata, _load_jsonc_file
+    from scripts.utilities.ui_elements import get_chart_save_params
+    from scripts.utilities.chart_saver import save_chart_robust
+except ImportError as e:
+    st.error(f"Error importing modules: {e}")
+    st.stop()
+
 def run():
-    # Adicionar scripts ao path se necessário
-    current_dir = Path(__file__).parent.parent.parent
-    scripts_path = str(current_dir / "scripts")
-    if scripts_path not in sys.path:
-        sys.path.insert(0, scripts_path)
-    
-    # Importar módulos localmente
-    try:
-        from scripts.data_generation.data_wrapper import DataWrapper # Import DataWrapper class
-        from scripts.utilities.utils import safe_download_image
-    except ImportError as e:
-        st.error(f"Erro ao importar módulos: {e}")
-        st.stop()
-    
-    # Initialize DataWrapper
-    data_wrapper = DataWrapper()
+    # Load data using the new JSON interpreter system
+    if 'df_interpreted' not in st.session_state:
+        try:
+            metadata_file_path = current_dir / "data" / "raw" / "initiatives_metadata.jsonc"
+            df_interpreted = interpret_initiatives_metadata(metadata_file_path)
+            if df_interpreted.empty:
+                st.error("❌ Data interpretation resulted in an empty DataFrame.")
+                return
+            st.session_state.df_interpreted = df_interpreted
+            
+            # Also load raw metadata for temporal analysis
+            raw_metadata = _load_jsonc_file(metadata_file_path)
+            st.session_state.metadata = raw_metadata
+            
+        except Exception as e:
+            st.error(f"❌ Error loading data: {e}")
+            return
 
-      # Carregar dados originais e preparar para filtros
-    if 'df_original' not in st.session_state or 'metadata' not in st.session_state or 'auxiliary_data' not in st.session_state:
-        df_loaded, metadata_loaded, auxiliary_data_loaded = data_wrapper.load_data() # Corrected assignment for three values
-        st.session_state.df_original = df_loaded
-        st.session_state.metadata = metadata_loaded
-        st.session_state.auxiliary_data = auxiliary_data_loaded # Store auxiliary_data
-        
-        # Corrected call to prepare_plot_data, using the instance method
-        prepared_data_dict = data_wrapper.prepare_plot_data(df_loaded.copy(), plot_type="overview")
-        st.session_state.df_prepared_initial = prepared_data_dict.get('data', pd.DataFrame()) # Get DataFrame from dict
+    df = st.session_state.get('df_interpreted', pd.DataFrame())
+    meta = st.session_state.get('metadata', {})
 
-    df = st.session_state.df_prepared_initial
-    meta = st.session_state.metadata
+    if df.empty:
+        st.error("❌ No data available. Please check the data loading process.")
+        return
 
-    # Create nome_to_sigla mapping from the main DataFrame
+    # Create nome_to_sigla mapping from the DataFrame
     nome_to_sigla = {}
-    if 'df_original' in st.session_state and not st.session_state.df_original.empty and 'Acronym' in st.session_state.df_original.columns and 'Name' in st.session_state.df_original.columns:
-        for _, row in st.session_state.df_original.iterrows():
-            nome_to_sigla[row['Name']] = row['Acronym']
+    if 'Acronym' in df.columns and 'Name' in df.columns:
+        for _, row in df.iterrows():
+            if pd.notna(row['Name']) and pd.notna(row['Acronym']):
+                nome_to_sigla[row['Name']] = row['Acronym']
 
 
 
 
-    # Filtros modernos no topo da página
-    st.markdown("### 🔎 Filtros de Iniciativas")
+    # Modern filters at the top of the page
+    st.markdown("### 🔎 Initiative Filters")
     col1, col2, col3, col4 = st.columns(4)    
     with col1:
         # Ensure df is not empty and 'Type' column exists before accessing unique values
@@ -72,7 +81,8 @@ def run():
     with col4:
         # Ensure df is not empty and 'Methodology' column exists
         metodologias = df["Methodology"].unique().tolist() if not df.empty and "Methodology" in df.columns else []
-        selected_methods = st.multiselect("Methodology", options=metodologias, default=metodologias)    # Aplicar filtros
+        selected_methods = st.multiselect("Methodology", options=metodologias, default=metodologias)
+    # Apply filters
     filtered_df = df[
         (df["Type"].isin(selected_types)) &
         (df["Resolution (m)"].between(selected_res[0], selected_res[1])) &
@@ -82,105 +92,375 @@ def run():
     st.session_state.filtered_df = filtered_df
 
     if filtered_df.empty:
-        st.warning("⚠️ Nenhuma iniciativa corresponde aos filtros selecionados. Ajuste os filtros para visualizar os dados.")
-        st.stop()
-
-    # Conteúdo principal da página Overview
-    # (deixe apenas o conteúdo específico desta página, sem dashboard ou instruções globais)
-    st.subheader("📈 Métricas Principais Agregadas")
+        st.warning("⚠️ No initiatives match the selected filters. Adjust the filters to view data.")
+        st.stop()    # Main content of the Overview page
+    st.subheader("📈 Key Aggregated Metrics")
+    
+    # Custom CSS for modern metric cards
+    st.markdown("""
+    <style>
+    .metric-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        color: white;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        border: 1px solid rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        margin: 0.5rem 0;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    }
+    .metric-card.accuracy { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .metric-card.resolution { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .metric-card.classes { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .metric-card.global { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    
+    .metric-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .metric-value {
+        font-size: 2.8rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .metric-label {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .metric-sublabel {
+        font-size: 0.9rem;
+        opacity: 0.7;
+        margin-top: 0.3rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     col1, col2, col3, col4 = st.columns(4)
+    
     with col1:
         avg_accuracy = filtered_df["Accuracy (%)"].mean()
-        st.metric("🎯 Acurácia Média", f"{avg_accuracy:.1f}%" if pd.notna(avg_accuracy) else "N/A")
+        accuracy_value = f"{avg_accuracy:.1f}" if pd.notna(avg_accuracy) else "N/A"
+        st.markdown(f"""
+        <div class="metric-card accuracy">
+            <span class="metric-icon">🎯</span>
+            <div class="metric-value">{accuracy_value}%</div>
+            <div class="metric-label">Average Accuracy</div>
+            <div class="metric-sublabel">Across all initiatives</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
     with col2:
         avg_resolution = filtered_df["Resolution (m)"].mean()
-        st.metric("🔬 Resolução Média", f"{avg_resolution:.0f}m" if pd.notna(avg_resolution) else "N/A")
+        resolution_value = f"{avg_resolution:.0f}" if pd.notna(avg_resolution) else "N/A"
+        st.markdown(f"""
+        <div class="metric-card resolution">
+            <span class="metric-icon">🔬</span>
+            <div class="metric-value">{resolution_value}m</div>
+            <div class="metric-label">Average Resolution</div>
+            <div class="metric-sublabel">Spatial precision</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
     with col3:
-        total_classes = filtered_df["Classes"].sum()
-        st.metric("🏷️ Total de Classes", f"{total_classes}" if pd.notna(total_classes) else "N/A")
+        if "Classes" in filtered_df.columns:
+            total_classes = filtered_df["Classes"].sum() if filtered_df["Classes"].notna().any() else 0
+        elif "Number_of_Classes" in filtered_df.columns:
+            total_classes = filtered_df["Number_of_Classes"].sum() if filtered_df["Number_of_Classes"].notna().any() else 0
+        else:
+            total_classes = 0
+        st.markdown(f"""
+        <div class="metric-card classes">
+            <span class="metric-icon">🏷️</span>
+            <div class="metric-value">{total_classes}</div>
+            <div class="metric-label">Total Classes</div>
+            <div class="metric-sublabel">Classification categories</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
     with col4:
-        global_initiatives = len(filtered_df[filtered_df["Type"] == "Global"])
-        st.metric("🌍 Iniciativas Globais", f"{global_initiatives}")
+        global_initiatives = len(filtered_df[filtered_df["Type"] == "Global"]) if "Type" in filtered_df.columns else 0
+        st.markdown(f"""
+        <div class="metric-card global">
+            <span class="metric-icon">🌍</span>
+            <div class="metric-value">{global_initiatives}</div>
+            <div class="metric-label">Global Initiatives</div>
+            <div class="metric-sublabel">Worldwide coverage</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
     st.markdown("---")
 
-    st.subheader("🔍 Exploração Detalhada por Iniciativa")
+    st.subheader("🔍 Detailed Exploration by Initiative")
+    
+    # CSS for modern initiative details
+    st.markdown("""
+    <style>
+    .initiative-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 15px 15px 0 0;
+        margin: 1rem 0 0 0;
+    }
+    .initiative-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .detail-card {
+        background: white;
+        border: 1px solid #e1e5e9;
+        border-radius: 0 0 15px 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+    .mini-metric {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+        border-left: 4px solid #007bff;
+    }
+    .mini-metric-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #007bff;
+        margin: 0.3rem 0;
+    }
+    .mini-metric-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    .badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        margin: 0.2rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+    }
+    .badge-type { background: #e3f2fd; color: #1976d2; border: 1px solid #bbdefb; }
+    .badge-methodology { background: #f3e5f5; color: #7b1fa2; border: 1px solid #ce93d8; }
+    .badge-scope { background: #e8f5e8; color: #388e3c; border: 1px solid #a5d6a7; }
+    .badge-years { background: #fff3e0; color: #f57c00; border: 1px solid #ffcc02; }
+    .info-section {
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #28a745;
+    }
+    .info-title {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     selected_initiative_detailed = st.selectbox(
-        "Selecione uma iniciativa para ver detalhes:",
+        "Select an initiative to see details:",
         options=filtered_df["Name"].tolist(),
-        help="Escolha uma iniciativa para ver informações detalhadas",
-        key="visao_geral_detailed_select" 
+        help="Choose an initiative for detailed information",
+        key="overview_detailed_select" 
     )
+    
     if selected_initiative_detailed:
         init_data = filtered_df[filtered_df["Name"] == selected_initiative_detailed].iloc[0]
         init_metadata = meta.get(selected_initiative_detailed, {})
         # Get the acronym for the selected initiative
         initiative_acronym = nome_to_sigla.get(selected_initiative_detailed, selected_initiative_detailed[:10])
 
+        # Modern initiative header
+        st.markdown(f"""
+        <div class="initiative-header">
+            <h2 class="initiative-title">🛰️ {initiative_acronym}</h2>
+            <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">{selected_initiative_detailed}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="detail-card">
+        """, unsafe_allow_html=True)
 
         col1_detail, col2_detail = st.columns([2, 3])
+        
         with col1_detail:
-            st.markdown(f"### {initiative_acronym}") # Use acronym
-            st.markdown("#### 📊 Métricas Principais")
-            metrics_col1, metrics_col2 = st.columns(2)
-            with metrics_col1:
-                st.metric("🎯 Acurácia", f"{init_data.get('Accuracy (%)', 'N/A')}%")
-                st.metric("🏷️ Classes", init_data.get("Classes", "N/A"))
-            with metrics_col2:
-                st.metric("🔬 Resolução", f"{init_data.get('Resolution (m)', 'N/A')}m")
-                st.metric("📅 Frequência", init_data.get("Temporal Frequency", "N/A"))
-            st.markdown("#### ⚙️ Informações Técnicas")
-            st.info(f"**Tipo:** {init_data.get('Type', 'N/A')}")
-            st.info(f"**Metodologia:** {init_data.get('Methodology', 'N/A')}")
-            st.info(f"**Escopo:** {init_data.get('Scope', 'N/A')}")
-            st.info(f"**Período:** {init_data.get('Available Years', 'N/A')}")
+            st.markdown("#### 📊 Key Metrics")
+            
+            # Modern metric grid
+            accuracy_val = init_data.get('Accuracy (%)', 'N/A')
+            resolution_val = init_data.get('Resolution (m)', 'N/A')
+            classes_val = init_data.get("Classes", init_data.get("Number_of_Classes", "N/A"))
+            frequency_val = init_data.get("Temporal Frequency", "N/A")
+            
+            st.markdown(f"""
+            <div class="metric-grid">
+                <div class="mini-metric">
+                    <div class="mini-metric-value">🎯 {accuracy_val}%</div>
+                    <div class="mini-metric-label">Accuracy</div>
+                </div>
+                <div class="mini-metric">
+                    <div class="mini-metric-value">🔬 {resolution_val}m</div>
+                    <div class="mini-metric-label">Resolution</div>
+                </div>
+                <div class="mini-metric">
+                    <div class="mini-metric-value">🏷️ {classes_val}</div>
+                    <div class="mini-metric-label">Classes</div>
+                </div>
+                <div class="mini-metric">
+                    <div class="mini-metric-value">📅 {frequency_val}</div>
+                    <div class="mini-metric-label">Frequency</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("#### ⚙️ Technical Information")
+            
+            # Modern badges for technical info
+            type_val = init_data.get('Type', 'N/A')
+            methodology_val = init_data.get('Methodology', 'N/A')
+            scope_val = init_data.get('Scope', 'N/A')
+            years_val = init_data.get('Available Years', 'N/A')
+            
+            st.markdown(f"""
+            <div style="margin: 1rem 0;">
+                <p><strong>🏷️ Type:</strong></p>
+                <span class="badge badge-type">{type_val}</span>
+                
+                <p style="margin-top: 1rem;"><strong>🔬 Methodology:</strong></p>
+                <span class="badge badge-methodology">{methodology_val}</span>
+                
+                <p style="margin-top: 1rem;"><strong>🌍 Scope:</strong></p>
+                <span class="badge badge-scope">{scope_val}</span>
+                
+                <p style="margin-top: 1rem;"><strong>📅 Available Years:</strong></p>
+                <span class="badge badge-years">{years_val}</span>
+            </div>
+            """, unsafe_allow_html=True)
+        
         with col2_detail:
-            st.markdown("#### 📋 Detalhes Metodológicos")
-            st.markdown("**🔬 Metodologia:**")
-            st.write(init_metadata.get("metodologia", "Não disponível"))
-            st.markdown("**✅ Validação:**")
-            st.success(init_metadata.get("validacao", "Não disponível"))
-            st.markdown("**🌍 Cobertura:**")
-            st.warning(init_metadata.get("cobertura", "Não disponível"))
-            st.markdown("**📡 Fontes de Dados:**")
-            st.info(init_metadata.get("fonte_dados", "Não disponível"))
+            st.markdown("#### 📋 Methodological Details")
+              # Modern info sections - using correct JSON fields
+            methodology_info = init_metadata.get("methodology", "Not available")
+            algorithm_info = init_metadata.get("algorithm", init_metadata.get("classification_method", "Not available"))
+            provider_info = init_metadata.get("provider", "Not available") 
+            source_info = init_metadata.get("source", "Not available")
+            update_freq_info = init_metadata.get("update_frequency", "Not available")
+            reference_sys_info = init_metadata.get("reference_system", "Not available")
+            
+            st.markdown(f"""
+            <div class="info-section">
+                <div class="info-title">🔬 Methodology</div>
+                <p><strong>Approach:</strong> {methodology_info}</p>
+                <p><strong>Algorithm:</strong> {algorithm_info}</p>
+            </div>
+            
+            <div class="info-section" style="border-left-color: #28a745;">
+                <div class="info-title">🏢 Provider & Sources</div>
+                <p><strong>Provider:</strong> {provider_info}</p>
+                <p><strong>Data Source:</strong> {source_info}</p>
+            </div>
+            
+            <div class="info-section" style="border-left-color: #ffc107;">
+                <div class="info-title">🔄 Update Information</div>
+                <p><strong>Update Frequency:</strong> {update_freq_info}</p>
+                <p><strong>Temporal Frequency:</strong> {init_data.get('Temporal Frequency', 'N/A')}</p>
+            </div>
+            
+            <div class="info-section" style="border-left-color: #17a2b8;">
+                <div class="info-title">�️ Technical Specifications</div>
+                <p><strong>Reference System:</strong> {reference_sys_info if isinstance(reference_sys_info, str) else 'Multiple systems'}</p>
+                <p><strong>Resolution:</strong> {init_data.get('Resolution (m)', 'N/A')} meters</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("</div>", unsafe_allow_html=True)
+        
+        # Additional section for class information
+        if 'class_legend' in init_metadata and init_metadata['class_legend']:
+            st.markdown("#### 🏷️ Classification Details")
+            class_legend = init_metadata.get('class_legend', '')
+            classes_list = [cls.strip() for cls in class_legend.split(',') if cls.strip()]
+            
+            st.markdown("""
+            <div class="info-section" style="margin-top: 1rem;">
+                <div class="info-title">📋 Land Cover Classes</div>
+            """, unsafe_allow_html=True)
+            
+            # Display classes as badges
+            classes_html = ""
+            for i, cls in enumerate(classes_list):
+                color = ["#e3f2fd", "#f3e5f5", "#e8f5e8", "#fff3e0", "#fce4ec", "#e0f2f1"][i % 6]
+                classes_html += f'<span class="badge" style="background: {color}; margin: 0.2rem;">{cls}</span>'
+            
+            st.markdown(f"""
+                <p style="line-height: 2;">
+                    {classes_html}
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
     
-    # Adicionar link para comparações detalhadas
+    # Link to detailed comparisons
     st.markdown("---")
-    st.info("💡 **Para comparações detalhadas entre múltiplas iniciativas**, acesse a página **'🔍 Análises Detalhadas'** no menu lateral.")
+    st.info("💡 **For detailed comparisons between multiple initiatives**, go to the **'🔍 Detailed Analyses'** page in the sidebar.")
     st.markdown("---")
 
-    # Adicionar gráfico de densidade temporal
-    st.subheader("🌊 Densidade Temporal de Iniciativas LULC")
+    # Temporal density chart
+    st.subheader("🌊 Temporal Density of LULC Initiatives")
     
-    if meta:        # Criar dados de densidade usando metadados
+    if meta:        # Create density data using metadata
         density_data = []
         all_years = set()
         
         for nome, meta_item in meta.items():
-            if 'available_years' in meta_item and meta_item['available_years']:
-                for ano in meta_item['available_years']:
-                    density_data.append({'nome': nome, 'ano': ano})
-                    all_years.add(ano)
+            # Ensure the initiative is in the filtered_df before processing
+            if nome in filtered_df["Name"].values:
+                if 'available_years' in meta_item and meta_item['available_years']:
+                    for ano in meta_item['available_years']:
+                        density_data.append({'nome': nome, 'ano': ano})
+                        all_years.add(ano)
         
         if density_data:
             density_df = pd.DataFrame(density_data)
             year_counts = density_df['ano'].value_counts().sort_index()
             
-            # Gráfico de densidade por ano (linha + área)
+            # Density chart by year (line + area)
             fig_density_line = go.Figure()
             fig_density_line.add_trace(go.Scatter(
                 x=year_counts.index,
                 y=year_counts.values,
                 mode='lines+markers',
                 fill='tonexty',
-                name='Iniciativas Ativas',
+                name='Active Initiatives', # Translated
                 line=dict(color='rgba(0,150,136,0.8)', width=3),
-                marker=dict(size=8, color='rgba(0,150,136,1)')            ))
+                marker=dict(size=8, color='rgba(0,150,136,1)')
+            ))
             
             fig_density_line.update_layout(
-                title='📊 Densidade Temporal: Número de Iniciativas por Ano (1985-2024)',
-                xaxis_title='Ano',
-                yaxis_title='Número de Iniciativas Ativas',
+                title='📊 Temporal Density: Number of Initiatives per Year', # Simplified title
+                xaxis_title='Year', # Translated
+                yaxis_title='Number of Active Initiatives', # Translated
                 height=450,
                 hovermode='x unified',
                 showlegend=True,
@@ -199,61 +479,218 @@ def run():
             )
             st.plotly_chart(fig_density_line, use_container_width=True)
             
-            # Add download button
-            try:
-                safe_download_image(fig_density_line, "densidade_temporal_overview.png", "⬇️ Baixar Densidade Temporal (PNG)")
-            except NameError:
-                st.info("📥 Função de download não disponível")
+            # Add download button using the new UI
+            filename_density, format_density, width_density, height_density, scale_density, save_clicked_density = get_chart_save_params(
+                default_filename="temporal_density_overview", 
+                key_prefix="density_overview"
+            )
+            if save_clicked_density:
+                # Ensure the 'graphics/detailed' directory exists
+                output_dir = Path(current_dir) / "graphics" / "detailed"
+                output_dir.mkdir(parents=True, exist_ok=True)
+                
+                success, message, _ = save_chart_robust(
+                    fig_density_line,
+                    str(output_dir), # Pass directory path
+                    filename_density, # Pass base filename
+                    width=width_density,
+                    height=height_density,
+                    scale=scale_density,
+                    file_format=format_density.lower() 
+                )
+                if success:
+                    st.success(f"Chart '{filename_density}.{format_density.lower()}' saved successfully in '{output_dir}'.")
+                else:
+                    st.error(f"Failed to save chart: {message}")
+              # Enhanced temporal metrics - Modern cards
+            st.markdown("#### 📈 Temporal Metrics")
             
-            # Enhanced temporal metrics
+            # CSS for temporal metrics
+            st.markdown("""
+            <style>
+            .temporal-metric {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 1.2rem;
+                border-radius: 12px;
+                text-align: center;
+                margin: 0.5rem 0;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
+            .temporal-metric-value {
+                font-size: 1.8rem;
+                font-weight: 700;
+                margin: 0.3rem 0;
+            }
+            .temporal-metric-label {
+                font-size: 0.9rem;
+                opacity: 0.9;
+            }
+            .temporal-metric-delta {
+                font-size: 0.8rem;
+                opacity: 0.8;
+                margin-top: 0.2rem;
+            }
+            .timeline-card {
+                background: white;
+                border: 1px solid #e9ecef;
+                border-radius: 12px;
+                padding: 1.5rem;
+                margin: 1rem 0;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            }
+            .initiative-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0.8rem;
+                margin: 0.5rem 0;
+                background: #f8f9fa;
+                border-radius: 8px;
+                border-left: 4px solid #007bff;
+                transition: all 0.3s ease;
+            }
+            .initiative-item:hover {
+                background: #e9ecef;
+                transform: translateX(5px);
+            }
+            .initiative-name {
+                font-weight: 600;
+                color: #495057;
+            }
+            .initiative-year {
+                background: #007bff;
+                color: white;
+                padding: 0.3rem 0.8rem;
+                border-radius: 15px;
+                font-size: 0.9rem;
+                font-weight: 500;
+            }
+            .coverage-stats {
+                font-size: 0.9rem;
+                color: #6c757d;
+                margin-left: 0.5rem;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+            
             col1_temp, col2_temp, col3_temp, col4_temp = st.columns(4)
-            with col1_temp:
-                st.metric("🗓️ Primeiro Ano", f"{min(all_years)}")
-            with col2_temp:
-                st.metric("📅 Último Ano", f"{max(all_years)}")
-            with col3_temp:
-                peak_year = year_counts.idxmax()
-                st.metric("🎯 Pico de Atividade", f"{max(year_counts.values)} iniciativas", f"Em {peak_year}")
-            with col4_temp:
-                st.metric("📈 Média por Ano", f"{np.mean(np.array(year_counts.values)):.1f}")
             
-            # Add timeline details
-            st.markdown("#### 📅 Detalhes da Linha Temporal")
+            with col1_temp:
+                first_year = min(all_years) if all_years else "N/A"
+                st.markdown(f"""
+                <div class="temporal-metric">
+                    <div class="temporal-metric-value">🗓️ {first_year}</div>
+                    <div class="temporal-metric-label">First Year</div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+            with col2_temp:
+                last_year = max(all_years) if all_years else "N/A"
+                st.markdown(f"""
+                <div class="temporal-metric">
+                    <div class="temporal-metric-value">📅 {last_year}</div>
+                    <div class="temporal-metric-label">Last Year</div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+            with col3_temp:
+                if not year_counts.empty:
+                    peak_year = year_counts.idxmax()
+                    peak_value = max(year_counts.values)
+                    st.markdown(f"""
+                    <div class="temporal-metric">
+                        <div class="temporal-metric-value">🎯 {peak_value}</div>
+                        <div class="temporal-metric-label">Peak Activity</div>
+                        <div class="temporal-metric-delta">In {peak_year}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown("""
+                    <div class="temporal-metric">
+                        <div class="temporal-metric-value">🎯 N/A</div>
+                        <div class="temporal-metric-label">Peak Activity</div>
+                    </div>                    """, unsafe_allow_html=True)
+                
+            with col4_temp:
+                if not year_counts.empty:
+                    avg_per_year = year_counts.mean()  # Using pandas mean instead of numpy
+                    st.markdown(f"""
+                    <div class="temporal-metric">
+                        <div class="temporal-metric-value">📈 {avg_per_year:.1f}</div>
+                        <div class="temporal-metric-label">Average per Year</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown("""
+                    <div class="temporal-metric">
+                        <div class="temporal-metric-value">📈 N/A</div>
+                        <div class="temporal-metric-label">Average per Year</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            
+            # Modern timeline details
+            st.markdown("#### 📅 Timeline Details")
             col_timeline1, col_timeline2 = st.columns(2)
             
             with col_timeline1:
-                st.markdown("**🚀 Iniciativas Mais Recentes:**")
+                st.markdown("""
+                <div class="timeline-card">
+                    <h5 style="color: #495057; margin-bottom: 1rem;">🚀 Most Recent Initiatives</h5>
+                """, unsafe_allow_html=True)
+                
                 recent_initiatives = []
                 for nome, meta_item in meta.items():
-                    if 'available_years' in meta_item and meta_item['available_years']:
-                        latest_year = max(meta_item['available_years'])
-                        acronym = nome_to_sigla.get(nome, nome[:10]) # Get acronym
-                        recent_initiatives.append((acronym, latest_year, nome)) # Store acronym and original name
+                    if nome in filtered_df["Name"].values:
+                        if 'available_years' in meta_item and meta_item['available_years']:
+                            latest_year = max(meta_item['available_years'])
+                            acronym = nome_to_sigla.get(nome, nome[:10])
+                            recent_initiatives.append((acronym, latest_year, nome))
                 
-                # Show top 5 most recent
+                # Show top 5 most recent with modern styling
                 recent_initiatives.sort(key=lambda x: x[1], reverse=True)
                 for acronym, year, original_name in recent_initiatives[:5]:
-                    st.write(f"• **{acronym}** ({year})") # Display acronym
+                    st.markdown(f"""
+                    <div class="initiative-item">
+                        <span class="initiative-name">{acronym}</span>
+                        <span class="initiative-year">{year}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                st.markdown("</div>", unsafe_allow_html=True)
             
             with col_timeline2:
-                st.markdown("**📊 Período de Cobertura por Iniciativa:**")
+                st.markdown("""
+                <div class="timeline-card">
+                    <h5 style="color: #495057; margin-bottom: 1rem;">📊 Coverage Period by Initiative</h5>
+                """, unsafe_allow_html=True)
+                
                 coverage_info = []
                 for nome, meta_item in meta.items():
-                    if 'available_years' in meta_item and meta_item['available_years']:
-                        years = meta_item['available_years']
-                        span = max(years) - min(years) + 1
-                        acronym = nome_to_sigla.get(nome, nome[:10]) # Get acronym
-                        coverage_info.append((acronym, span, len(years), nome)) # Store acronym and original name
+                    if nome in filtered_df["Name"].values:
+                        if 'available_years' in meta_item and meta_item['available_years']:
+                            years_list = meta_item['available_years']
+                            if years_list:
+                                span = max(years_list) - min(years_list) + 1
+                                acronym = nome_to_sigla.get(nome, nome[:10])
+                                coverage_info.append((acronym, span, len(years_list), nome))
                 
                 # Show initiatives with longest coverage
                 coverage_info.sort(key=lambda x: x[1], reverse=True)
                 for acronym, span, count, original_name in coverage_info[:5]:
-                    st.write(f"• **{acronym}**: {span} anos ({count} datasets)") # Display acronym
+                    st.markdown(f"""
+                    <div class="initiative-item">
+                        <span class="initiative-name">{acronym}</span>
+                        <span class="coverage-stats">{span} years ({count} datasets)</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                st.markdown("</div>", unsafe_allow_html=True)
                     
         else:
-            st.warning("📅 Dados temporais não foram encontrados nos metadados processados.")
-            st.info("💡 **Dica:** Verifique se os metadados contêm informações sobre anos disponíveis para cada iniciativa.")
+            st.warning("📅 Temporal data not found for the selected initiatives in the processed metadata.") # Updated message
+            st.info("💡 **Tip:** Check if the metadata contains information about available years for the selected initiatives.") # Updated message
     else:
-        st.error("Metadados não disponíveis para análise temporal.")
+        st.error("Metadata not available for temporal analysis.") # Translated
 
     st.markdown("---")

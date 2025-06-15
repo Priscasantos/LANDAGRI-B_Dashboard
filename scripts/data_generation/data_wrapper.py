@@ -30,7 +30,8 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # Add project root to path
-sys.path.append(str(Path(__file__).parent.parent.parent))
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.append(str(PROJECT_ROOT))
 
 try:
     from scripts.data_generation.lulc_data_engine import UnifiedDataProcessor
@@ -53,7 +54,7 @@ class DataWrapper:
             
         try:
             # Load processed CSV
-            csv_path = Path('data/processed/initiatives_processed.csv')
+            csv_path = PROJECT_ROOT / 'data/processed/initiatives_processed.csv'
             if csv_path.exists():
                 self._cached_data['dataframe'] = pd.read_csv(csv_path)
             else:
@@ -65,15 +66,15 @@ class DataWrapper:
                 self._cached_data['auxiliary'] = auxiliary_data
                 
             # Load processed metadata
-            metadata_path = Path('data/processed/metadata_processed.json')
+            metadata_path = PROJECT_ROOT / 'data/processed/metadata_processed.json'
             if metadata_path.exists() and 'metadata' not in self._cached_data:
-                with open(metadata_path, 'r') as f:
+                with open(metadata_path, 'r', encoding='utf-8') as f:
                     self._cached_data['metadata'] = json.load(f)
                     
             # Load auxiliary data
-            aux_path = Path('data/processed/auxiliary_data.json')
+            aux_path = PROJECT_ROOT / 'data/processed/auxiliary_data.json'
             if aux_path.exists() and 'auxiliary' not in self._cached_data:
-                with open(aux_path, 'r') as f:
+                with open(aux_path, 'r', encoding='utf-8') as f:
                     self._cached_data['auxiliary'] = json.load(f)
                     
             self._data_loaded = True
@@ -81,7 +82,19 @@ class DataWrapper:
             
         except Exception as e:
             print(f"❌ Error loading processed data: {e}")
-            return False
+            # If loading fails, attempt to generate data on the fly as a fallback
+            try:
+                print("🔄 Attempting to generate data on the fly due to loading error...")
+                df, metadata = self.processor.load_data_from_jsonc()
+                auxiliary_data = self.processor.create_comprehensive_auxiliary_data(df, metadata)
+                self._cached_data['dataframe'] = df
+                self._cached_data['metadata'] = metadata
+                self._cached_data['auxiliary'] = auxiliary_data
+                self._data_loaded = True # Mark as loaded even if generated
+                return True
+            except Exception as gen_e:
+                print(f"❌❌ Critical Error: Failed to load and generate data: {gen_e}")
+                return False
     
     def load_data(self) -> Tuple[pd.DataFrame, Dict[str, Any], Dict[str, Any]]:
         """

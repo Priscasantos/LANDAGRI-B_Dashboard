@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 """
-Script principal modernizado para análise completa das iniciativas LULC.
+Main modernized script for complete LULC initiatives analysis.
 
-Este script executa todos os módulos de análise na ordem correta:
-1. Preview dos dados
-2. Análise principal com gráficos comparativos 
-3. Gráficos temporais 
-4. Gráficos detalhados 
+This script executes all analysis modules in the correct order:
+1. Data Preview
+2. Main Analysis with Comparative Charts
+3. Temporal Charts
+4. Detailed Charts
 
-Estrutura de saída:
-- graphics/comparisons/  - PNGs dos gráficos comparativos entre iniciativas
-- graphics/temporal/     - PNGs das análises temporais das iniciativas  
-- graphics/detailed/     - PNGs das análises detalhadas específicas
+Output Structure:
+- graphics/comparisons/  - PNGs of comparative charts between initiatives
+- graphics/temporal/     - PNGs of temporal analyses of initiatives
+- graphics/detailed/     - PNGs of specific detailed analyses
 
-Estrutura do dashboard interativo:
-- dashboard/comparisons/ - Módulos Streamlit para análises comparativas
-- dashboard/temporal/    - Módulos Streamlit para análises temporais
-- dashboard/detailed/    - Módulos Streamlit para análises detalhadas
+Interactive Dashboard Structure:
+- dashboard/comparisons/ - Streamlit modules for comparative analyses
+- dashboard/temporal/    - Streamlit modules for temporal analyses
+- dashboard/detailed/    - Streamlit modules for detailed analyses
 
-Baseado na estrutura padrão do dashboard-agricultura
-Autor: Sistema de Análise LULC
-Data: 2025
+Based on the standard structure of dashboard-agricultura
+Author: LULC Analysis System
+Date: 2025
 """
 
 import sys
@@ -42,31 +42,31 @@ def get_cached_data():
             'metadata': metadata,
             'df_for_plots': df_for_plots
         }
-        print(f"📊 Dados carregados e cachados: {len(df_for_plots)} iniciativas")
+        print(f"📊 Data loaded and cached: {len(df_for_plots)} initiatives")
     return _DATA_CACHE['data']
 
-# Adicionar o diretório scripts ao path
+# Add the scripts directory to the path
 scripts_dir = Path(__file__).parent / "scripts"
 sys.path.append(str(scripts_dir))
 
 def run_analysis_step(module_name, description):
-    """Executa um passo da análise e trata erros"""
+    """Executes an analysis step and handles errors"""
     print(f"\n{'='*60}")
-    print(f"🔄 EXECUTANDO: {description}")
+    print(f"🔄 EXECUTING: {description}")
     print(f"{'='*60}")
     
     try:
         if module_name == "preview_dados":
             from scripts.data_generation.data_wrapper import load_data  # Use correct import
-            # Preview dos dados carregados
-            print("📊 Carregando dados das iniciativas LULC...")
+            # Preview of loaded data
+            print("📊 Loading LULC initiatives data...")
             df, metadata, _ = load_data()  # Fixed tuple unpacking
-            print(f"✅ Dados carregados: {len(df)} iniciativas")
-            print(f"📋 Colunas disponíveis: {list(df.columns)}")
+            print(f"✅ Data loaded: {len(df)} initiatives")
+            print(f"📋 Available columns: {list(df.columns)}")
             if 'Type' in df.columns:
-                print(f"🏷️ Tipos de iniciativas: {df['Type'].unique().tolist()}")            
-            elif 'Tipo' in df.columns:
-                print(f"🏷️ Tipos de iniciativas: {df['Tipo'].unique().tolist()}")
+                print(f"🏷️ Initiative types: {df['Type'].unique().tolist()}")            
+            elif 'Tipo' in df.columns: # Fallback for Portuguese column name
+                print(f"🏷️ Initiative types: {df['Tipo'].unique().tolist()}")
                 
         elif module_name == "analise_comparativa":
             # Use cached data for better performance
@@ -84,50 +84,92 @@ def run_analysis_step(module_name, description):
             from scripts.plotting.charts.timeline_chart import plot_timeline
             
             plot_resolution_accuracy(df_for_plots)
-            plot_timeline(metadata, df_for_plots) # Added metadata
+            plot_timeline(metadata, df_for_plots) 
             plot_classes_por_iniciativa(df_for_plots)
             plot_distribuicao_classes(df_for_plots)
             plot_distribuicao_metodologias(df_for_plots['Methodology'].value_counts() if 'Methodology' in df_for_plots and not df_for_plots.empty else pd.Series())
             
         elif module_name == "analise_temporal":
-            from dashboard.temporal.temporal import run_non_streamlit
-            from scripts.data_generation.data_wrapper import load_data # Corrected import
-            # Load data and pass to temporal analysis
-            df, metadata, _ = load_data() # Load processed data
+            from dashboard.temporal.temporal import prepare_temporal_data 
+            from scripts.plotting.charts.temporal_charts_offline import (
+                create_gaps_chart_non_streamlit,
+                create_evolution_charts_non_streamlit
+            )
+            # create_timeline_chart_non_streamlit is available but called in comparative analysis
+            from scripts.utilities.chart_saver import save_chart_robust 
+            from pathlib import Path
+
+            cached_data = get_cached_data()
+            df = cached_data['df'] 
+            metadata = cached_data['metadata']
             
-            # Execute temporal analysis without Streamlit UI
-            success = run_non_streamlit(metadata, df, "graphics/temporal")
-            if not success:
-                print("❌ Falha na geração das análises temporais")
-                return False            
+            output_dir = Path("graphics/temporal")
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+            print("Preparing temporal data for offline charts...")
+            temporal_data_script = prepare_temporal_data(metadata, df_original=df) 
+
+            if temporal_data_script.empty:
+                print("No temporal data available to generate charts.")
+                return False # Indicate failure or skip
+
+            print("Generating offline temporal charts...")
+            
+            # Gaps Chart
+            fig_gaps_ns = create_gaps_chart_non_streamlit(temporal_data_script)
+            if fig_gaps_ns:
+                gaps_df_for_height = temporal_data_script[temporal_data_script['Anos_Faltando'] > 0]
+                height_gaps = max(400, len(gaps_df_for_height) * 25) if not gaps_df_for_height.empty else 400
+                save_chart_robust(fig_gaps_ns, output_dir, "temporal_gaps_offline", width=1000, height=height_gaps)
+                print("Temporal Gaps chart (offline) saved.")
+
+            # Evolution Charts
+            fig_evolution_ns, fig_heatmap_evo_ns = create_evolution_charts_non_streamlit(temporal_data_script)
+            if fig_evolution_ns: 
+                save_chart_robust(fig_evolution_ns, output_dir, "availability_evolution_offline")
+                print("Availability Evolution line chart (offline) saved.")
+            if fig_heatmap_evo_ns:
+                height_heatmap = max(400, len(temporal_data_script['Tipo'].unique()) * 50) if 'Tipo' in temporal_data_script and temporal_data_script['Tipo'].nunique() > 0 else 400
+                save_chart_robust(fig_heatmap_evo_ns, output_dir, "heatmap_type_year_evolution_offline", height=height_heatmap)
+                print("Evolution Heatmap (offline) saved.")
+            
+            # The old call to run_non_streamlit from temporal.py is fully replaced
+            # success = run_non_streamlit(metadata, df, "graphics/temporal") 
+            # if not success:
+            #     print("❌ Failed to generate temporal analyses.") # Translated
+            #     return False   
+            return True 
+                     
         elif module_name == "analise_detalhada":
             from dashboard.detailed.detailed import run_non_streamlit as detailed_run_non_streamlit
-            from scripts.data_generation.data_wrapper import load_data # Corrected import
-            # Load data and pass to detailed analysis
-            df, metadata, _ = load_data() # Load processed data
+            # No need to load data again if using cached data, but detailed_run_non_streamlit might expect its own loading.
+            # For consistency, let's ensure it uses cached data or document why it reloads.
+            # Assuming detailed_run_non_streamlit is adapted or can take df, metadata:
+            cached_data = get_cached_data()
+            df_for_plots = cached_data['df_for_plots'] # Or 'df' depending on what detailed_run_non_streamlit expects
+            metadata = cached_data['metadata']
             
-            # Execute detailed analysis without Streamlit UI
-            success = detailed_run_non_streamlit(df, metadata, "graphics/detailed")
+            success = detailed_run_non_streamlit(df_for_plots, metadata, "graphics/detailed")
             if not success:
-                print("❌ Falha na geração das análises detalhadas")
+                print("❌ Failed to generate detailed analyses.") # Translated
                 return False
         
-        print(f"✅ {description} - CONCLUÍDO COM SUCESSO!")
+        print(f"✅ {description} - COMPLETED SUCCESSFULLY!") # Translated
         return True
         
     except ImportError as e:
-        print(f"❌ ERRO DE IMPORTAÇÃO: {e}")
-        print("💡 Verifique se todas as dependências estão instaladas:")
+        print(f"❌ IMPORT ERROR: {e}") # Translated
+        print("💡 Make sure all dependencies are installed:") # Translated
         print("   pip install -r requirements.txt")
         return False
         
     except Exception as e:
-        print(f"❌ ERRO DURANTE EXECUÇÃO: {e}")
-        print(f"💡 Verifique o módulo: {module_name}")
+        print(f"❌ ERROR DURING EXECUTION: {e}") # Translated
+        print(f"💡 Check the module: {module_name}") # Translated
         return False
 
 def check_dependencies():
-    """Verifica se as dependências necessárias estão instaladas"""
+    """Checks if necessary dependencies are installed"""
     required_packages = ["pandas", "matplotlib", "numpy", "plotly", "seaborn", "streamlit"]
     missing_packages = []
     
@@ -138,189 +180,64 @@ def check_dependencies():
             missing_packages.append(package)
     
     if missing_packages:
-        print("❌ DEPENDÊNCIAS FALTANDO:")
+        print("❌ MISSING DEPENDENCIES:") # Translated
         for package in missing_packages:
             print(f"   - {package}")
-        print("\n💡 Execute primeiro: pip install -r requirements.txt")
+        print("\n💡 First run: pip install -r requirements.txt") # Translated
         return False
     
-    print("✅ Todas as dependências estão instaladas!")
+    print("✅ All dependencies are installed!") # Translated
     return True
 
 def create_output_directories():
-    """Cria os diretórios de saída para PNGs se não existirem"""
-    directories = [
-        "graphics/comparisons", 
-        "graphics/temporal",
-        "graphics/detailed",
-        "data/processed",
-        "data/raw"
+    """Creates output directories for PNGs if they don't exist"""
+    base_path = Path("graphics")
+    dirs_to_create = [
+        base_path / "comparisons",
+        base_path / "temporal",
+        base_path / "detailed"
     ]
     
-    for directory in directories:
-        Path(directory).mkdir(parents=True, exist_ok=True)
-        print(f"📁 Diretório verificado: {directory}")
+    print("📂 Creating output directories...") # Translated
+    for dir_path in dirs_to_create:
+        try:
+            dir_path.mkdir(parents=True, exist_ok=True)
+            print(f"   Directory created/exists: {dir_path}") # Translated
+        except Exception as e:
+            print(f"   ❌ Error creating directory {dir_path}: {e}") # Translated
+            # Optionally, decide if this is a critical error
+    print("✅ Output directories checked/created.") # Translated
 
 def main():
-    """Função principal com menu interativo para geração de análises LULC"""
-    print("🛰️ ANÁLISE COMPLETA DAS INICIATIVAS LULC")
-    print("=" * 60)
-    print("📊 Sistema de Análise de Dados de Mapeamento LULC")
-    print("🌍 Comparação entre iniciativas de monitoramento")
-    print("📅 Análises temporais e comparativas detalhadas")
-    print("=" * 60)
+    """Main function to run the complete analysis"""
+    print("🚀 STARTING LULC INITIATIVE ANALYSIS 🚀") # Translated
     
     if not check_dependencies():
-        return False
-    
-    print("\n📁 CRIANDO DIRETÓRIOS DE SAÍDA...")
+        print("🔴 Analysis halted due to missing dependencies.") # Translated
+        return
+
     create_output_directories()
-    
-    while True:
-        print("\nMENU PRINCIPAL:")
-        print("1. Gerar Análises Comparativas")
-        print("2. Gerar Análises Temporais")
-        print("3. Gerar Apenas Dados Processados")
-        print("0. Sair")
-        opcao = input("Escolha uma opção: ").strip()
 
-        if opcao == "1":
-            menu_analises_comparativas()
-        elif opcao == "2":
-            menu_analises_temporais()
-        elif opcao == "3":
-            menu_gerar_dados_processados()
-        elif opcao == "0":
-            print("Saindo...")
-            break
-        else:
-            print("Opção inválida. Tente novamente.")
-
-def menu_analises_comparativas():
-    """Menu para análises comparativas"""
-    # Import direct from modular chart files for better performance
-    from scripts.plotting.charts.distribution_charts import (
-        plot_resolution_accuracy,
-        plot_classes_por_iniciativa,
-        plot_distribuicao_classes,
-        plot_distribuicao_metodologias
-    )
-    from scripts.plotting.charts.timeline_chart import plot_timeline
-    from scripts.plotting.charts.coverage_charts import plot_annual_coverage_multiselect
-    
-    opcoes = [
-        ("Resolução vs Acurácia", plot_resolution_accuracy),
-        ("Timeline de Iniciativas", plot_timeline),
-        ("Cobertura Anual (Seleção Múltipla)", plot_annual_coverage_multiselect),
-        ("Classes por iniciativa", plot_classes_por_iniciativa),
-        ("Distribuição de classes", plot_distribuicao_classes),
-        ("Distribuição de metodologias", plot_distribuicao_metodologias),
+    # Analysis Steps (translated descriptions)
+    analysis_pipeline = [
+        ("preview_dados", "Data Preview"),
+        ("analise_comparativa", "Comparative Analysis"),
+        ("analise_temporal", "Temporal Analysis (Offline Charts)"),
+        ("analise_detalhada", "Detailed Analysis (Offline Charts)")
     ]
     
-    print("\nAnálises Comparativas Disponíveis:")
-    for idx, (desc, _) in enumerate(opcoes, 1):
-        print(f"{idx}. {desc}")
-    print("0. Voltar ao menu principal")
+    all_successful = True
+    for module, description in analysis_pipeline:
+        if not run_analysis_step(module, description):
+            all_successful = False
+            print(f"⚠️ Step '{description}' failed or was skipped.") # Translated
+            # Decide if to continue or break on failure
+            # break 
     
-    escolhas = input("Digite os números das análises desejadas separados por vírgula (ex: 1,3,5): ").strip()
-    if escolhas == "0":
-        return
-        
-    indices = [int(i) for i in escolhas.split(",") if i.strip().isdigit() and 1 <= int(i) <= len(opcoes)]
-      # Carregar dados uma vez
-    from scripts.data_generation.data_wrapper import load_data, prepare_plot_data # Corrected import
-    df, metadata, _ = load_data() # Corrected tuple unpacking
-    df_prepared_dict = prepare_plot_data(df) # df_prepared is now a dict
-    df_for_plots = df_prepared_dict.get('data', pd.DataFrame()) # Get the DataFrame from the dict
-    
-    for idx in indices:
-        desc, func = opcoes[idx-1]
-        print(f"\n🔄 Gerando: {desc}")
-        try:
-            if desc == "Timeline de Iniciativas":
-                func(metadata, df_for_plots)
-            elif desc == "Cobertura Anual (Seleção Múltipla)":
-                # Requires interactive selection, skipping for non-interactive run
-                print(f"⚠️ {desc} requer seleção interativa, pulando na execução de script.")
-                # func(metadata, df_for_plots, df_for_plots['Name'].unique().tolist()[:3]) # Example if we wanted to force it
-            elif desc == "Distribuição de metodologias":
-                method_counts = df_for_plots['Methodology'].value_counts() if 'Methodology' in df_for_plots and not df_for_plots.empty else pd.Series()
-                func(method_counts)
-            else:
-                func(df_for_plots)
-            print(f"✅ {desc} gerado com sucesso!")
-        except Exception as e:
-            print(f"❌ Erro ao gerar {desc}: {e}")
-
-def menu_analises_temporais():
-    """Menu para análises temporais"""
-    print("\n🔄 Executando análises temporais...")
-    try:
-        run_analysis_step("analise_temporal", "Análises temporais das iniciativas")
-    except Exception as e:
-        print(f"❌ Erro nas análises temporais: {e}")
-
-def menu_gerar_dados_processados():
-    """Menu para gerar apenas dados processados"""
-    print("\n🔄 Executando geração de dados processados...")
-    print("💡 Esta opção gera apenas os dados necessários para o dashboard")
-    print("🚀 Processo otimizado - sem gráficos")
-    
-    try:
-        from scripts.data_generation.lulc_data_engine import UnifiedDataProcessor
-        import json
-
-        processor = UnifiedDataProcessor()
-
-        # Gerar dataset principal
-        print("\n1️⃣ GERANDO DATASET PRINCIPAL...")
-        df, metadata = processor.load_data_from_jsonc()
-        # Apply any additional processing if needed, similar to add_derived_metrics
-        # For now, we assume load_data_from_jsonc and create_comprehensive_auxiliary_data cover it.
-        
-        # Adicionar coluna Sigla (Acronym) - This should ideally be part of the main data processing
-        # If 'Acronym' is already generated by lulc_data_engine.py, this step might be redundant
-        # or needs to be harmonized.
-        # For now, let's assume 'Acronym' is handled or can be mapped here if necessary.
-        # Example: if 'Acronym' is not in df.columns:
-        # df['Acronym'] = df['Name'].map(processor.get_acronym_map()).fillna(df['Name'].str[:8])
-
-        # Salvar dataset
-        df.to_csv('data/processed/initiatives_processed.csv', index=False, encoding='utf-8')
-        print(f"✅ Dataset salvo: {len(df)} iniciativas")
-        
-        # Gerar metadados processados
-        print("\n2️⃣ GERANDO METADADOS PROCESSADOS...")
-        # metadata is already loaded, just need to save it
-        output_path_metadata = 'data/processed/metadata_processed.json'
-        with open(output_path_metadata, 'w', encoding='utf-8') as f:
-            json.dump(metadata, f, ensure_ascii=False, indent=2)
-        print(f"✅ Metadados salvos: {len(metadata)} iniciativas")
-
-        # Gerar dados auxiliares
-        print("\n3️⃣ GERANDO DADOS AUXILIARES PROCESSADOS...")
-        auxiliary_data = processor.create_comprehensive_auxiliary_data(df, metadata)
-        # Use the save_data method from the processor instance
-        processor.save_data(auxiliary_data, 'data/processed/auxiliary_data.json', data_type="JSON")
-        # output_path_auxiliary = 'data/processed/auxiliary_data.json'
-        # with open(output_path_auxiliary, 'w', encoding='utf-8') as f:
-        #     json.dump(auxiliary_data, f, ensure_ascii=False, indent=2)
-        # print(f"✅ Dados auxiliares salvos.") # Corrected f-string
-        
-        print("\n🎉 DADOS PROCESSADOS GERADOS COM SUCESSO!")
-        print("💡 Os arquivos estão prontos para uso no dashboard")
-        print("📁 Localização: data/processed/")
-        
-    except Exception as e:
-        print(f"❌ Erro na geração de dados: {e}")
-        import traceback
-        traceback.print_exc()
+    if all_successful:
+        print("\n🎉🎉 ALL ANALYSES COMPLETED SUCCESSFULLY! 🎉🎉") # Translated
+    else:
+        print("\n💔 SOME ANALYSES FAILED OR WERE SKIPPED. Please check the logs. 💔") # Translated
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("\n\n⚡ Análise interrompida pelo usuário")
-    except Exception as e:
-        print(f"\n\n❌ ERRO CRÍTICO: {e}")
-        print("💡 Verifique a instalação e os arquivos de dados")
+    main()

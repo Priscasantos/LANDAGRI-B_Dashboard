@@ -32,7 +32,8 @@ import sys
 warnings.filterwarnings('ignore')
 
 # Add project root to path
-sys.path.append(str(Path(__file__).parent.parent.parent))
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.append(str(PROJECT_ROOT))
 
 try:
     from scripts.utilities.config import standardize_dataframe_columns
@@ -45,68 +46,10 @@ class UnifiedDataProcessor:
     """Unified data processor that consolidates all data processing functionality."""
     
     def __init__(self):
-        """Initialize the unified data processor with shared mappings."""
-        self._init_shared_mappings()
+        """Initialize the unified data processor."""
+        # self._init_shared_mappings() # Removed as mappings are now handled by json_interpreter
         self._cached_data = {}
         
-    def _init_shared_mappings(self):
-        """Initialize shared mapping dictionaries."""
-        
-        # Unified Name-Acronym mapping (single source of truth)
-        self.name_to_acronym = {
-            'Copernicus Global Land Cover Service (CGLS)': 'CGLS',
-            'Dynamic World (GDW)': 'GDW', 
-            'ESRI-10m Annual LULC': 'ESRI',
-            'FROM-GLC': 'FROM-GLC',
-            'Global LULC change 2000 and 2020': 'GLULC',
-            'Global Pasture Watch (GPW)': 'GPW',
-            'South America Soybean Maps': 'SASM',
-            'WorldCover 10m 2021': 'WorldCover',
-            'WorldCereal': 'WorldCereal',
-            'Land Cover CCI': 'CCI',
-            'MODIS Land Cover': 'MODIS',
-            'GLC_FCS30': 'GLC_FCS30',
-            'MapBiomas Brasil': 'MapBiomas',
-            'PRODES Amazônia': 'PRODES-AMZ',
-            'DETER Amazônia': 'DETER',
-            'PRODES Cerrado': 'PRODES-CER', 
-            'TerraClass Amazônia': 'TerraClass',
-            'IBGE Monitoramento': 'IBGE',
-            'IBGE Monitoring': 'IBGE',
-            'Agricultural Mapping': 'AgriMap'
-        }
-          # Unified temporal data mapping (single source of truth)
-        self.temporal_data = {
-            'Copernicus Global Land Cover Service (CGLS)': [2015, 2016, 2017, 2018, 2019],
-            'Dynamic World (GDW)': list(range(2017, 2025)),
-            'ESRI-10m Annual LULC': list(range(2017, 2025)),
-            'FROM-GLC': [2010, 2015, 2017],
-            'Global LULC change 2000 and 2020': [2000, 2005, 2010, 2015, 2020],
-            'Global Pasture Watch (GPW)': list(range(2000, 2023, 2)),
-            'South America Soybean Maps': list(range(2001, 2024)),
-            'WorldCover 10m 2021': [2020, 2021],
-            'WorldCereal': [2021],
-            'Land Cover CCI': list(range(1992, 2021)),
-            'MODIS Land Cover': list(range(2001, 2024)),
-            'GLC_FCS30': [2020],
-            'MapBiomas Brasil': list(range(1985, 2024)),
-            'PRODES Amazônia': list(range(2000, 2024)),
-            'DETER Amazônia': list(range(2012, 2024)),
-            'PRODES Cerrado': [2018, 2020, 2022],
-            'TerraClass Amazônia': list(range(2008, 2021, 2)),
-            'IBGE Monitoramento': list(range(2000, 2021, 2)),
-            'IBGE Monitoring': list(range(2000, 2021, 2)),
-            'Agricultural Mapping': list(range(2018, 2024))
-        }
-        # Coverage categorization mapping
-        self.coverage_mapping = {
-            'Global': 'Global',
-            'Continental': 'Continental',
-            'Nacional': 'National',
-            'National': 'National',
-            'Regional': 'Regional'
-        }
-    
     def _parse_enhanced_accuracy(self, accuracy_value):
         """Enhanced accuracy parsing to support both traditional and new structured formats."""
         # Handle new structured accuracy format
@@ -312,17 +255,26 @@ class UnifiedDataProcessor:
             except (ValueError, AttributeError):
                 years = []
         elif isinstance(temporal_interval, list):
-            years = [int(y) for y in temporal_interval if isinstance(y, (int, str)) and str(y).isdigit()]
+            # Ensure all elements are convertible to int before processing
+            valid_years = []
+            for y in temporal_interval:
+                if isinstance(y, (int, float)) or (isinstance(y, str) and y.strip().isdigit()):
+                    try:
+                        valid_years.append(int(y))
+                    except ValueError:
+                        pass # Ignore non-integer values in list
+            years = valid_years
         else:
             years = []
         
         if not years:
+            # Return a default structure if no valid years are found
             return {
-                'start_year': 2000, 'end_year': 2024, 'temporal_span': 1, 'total_years': 1,
-                'available_years': [2000], 'available_years_str': '2000', 'temporal_gaps': []
+                'start_year': None, 'end_year': None, 'temporal_span': 0, 'total_years': 0,
+                'available_years': [], 'available_years_str': '', 'temporal_gaps': []
             }
         
-        years = sorted(years)
+        years = sorted(list(set(years))) # Remove duplicates and sort
         start_year = min(years)
         end_year = max(years)
         temporal_span = end_year - start_year + 1
@@ -330,16 +282,16 @@ class UnifiedDataProcessor:
         
         # Calculate gaps
         expected_years = set(range(start_year, end_year + 1))
-        missing_years = sorted(expected_years - set(years))
+        missing_years = sorted(list(expected_years - set(years)))
         
         return {
             'start_year': start_year,
             'end_year': end_year,
             'temporal_span': temporal_span,
             'total_years': total_years,
-            'available_years': years,
-            'available_years_str': ','.join(map(str, years)),
-            'temporal_gaps': missing_years
+            'available_years': years, # Store as list of ints
+            'available_years_str': ','.join(map(str, years)), # String version for display/CSV
+            'temporal_gaps': missing_years # Store as list of ints
         }
     
     def categorize_provider(self, provider: str) -> str:
@@ -406,7 +358,16 @@ class UnifiedDataProcessor:
     
     def categorize_coverage(self, coverage: str) -> str:
         """Unified coverage categorization function."""
-        return self.coverage_mapping.get(coverage, 'Regional')
+        # return self.coverage_mapping.get(coverage, \'Regional\') # Removed as mappings are now handled by json_interpreter
+        # Simplified direct mapping, can be expanded if needed
+        coverage_mapping = {
+            'Global': 'Global',
+            'Continental': 'Continental',
+            'Nacional': 'National',
+            'National': 'National',
+            'Regional': 'Regional'
+        }
+        return coverage_mapping.get(coverage, 'Regional')
     
     def categorize_resolution(self, resolution: float) -> str:
         """Unified resolution categorization function."""
@@ -462,11 +423,12 @@ class UnifiedDataProcessor:
         
         for initiative_name, initiative_data in metadata.items():
             # Get temporal data from mapping or parse from metadata
-            temporal_years = self.temporal_data.get(
-                initiative_name, 
-                initiative_data.get('available_years', [])
-            )
-            temporal_info = self.parse_temporal_data(temporal_years)
+            # temporal_years_input = self.temporal_data.get( # Removed as mappings are now handled by json_interpreter
+            #     initiative_name, 
+            #     initiative_data.get('available_years', [])
+            # )
+            temporal_years_input = initiative_data.get('available_years', [])
+            temporal_info = self.parse_temporal_data(temporal_years_input)
               # Handle multiple class versions - now using English field names
             classes_main = initiative_data.get('number_of_classes', 1)
             
@@ -490,7 +452,7 @@ class UnifiedDataProcessor:
             accuracy = self._parse_enhanced_accuracy(accuracy_raw)# Create standardized row with English columns
             row = {
                 'Name': initiative_name,
-                'Acronym': initiative_data.get('acronym', self.name_to_acronym.get(initiative_name, initiative_name[:8])),
+                'Acronym': initiative_data.get('acronym', initiative_name[:8]),
                 'Type': self.categorize_coverage(initiative_data.get('coverage', 'Regional')),
                 'Scope': initiative_data.get('coverage', 'Regional'),
                 'Provider': initiative_data.get('provider', ''),
@@ -514,8 +476,8 @@ class UnifiedDataProcessor:
                 'End Year': temporal_info['end_year'],
                 'Temporal Span': temporal_info['temporal_span'],
                 'Total Years': temporal_info['total_years'],
-                'Available Years': temporal_info['available_years_str'],
-                'Temporal Gaps': ','.join(map(str, temporal_info['temporal_gaps'])) if temporal_info['temporal_gaps'] else '',
+                'Available Years': temporal_info['available_years_str'], # Keep as string for DataFrame
+                'Temporal Gaps': ','.join(map(str, temporal_info['temporal_gaps'])) if temporal_info['temporal_gaps'] else '', # Keep as string for DataFrame
                 
                 # Derived metrics
                 'Resolution Score': 1000 / (1 + resolution / 10),
@@ -533,16 +495,17 @@ class UnifiedDataProcessor:
         for initiative_name, initiative_data in metadata.items():
             enhanced_data = initiative_data.copy()
             # Add unified temporal data
-            temporal_years = self.temporal_data.get(initiative_name, initiative_data.get('available_years', []))
-            temporal_info = self.parse_temporal_data(temporal_years)
+            # temporal_years_input_meta = self.temporal_data.get(initiative_name, initiative_data.get('available_years', [])) # Removed: temporal_data is no longer a class attribute
+            temporal_years_input_meta = initiative_data.get('available_years', [])
+            temporal_info_meta = self.parse_temporal_data(temporal_years_input_meta)
             
             enhanced_data.update({
-                'acronym': initiative_data.get('acronym', self.name_to_acronym.get(initiative_name, initiative_name[:8])),
-                'available_years': temporal_info['available_years'],
-                'start_year': temporal_info['start_year'],
-                'end_year': temporal_info['end_year'],
-                'temporal_span': temporal_info['temporal_span'],
-                'temporal_gaps': temporal_info['temporal_gaps']
+                'acronym': initiative_data.get('acronym', initiative_name[:8]),
+                'available_years': temporal_info_meta['available_years'], # Store as list of ints in metadata dict
+                'start_year': temporal_info_meta['start_year'],
+                'end_year': temporal_info_meta['end_year'],
+                'temporal_span': temporal_info_meta['temporal_span'],
+                'temporal_gaps': temporal_info_meta['temporal_gaps'] # Store as list of ints in metadata dict
             })
             
             enhanced_metadata[initiative_name] = enhanced_data
@@ -621,11 +584,12 @@ class UnifiedDataProcessor:
         all_years = set()
         for name, meta in metadata.items():
             # Use unified temporal data
-            years = self.temporal_data.get(name, meta.get('available_years', []))
+            # years = self.temporal_data.get(name, meta.get('available_years', [])) # Removed: temporal_data is no longer a class attribute
+            years = meta.get('available_years', [])
             if not years:
                 continue
                 
-            acronym = name_to_acronym.get(name, self.name_to_acronym.get(name, name[:10]))
+            acronym = name_to_acronym.get(name, name[:10]) # Simplified, relies on df for acronym if available, otherwise truncates name
             years = sorted(years)
             
             initiative_data = {
@@ -700,11 +664,13 @@ class UnifiedDataProcessor:
             'generation_timestamp': datetime.now().isoformat(),
             'data_summary': {
                 'total_initiatives': len(df) if df is not None else 0,
-                'initiatives_with_temporal_data': len(self.temporal_data),
+                'initiatives_with_temporal_data': sum(1 for item in metadata.values() if item.get('available_years')), # Calculate dynamically
                 'available_metrics': list(df.columns) if df is not None else [],
                 'unified_mappings': {
-                    'name_to_acronym': len(self.name_to_acronym),
-                    'temporal_data_entries': len(self.temporal_data)
+                    # 'name_to_acronym': len(self.name_to_acronym), # Removed: name_to_acronym is no longer a class attribute
+                    # 'temporal_data_entries': len(self.temporal_data) # Removed: temporal_data is no longer a class attribute
+                    'name_to_acronym_source': 'Dynamic from JSON or DataFrame', # Clarify source
+                    'temporal_data_source': 'Dynamic from JSON' # Clarify source
                 }
             }
         }
@@ -855,121 +821,81 @@ class UnifiedDataProcessor:
         }
     
     def _create_visualization_ready_data(self, df: pd.DataFrame, metadata: Dict[str, Any]) -> Dict[str, Any]:
-        """Create data structures ready for different visualization types."""
-        if df is None or df.empty:
-            return {'chart_types': []}
-        
-        acronym_col = 'Acronym' if 'Acronym' in df.columns else 'Sigla'
-        
-        viz_data = {
-            'radar_chart': self._prepare_radar_chart_data(df, acronym_col),
-            'scatter_plot': self._prepare_scatter_plot_data(df, acronym_col),
-            'bar_chart': self._prepare_bar_chart_data(df, acronym_col),
-            'timeline_chart': self._prepare_timeline_chart_data(metadata),
-            'heatmap': self._prepare_heatmap_data(df)
-        }
-        
-        return {
-            'chart_types': list(viz_data.keys()),
-            'data': viz_data,
-            'configs': self._get_chart_configs(),
-            'ready_for_visualization': True
-        }
-    
-    def _prepare_radar_chart_data(self, df: pd.DataFrame, acronym_col: str) -> List[Dict]:
-        """Prepare normalized data for radar charts."""
-        radar_data = []
-        
-        for _, row in df.iterrows():
-            # Normalize values to 0-1 scale
-            accuracy_norm = row.get('Accuracy (%)', 0) / 100
-            resolution_norm = 1 - min(row.get('Resolution (m)', 999) / 1000, 1)  # Inverted, capped
-            classes_norm = min(row.get('Classes', 0) / 50, 1)  # Cap at 50
-            temporal_norm = min(row.get('Temporal Span', 0) / 30, 1)  # Cap at 30
-            
-            radar_data.append({
-                'acronym': str(row[acronym_col])[:10],
-                'metrics': {
-                    'accuracy': round(accuracy_norm, 3),
-                    'resolution': round(resolution_norm, 3),
-                    'classes': round(classes_norm, 3),
-                    'temporal': round(temporal_norm, 3),
-                    'overall': round((accuracy_norm + resolution_norm + classes_norm + temporal_norm) / 4, 3)
-                }
-            })
-        
-        return radar_data
-    
-    def _prepare_scatter_plot_data(self, df: pd.DataFrame, acronym_col: str) -> List[Dict]:
-        """Prepare data for scatter plots."""
-        scatter_data = []
-        
-        for _, row in df.iterrows():
-            scatter_data.append({
-                'acronym': str(row[acronym_col])[:10],
-                'accuracy': float(row.get('Accuracy (%)', 0)),
-                'resolution': float(row.get('Resolution (m)', 0)),
-                'classes': int(row.get('Classes', 0)),
-                'category': self._categorize_accuracy_compact(float(row.get('Accuracy (%)', 0)))
-            })
-        
-        return scatter_data
-    
-    def _prepare_bar_chart_data(self, df: pd.DataFrame, acronym_col: str) -> Dict[str, List]:
-        """Prepare data for bar charts."""
-        return {
-            'labels': [str(row[acronym_col])[:10] for _, row in df.iterrows()],
-            'accuracy': df['Accuracy (%)'].tolist() if 'Accuracy (%)' in df.columns else [],
-            'resolution': df['Resolution (m)'].tolist() if 'Resolution (m)' in df.columns else [],
-            'classes': df['Classes'].tolist() if 'Classes' in df.columns else []
-        }
-    
-    def _prepare_timeline_chart_data(self, metadata: Dict[str, Any]) -> Dict[str, Any]:
-        """Prepare data for timeline charts."""
-        return {
-            'format': 'timeline_ready',
-            'source': 'temporal_analysis',
-            'note': 'Extract from temporal_analysis_v2'
-        }
-    
-    def _prepare_heatmap_data(self, df: pd.DataFrame) -> Dict[str, Any]:
-        """Prepare correlation data for heatmaps."""
-        numeric_cols = df.select_dtypes(include=[np.number]).columns
-        if len(numeric_cols) < 2:
+        """Create data structures optimized for direct use in visualizations."""
+        if df is None or df.empty or not metadata:
             return {}
         
-        correlation_matrix = df[numeric_cols].corr()
+        # Use standardized column names
+        acronym_col = 'Acronym' if 'Acronym' in df.columns else 'Sigla'
+        name_col = 'Name' if 'Name' in df.columns else 'Nome'
         
-        return {
-            'matrix': correlation_matrix.values.tolist(),
-            'labels': correlation_matrix.columns.tolist(),
-            'size': correlation_matrix.shape
+        # Create name to acronym mapping from DataFrame if available
+        name_to_acronym_df = {}
+        if acronym_col in df.columns and name_col in df.columns:
+            name_to_acronym_df = pd.Series(df[acronym_col].values, index=df[name_col]).to_dict()
+            
+        vis_data = {
+            'radar_chart_data': [],
+            'temporal_evolution_data': [],
+            'heatmap_data': {} # Initialize as dict for pivot_table output
         }
-    
-    def _get_chart_configs(self) -> Dict[str, Dict]:
-        """Get optimized chart configurations."""
-        return {
-            'radar_chart': {
-                'axes': ['accuracy', 'resolution', 'classes', 'temporal'],
-                'scale': [0, 1],
-                'fill_opacity': 0.3
-            },
-            'scatter_plot': {
-                'x_axis': 'accuracy',
-                'y_axis': 'resolution', 
-                'size_by': 'classes',
-                'color_by': 'category'
-            },
-            'bar_chart': {
-                'orientation': 'vertical',
-                'metrics': ['accuracy', 'resolution', 'classes']
-            },
-            'timeline_chart': {
-                'x_axis': 'year',
-                'y_axis': 'initiative',
-                'show_gaps': True
-            }
-        }
+        
+        # Radar chart data (using normalized comparison matrix)
+        comparison_matrix = self.create_comparison_matrix(df)
+        if not comparison_matrix.empty:
+            for _, row in comparison_matrix.iterrows():
+                vis_data['radar_chart_data'].append({
+                    'acronym': row[acronym_col],
+                    'name': row[name_col],
+                    'metrics': {
+                        col.replace('_normalized', ''): row[col] 
+                        for col in comparison_matrix.columns if col.endswith('_normalized')
+                    },
+                    'overall_score': row.get('Overall_Score', 0)
+                })
+        
+        # Temporal evolution data
+        all_years_set = set()
+        initiative_temporal_data = []
+        for name, meta_item in metadata.items():
+            # years = self.temporal_data.get(name, meta_item.get('available_years', [])) # Removed: temporal_data is no longer a class attribute
+            years = meta_item.get('available_years', [])
+            if years:
+                all_years_set.update(years)
+                initiative_temporal_data.append({
+                    'name': name,
+                    # 'acronym': self.name_to_acronym.get(name, name_to_acronym_df.get(name, name[:10])), # Removed: name_to_acronym is no longer a class attribute
+                    'acronym': name_to_acronym_df.get(name, name[:10]), # Use mapping from df or truncate name
+                    'years': sorted(list(set(years)))
+                })
+        
+        if all_years_set:
+            sorted_years = sorted(list(all_years_set))
+            for init_data in initiative_temporal_data:
+                availability = [1 if year in init_data['years'] else 0 for year in sorted_years]
+                vis_data['temporal_evolution_data'].append({
+                    'acronym': init_data['acronym'],
+                    'name': init_data['name'],
+                    'availability_timeline': availability,
+                    'timeline_years': sorted_years
+                })
+        
+        # Heatmap data (e.g., initiative vs. year availability)
+        if vis_data['temporal_evolution_data']:
+            heatmap_df_data = []
+            for item in vis_data['temporal_evolution_data']:
+                for i, year in enumerate(item['timeline_years']):
+                    heatmap_df_data.append({
+                        'acronym': item['acronym'],
+                        'year': year,
+                        'available': item['availability_timeline'][i]
+                    })
+            if heatmap_df_data:
+                vis_data['heatmap_data'] = pd.DataFrame(heatmap_df_data).pivot_table(
+                    index='acronym', columns='year', values='available', fill_value=0
+                ).to_dict(orient='index')
+        
+        return vis_data
     
     def _generate_data_insights(self, df: pd.DataFrame, metadata: Dict[str, Any]) -> Dict[str, Any]:
         """Generate automated insights from the data."""
@@ -1193,13 +1119,22 @@ class UnifiedDataProcessor:
             validation_results['metadata_valid'] = False
             validation_results['issues'].append("Metadata is empty")
         else:
-            # Check temporal data consistency
+            # Check temporal data consistency (no longer comparing with self.temporal_data)
             for name, data in metadata.items():
-                if name in self.temporal_data:
-                    metadata_years = data.get('available_years', [])
-                    unified_years = self.temporal_data[name]
-                    if metadata_years != unified_years:
-                        validation_results['issues'].append(f"Temporal data mismatch for {name}")
+                # if name in self.temporal_data: # Removed: self.temporal_data no longer exists
+                metadata_years = data.get('available_years', [])
+                # unified_years = self.temporal_data[name] # Removed: self.temporal_data no longer exists
+                # The concept of \"unified_years\" from a separate mapping is gone.\r
+                # Validation might now focus on the internal consistency of metadata_years if needed,\r
+                # or this specific check might be removed if json_interpreter handles it.\r
+                # For now, let's remove the direct comparison that causes an error.\r
+                if not isinstance(metadata_years, list):
+                    validation_results['issues'].append(f"Invalid 'available_years' format for {name}: not a list")
+                else:
+                    for year in metadata_years:
+                        if not isinstance(year, int):
+                            validation_results['issues'].append(f"Invalid year in 'available_years' for {name}: {year} is not an integer")
+                            break
         
         # Set overall validity
         validation_results['dataframe_valid'] = len([i for i in validation_results['issues'] if 'DataFrame' in i or 'column' in i or 'accuracy' in i or 'resolution' in i]) == 0

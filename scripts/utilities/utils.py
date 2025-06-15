@@ -1,17 +1,17 @@
 import streamlit as st
 import io
 
-def safe_download_image(fig, filename, button_text="⬇️ Baixar Gráfico (PNG)"):
-    """Safely export a Plotly figure as PNG with fallback instructions"""
+def safe_download_image(fig, filename, button_text="⬇️ Download Chart (PNG)", width=None, height=None):
+    """Safely export a Plotly figure as PNG with fallback instructions and custom dimensions."""
     try:
         buf = io.BytesIO()
-        fig.write_image(buf, format="png")
+        fig.write_image(buf, format="png", width=width, height=height)
         st.download_button(button_text, data=buf.getvalue(), file_name=filename, mime="image/png")
         return True
     except Exception:
-        st.warning("⚠️ **Erro ao gerar PNG automaticamente**")
-        st.info("💡 **Alternativas para salvar o gráfico:**\n"
-               "1. Clique no ícone 📷 (câmera) no canto superior direito do gráfico\n"
-               "2. Ou clique com botão direito no gráfico → 'Salvar imagem como'\n"
-               "3. Ou use o menu de opções do gráfico (⋯) → 'Download plot as PNG'")
+        st.warning("⚠️ **Error generating PNG automatically**")
+        st.info("💡 **Alternatives to save the chart:**\n"
+               "1. Click the 📷 (camera) icon in the top right corner of the chart\n"
+               "2. Or right-click on the chart → 'Save image as'\n"
+               "3. Or use the chart options menu (⋯) → 'Download plot as PNG'")
         return False

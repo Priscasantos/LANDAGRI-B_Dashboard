@@ -1,5 +1,4 @@
 # Configuration for the LULC Initiatives Dashboard
-import plotly.express as px
 
 # Color and style configuration for the app
 COLORS = {
@@ -46,9 +45,29 @@ def standardize_dataframe_columns(df):
     return df.rename(columns=PT_TO_EN_COLUMNS)
 
 def get_initiative_color_map(initiative_names):
-    """Assign a unique color to each initiative using a qualitative palette."""
-    palette = px.colors.qualitative.Plotly
+    """Assign a unique color to each initiative using a highly divergent 15-color palette."""
+    # Custom highly divergent 15-color palette based on color theory for maximum visual distinction
+    # Uses combinations of primary, secondary, tertiary colors and high contrast variations
+    # ColorBrewer "Spectral" 11-color palette extended to 15 colors for high divergence
+    divergent_palette = [
+        "#9e0142",  # deep red
+        "#d53e4f",  # red
+        "#f46d43",  # orange
+        "#fdae61",  # light orange
+        "#fee08b",  # yellow
+        "#e6f598",  # light yellow-green
+        "#abdda4",  # light green
+        "#66c2a5",  # green-cyan
+        "#3288bd",  # blue
+        "#5e4fa2",  # purple
+        "#a6d96a",  # green
+        "#140253",  # charcoal
+        "#e7298a",  # magenta
+        "#1c9099",  # teal
+        "#762a83",  # dark purple
+    ]
+    
     n = len(initiative_names)
-    # Repeat palette if not enough colors
-    colors = (palette * ((n // len(palette)) + 1))[:n]
+    # Repeat palette if more than 15 initiatives
+    colors = (divergent_palette * ((n // len(divergent_palette)) + 1))[:n]
     return dict(zip(initiative_names, colors))

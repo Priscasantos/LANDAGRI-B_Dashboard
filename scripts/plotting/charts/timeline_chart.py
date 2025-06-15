@@ -21,10 +21,10 @@ from scripts.plotting.universal_cache import smart_cache_data
 
 # If this function is also used by Streamlit pages, keep the cache decorator.
 # Otherwise, if it's only for non-Streamlit generation, it can be removed.
-@smart_cache_data(ttl=300) 
 def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame, 
-                 chart_height: Optional[int] = None, item_spacing: int = 25, 
-                 line_width: int = 15, margin_config: Optional[Dict] = None) -> go.Figure:
+                 chart_height: Optional[int] = None, chart_width: Optional[int] = None,
+                 item_spacing: int = 25, line_width: int = 15, 
+                 margin_config: Optional[Dict] = None) -> go.Figure:    
     """
     Plot an improved timeline using anos_disponiveis from metadata, with acronyms from DataFrame.
     
@@ -32,6 +32,7 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame,
         metadata: Initiative metadata
         filtered_df: Filtered DataFrame
         chart_height: Custom chart height (None for auto)
+        chart_width: Custom chart width (None for auto)
         item_spacing: Vertical spacing between items (pixels)
         line_width: Width of timeline bars
         margin_config: Custom margins dict
@@ -44,7 +45,6 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame,
     # Ensure 'Name' column exists for mapping with metadata keys
     if 'Name' not in plot_df.columns and 'Nome' in plot_df.columns: # Handle legacy 'Nome'
         plot_df.rename(columns={'Nome': 'Name'}, inplace=True)
-    
     if 'Display_Name' not in plot_df.columns:
         plot_df = add_display_names_to_df(plot_df) # Add/overwrite Display_Name using chart_core
 
@@ -60,6 +60,9 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame,
         initiative_row = initiative_row_series.iloc[0]
         display_name = initiative_row['Display_Name']
         metodologia = initiative_row.get('Methodology', 'N/A')
+        
+        # Get coverage information from metadata
+        coverage = meta_content.get('coverage', 'N/A')
 
         years_key = 'available_years' if 'available_years' in meta_content else 'anos_disponiveis'
         if years_key in meta_content and meta_content[years_key]:
@@ -75,20 +78,31 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame,
                     'ano': int(ano), # Ensure ano is int
                     'disponivel': 1,
                     'metodologia': metodologia,
+                    'coverage': coverage,
                 })
                 all_years.add(int(ano))
 
     if not timeline_data: # Simplified check, all_years would also be empty
-        return go.Figure().update_layout(title="Timeline of Initiatives (No temporal data for selected initiatives)")
-
+        return go.Figure().update_layout(title="Timeline of Initiatives (No temporal data for selected initiatives)")    
     timeline_df = pd.DataFrame(timeline_data)
-    # min_year_data, max_year_data = (int(timeline_df['ano'].min()), int(timeline_df['ano'].max())) if not timeline_df.empty else (1985, 2024)
     
-    # Define the fixed range for the chart
-    chart_min_year, chart_max_year = 1985, 2024
-    all_years_range = list(range(chart_min_year, chart_max_year + 1))
+    # Calculate dynamic range based on actual data
+    min_year_data = int(timeline_df['ano'].min()) if not timeline_df.empty else 1985
+    max_year_data = int(timeline_df['ano'].max()) if not timeline_df.empty else 2024
     
-    produtos_unicos_df = timeline_df[['produto', 'produto_display_name']].drop_duplicates().sort_values(by='produto_display_name')
+    # Use dynamic range: start at first year, end at last year + 1
+    chart_min_year, chart_max_year = min_year_data, max_year_data + 1
+    all_years_range = list(range(min_year_data, max_year_data + 1))
+
+    # Define the desired order for 'coverage'
+    coverage_order = ['Global', 'Regional', 'National', 'N/A']
+    timeline_df['coverage'] = pd.Categorical(timeline_df['coverage'], categories=coverage_order, ordered=True)
+
+    # Sort by coverage and then by product_display_name in reverse alphabetical order
+    produtos_unicos_df = timeline_df[['produto', 'produto_display_name', 'coverage']].drop_duplicates().sort_values(
+        by=['coverage', 'produto_display_name'],
+        ascending=[True, False]  # Ascending for coverage, Descending for product_display_name
+    )
     
     display_names_unicos_sorted = produtos_unicos_df['produto_display_name'].tolist()
     if not display_names_unicos_sorted: # If no unique display names, means no valid data to plot
@@ -162,18 +176,21 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame,
                     legendgroup=current_display_name,
                     hovertemplate=f"<b>{current_display_name}</b><br>Metodologia: {metodologia}<br>Anos: {seg_start}-{seg_end}<extra></extra>"
                 ))                
-    apply_standard_layout(fig_timeline, "📅 Timeline of LULC Initiatives Availability (1985-2024)", "Year", "Initiatives", "timeline")
+    apply_standard_layout(fig_timeline, "", "Year", "Initiatives", "timeline")
     
     # Default margins
     default_margins = dict(l=220, r=30, t=60, b=40)
     margins = margin_config if margin_config else default_margins
-    
+
     # Calculate height
     if chart_height is None:
         calculated_height = max(300, len(display_names_unicos_sorted) * item_spacing)
     else:
         calculated_height = chart_height
-    
+
+    # Padronizar espessura dos ticks
+    tick_width_standard = 0.8
+
     fig_timeline.update_layout(
         height=calculated_height,
         margin=margins,
@@ -184,20 +201,39 @@ def plot_timeline(metadata: Dict[str, Any], filtered_df: pd.DataFrame,
             type='category', 
             categoryorder='array', 
             categoryarray=display_names_unicos_sorted, 
-            tickfont=dict(size=11), # Slightly smaller font if many items
-            showgrid=False
+            tickfont=dict(size=11),
+            showgrid=False,
+            ticks="outside",
+            ticklen=8,
+            tickwidth=tick_width_standard,
+            tickcolor="black",
+            showline=True,
+            linewidth=1,
+            linecolor="black",
         ),
         xaxis=dict(
             range=[chart_min_year - 0.5, chart_max_year + 0.5], 
-            dtick=1, 
+            tickmode='array',
+            tickvals=list(range(chart_min_year, chart_max_year + 2)),
+            ticktext=[str(year) for year in range(chart_min_year, chart_max_year + 2)],
             tickformat='d',
             tickangle=-45,
-            tickfont=dict(size=14), # Slightly smaller font
-            gridwidth=1, # Thicker grid lines for clarity
-            showgrid=True
+            tickfont=dict(size=12),
+            ticks="outside",
+            ticklen=8,
+            tickwidth=tick_width_standard,
+            tickcolor="black",
+            showgrid=True,
+            zeroline=False,
+            showline=True,
+            linewidth=1,
+            linecolor="black",
+            type="linear",
+            autorange=False,
+            fixedrange=False
         ),
         showlegend=True,
-        legend=dict(traceorder='normal') # Ensure legend order matches y-axis if possible
+        legend=dict(traceorder='normal')
     )
     return fig_timeline
 
