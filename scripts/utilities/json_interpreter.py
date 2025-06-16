@@ -297,7 +297,8 @@ def interpret_initiatives_metadata(file_path: Optional[Union[str, Path]] = None)
     """
     actual_file_path: Path
     if file_path is None:        # Default path relative to this script's parent's parent directory (project root)
-        actual_file_path = Path(__file__).resolve().parent.parent.parent / "data" / "raw" / "initiatives_metadata.jsonc"
+        # Changed default path to remove "raw" subdirectory
+        actual_file_path = Path(__file__).resolve().parent.parent.parent / "data" / "initiatives_metadata.jsonc"
     else:
         actual_file_path = Path(file_path)
         
@@ -319,7 +320,26 @@ def interpret_initiatives_metadata(file_path: Optional[Union[str, Path]] = None)
         available_years_list = _parse_available_years(_get_safe_value(details, 'available_years'))
         available_years_str = f"{min(available_years_list)}-{max(available_years_list)}" if available_years_list else "N/A"
         sensors_referenced_list = _get_safe_value(details, 'sensors_referenced', [])
-        class_legend_data = _get_safe_value(details, 'class_legend') # Get class legend data
+        class_legend_data = _get_safe_value(details, 'class_legend') 
+        
+        processed_class_legend_list = []
+        if isinstance(class_legend_data, str):
+            processed_class_legend_list = [s.strip() for s in class_legend_data.split(',') if s.strip()]
+        elif isinstance(class_legend_data, list):
+            processed_class_legend_list = class_legend_data # Assumes it's already a list of strings
+
+        # New fields for agricultural classes and capability
+        num_agri_classes = _get_safe_value(details, 'number_of_agriculture_classes')
+        capability_text = _get_safe_value(details, 'capability') # For general capability display
+        agricultural_capabilities_text = _get_safe_value(details, 'agricultural_capabilities') # Specific for agri legend
+
+        # Derive Agricultural_Class_Legend
+        agri_legend_list = []
+        if isinstance(num_agri_classes, int) and num_agri_classes == 1 and \
+           isinstance(agricultural_capabilities_text, str) and agricultural_capabilities_text.strip():
+            agri_legend_list.append(agricultural_capabilities_text.strip())
+        # TODO: Add logic here if agricultural_capabilities_text could be a list of strings for num_agri_classes > 1
+        # For now, it handles the case where number_of_agriculture_classes = 1 and agricultural_capabilities is its name.
 
         initiative_dict = {
             'Name': initiative_name,
@@ -345,17 +365,21 @@ def interpret_initiatives_metadata(file_path: Optional[Union[str, Path]] = None)
             'Temporal_Coverage_End': _get_safe_value(details, 'temporal_coverage_end_date'),
             'Available_Years_Str': available_years_str,
             'Available_Years_List': json.dumps(available_years_list), # Convert list to JSON string
-            'Classes': _get_safe_value(details, 'number_of_classes'), # Changed 'Number_of_Classes' to 'Classes'
-            'Class_Legend': json.dumps(class_legend_data) if isinstance(class_legend_data, list) else class_legend_data, # Convert to JSON string if it's a list
+            'Classes': _get_safe_value(details, 'number_of_classes'), 
+            'Num_Agri_Classes': num_agri_classes, # Added new column
+            'Class_Legend': json.dumps(processed_class_legend_list), # Store the processed list as JSON string
+            'Agricultural_Class_Legend': json.dumps(agri_legend_list), # New: Derived agricultural legend
+            'Capability': capability_text, # Added new column
             'Algorithm': _get_safe_value(details, 'algorithm'),
             'Classification_Method': _get_safe_value(details, 'classification_method'),
-            'Sensors_Referenced': json.dumps(sensors_referenced_list) # Already a JSON string
+            'Sensors_Referenced': json.dumps(sensors_referenced_list) 
         }
         processed_initiatives.append(initiative_dict)
 
     df = pd.DataFrame(processed_initiatives)    # Post-processing: Ensure essential numeric columns are float, fill NaNs if necessary
     numeric_cols = ['Resolution', 'Resolution_min_val', 'Resolution_max_val', 
-                    'Accuracy (%)', 'Accuracy_min_val', 'Accuracy_max_val', 'Classes'] # Changed 'Accuracy' to 'Accuracy (%)'
+                    'Accuracy (%)', 'Accuracy_min_val', 'Accuracy_max_val', 'Classes',
+                    'Num_Agri_Classes'] # Added Num_Agri_Classes to numeric cols
     for col in numeric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0) # Coerce errors to NaN, then fill with 0
@@ -370,7 +394,8 @@ if __name__ == '__main__':
     
     # Assuming the script is in scripts/utilities/ and data is in data/raw/
     project_root_path = Path(__file__).resolve().parent.parent.parent
-    test_file_path = project_root_path / "data" / "raw" / "initiatives_metadata.jsonc"
+    # Changed test file path to remove "raw" subdirectory
+    test_file_path = project_root_path / "data" / "initiatives_metadata.jsonc"
     
     print(f"Attempting to load data from: {test_file_path}")
     

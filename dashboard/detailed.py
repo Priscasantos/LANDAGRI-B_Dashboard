@@ -91,7 +91,7 @@ def run():
         fig = go.Figure()
         fig.add_trace(go.Bar(
             y=df_filtered['Display_Name'],  # Use siglas
-            x=df_filtered['Accuracy'],
+            x=df_filtered['Accuracy (%)'], # Changed from 'Overall_Accuracy' to 'Accuracy (%)'
             name='Accuracy (%)',
             orientation='h',
             marker_color='royalblue'
@@ -118,7 +118,7 @@ def run():
     with tab2:  
         st.subheader("Multi-dimensional Performance Radar") # Added subheader
         # Radar using siglas
-        radar_columns = ['Accuracy', 'Resolution', 'Number_of_Classes']
+        radar_columns = ['Accuracy (%)', 'Resolution', 'Number_of_Classes'] # Changed from 'Overall_Accuracy' to 'Accuracy (%)'
         available_radar_cols = [col for col in radar_columns if col in df_filtered.columns]
         radar_df = None  # Initialize radar_df
         
@@ -327,7 +327,7 @@ def create_dual_bars_chart(df_filtered_chart):
         fig = go.Figure()
         fig.add_trace(go.Bar(
             y=df_filtered_chart['Display_Name'], 
-            x=df_filtered_chart['Accuracy'],
+            x=df_filtered_chart['Accuracy (%)'],
             name='Accuracy (%)',
             orientation='h',
             marker_color='royalblue'
@@ -361,7 +361,7 @@ def create_dual_bars_chart(df_filtered_chart):
 def create_radar_chart(df_filtered_chart):
     """Create radar chart without Streamlit dependencies"""
     try:
-        radar_columns = ['Accuracy', 'Resolution', 'Number_of_Classes']
+        radar_columns = ['Accuracy (%)', 'Resolution', 'Number_of_Classes']
         available_radar_cols_chart = [col for col in radar_columns if col in df_filtered_chart.columns]
         
         if len(available_radar_cols_chart) < 2:
@@ -411,7 +411,7 @@ def create_radar_chart(df_filtered_chart):
 def create_heatmap_chart(df_filtered_chart):
     """Create heatmap chart without Streamlit dependencies"""
     try:
-        radar_columns = ['Accuracy', 'Resolution', 'Number_of_Classes']
+        radar_columns = ['Accuracy (%)', 'Resolution', 'Number_of_Classes']
         available_radar_cols_chart = [col for col in radar_columns if col in df_filtered_chart.columns]
         
         if len(available_radar_cols_chart) < 2:

@@ -100,7 +100,7 @@ def run():
 
     # Modern filters at the top of the page
     st.markdown("### 🔎 Initiative Filters")
-    col1, col2, col3, col4 = st.columns(4)    
+    col1, col2, col3, col4, col5 = st.columns(5) # Added a 5th column for Num_Agri_Classes
     with col1:
         # Ensure df is not empty and 'Type' column exists before accessing unique values
         tipos = df["Type"].unique().tolist() if not df.empty and "Type" in df.columns and df["Type"].notna().any() else []
@@ -134,7 +134,25 @@ def run():
     with col4:
         # Ensure df is not empty and 'Methodology' column exists
         metodologias = df["Methodology"].unique().tolist() if not df.empty and "Methodology" in df.columns and df["Methodology"].notna().any() else []
-        selected_methods = st.multiselect("Methodology", options=metodologias, default=metodologias)    # Apply filters
+        selected_methods = st.multiselect("Methodology", options=metodologias, default=metodologias)
+    with col5: # New filter for Number of Agricultural Classes
+        if not df.empty and "Num_Agri_Classes" in df.columns and df["Num_Agri_Classes"].notna().any():
+            # Convert to numeric, coercing errors to NaN, then drop NaNs for min/max
+            num_agri_classes_numeric = pd.to_numeric(df["Num_Agri_Classes"], errors='coerce').dropna()
+            if not num_agri_classes_numeric.empty:
+                min_agri_classes, max_agri_classes = int(num_agri_classes_numeric.min()), int(num_agri_classes_numeric.max())
+                # Ensure min is not greater than max, can happen if only one value
+                if min_agri_classes > max_agri_classes:
+                    max_agri_classes = min_agri_classes 
+                selected_agri_classes_range = st.slider("Agricultural Classes", min_value=min_agri_classes, max_value=max_agri_classes, value=(min_agri_classes, max_agri_classes))
+            else:
+                selected_agri_classes_range = st.slider("Agricultural Classes", min_value=0, max_value=50, value=(0, 50), disabled=True)
+                st.caption("Number of agricultural classes data not available or not numeric.")
+        else:
+            selected_agri_classes_range = st.slider("Agricultural Classes", min_value=0, max_value=50, value=(0, 50), disabled=True)
+            st.caption("Number of agricultural classes data not available for current selection.")
+
+    # Apply filters
     
     # Ensure columns used for filtering exist and handle potential errors
     conditions = []
@@ -148,6 +166,9 @@ def run():
         conditions.append(df["Accuracy_numeric"].between(selected_acc[0], selected_acc[1]))
     if "Methodology" in df.columns and selected_methods:
         conditions.append(df["Methodology"].isin(selected_methods))
+    if "Num_Agri_Classes" in df.columns and selected_agri_classes_range: # Add filter condition for Num_Agri_Classes
+        df["Num_Agri_Classes_numeric"] = pd.to_numeric(df["Num_Agri_Classes"], errors='coerce')
+        conditions.append(df["Num_Agri_Classes_numeric"].between(selected_agri_classes_range[0], selected_agri_classes_range[1]))
     
     if conditions:
         final_condition = pd.Series(True, index=df.index)
@@ -162,6 +183,8 @@ def run():
         filtered_df = filtered_df.drop(columns=["Resolution_numeric"])
     if "Accuracy_numeric" in filtered_df.columns:
         filtered_df = filtered_df.drop(columns=["Accuracy_numeric"])
+    if "Num_Agri_Classes_numeric" in filtered_df.columns: # Clean up temp column
+        filtered_df = filtered_df.drop(columns=["Num_Agri_Classes_numeric"])
 
     st.session_state.filtered_df = filtered_df
 
@@ -193,6 +216,7 @@ def run():
     .metric-card.resolution { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
     .metric-card.classes { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
     .metric-card.global { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .metric-card.agri-classes { background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%); } /* New style for agri classes */
     
     .metric-icon {
         font-size: 2.5rem;
@@ -434,7 +458,7 @@ def run():
             
             # Modern metric grid - Conditional rendering
             metrics_html_parts = []
-            accuracy_val = pd.to_numeric(init_data.get('Accuracy'), errors='coerce')
+            accuracy_val = pd.to_numeric(init_data.get('Accuracy (%)'), errors='coerce') # Corrected key to 'Accuracy (%)'
             if pd.notna(accuracy_val):
                 metrics_html_parts.append(f'''<div class="mini-metric">
                     <div class="mini-metric-value">🎯 {accuracy_val:.1f}%</div>
@@ -521,9 +545,9 @@ def run():
                         current_sensor_key_str = sensor_ref_obj # Already a string
                     
                     # Proceed only if current_sensor_key_str is a valid (non-empty) string
-                    if current_sensor_key_str:
-                        sensor_info_from_meta = sensors_meta.get(current_sensor_key_str, {}) 
-                        display_name = sensor_info_from_meta.get('display_name', current_sensor_key_str.replace("_", " ").title())
+                    if current_sensor_key_str: # Check if current_sensor_key_str is not None and not empty
+                        sensor_info_from_meta = sensors_meta.get(str(current_sensor_key_str), {}) 
+                        display_name = sensor_info_from_meta.get('display_name', str(current_sensor_key_str).replace("_", " ").title())
                         
                         sensor_display_text_for_badge = display_name
                         if years_used_list and isinstance(years_used_list, list):
@@ -539,17 +563,27 @@ def run():
                         
                         # Add all details from sensors_meta for this sensor
                         if sensor_info_from_meta: # Check if sensor_info_from_meta is not empty
-                            expander_content += "**General Specifications:**\\n"
+                            expander_content += "**General Specifications:**\n"
                             for spec_key, spec_value in sensor_info_from_meta.items():
                                 if spec_key not in ['display_name', 'notes']: 
+                                    formatted_spec_key = spec_key.replace('_', ' ').title()
                                     if isinstance(spec_value, list):
-                                        expander_content += f"  - **{spec_key.replace('_', ' ').title()}:** {', '.join(map(str, spec_value))}\\n"
+                                        # If list of dicts (like spectral_bands)
+                                        if all(isinstance(item, dict) for item in spec_value):
+                                            expander_content += f"  - **{formatted_spec_key}:**\n"
+                                            for item_dict in spec_value:
+                                                band_details = []
+                                                for k, v in item_dict.items():
+                                                    band_details.append(f"{k.replace('_', ' ').title()}: {v}")
+                                                expander_content += f"    - {', '.join(band_details)}\n"
+                                        else: # Simple list
+                                            expander_content += f"  - **{formatted_spec_key}:** {', '.join(map(str, spec_value))}\n"
                                     elif isinstance(spec_value, dict):
-                                        expander_content += f"  - **{spec_key.replace('_', ' ').title()}:**\\n"
+                                        expander_content += f"  - **{formatted_spec_key}:**\n"
                                         for sub_k, sub_v in spec_value.items():
-                                            expander_content += f"    - {sub_k.replace('_', ' ').title()}: {sub_v}\\n"
+                                            expander_content += f"    - {sub_k.replace('_', ' ').title()}: {sub_v}\n"
                                     else:
-                                        expander_content += f"  - **{spec_key.replace('_', ' ').title()}:** {spec_value}\\n"
+                                        expander_content += f"  - **{formatted_spec_key}:** {spec_value}\n"
                             if 'notes' in sensor_info_from_meta:
                                  expander_content += f"\\n**Notes:** {sensor_info_from_meta['notes']}\\n"
                         else:
@@ -628,12 +662,15 @@ def run():
                 sensors_display_parts = []
                 for sensor_ref in sensors_referenced_metadata:
                     if isinstance(sensor_ref, dict):
-                        sensor_key = sensor_ref.get('sensor_key')
+                        sensor_key_from_dict = sensor_ref.get('sensor_key')
+                        sensor_key = str(sensor_key_from_dict) if sensor_key_from_dict is not None else None # Ensure string or None
                         years_used = sensor_ref.get('years_used')
                         
                         # Get display_name from sensors_meta for this section as well
-                        sensor_details_from_meta = sensors_meta.get(sensor_key, {})
-                        display_name = sensor_details_from_meta.get('display_name', sensor_key)
+                        sensor_details_from_meta = {}
+                        if sensor_key: # Only proceed if sensor_key is a valid string
+                            sensor_details_from_meta = sensors_meta.get(sensor_key, {})
+                        display_name = sensor_details_from_meta.get('display_name', sensor_key if sensor_key else 'Unknown Sensor')
 
                         sensor_detail_display = display_name
                         if years_used and isinstance(years_used, list):
@@ -647,11 +684,23 @@ def run():
                 detailed_sensor_info_html = ["<div class=\"info-section\" style=\"border-left-color: #6f42c1;\"><div class=\"info-title\">🛰️ Detailed Sensor Specifications</div>"]
                 for sensor_ref in sensors_referenced_metadata:
                     if isinstance(sensor_ref, dict):
-                        sensor_key = sensor_ref.get('sensor_key')
-                        sensor_details_from_meta = sensors_meta.get(sensor_key, {})
-                        display_name = sensor_details_from_meta.get('display_name', sensor_key)
+                        sensor_key_from_ref = sensor_ref.get('sensor_key')
                         
-                        detailed_sensor_info_html.append(f"<h5 style=\'margin-top: 1rem; color: #6f42c1;\'>{display_name}</h5><ul style=\'list-style-type: disc; margin-left: 20px;\'>")
+                        key_to_use_for_get = None
+                        if isinstance(sensor_key_from_ref, str) and sensor_key_from_ref.strip():
+                            key_to_use_for_get = sensor_key_from_ref.strip()
+                        
+                        sensor_details_from_meta = {}
+                        display_name_for_sensor_heading = 'Unknown Sensor'
+
+                        if key_to_use_for_get: # This ensures key_to_use_for_get is a non-empty string
+                            sensor_details_from_meta = sensors_meta.get(key_to_use_for_get, {})
+                            display_name_for_sensor_heading = sensor_details_from_meta.get('display_name', key_to_use_for_get)
+                        elif sensor_key_from_ref is not None: # Original key was present but not a valid string
+                            display_name_for_sensor_heading = f"Invalid Sensor Key ({str(sensor_key_from_ref)})"
+                        # else: sensor_key_from_ref was None, display_name_for_sensor_heading remains 'Unknown Sensor'
+                        
+                        detailed_sensor_info_html.append(f"<h5 style=\'margin-top: 1rem; color: #6f42c1;\'>{display_name_for_sensor_heading}</h5><ul style=\'list-style-type: disc; margin-left: 20px;\'>")
                         
                         family = sensor_details_from_meta.get('sensor_family')
                         platform = sensor_details_from_meta.get('platform_name')
@@ -735,27 +784,75 @@ def run():
         class_legend_str = str(init_metadata.get('class_legend', '')).strip()
         if class_legend_str and class_legend_str.lower() not in ["not available", "none", "n/a"]:
             st.markdown("#### 🏷️ Classification Details")
-            classes_list = [cls.strip() for cls in class_legend_str.split(',') if cls.strip()]
-            
-            if classes_list:
+            # Display Number of Classes (Total)
+            num_total_classes_str = str(init_data.get("Classes", init_data.get("Number_of_Classes", "N/A"))).strip()
+            num_total_classes = pd.to_numeric(num_total_classes_str, errors='coerce')
+            if pd.notna(num_total_classes) and num_total_classes_str.lower() not in ["n/a", "none", "not available"]:
+                st.markdown(f"<p><strong>Total Number of Classes:</strong> {num_total_classes:.0f}</p>", unsafe_allow_html=True)
+            else:
+                st.markdown("<p><strong>Total Number of Classes:</strong> Not specified</p>", unsafe_allow_html=True)
+
+            # Display Class Legend (Total Classes)
+            class_legend_json_str = init_data.get('Class_Legend', '[]') # Get from df_interpreted
+            try:
+                class_legend_list = json.loads(class_legend_json_str) if isinstance(class_legend_json_str, str) else class_legend_json_str
+                if not isinstance(class_legend_list, list):
+                    class_legend_list = [] # Ensure it's a list
+            except (json.JSONDecodeError, TypeError):
+                class_legend_list = []
+
+            if class_legend_list:
                 st.markdown('''<div class="info-section" style="margin-top: 1rem;">
-                                <div class="info-title">📋 Land Cover Classes</div>''', unsafe_allow_html=True)
-                
+                                <div class="info-title">📋 Land Cover Classes (Legend)</div>''', unsafe_allow_html=True)
                 classes_html = ""
-                for i, cls in enumerate(classes_list):
-                    # Cycle through a few more distinct colors for badges
+                for i, cls in enumerate(class_legend_list):
+                    # Cycle through a few distinct colors for badges
                     badge_colors = ["#e3f2fd", "#f3e5f5", "#e8f5e8", "#fff3e0", "#fce4ec", "#e0f2f1", 
                                     "#ede7f6", "#b3e5fc", "#b2ebf2", "#c8e6c9", "#fff9c4", "#ffecb3"]
-                    text_colors =  ["#1976d2", "#7b1fa2", "#388e3c", "#f57c00", "#d81b60", "#00796b",
-                                    "#5e35b1", "#0277bd", "#006064", "#558b2f", "#f9a825", "#e65100"]
-                    border_colors= ["#bbdefb", "#ce93d8", "#a5d6a7", "#ffcc02", "#f8bbd0", "#b2dfdb",
-                                    "#d1c4e9", "#b3e5fc", "#b2ebf2", "#c8e6c9", "#fff9c4", "#ffecb3"]
+                    text_colors =  ["#1976d2", "#7b1fa2", "#388e3c", "#f57c00", "#d81b60", "#00796b"]
+                    border_colors= ["#bbdefb", "#ce93d8", "#a5d6a7", "#ffcc02", "#f8bbd0", "#b2dfdb"]
                     bg_color = badge_colors[i % len(badge_colors)]
                     text_color = text_colors[i % len(text_colors)]
                     border_color = border_colors[i % len(border_colors)]
                     classes_html += f'<span class="badge" style="background-color: {bg_color}; color: {text_color}; border: 1px solid {border_color}; margin: 0.2rem;">{cls}</span>'
                 
                 st.markdown(f'''<p style="line-height: 2;">{classes_html}</p></div>''', unsafe_allow_html=True)
+            else:
+                st.markdown("<p><em>Class legend not available.</em></p>", unsafe_allow_html=True)
+
+            # Display Number of Agricultural Classes
+            num_agri_classes_str = str(init_data.get("Num_Agri_Classes", "N/A")).strip()
+            num_agri_classes = pd.to_numeric(num_agri_classes_str, errors='coerce')
+            if pd.notna(num_agri_classes) and num_agri_classes_str.lower() not in ["n/a", "none", "not available"]:
+                st.markdown(f"<p style='margin-top: 0.5rem;'><strong>Number of Agricultural Classes:</strong> {num_agri_classes:.0f}</p>", unsafe_allow_html=True)
+            else:
+                st.markdown("<p style='margin-top: 0.5rem;'><strong>Number of Agricultural Classes:</strong> Not specified</p>", unsafe_allow_html=True)
+            
+            # Display Agricultural Class Legend (if available)
+            # This assumes a field like 'Agricultural_Class_Legend' might exist in init_data (from json_interpreter)
+            agri_class_legend_json_str = init_data.get('Agricultural_Class_Legend', '[]')
+            try:
+                agri_class_legend_list = json.loads(agri_class_legend_json_str) if isinstance(agri_class_legend_json_str, str) else agri_class_legend_json_str
+                if not isinstance(agri_class_legend_list, list):
+                    agri_class_legend_list = [] # Ensure it's a list
+            except (json.JSONDecodeError, TypeError):
+                agri_class_legend_list = []
+
+            if agri_class_legend_list:
+                st.markdown('''<div class="info-section" style="margin-top: 1rem;">
+                                <div class="info-title">🌾 Agricultural Classes (Legend)</div>''', unsafe_allow_html=True)
+                agri_classes_html = ""
+                for i, cls in enumerate(agri_class_legend_list):
+                    badge_colors = ["#e8f5e8", "#fff3e0", "#e3f2fd", "#f3e5f5", "#fce4ec", "#e0f2f1"] # Different color set for agri
+                    text_colors =  ["#388e3c", "#f57c00", "#1976d2", "#7b1fa2", "#d81b60", "#00796b"]
+                    border_colors= ["#a5d6a7", "#ffcc02", "#bbdefb", "#ce93d8", "#f8bbd0", "#b2dfdb"]
+                    bg_color = badge_colors[i % len(badge_colors)]
+                    text_color = text_colors[i % len(text_colors)]
+                    border_color = border_colors[i % len(border_colors)]
+                    agri_classes_html += f'<span class="badge" style="background-color: {bg_color}; color: {text_color}; border: 1px solid {border_color}; margin: 0.2rem;">{cls}</span>'
+                st.markdown(f'''<p style="line-height: 2;">{agri_classes_html}</p></div>''', unsafe_allow_html=True)
+            elif pd.notna(num_agri_classes) and num_agri_classes > 0:
+                 st.markdown("<p><em>Agricultural class legend not specified.</em></p>", unsafe_allow_html=True)
 
         # New Technical Specifications Section (from df_interpreted)
         # This section focuses on data from df_interpreted (init_data)
