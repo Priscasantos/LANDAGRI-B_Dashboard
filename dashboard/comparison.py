@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 # import plotly.express as px # This line can be removed if px is not directly used in this file
 import sys
+import json # Added json import
 from pathlib import Path
 from typing import Type, Union
 
@@ -33,7 +34,17 @@ try:
         plot_global_accuracy_comparison,
         plot_temporal_evolution_frequency,
         plot_class_diversity_focus,
-        plot_classification_methodology
+        plot_classification_methodology,
+        # New resolution chart imports
+        plot_resolution_vs_launch_year,
+        plot_initiatives_by_resolution_category,
+        plot_resolution_coverage_heatmap,
+        plot_resolution_by_sensor_family,
+        plot_resolution_slopegraph,
+        # Distribution charts for new tabs
+        plot_distribuicao_classes,
+        plot_distribuicao_metodologias,
+        plot_acuracia_por_metodologia
     )
     st.success("SUCCESS: Plotting functions imported from scripts.plotting.generate_graphics!")
     plotting_functions_loaded = True
@@ -59,9 +70,35 @@ except ImportError as e_graphics_detail:
     def plot_class_diversity_focus(_filtered_df): # Added placeholder
         st.warning("Placeholder: plot_class_diversity_focus not loaded due to import error.")
         return go.Figure().add_annotation(text="plot_class_diversity_focus not available", showarrow=False)
-    def plot_classification_methodology(_filtered_df, chart_type='pie'): # Added placeholder
+    def plot_classification_methodology(filtered_df, chart_type='pie'): # Corrected placeholder
         st.warning("Placeholder: plot_classification_methodology not loaded due to import error.")
         return go.Figure().add_annotation(text="plot_classification_methodology not available", showarrow=False)
+    # Placeholders for new resolution charts if main import fails
+    def plot_resolution_vs_launch_year(filtered_df):
+        st.warning("Placeholder: plot_resolution_vs_launch_year not loaded.")
+        return go.Figure().add_annotation(text="plot_resolution_vs_launch_year not available", showarrow=False)
+    def plot_initiatives_by_resolution_category(filtered_df):
+        st.warning("Placeholder: plot_initiatives_by_resolution_category not loaded.")
+        return go.Figure().add_annotation(text="plot_initiatives_by_resolution_category not available", showarrow=False)
+    def plot_resolution_coverage_heatmap(filtered_df):
+        st.warning("Placeholder: plot_resolution_coverage_heatmap not loaded.")
+        return go.Figure().add_annotation(text="plot_resolution_coverage_heatmap not available", showarrow=False)
+    def plot_resolution_by_sensor_family(filtered_df, sensors_meta):
+        st.warning("Placeholder: plot_resolution_by_sensor_family not loaded.")
+        return go.Figure().add_annotation(text="plot_resolution_by_sensor_family not available", showarrow=False)
+    def plot_resolution_slopegraph(filtered_df, sensors_meta):
+        st.warning("Placeholder: plot_resolution_slopegraph not loaded.")
+        return go.Figure().add_annotation(text="plot_resolution_slopegraph not available", showarrow=False)
+    # Placeholders for distribution charts for new tabs
+    def plot_distribuicao_classes(filtered_df):
+        st.warning("Placeholder: plot_distribuicao_classes not loaded.")
+        return go.Figure().add_annotation(text="plot_distribuicao_classes not available", showarrow=False)
+    def plot_distribuicao_metodologias(method_counts):
+        st.warning("Placeholder: plot_distribuicao_metodologias not loaded.")
+        return go.Figure().add_annotation(text="plot_distribuicao_metodologias not available", showarrow=False)
+    def plot_acuracia_por_metodologia(filtered_df):
+        st.warning("Placeholder: plot_acuracia_por_metodologia not loaded.")
+        return go.Figure().add_annotation(text="plot_acuracia_por_metodologia not available", showarrow=False)
 
 # --- End of plotting function import attempt ---
 
@@ -239,13 +276,44 @@ def run():
     st.markdown("---")
     st.markdown("### 📊 Comparison Charts")
 
-    tab_spatial, tab_accuracy, tab_temporal, tab_diversity, tab_methodology = st.tabs([
+    tab_spatial, tab_accuracy, tab_temporal, tab_diversity, tab_methodology_dist, tab_resolution_analysis, tab_class_details, tab_methodology_details = st.tabs([
         "Spatial Resolution", 
         "Global Accuracy", 
         "Temporal Evolution", 
         "Class Diversity", 
-        "Methodology Distribution"
+        "Overall Methodology Dist.", # Renamed for clarity from just "Methodology Distribution"
+        "Resolution Analysis",
+        "Class Details",
+        "Methodology Deep Dive"  # New Tab for Methodology charts
     ])
+
+    # Renaming the original methodology tab variable for clarity
+    # The original tab_methodology is now tab_methodology_dist
+    with tab_methodology_dist:
+        st.markdown("#### Overall Classification Methodology Distribution")
+        st.write("This chart shows the distribution of different classification methodologies used across ALL selected initiatives.")
+        
+        methodology_chart_type = st.radio(
+            "Select Methodology Chart Type:", 
+            ('Pie Chart', 'Bar Chart'), 
+            key='methodology_chart_type_comparison_tab' # Unique key for radio in tab
+        )
+        chart_type_param = 'pie' if methodology_chart_type == 'Pie Chart' else 'bar'
+        
+        if not filtered_df.empty:
+            try:
+                # This was plot_classification_methodology, which is a general distribution chart
+                # For this tab, we use the specific plot_distribuicao_metodologias if it's meant for overall distribution
+                # or ensure plot_classification_methodology is correctly handling the filtered_df for an overall view.
+                # Assuming plot_classification_methodology is the correct one for this pre-existing tab.
+                methodology_fig = plot_classification_methodology(filtered_df, chart_type=chart_type_param)
+                st.plotly_chart(methodology_fig, use_container_width=True, key="overall_methodology_chart_comp")
+            except Exception as e:
+                st.error(f"❌ Error generating overall classification methodology chart: {e}")
+        elif not plotting_functions_loaded:
+            st.warning("Overall classification methodology chart cannot be loaded because plotting functions failed to import.")
+        else:
+            st.info("No data to display for overall methodology distribution based on current filters.")
 
     with tab_spatial:
         st.markdown("#### Spatial Resolution Overview")
@@ -303,27 +371,159 @@ def run():
         else:
             st.info("No data to display based on current filters.")
 
-    with tab_methodology:
-        st.markdown("#### Classification Methodology Distribution")
-        st.write("This chart shows the distribution of different classification methodologies used across the selected initiatives.")
-        
-        methodology_chart_type = st.radio(
-            "Select Methodology Chart Type:", 
-            ('Pie Chart', 'Bar Chart'), 
-            key='methodology_chart_type_comparison_tab' # Unique key for radio in tab
-        )
-        chart_type_param = 'pie' if methodology_chart_type == 'Pie Chart' else 'bar'
-        
-        if not filtered_df.empty:
-            try:
-                methodology_fig = plot_classification_methodology(filtered_df, chart_type=chart_type_param)
-                st.plotly_chart(methodology_fig, use_container_width=True, key="methodology_chart_comp")
-            except Exception as e:
-                st.error(f"❌ Error generating classification methodology chart: {e}")
-        elif not plotting_functions_loaded:
-            st.warning("Classification methodology chart cannot be loaded because plotting functions failed to import.")
+    with tab_resolution_analysis: # Content for the new tab
+        st.markdown("#### In-depth Resolution Analysis")
+        st.write("This section provides a deeper dive into spatial resolution characteristics, including its evolution, distribution by sensor, and relationship with other factors.")
+
+        if not plotting_functions_loaded:
+            st.warning("Resolution analysis charts cannot be loaded because essential plotting functions failed to import.")
+        elif filtered_df.empty:
+            st.info("No data to display for resolution analysis based on current filters.")
         else:
-            st.info("No data to display based on current filters.")
+            # Load sensor metadata (once per session or if not already loaded)
+            sensors_data_path = current_dir / "data" / "sensors_metadata.jsonc"
+            if 'sensors_meta' not in st.session_state:
+                try:
+                    with open(sensors_data_path, 'r', encoding='utf-8') as f:
+                        # Attempt to parse JSONC by removing comments first
+                        content = f.read()
+                        # Basic comment removal: lines starting with // and block comments /* ... */
+                        import re
+                        content_no_comments = re.sub(r"//.*", "", content) # Remove single line comments
+                        content_no_comments = re.sub(r"/\*.*?\*/", "", content_no_comments, flags=re.DOTALL) # Remove block comments
+                        st.session_state.sensors_meta = json.loads(content_no_comments)
+                    st.success("Sensor metadata loaded successfully.")
+                except Exception as e_sensor_load:
+                    st.error(f"❌ Error loading or parsing sensor metadata from {sensors_data_path}: {e_sensor_load}")
+                    st.session_state.sensors_meta = {} # Fallback to empty dict
+            
+            sensors_meta_data = st.session_state.get('sensors_meta', {})
+
+            # Chart 1: Resolution vs. Launch Year
+            st.markdown("##### Resolution vs. Launch Year")
+            st.write("Shows the relationship between spatial resolution and the year each initiative began. Lower resolution values (Y-axis) are generally better. Points are labeled by initiative.")
+            try:
+                fig_res_launch = plot_resolution_vs_launch_year(filtered_df)
+                st.plotly_chart(fig_res_launch, use_container_width=True, key="res_vs_launch_comp")
+            except Exception as e:
+                st.error(f"❌ Error generating 'Resolution vs. Launch Year' chart: {e}")
+
+            # Chart 2: Initiatives by Resolution Category
+            st.markdown("##### Initiatives by Resolution Category")
+            st.write("Summarizes how many initiatives fall into predefined spatial resolution categories, stacked by initiative type.")
+            try:
+                fig_res_cat = plot_initiatives_by_resolution_category(filtered_df)
+                st.plotly_chart(fig_res_cat, use_container_width=True, key="res_by_cat_comp")
+            except Exception as e:
+                st.error(f"❌ Error generating 'Initiatives by Resolution Category' chart: {e}")
+
+            # Chart 3: Resolution vs. Coverage Type Heatmap
+            st.markdown("##### Resolution vs. Coverage Type Heatmap")
+            st.write("Visualizes the number of initiatives at the intersection of spatial resolution categories and geographic coverage types.")
+            try:
+                fig_res_heatmap = plot_resolution_coverage_heatmap(filtered_df)
+                st.plotly_chart(fig_res_heatmap, use_container_width=True, key="res_cov_heatmap_comp")
+            except Exception as e:
+                st.error(f"❌ Error generating 'Resolution vs.Coverage Heatmap' chart: {e}")
+
+            # Charts requiring sensor metadata
+            if not sensors_meta_data:
+                st.warning("Sensor metadata (`sensors_metadata.jsonc`) could not be loaded or is empty. Skipping charts that depend on it (Resolution by Sensor Family, Resolution Slopegraph).")
+            else:
+                # Chart 4: Resolution by Sensor Family
+                st.markdown("##### Resolution Distribution by Sensor Family")
+                st.write("Compares the spread (median, quartiles, outliers) of spatial resolutions for initiatives, grouped by the primary sensor families they utilize.")
+                try:
+                    fig_res_sensor = plot_resolution_by_sensor_family(filtered_df, sensors_meta_data)
+                    st.plotly_chart(fig_res_sensor, use_container_width=True, key="res_by_sensor_comp")
+                except Exception as e:
+                    st.error(f"❌ Error generating 'Resolution by Sensor Family' chart: {e}")
+
+                # Chart 5: Resolution Improvement Slopegraph
+                st.markdown("##### Resolution Improvement Over Time (Slopegraph)")
+                st.write("Shows how individual initiatives have changed their spatial resolution over time, based on changes in their referenced sensors and associated operational years.")
+                try:
+                    fig_res_slope = plot_resolution_slopegraph(filtered_df, sensors_meta_data)
+                    st.plotly_chart(fig_res_slope, use_container_width=True, key="res_slope_comp")
+                except Exception as e:
+                    st.error(f"❌ Error generating 'Resolution Slopegraph' chart: {e}")
+    
+    with tab_class_details: # Content for the new Class Details tab
+        st.markdown("#### Distribution of Number of Classes")
+        st.write("This chart shows the distribution of the total number of classes identified by the selected LULC initiatives, colored by initiative type.")
+        if not plotting_functions_loaded:
+            st.warning("Class details chart cannot be loaded because essential plotting functions failed to import.")
+        elif filtered_df.empty:
+            st.info("No data to display for class details based on current filters.")
+        else:
+            if 'Classes' in filtered_df.columns and 'Type' in filtered_df.columns:
+                try:
+                    # Ensure the 'Classes' column is numeric for the histogram
+                    df_for_chart = filtered_df.copy()
+                    df_for_chart['Classes'] = pd.to_numeric(df_for_chart['Classes'], errors='coerce')
+                    df_for_chart.dropna(subset=['Classes'], inplace=True) # Remove rows where 'Classes' could not be converted
+                    
+                    if not df_for_chart.empty:
+                        fig_dist_classes = plot_distribuicao_classes(df_for_chart)
+                        st.plotly_chart(fig_dist_classes, use_container_width=True, key="dist_classes_comp")
+                    else:
+                        st.info("No valid data for 'Classes' to display the chart after attempting conversion.")
+                except Exception as e:
+                    st.error(f"❌ Error generating 'Distribution of Classes' chart: {e}")
+            else:
+                missing_cols = []
+                if 'Classes' not in filtered_df.columns: missing_cols.append('Classes')
+                if 'Type' not in filtered_df.columns: missing_cols.append('Type') # plot_distribuicao_classes uses 'Type' for color
+                st.warning(f"The column(s) {', '.join(missing_cols)} are not available in the filtered data, so the 'Distribution of Classes' chart cannot be generated.")
+
+    with tab_methodology_details: # Content for the new Methodology Details tab
+        st.markdown("#### Methodology Deep Dive")
+        st.write("Explore the distribution of methodologies and their associated accuracies.")
+
+        if not plotting_functions_loaded:
+            st.warning("Methodology details charts cannot be loaded because essential plotting functions failed to import.")
+        elif filtered_df.empty:
+            st.info("No data to display for methodology details based on current filters.")
+        else:
+            # Chart 1: Distribution of Methodologies (Pie Chart)
+            st.markdown("##### Distribution of Methodologies Used")
+            if 'Methodology' in filtered_df.columns:
+                try:
+                    method_counts = filtered_df['Methodology'].value_counts()
+                    if not method_counts.empty:
+                        fig_dist_meth = plot_distribuicao_metodologias(method_counts)
+                        st.plotly_chart(fig_dist_meth, use_container_width=True, key="dist_meth_comp")
+                    else:
+                        st.info("No methodology data to display the distribution chart.")
+                except Exception as e:
+                    st.error(f"❌ Error generating 'Distribution of Methodologies' chart: {e}")
+            else:
+                st.warning("The 'Methodology' column is not available, so 'Distribution of Methodologies' chart cannot be generated.")
+
+            st.markdown("---") # Separator
+
+            # Chart 2: Accuracy by Methodology (Box Plot)
+            st.markdown("##### Accuracy by Methodology")
+            if 'Methodology' in filtered_df.columns and 'Accuracy (%)' in filtered_df.columns and 'Type' in filtered_df.columns:
+                try:
+                    # Ensure 'Accuracy (%)' is numeric
+                    df_for_acc_chart = filtered_df.copy()
+                    df_for_acc_chart['Accuracy (%)'] = pd.to_numeric(df_for_acc_chart['Accuracy (%)'], errors='coerce')
+                    df_for_acc_chart.dropna(subset=['Accuracy (%)', 'Methodology', 'Type'], inplace=True)
+
+                    if not df_for_acc_chart.empty:
+                        fig_acc_meth = plot_acuracia_por_metodologia(df_for_acc_chart)
+                        st.plotly_chart(fig_acc_meth, use_container_width=True, key="acc_meth_comp")
+                    else:
+                        st.info("No valid data for 'Accuracy (%)' or 'Methodology' to display the accuracy chart after attempting conversion.")
+                except Exception as e:
+                    st.error(f"❌ Error generating 'Accuracy by Methodology' chart: {e}")
+            else:
+                missing_cols_acc = []
+                if 'Methodology' not in filtered_df.columns: missing_cols_acc.append('Methodology')
+                if 'Accuracy (%)' not in filtered_df.columns: missing_cols_acc.append('Accuracy (%)')
+                if 'Type' not in filtered_df.columns: missing_cols_acc.append('Type') # plot_acuracia_por_metodologia uses 'Type' for color
+                st.warning(f"The column(s) {', '.join(missing_cols_acc)} are not available, so 'Accuracy by Methodology' chart cannot be generated.")
 
     st.markdown("---")
     st.markdown("### 📋 Detailed Data Table")

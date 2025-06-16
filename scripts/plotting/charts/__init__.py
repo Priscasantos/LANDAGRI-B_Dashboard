@@ -39,6 +39,13 @@ from .comparison_charts import (
     plot_class_diversity_focus,         # New
     plot_classification_methodology     # New
 )
+from .resolution_comparison_charts import (
+    plot_resolution_vs_launch_year,
+    plot_initiatives_by_resolution_category,
+    plot_resolution_coverage_heatmap,
+    plot_resolution_by_sensor_family,
+    plot_resolution_slopegraph
+)
 
 __all__ = [
     # Timeline charts
@@ -68,5 +75,11 @@ __all__ = [
     'plot_global_accuracy_comparison',    # New
     'plot_temporal_evolution_frequency',  # New
     'plot_class_diversity_focus',         # New
-    'plot_classification_methodology'     # New
+    'plot_classification_methodology',     # New
+    # Resolution Comparison Charts
+    'plot_resolution_vs_launch_year',
+    'plot_initiatives_by_resolution_category',
+    'plot_resolution_coverage_heatmap',
+    'plot_resolution_by_sensor_family',
+    'plot_resolution_slopegraph'
 ]

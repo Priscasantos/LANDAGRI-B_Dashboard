@@ -328,7 +328,7 @@ def interpret_initiatives_metadata(file_path: Optional[Union[str, Path]] = None)
             'Resolution': resolution_data['value'],
             'Resolution_min_val': resolution_data['min_val'],
             'Resolution_max_val': resolution_data['max_val'],
-            'Accuracy': accuracy_data['value'],
+            'Accuracy (%)': accuracy_data['value'], # Changed 'Accuracy' to 'Accuracy (%)'
             'Accuracy_min_val': accuracy_data['min_val'],
             'Accuracy_max_val': accuracy_data['max_val'],
             'Type': _standardize_type(_get_safe_value(details, 'coverage')),
@@ -345,7 +345,7 @@ def interpret_initiatives_metadata(file_path: Optional[Union[str, Path]] = None)
             'Temporal_Coverage_End': _get_safe_value(details, 'temporal_coverage_end_date'),
             'Available_Years_Str': available_years_str,
             'Available_Years_List': json.dumps(available_years_list), # Convert list to JSON string
-            'Number_of_Classes': _get_safe_value(details, 'number_of_classes'),
+            'Classes': _get_safe_value(details, 'number_of_classes'), # Changed 'Number_of_Classes' to 'Classes'
             'Class_Legend': json.dumps(class_legend_data) if isinstance(class_legend_data, list) else class_legend_data, # Convert to JSON string if it's a list
             'Algorithm': _get_safe_value(details, 'algorithm'),
             'Classification_Method': _get_safe_value(details, 'classification_method'),
@@ -355,7 +355,7 @@ def interpret_initiatives_metadata(file_path: Optional[Union[str, Path]] = None)
 
     df = pd.DataFrame(processed_initiatives)    # Post-processing: Ensure essential numeric columns are float, fill NaNs if necessary
     numeric_cols = ['Resolution', 'Resolution_min_val', 'Resolution_max_val', 
-                    'Accuracy', 'Accuracy_min_val', 'Accuracy_max_val', 'Number_of_Classes']
+                    'Accuracy (%)', 'Accuracy_min_val', 'Accuracy_max_val', 'Classes'] # Changed 'Accuracy' to 'Accuracy (%)'
     for col in numeric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0) # Coerce errors to NaN, then fill with 0

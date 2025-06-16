@@ -118,10 +118,10 @@ def run():
         else:
             selected_res = st.slider("Resolution (m)", min_value=0, max_value=1000, value=(0, 1000), disabled=True)
             st.caption("Resolution data not available for current selection.")
-    with col3:        # Ensure df is not empty and 'Accuracy' column exists
-        if not df.empty and "Accuracy" in df.columns and df["Accuracy"].notna().any():
+    with col3:        # Ensure df is not empty and 'Accuracy (%)' column exists
+        if not df.empty and "Accuracy (%)" in df.columns and df["Accuracy (%)"].notna().any(): # Changed "Accuracy" to "Accuracy (%)"
             # Convert to numeric, coercing errors to NaN, then drop NaNs for min/max
-            accuracies_numeric = pd.to_numeric(df["Accuracy"], errors='coerce').dropna()
+            accuracies_numeric = pd.to_numeric(df["Accuracy (%)"], errors='coerce').dropna() # Changed "Accuracy" to "Accuracy (%)"
             if not accuracies_numeric.empty:
                 min_acc, max_acc = int(accuracies_numeric.min()), int(accuracies_numeric.max())
                 selected_acc = st.slider("Accuracy (%)", min_value=min_acc, max_value=max_acc, value=(min_acc, max_acc))
@@ -143,8 +143,8 @@ def run():
     if "Resolution" in df.columns and selected_res:
         df["Resolution_numeric"] = pd.to_numeric(df["Resolution"], errors='coerce')
         conditions.append(df["Resolution_numeric"].between(selected_res[0], selected_res[1]))
-    if "Accuracy" in df.columns and selected_acc:
-        df["Accuracy_numeric"] = pd.to_numeric(df["Accuracy"], errors='coerce')
+    if "Accuracy (%)" in df.columns and selected_acc: # Changed "Accuracy" to "Accuracy (%)"
+        df["Accuracy_numeric"] = pd.to_numeric(df["Accuracy (%)"], errors='coerce') # Changed "Accuracy" to "Accuracy (%)"
         conditions.append(df["Accuracy_numeric"].between(selected_acc[0], selected_acc[1]))
     if "Methodology" in df.columns and selected_methods:
         conditions.append(df["Methodology"].isin(selected_methods))
@@ -249,8 +249,8 @@ def run():
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        # Calculate mean only on numeric 'Accuracy' data, dropping NaNs
-        avg_accuracy_series = pd.to_numeric(filtered_df["Accuracy"], errors='coerce').dropna()
+        # Calculate mean only on numeric 'Accuracy (%)' data, dropping NaNs
+        avg_accuracy_series = pd.to_numeric(filtered_df["Accuracy (%)"], errors='coerce').dropna() # Changed "Accuracy" to "Accuracy (%)"
         if not avg_accuracy_series.empty:
             avg_accuracy = avg_accuracy_series.mean()
             st.markdown(f'''
