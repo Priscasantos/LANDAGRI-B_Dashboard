@@ -16,7 +16,7 @@ import plotly.graph_objects as go # Ensure go is imported
 import streamlit as st
 from typing import Dict, Any, Optional
 from scripts.utilities.config import get_initiative_color_map
-from scripts.plotting.chart_core import add_display_names_to_df, apply_standard_layout, CHART_CONFIG # Import CHART_CONFIG
+from scripts.plotting.chart_core import add_display_names_to_df, apply_standard_layout
 
 # Renamed from plot_timeline to plot_timeline_chart
 def plot_timeline_chart(metadata: Dict[str, Any], filtered_df: pd.DataFrame, 
@@ -349,13 +349,136 @@ def plot_gaps_bar_chart(gaps_data: pd.DataFrame) -> go.Figure:
         pass
     return fig
 
-def plot_evolution_line_chart(years_df: pd.DataFrame) -> go.Figure:
-    """Generates the Plotly line chart for evolution analysis."""
+def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
+    """
+    Generates the Plotly line chart for evolution analysis showing how data availability
+    evolves over time across all initiatives.
+    
+    Args:
+        temporal_data: DataFrame with temporal data containing 'Anos_Lista' and 'Tipo' columns
+        
+    Returns:
+        go.Figure: Plotly figure showing evolution of data availability
+    """
+    if temporal_data.empty or 'Anos_Lista' not in temporal_data.columns:
+        fig = go.Figure()
+        apply_standard_layout(fig, "Evolution of Data Availability Over Time", "Year", "Number of Active Initiatives")
+        fig.add_annotation(
+            text="No temporal data available for evolution analysis",
+            xref="paper", yref="paper",
+            x=0.5, y=0.5, showarrow=False,
+            font=dict(size=16, color="gray")
+        )
+        return fig
+    
+    # Process data to count initiatives per year
+    all_years = []
+    for _, row in temporal_data.iterrows():
+        if isinstance(row['Anos_Lista'], list):
+            all_years.extend(row['Anos_Lista'])
+    
+    if not all_years:
+        fig = go.Figure()
+        apply_standard_layout(fig, "Evolution of Data Availability Over Time", "Year", "Number of Active Initiatives")
+        fig.add_annotation(
+            text="No year data available for evolution analysis",
+            xref="paper", yref="paper",
+            x=0.5, y=0.5, showarrow=False,
+            font=dict(size=16, color="gray")
+        )
+        return fig
+    
+    # Count initiatives per year
+    year_counts = pd.Series(all_years).value_counts().sort_index()
+    years_df = pd.DataFrame({
+        'Year': year_counts.index,
+        'Number_Initiatives': year_counts.values
+    })
+    
+    # Create the figure
     fig = go.Figure()
-    apply_standard_layout(fig, "Initiative Evolution (Not Implemented)", "Year", "Number of Initiatives")
-    fig.add_annotation(text="plot_evolution_line_chart - Not Implemented", showarrow=False)
-    if years_df.empty: # Basic check
-        pass
+    
+    # Add the main evolution line with area fill
+    fig.add_trace(go.Scatter(
+        x=years_df['Year'],
+        y=years_df['Number_Initiatives'],
+        mode='lines+markers',
+        name='Active Initiatives',
+        line=dict(color='rgba(0, 150, 136, 1)', width=3),
+        marker=dict(
+            size=8, 
+            color='rgba(0, 150, 136, 0.8)',
+            line=dict(width=2, color='rgba(0, 150, 136, 1)')
+        ),
+        fill='tonexty',
+        fillcolor='rgba(0, 150, 136, 0.2)',
+        hovertemplate='<b>Year: %{x}</b><br>Active Initiatives: %{y}<extra></extra>'
+    ))
+      # Add trend markers for key points
+    max_initiatives_year = years_df.loc[years_df['Number_Initiatives'].idxmax()]
+    
+    # Mark peak year
+    fig.add_trace(go.Scatter(
+        x=[max_initiatives_year['Year']],
+        y=[max_initiatives_year['Number_Initiatives']],
+        mode='markers',
+        name='Peak Year',
+        marker=dict(
+            size=12,
+            color='rgba(255, 193, 7, 1)',
+            symbol='star',
+            line=dict(width=2, color='rgba(255, 152, 0, 1)')
+        ),
+        hovertemplate=f'<b>Peak Year: {max_initiatives_year["Year"]}</b><br>Initiatives: {max_initiatives_year["Number_Initiatives"]}<extra></extra>',
+        showlegend=True
+    ))
+    
+    # Apply standard layout with custom modifications
+    apply_standard_layout(fig, "Evolution of Data Availability Over Time", "Year", "Number of Active Initiatives")
+    
+    # Enhanced layout specific to evolution chart
+    fig.update_layout(
+        height=450,
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        xaxis=dict(
+            showgrid=True, 
+            gridcolor='rgba(128,128,128,0.2)',
+            gridwidth=1,
+            tickformat='d',
+            dtick=2,  # Show every 2 years for better readability
+            tickangle=-45 if len(years_df) > 15 else 0  # Rotate labels if many years
+        ),
+        yaxis=dict(
+            showgrid=True, 
+            gridcolor='rgba(128,128,128,0.2)',
+            gridwidth=1,
+            tickformat='d',
+            zeroline=True,
+            zerolinecolor='rgba(128,128,128,0.4)',
+            zerolinewidth=1
+        ),
+        hovermode='x unified'
+    )
+    
+    # Add annotations for context
+    avg_initiatives = years_df['Number_Initiatives'].mean()
+    fig.add_hline(
+        y=avg_initiatives,
+        line_dash="dash",
+        line_color="rgba(128,128,128,0.6)",
+        annotation_text=f"Average: {avg_initiatives:.1f}",
+        annotation_position="bottom right"
+    )
+    
     return fig
 
 def plot_evolution_heatmap_chart(temporal_data_for_evolution: pd.DataFrame) -> go.Figure:

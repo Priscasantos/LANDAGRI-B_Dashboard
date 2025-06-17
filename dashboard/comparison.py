@@ -44,7 +44,8 @@ try:
         # Distribution charts for new tabs
         plot_distribuicao_classes,
         plot_distribuicao_metodologias,
-        plot_acuracia_por_metodologia
+        plot_acuracia_por_metodologia,
+        plot_normalized_performance_heatmap # Added import for the new heatmap
     )
     st.success("SUCCESS: Plotting functions imported from scripts.plotting.generate_graphics!")
     plotting_functions_loaded = True
@@ -99,6 +100,9 @@ except ImportError as e_graphics_detail:
     def plot_acuracia_por_metodologia(filtered_df):
         st.warning("Placeholder: plot_acuracia_por_metodologia not loaded.")
         return go.Figure().add_annotation(text="plot_acuracia_por_metodologia not available", showarrow=False)
+    def plot_normalized_performance_heatmap(filtered_df): # Added placeholder for the new heatmap
+        st.warning("Placeholder: plot_normalized_performance_heatmap not loaded due to import error.")
+        return go.Figure().add_annotation(text="plot_normalized_performance_heatmap not available", showarrow=False)
 
 # --- End of plotting function import attempt ---
 
@@ -276,16 +280,18 @@ def run():
     st.markdown("---")
     st.markdown("### 📊 Comparison Charts")
 
-    tab_spatial, tab_accuracy, tab_temporal, tab_diversity, tab_methodology_dist, tab_resolution_analysis, tab_class_details, tab_methodology_details = st.tabs([
+    tab_titles = [
         "Spatial Resolution", 
         "Global Accuracy", 
         "Temporal Evolution", 
         "Class Diversity", 
-        "Overall Methodology Dist.", # Renamed for clarity from just "Methodology Distribution"
+        "Overall Methodology Dist.",
         "Resolution Analysis",
         "Class Details",
-        "Methodology Deep Dive"  # New Tab for Methodology charts
-    ])
+        "Methodology Deep Dive",
+        "Normalized Performance"  # New Tab for Normalized Performance Heatmap
+    ]
+    tab_spatial, tab_accuracy, tab_temporal, tab_diversity, tab_methodology_dist, tab_resolution_analysis, tab_class_details, tab_methodology_details, tab_normalized_performance = st.tabs(tab_titles)
 
     # Renaming the original methodology tab variable for clarity
     # The original tab_methodology is now tab_methodology_dist
@@ -524,6 +530,20 @@ def run():
                 if 'Accuracy (%)' not in filtered_df.columns: missing_cols_acc.append('Accuracy (%)')
                 if 'Type' not in filtered_df.columns: missing_cols_acc.append('Type') # plot_acuracia_por_metodologia uses 'Type' for color
                 st.warning(f"The column(s) {', '.join(missing_cols_acc)} are not available, so 'Accuracy by Methodology' chart cannot be generated.")
+
+    with tab_normalized_performance: # Content for the new Normalized Performance Heatmap tab
+        st.markdown("#### Normalized Performance Heatmap")
+        st.write("This heatmap displays a normalized view of various performance metrics across all selected initiatives. Values are scaled to highlight relative performance within each metric.")
+        if not plotting_functions_loaded:
+            st.warning("Normalized Performance Heatmap cannot be loaded because essential plotting functions failed to import.")
+        elif filtered_df.empty:
+            st.info("No data to display for the Normalized Performance Heatmap based on current filters.")
+        else:
+            try:
+                fig_normalized_heatmap = plot_normalized_performance_heatmap(filtered_df)
+                st.plotly_chart(fig_normalized_heatmap, use_container_width=True, key="normalized_perf_heatmap_comp")
+            except Exception as e:
+                st.error(f"❌ Error generating Normalized Performance Heatmap: {e}")
 
     st.markdown("---")
     st.markdown("### 📋 Detailed Data Table")

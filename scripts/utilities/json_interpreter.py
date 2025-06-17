@@ -386,6 +386,85 @@ def interpret_initiatives_metadata(file_path: Optional[Union[str, Path]] = None)
 
     return df
 
+def interpret_combined_conab_metadata(
+    main_file_path: Optional[Union[str, Path]] = None, 
+    conab_file_path: Optional[Union[str, Path]] = None
+) -> pd.DataFrame:
+    """
+    Reads both initiatives_metadata.jsonc and conab_detailed_initiative.jsonc, 
+    combines them, and returns a unified Pandas DataFrame.
+    
+    Args:
+        main_file_path: Path to main initiatives metadata file
+        conab_file_path: Path to CONAB detailed initiative file
+        
+    Returns:
+        Combined DataFrame with all initiatives
+    """
+    # Set default paths
+    if main_file_path is None:
+        main_file_path = Path(__file__).resolve().parent.parent.parent / "data" / "initiatives_metadata.jsonc"
+    else:
+        main_file_path = Path(main_file_path)
+        
+    if conab_file_path is None:
+        conab_file_path = Path(__file__).resolve().parent.parent.parent / "data" / "conab_detailed_initiative.jsonc"
+    else:
+        conab_file_path = Path(conab_file_path)
+    
+    # Load main initiatives data
+    main_df = interpret_initiatives_metadata(main_file_path)
+    
+    # Load CONAB data
+    conab_df = interpret_initiatives_metadata(conab_file_path)
+    
+    # Combine the DataFrames
+    if not main_df.empty and not conab_df.empty:
+        combined_df = pd.concat([main_df, conab_df], ignore_index=True)
+        print(f"Combined {len(main_df)} main initiatives with {len(conab_df)} CONAB initiatives")
+        return combined_df
+    elif not main_df.empty:
+        print("Only main initiatives loaded (CONAB file not found or empty)")
+        return main_df
+    elif not conab_df.empty:
+        print("Only CONAB initiatives loaded (main file not found or empty)")
+        return conab_df
+    else:
+        print("No initiatives loaded from either file")
+        return pd.DataFrame()
+
+def get_conab_crop_availability(conab_file_path: Optional[Union[str, Path]] = None) -> Dict[str, Any]:
+    """
+    Extracts detailed crop availability data from CONAB initiative metadata.
+    
+    Args:
+        conab_file_path: Path to CONAB detailed initiative file
+        
+    Returns:
+        Dictionary with detailed crop coverage information
+    """
+    if conab_file_path is None:
+        conab_file_path = Path(__file__).resolve().parent.parent.parent / "data" / "conab_detailed_initiative.jsonc"
+    else:
+        conab_file_path = Path(conab_file_path)
+    
+    raw_data = _load_jsonc_file(conab_file_path)
+    
+    if not raw_data:
+        return {}
+    
+    # Extract CONAB initiative data
+    conab_initiative = raw_data.get("CONAB Crop Monitoring Initiative", {})
+    detailed_crop_coverage = conab_initiative.get("detailed_crop_coverage", {})
+    
+    return {
+        "crop_coverage": detailed_crop_coverage,
+        "regional_coverage": conab_initiative.get("regional_coverage", []),
+        "data_products": conab_initiative.get("data_products", []),
+        "available_years": conab_initiative.get("available_years", []),
+        "temporal_coverage_notes": conab_initiative.get("temporal_coverage_notes", {})
+    }
+
 if __name__ == '__main__':
     # Example usage:
     # Ensure the path to initiatives_metadata.jsonc is correct relative to where you run this.

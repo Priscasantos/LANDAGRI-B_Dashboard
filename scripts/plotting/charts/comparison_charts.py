@@ -15,6 +15,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from typing import Dict, Any
+
+from scipy.__config__ import show
 from scripts.plotting.chart_core import get_display_name, apply_standard_layout
 from scripts.plotting.universal_cache import smart_cache_data
 
@@ -472,6 +474,219 @@ def plot_comparison_matrix(filtered_df: pd.DataFrame) -> go.Figure:
         yaxis=dict(type='category')
     )
     
+    return fig
+
+
+@smart_cache_data(ttl=300)
+def plot_normalized_performance_heatmap(filtered_df: pd.DataFrame) -> go.Figure:
+    """Create a normalized performance heatmap for specific metrics with customizable display names."""
+    if filtered_df is None or filtered_df.empty:
+        fig = go.Figure()
+        fig.update_layout(title="Normalized Performance Heatmap (Insufficient data)")
+        return fig
+
+    # Define available metrics by checking what columns exist in the DataFrame
+    available_metrics = {}
+    print(filtered_df.columns)  # Debugging line to check available columns
+    # Priority order for resolution columns
+    if 'Resolution (m)' in filtered_df.columns:
+        available_metrics['Resolution (m)'] = 'Resolution (m)'
+    elif 'Resolution_max_val' in filtered_df.columns:
+        available_metrics['Resolution_max_val'] = 'Resolution (m)'
+    elif 'Resolution_min_val' in filtered_df.columns:
+        available_metrics['Resolution_min_val'] = 'Min Resolution (m)'
+    
+    # Priority order for accuracy columns
+    if 'Accuracy (%)' in filtered_df.columns:
+        available_metrics['Accuracy (%)'] = 'Accuracy (%)'
+    elif 'Accuracy_max_val' in filtered_df.columns:
+        available_metrics['Accuracy_max_val'] = 'Accuracy (%)'
+    elif 'Accuracy_min_val' in filtered_df.columns:
+        available_metrics['Accuracy_min_val'] = 'Min Accuracy (%)'
+    
+    # Priority order for classes columns
+    if 'Number_of_Classes' in filtered_df.columns:
+        available_metrics['Number_of_Classes'] = 'Total of Classes (qnt)'
+    elif 'Classes' in filtered_df.columns:
+        available_metrics['Classes'] = 'Total of Classes (qnt)'
+
+    # Agricultural classes
+    if 'Num_Agri_Classes_numeric' in filtered_df.columns:
+        available_metrics['Num_Agri_Classes_numeric'] = 'Agricultural Classes (qnt)'
+
+    if not available_metrics:
+        fig = go.Figure()
+        fig.update_layout(title="Normalized Performance Heatmap (Required metric columns not found)")
+        return fig
+
+    internal_metric_names = list(available_metrics.keys())
+    display_metric_names = list(available_metrics.values())    # Create a subset with numeric data and add display names
+    print(display_metric_names)  # Debugging line to check metric names
+    print(internal_metric_names)  # Debugging line to check internal metric names
+    # Ensure 'Name' or another identifier is present for get_display_name
+    cols_for_plot_df = internal_metric_names
+    if 'Name' in filtered_df.columns: # Primary identifier
+        cols_for_plot_df = ['Name'] + internal_metric_names
+    elif 'Acronym' in filtered_df.columns: # Fallback
+        cols_for_plot_df = ['Acronym'] + internal_metric_names
+    elif 'Source' in filtered_df.columns: # Further fallback
+        cols_for_plot_df = ['Source'] + internal_metric_names
+    
+    plot_df = filtered_df[cols_for_plot_df].copy()
+    
+    # Convert metric columns to numeric, coercing errors. This is important before dropna and fillna.
+    for col in internal_metric_names:
+        plot_df[col] = pd.to_numeric(plot_df[col], errors='coerce')
+
+    plot_df = plot_df.dropna(subset=internal_metric_names, how='all') 
+
+    if plot_df.empty:
+        fig = go.Figure()
+        fig.update_layout(title="Normalized Performance Heatmap (No valid data after filtering for specified metrics)")
+        return fig
+    
+    # Add display names using the imported get_display_name function
+    # Apply to the original filtered_df rows corresponding to plot_df indices
+    temp_display_name_df = filtered_df.loc[plot_df.index].copy()
+    temp_display_name_df['Display_Name'] = temp_display_name_df.apply(get_display_name, axis=1)
+    plot_df['Display_Name'] = temp_display_name_df['Display_Name']
+    
+    # Normalize the data for better visualization
+    from sklearn.preprocessing import MinMaxScaler
+    scaler = MinMaxScaler()
+    
+    # Fill NaN values with column means before scaling for internal_metric_names only
+    numeric_df_for_scaling = plot_df[internal_metric_names].fillna(plot_df[internal_metric_names].mean())
+    
+    if numeric_df_for_scaling.empty or numeric_df_for_scaling.isnull().all().all():
+        fig = go.Figure()
+        fig.update_layout(title="Normalized Performance Heatmap (No numeric data to scale for specified metrics)")
+        return fig
+        
+    normalized_data = scaler.fit_transform(numeric_df_for_scaling)
+    
+    # Custom normalization with specific rules for each metric
+    normalized_data = []
+    
+    for col in internal_metric_names:
+        col_values = numeric_df_for_scaling[col]
+        
+        if col_values.isna().all():
+            # If all values are NaN, assign neutral score (0.5)
+            normalized_col = [0.5] * len(col_values)
+        else:
+            min_val = col_values.min()
+            max_val = col_values.max()
+            
+            if min_val == max_val:
+                # If all values are the same, assign neutral score (0.5)
+                normalized_col = [0.5] * len(col_values)
+            else:
+                # Apply specific normalization rules based on metric type
+                if any(resolution_term in col.lower() for resolution_term in ['resolution']):
+                    # For Resolution: LOWER values are BETTER (inverted scale)
+                    # Best = 10m (high score), Worst = 100m+ (low score)
+                    normalized_col = [(max_val - val) / (max_val - min_val) for val in col_values]
+                    
+                elif any(accuracy_term in col.lower() for accuracy_term in ['accuracy']):
+                    # For Accuracy: HIGHER values are BETTER (normal scale)
+                    # Best = 100% (high score), Worst = low % (low score)
+                    normalized_col = [(val - min_val) / (max_val - min_val) for val in col_values]
+                    
+                elif any(class_term in col.lower() for class_term in ['class', 'agri']):
+                    # For Classes/Agricultural Classes: HIGHER values are BETTER (normal scale)
+                    # More classes = better coverage (high score)
+                    normalized_col = [(val - min_val) / (max_val - min_val) for val in col_values]
+                    
+                else:
+                    # Default normalization (higher is better)
+                    normalized_col = [(val - min_val) / (max_val - min_val) for val in col_values]
+        
+        normalized_data.append(normalized_col)
+    
+    # Transpose to get the correct shape for the heatmap (initiatives x metrics)
+    normalized_data = list(map(list, zip(*normalized_data)))
+    
+    # Create heatmap with custom colorscale
+    fig = go.Figure(data=go.Heatmap(
+        z=normalized_data,
+        x=display_metric_names,
+        y=plot_df['Display_Name'].values,
+        colorscale='RdYlGn',
+        hoverongaps=False,
+        showscale=True,
+        colorbar=dict(
+            title=dict(text="<b>Performance Score</b><br><br><br><br><br><br><br><br><br><br>", side="top"),  # Position the title to the top
+            tickvals=[0, 0.25, 0.5, 0.75, 1.0],
+            ticktext=['<b>Poor</b>', '<b>Below Average</b>', '<b>Average</b>', '<b>Good</b>', '<b>Excellent</b>'],
+            len=0.75,  # Adjust the length of the color bar
+            thickness=15,  # Adjust the thickness of the color bar
+            xanchor="left",
+            x=1.02,  # Adjust the position of the color bar
+        ),
+        # Customdata for hoverinfo: show original values
+        customdata=plot_df[internal_metric_names].values,
+        hovertemplate="<b>Initiative:</b> %{y}<br>" +
+                      "<b>Metric:</b> %{x}<br>" +
+                      "<b>Original Value:</b> <b>%{customdata:.2f}</b><br>" +
+                      "<b>Performance Score:</b> <b>%{z:.2f}</b><br>" +
+                      "<b>Rating:</b> <b>%{z|.0%}</b><extra></extra>",
+        zmin=0,
+        zmax=1
+    ))
+    
+    apply_standard_layout(fig, "", "Metrics", "Initiative")
+    
+    # Increase height based on number of initiatives
+    num_initiatives = len(plot_df['Display_Name'].unique())
+    chart_height = max(600, num_initiatives * 30)
+
+    
+    # Increase height: base height + per initiative, ensure a minimum reasonable height
+    num_initiatives = len(plot_df['Display_Name'].unique())
+    chart_height = max(600, num_initiatives * 30) # Increased base height and per-initiative height
+
+    fig.update_layout(
+        height=chart_height, 
+        xaxis=dict(tickangle=45), 
+        yaxis=dict(type='category', autorange='reversed'), # Reversed to match typical heatmap/table views
+        margin=dict(l=150) # Add left margin if initiative names are long
+    )
+    
+    fig.update_layout(
+        height=chart_height, 
+        xaxis=dict(tickangle=0,
+                   color='black',
+                   title_font=dict(size=20),
+                   tickfont=dict(color='black', size=20),
+                   showline=False,
+                   tickcolor='white',
+        ), 
+        yaxis=dict(type='category', 
+                   autorange='reversed',
+                   color='black',
+                   title_font=dict(size=20),
+                   tickfont=dict(color='black', size=20),
+                   showline=False,
+                   tickcolor='white',
+        ),
+        margin=dict(l=150),
+        font=dict(size=16),  # Font size global para todo o gráfico
+    # Add annotation explaining the color scale
+        # annotations=[
+        #     dict(
+        #         text= "<b>Color Scale Legend<br>" +
+        #              "Resolution: Dark Red (Poor) → (Excellent)<br>" +
+        #              "Accuracy, Total Classes and & Agriculture Classes: Light Blue (Poor) → Dark Red (Excellent)</b><br>",
+        #         showarrow=False,
+        #         xref="paper", yref="paper",
+        #         x=0.5, y=-0.15,
+        #         xanchor='center', yanchor='top',
+        #         font=dict(size=10, color="gray")
+        #     )
+        # ]
+    )
+
     return fig
 
 

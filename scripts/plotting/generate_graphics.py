@@ -32,7 +32,8 @@ from scripts.plotting.charts.comparison_charts import (
     plot_temporal_evolution_frequency,  # New
     plot_class_diversity_focus,         # New
     plot_classification_methodology,     # New
-    plot_classes_frequency_boxplot      # Added missing import here
+    plot_classes_frequency_boxplot,      # Added missing import here
+    plot_normalized_performance_heatmap # Added import for the new heatmap
 )
 from scripts.plotting.charts.resolution_comparison_charts import (
     plot_resolution_vs_launch_year,
@@ -68,6 +69,7 @@ __all__ = [
     'plot_class_diversity_focus',         # New
     'plot_classification_methodology',    # New
     'plot_classes_frequency_boxplot',      # Added to __all__
+    'plot_normalized_performance_heatmap', # Added to __all__
     # Resolution Comparison Charts
     'plot_resolution_vs_launch_year',
     'plot_initiatives_by_resolution_category',
