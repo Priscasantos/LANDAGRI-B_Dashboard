@@ -481,13 +481,259 @@ def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
     
     return fig
 
-def plot_evolution_heatmap_chart(temporal_data_for_evolution: pd.DataFrame) -> go.Figure:
-    """Generates the Plotly heatmap for evolution analysis."""
+def plot_evolution_heatmap_chart(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Figure:
+    """
+    Generates an area chart showing the evolution of spatial resolution in LULC initiatives over time.
+    Uses three resolution categories: Coarse (≥100m), Medium (30-99m), and High (<30m).
+    
+    Args:
+        metadata: Initiative metadata containing spatial resolution and available years
+        filtered_df: Filtered DataFrame with initiative data
+        
+    Returns:
+        go.Figure: Plotly figure showing stacked area chart of resolution evolution
+    """
+    if not metadata or filtered_df is None or filtered_df.empty:
+        fig = go.Figure()
+        apply_standard_layout(fig, "Evolution of Spatial Resolution in LULC (1985-2024)", "Year", "Initiatives")
+        fig.add_annotation(
+            text="No data available for resolution evolution analysis",
+            xref="paper", yref="paper",
+            x=0.5, y=0.5, showarrow=False,
+            font=dict(size=16, color="gray")
+        )
+        return fig
+    
+    # Process metadata to extract resolution and years data
+    resolution_data = []
+    
+    for initiative_name, meta_info in metadata.items():
+        if not isinstance(meta_info, dict):
+            continue
+            
+        # Get available years
+        years_key = 'available_years' if 'available_years' in meta_info else 'anos_disponiveis'
+        if years_key not in meta_info or not meta_info[years_key]:
+            continue
+            
+        years = meta_info[years_key]
+        if not isinstance(years, list):
+            continue
+            
+        # Get spatial resolution
+        spatial_res = meta_info.get('spatial_resolution')
+        if spatial_res is None:
+            continue
+            
+        # Parse resolution to get a single representative value
+        resolution_value = _parse_resolution_for_categorization(spatial_res)
+        if resolution_value is None:
+            continue
+            
+        # Categorize resolution
+        if resolution_value >= 100:
+            category = "Coarse (≥100m)"
+        elif resolution_value >= 30:
+            category = "Medium (30-99m)"
+        else:
+            category = "High (<30m)"
+            
+        # Add data for each year
+        for year in years:
+            if isinstance(year, (int, float)) and 1985 <= year <= 2024:
+                resolution_data.append({
+                    'initiative': initiative_name,
+                    'year': int(year),
+                    'resolution_value': resolution_value,
+                    'category': category
+                })
+    
+    if not resolution_data:
+        fig = go.Figure()
+        apply_standard_layout(fig, "Evolution of Spatial Resolution in LULC (1985-2024)", "Year", "Initiatives")
+        fig.add_annotation(
+            text="No resolution data available for the selected initiatives",
+            xref="paper", yref="paper",
+            x=0.5, y=0.5, showarrow=False,
+            font=dict(size=16, color="gray")
+        )
+        return fig
+    
+    # Create DataFrame and aggregate by year and category
+    df_resolution = pd.DataFrame(resolution_data)
+    
+    # Count initiatives by year and category
+    yearly_counts = df_resolution.groupby(['year', 'category']).size().reset_index(name='count')
+    
+    # Pivot to get categories as columns
+    pivot_df = yearly_counts.pivot(index='year', columns='category', values='count').fillna(0)
+    
+    # Ensure we have all years from 1985 to 2024
+    all_years = list(range(1985, 2025))
+    pivot_df = pivot_df.reindex(all_years, fill_value=0)
+    
+    # Define category order and colors
+    category_order = ["High (<30m)", "Medium (30-99m)", "Coarse (≥100m)"]
+    colors = {
+        "High (<30m)": "#006d4e",      # Dark teal/green for high resolution
+        "Medium (30-99m)": "#f39800",   # Orange for medium resolution  
+        "Coarse (≥100m)": "#c62d42"    # Red for coarse resolution
+    }
+    
+    # Ensure all categories exist in the DataFrame
+    for category in category_order:
+        if category not in pivot_df.columns:
+            pivot_df[category] = 0
+    
+    # Create the figure
     fig = go.Figure()
-    apply_standard_layout(fig, "Evolution Heatmap (Not Implemented)", "Year", "Initiative Type")
-    fig.add_annotation(text="plot_evolution_heatmap_chart - Not Implemented", showarrow=False)
-    if temporal_data_for_evolution.empty: # Basic check
-        pass
+    
+    # Add stacked area traces
+    for i, category in enumerate(category_order):
+        if category in pivot_df.columns:
+            fig.add_trace(go.Scatter(
+                x=pivot_df.index,
+                y=pivot_df[category],
+                mode='lines',
+                name=category,
+                fill='tonexty' if i > 0 else 'tozeroy',
+                fillcolor=colors[category],
+                line=dict(color=colors[category], width=2),
+                hovertemplate=f'<b>{category}</b><br>Year: %{{x}}<br>Initiatives: %{{y}}<extra></extra>',
+                stackgroup='one'  # This creates the stacked area effect
+            ))    # Add milestone annotations for key years
+    milestones = {
+        2000: "Milestone 2000",
+        2010: "Milestone 2010", 
+        2020: "Milestone 2020"
+    }
+    
+    for year, label in milestones.items():
+        if year in pivot_df.index:
+            fig.add_vline(
+                x=year,
+                line_dash="dash",
+                line_color="rgba(128,128,128,0.6)",
+                line_width=1,
+                annotation_text=label,
+                annotation_position="top",
+                annotation_font_size=10,
+                annotation_font_color="rgba(139,69,19,0.8)"
+            )
+    
+    # Apply standard layout
+    apply_standard_layout(fig, "Evolution of Spatial Resolution in LULC (1985-2024)", "Year", "Initiatives")
+    
+    # Customize layout for area chart
+    fig.update_layout(
+        height=500,
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1,
+            bgcolor="rgba(255,255,255,0.8)",
+            bordercolor="rgba(0,0,0,0.2)",
+            borderwidth=1
+        ),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        xaxis=dict(
+            range=[1985, 2024],
+            showgrid=True,
+            gridcolor='rgba(128,128,128,0.2)',
+            gridwidth=1,
+            tickformat='d',
+            dtick=5,  # Show every 5 years
+            tickangle=0,
+            tickfont=dict(size=12)
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridcolor='rgba(128,128,128,0.2)',
+            gridwidth=1,
+            tickformat='d',
+            zeroline=True,
+            zerolinecolor='rgba(128,128,128,0.4)',
+            zerolinewidth=1,
+            title_font=dict(size=14)
+        ),
+        hovermode='x unified'
+    )
+    
+    # Add subtitle with resolution categories explanation
+    fig.add_annotation(
+        text="High: <30m | Medium: 30-99m | Coarse: ≥100m",
+        xref="paper", yref="paper",
+        x=0.5, y=-0.12,
+        showarrow=False,
+        font=dict(size=12, color="gray"),
+        align="center"
+    )
+    
     return fig
+
+
+def _parse_resolution_for_categorization(spatial_res: Any) -> Optional[float]:
+    """
+    Helper function to parse spatial resolution for categorization.
+    Returns a single representative resolution value in meters.
+    """
+    if spatial_res is None:
+        return None
+        
+    # Handle direct numeric values
+    if isinstance(spatial_res, (int, float)):
+        return float(spatial_res)
+    
+    # Handle string values
+    if isinstance(spatial_res, str):
+        # Extract numeric value from string like "30m", "100", etc.
+        import re
+        res_str = re.sub(r'[^\d.]', '', spatial_res)
+        if res_str:
+            return float(res_str)
+        return None
+    
+    # Handle list of values or objects
+    if isinstance(spatial_res, list):
+        values = []
+        
+        # Look for 'current' resolution first
+        for item in spatial_res:
+            if isinstance(item, dict) and item.get('current', False):
+                val = item.get('resolution')
+                if val is not None:
+                    if isinstance(val, (int, float)):
+                        return float(val)
+                    elif isinstance(val, str):
+                        import re
+                        res_str = re.sub(r'[^\d.]', '', val)
+                        if res_str:
+                            return float(res_str)
+        
+        # If no 'current' found, collect all values
+        for item in spatial_res:
+            if isinstance(item, dict):
+                val = item.get('resolution')
+            else:
+                val = item
+                
+            if val is not None:
+                if isinstance(val, (int, float)):
+                    values.append(float(val))
+                elif isinstance(val, str):
+                    import re
+                    res_str = re.sub(r'[^\d.]', '', val)
+                    if res_str:
+                        values.append(float(res_str))
+        
+        # Return the minimum resolution (highest detail) if multiple values
+        if values:
+            return min(values)
+    
+    return None
 
 

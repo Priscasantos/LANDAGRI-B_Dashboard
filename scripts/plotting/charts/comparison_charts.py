@@ -487,7 +487,7 @@ def plot_normalized_performance_heatmap(filtered_df: pd.DataFrame) -> go.Figure:
 
     # Define available metrics by checking what columns exist in the DataFrame
     available_metrics = {}
-    print(filtered_df.columns)  # Debugging line to check available columns
+
     # Priority order for resolution columns
     if 'Resolution (m)' in filtered_df.columns:
         available_metrics['Resolution (m)'] = 'Resolution (m)'
@@ -521,8 +521,7 @@ def plot_normalized_performance_heatmap(filtered_df: pd.DataFrame) -> go.Figure:
 
     internal_metric_names = list(available_metrics.keys())
     display_metric_names = list(available_metrics.values())    # Create a subset with numeric data and add display names
-    print(display_metric_names)  # Debugging line to check metric names
-    print(internal_metric_names)  # Debugging line to check internal metric names
+
     # Ensure 'Name' or another identifier is present for get_display_name
     cols_for_plot_df = internal_metric_names
     if 'Name' in filtered_df.columns: # Primary identifier

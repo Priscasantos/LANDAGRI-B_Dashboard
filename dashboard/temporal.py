@@ -18,7 +18,6 @@ try:
         prepare_temporal_display_data
     )
     from scripts.plotting.charts.temporal_charts import (
-        timeline_with_controls, 
         plot_timeline_chart, 
         plot_coverage_heatmap_chart, 
         plot_gaps_bar_chart, 
@@ -225,13 +224,6 @@ def show_timeline_chart(df_for_analysis, raw_initiatives_metadata):
             st.metric("Total Years Available", total_anos_disponiveis)
         else:
             st.metric("Total Years Available", "N/A")
-    
-    st.markdown("---")
-    st.markdown("#### Interactive Timeline Controls")
-    try:
-        timeline_with_controls(raw_initiatives_metadata, temporal_df)
-    except Exception as e:
-        st.warning(f"Interactive controls not available: {e}")
 
 def create_basic_timeline_chart(metadata, df_for_analysis):
     """Create a basic timeline chart as fallback"""
@@ -285,18 +277,40 @@ def show_coverage_heatmap(temporal_data):
     """Heatmap of initiative availability by type and year using display names"""
     st.subheader("🔥 Initiative Availability Heatmap (by Type and Year)")
     
-    fig_heatmap = plot_coverage_heatmap_chart(temporal_data)
-    if fig_heatmap is None:
-        # Fallback: create basic heatmap
-        fig_heatmap = create_basic_coverage_heatmap(temporal_data)
+    # Create heatmap with consistent dimensions
+    fig_heatmap = None
+    if CHARTS_AVAILABLE and 'plot_coverage_heatmap_chart' in globals():
+        fig_heatmap = plot_coverage_heatmap_chart(temporal_data)
     
     if fig_heatmap is None:
-        st.info("No data to display for the coverage heatmap.")
-        return
-        
-    st.plotly_chart(fig_heatmap, use_container_width=True, key="coverage_heatmap_tab4_chart")
+        # Enhanced fallback: create comprehensive coverage heatmap
+        fig_heatmap = create_comprehensive_coverage_heatmap(temporal_data)
+    
     if fig_heatmap:
+        st.plotly_chart(fig_heatmap, use_container_width=True, key="coverage_heatmap_tab4_chart")
         setup_download_form(fig_heatmap, default_filename="heatmap_type_year", key_prefix="heatmap_tab4")
+    else:
+        st.info("No data to display for the coverage heatmap.")
+        
+    # Add summary statistics
+    if not temporal_data.empty:
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            total_types = temporal_data['Tipo'].nunique() if 'Tipo' in temporal_data.columns else 0
+            st.metric("Initiative Types", total_types)
+        with col2:
+            if 'Anos_Lista' in temporal_data.columns:
+                all_years = []
+                for _, row in temporal_data.iterrows():
+                    if isinstance(row['Anos_Lista'], list):
+                        all_years.extend(row['Anos_Lista'])
+                year_span = f"{min(all_years)}-{max(all_years)}" if all_years else "N/A"
+                st.metric("Year Range", year_span)
+            else:
+                st.metric("Year Range", "N/A")
+        with col3:
+            total_data_points = sum(len(anos) for anos in temporal_data['Anos_Lista'] if isinstance(anos, list)) if 'Anos_Lista' in temporal_data.columns else 0
+            st.metric("Total Data Points", total_data_points)
 
 def create_basic_coverage_heatmap(temporal_data):
     """Create basic coverage heatmap as fallback"""
@@ -348,6 +362,83 @@ def create_basic_coverage_heatmap(temporal_data):
         st.error(f"Error creating coverage heatmap: {e}")
         return None
 
+def create_comprehensive_coverage_heatmap(temporal_data):
+    """Create comprehensive coverage heatmap with standardized dimensions"""
+    try:
+        if temporal_data.empty or 'Anos_Lista' not in temporal_data.columns or 'Tipo' not in temporal_data.columns:
+            return None
+        
+        # Create heatmap data
+        heatmap_data = []
+        for _, row in temporal_data.iterrows():
+            if isinstance(row['Anos_Lista'], list):
+                initiative_type = row['Tipo'] if pd.notna(row['Tipo']) else "Uncategorized"
+                for year in row['Anos_Lista']:
+                    if isinstance(year, (int, float)):
+                        heatmap_data.append({
+                            'Type': initiative_type,
+                            'Year': int(year),
+                            'Available': 1
+                        })
+        
+        if not heatmap_data:
+            return None
+        
+        heatmap_df = pd.DataFrame(heatmap_data)
+        
+        # Create pivot table
+        pivot_df = heatmap_df.pivot_table(
+            values='Available',
+            index='Type',
+            columns='Year',
+            aggfunc='sum',
+            fill_value=0
+        )
+        
+        # Ensure reasonable year range (last 20 years)
+        current_year = 2024
+        start_year = max(pivot_df.columns.min(), current_year - 20) if len(pivot_df.columns) > 0 else current_year - 10
+        year_range = range(int(start_year), current_year + 1)
+        pivot_df = pivot_df.reindex(columns=year_range, fill_value=0)
+        
+        # Create heatmap
+        fig = go.Figure(data=go.Heatmap(
+            z=pivot_df.values,
+            x=pivot_df.columns,
+            y=pivot_df.index,
+            colorscale='Viridis',
+            hoverongaps=False,
+            hovertemplate='<b>Type: %{y}</b><br>Year: %{x}<br>Active Initiatives: %{z}<extra></extra>',
+            colorbar=dict(
+                title="Active<br>Initiatives",
+                titleside="right"
+            )
+        ))
+        
+        fig.update_layout(
+            title='Initiative Availability by Type and Year',
+            xaxis_title='Year',
+            yaxis_title='Initiative Type',
+            height=500,  # Standardized height
+            plot_bgcolor='rgba(0,0,0,0)',
+            xaxis=dict(
+                tickmode='linear',
+                tick0=start_year,
+                dtick=2,  # Show every 2 years
+                showgrid=True,
+                gridcolor='rgba(128,128,128,0.2)'
+            ),
+            yaxis=dict(
+                showgrid=True,
+                gridcolor='rgba(128,128,128,0.2)'
+            )
+        )
+        
+        return fig
+    except Exception as e:
+        st.error(f"Error creating comprehensive coverage heatmap: {e}")
+        return None
+
 def show_gaps_analysis(temporal_data):
     """Temporal gaps analysis using display names"""
     st.subheader("⚠️ Temporal Gaps Analysis")
@@ -368,27 +459,31 @@ def show_gaps_analysis(temporal_data):
     
     st.markdown("This section highlights initiatives with missing years in their time series.")
     
-    col1, col2 = st.columns([3,2])
-    with col1:
+    # Create gaps chart with consistent dimensions
+    fig_gaps = None
+    if CHARTS_AVAILABLE and 'plot_gaps_bar_chart' in globals():
         fig_gaps = plot_gaps_bar_chart(temporal_data)
-        if fig_gaps is None:
-            # Fallback: create basic gaps chart
-            fig_gaps = create_basic_gaps_chart(gaps_data)
-        
-        if fig_gaps:
-            st.plotly_chart(fig_gaps, use_container_width=True, key="gaps_chart")
-            setup_download_form(fig_gaps, default_filename="temporal_gaps", key_prefix="gaps_tab2")
-        else:
-            st.info("Could not generate gaps analysis chart.")
     
-    with col2:
-        st.markdown("#### Gap Statistics")
-        avg_gap = gaps_data['Anos_Faltando'].mean()
-        max_gap = gaps_data['Anos_Faltando'].max()
+    if fig_gaps is None:
+        # Enhanced fallback: create comprehensive gaps chart
+        fig_gaps = create_comprehensive_gaps_chart(gaps_data)
+    
+    if fig_gaps:
+        st.plotly_chart(fig_gaps, use_container_width=True, key="gaps_chart")
+        setup_download_form(fig_gaps, default_filename="temporal_gaps", key_prefix="gaps_tab2")
+    else:
+        st.info("Could not generate gaps analysis chart.")
+    
+    # Gap Statistics in columns
+    col1, col2, col3 = st.columns(3)
+    with col1:
         initiatives_with_gaps = len(gaps_data)
-        
         st.metric("Initiatives with Gaps", initiatives_with_gaps)
+    with col2:
+        avg_gap = gaps_data['Anos_Faltando'].mean()
         st.metric("Average Missing Years", f"{avg_gap:.1f}")
+    with col3:
+        max_gap = gaps_data['Anos_Faltando'].max()
         st.metric("Maximum Missing Years", f"{max_gap}")
 
 def create_basic_gaps_chart(gaps_data):
@@ -415,6 +510,67 @@ def create_basic_gaps_chart(gaps_data):
         return fig
     except Exception as e:
         st.error(f"Error creating gaps chart: {e}")
+        return None
+
+def create_comprehensive_gaps_chart(gaps_data):
+    """Create comprehensive gaps chart with standardized dimensions"""
+    try:
+        if gaps_data.empty or 'Display_Name' not in gaps_data.columns:
+            return None
+        
+        # Sort by missing years for better visualization
+        gaps_data_sorted = gaps_data.sort_values('Anos_Faltando', ascending=True)
+        
+        # Create figure with standardized height
+        fig = go.Figure()
+        
+        # Color scale based on severity
+        colors = []
+        for missing in gaps_data_sorted['Anos_Faltando']:
+            if missing <= 2:
+                colors.append('#4CAF50')  # Green for low gaps
+            elif missing <= 5:
+                colors.append('#FF9800')  # Orange for medium gaps
+            else:
+                colors.append('#F44336')  # Red for high gaps
+        
+        fig.add_trace(go.Bar(
+            x=gaps_data_sorted['Display_Name'],
+            y=gaps_data_sorted['Anos_Faltando'],
+            name='Missing Years',
+            marker_color=colors,
+            hovertemplate='<b>%{x}</b><br>Missing Years: %{y}<br>Severity: %{marker.color}<extra></extra>',
+            text=gaps_data_sorted['Anos_Faltando'],
+            textposition='auto'
+        ))
+        
+        # Add severity threshold lines
+        fig.add_hline(y=2, line_dash="dash", line_color="orange", 
+                     annotation_text="Medium Severity", annotation_position="top right")
+        fig.add_hline(y=5, line_dash="dash", line_color="red",
+                     annotation_text="High Severity", annotation_position="top right")
+        
+        fig.update_layout(
+            title='Temporal Gaps Analysis - Missing Years by Initiative',
+            xaxis_title='Initiative',
+            yaxis_title='Number of Missing Years',
+            height=500,  # Standardized height
+            showlegend=False,
+            plot_bgcolor='rgba(0,0,0,0)',
+            xaxis=dict(
+                tickangle=45,
+                showgrid=True, 
+                gridcolor='rgba(128,128,128,0.2)'
+            ),
+            yaxis=dict(
+                showgrid=True, 
+                gridcolor='rgba(128,128,128,0.2)'
+            )
+        )
+        
+        return fig
+    except Exception as e:
+        st.error(f"Error creating comprehensive gaps chart: {e}")
         return None
 
 def show_evolution_analysis(temporal_data):
@@ -446,34 +602,72 @@ def show_evolution_analysis(temporal_data):
         'Number_Initiatives': year_counts.values
     })
     
-    col1, col2 = st.columns(2)
-    with col1:
-        fig_evolution = plot_evolution_line_chart(temporal_data_for_evolution)
-        if fig_evolution is None:
-            # Fallback: create basic evolution chart
-            fig_evolution = create_basic_evolution_chart(years_df)
-        
-        if fig_evolution:
-            st.plotly_chart(fig_evolution, use_container_width=True, key="evolution_chart")
-            setup_download_form(fig_evolution, default_filename="availability_evolution", key_prefix="evolution_tab3")
-        else:
-            st.info("Could not generate evolution chart.")
+    # First chart: Evolution of Data Availability Over Time
+    st.markdown("#### Evolution of Data Availability Over Time")
+    fig_evolution = plot_evolution_line_chart(temporal_data_for_evolution)
+    if fig_evolution is None:
+        # Fallback: create basic evolution chart
+        fig_evolution = create_basic_evolution_chart(years_df)
     
-    with col2:
-        fig_evolution_heatmap = plot_evolution_heatmap_chart(temporal_data_for_evolution)
-        if fig_evolution_heatmap is None:
-            # Show summary statistics instead
-            st.markdown("#### Evolution Statistics")
+    if fig_evolution:
+        st.plotly_chart(fig_evolution, use_container_width=True, key="evolution_chart")
+        setup_download_form(fig_evolution, default_filename="availability_evolution", key_prefix="evolution_tab3")
+    else:
+        st.info("Could not generate evolution chart.")
+    
+    # Second chart: Spatial Resolution Evolution
+    st.markdown("#### Evolution of Spatial Resolution in LULC (1985-2024)")
+    metadata = st.session_state.get('metadata', {})
+    filtered_df = st.session_state.get('df_interpreted', pd.DataFrame())
+    
+    if metadata and not filtered_df.empty:
+        if CHARTS_AVAILABLE and 'plot_evolution_heatmap_chart' in globals():
+            fig_evolution_heatmap = plot_evolution_heatmap_chart(metadata, filtered_df)
+            if fig_evolution_heatmap:
+                st.plotly_chart(fig_evolution_heatmap, use_container_width=True, key="evolution_heatmap_chart")
+                setup_download_form(fig_evolution_heatmap, default_filename="spatial_resolution_evolution", key_prefix="evolution_heatmap_tab3")
+            else:
+                # Show summary statistics instead
+                st.markdown("#### Evolution Statistics")
+                peak_year = years_df.loc[years_df['Number_Initiatives'].idxmax(), 'Year']
+                peak_count = years_df['Number_Initiatives'].max()
+                avg_initiatives = years_df['Number_Initiatives'].mean()
+                
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Peak Year", f"{peak_year}")
+                with col2:
+                    st.metric("Peak Initiatives", f"{peak_count}")
+                with col3:
+                    st.metric("Average per Year", f"{avg_initiatives:.1f}")
+        else:
+            st.info("Spatial resolution evolution chart not available.")
+    else:
+        # Show summary statistics if no metadata available
+        st.markdown("#### Evolution Statistics")
+        if not years_df.empty:
             peak_year = years_df.loc[years_df['Number_Initiatives'].idxmax(), 'Year']
             peak_count = years_df['Number_Initiatives'].max()
             avg_initiatives = years_df['Number_Initiatives'].mean()
             
-            st.metric("Peak Year", f"{peak_year}")
-            st.metric("Peak Initiatives", f"{peak_count}")
-            st.metric("Average per Year", f"{avg_initiatives:.1f}")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Peak Year", f"{peak_year}")
+            with col2:
+                st.metric("Peak Initiatives", f"{peak_count}")
+            with col3:
+                st.metric("Average per Year", f"{avg_initiatives:.1f}")
         else:
-            st.plotly_chart(fig_evolution_heatmap, use_container_width=True, key="evolution_heatmap_chart")
-            setup_download_form(fig_evolution_heatmap, default_filename="evolution_heatmap", key_prefix="evolution_heatmap_tab3")
+            st.info("No data available for statistics.")
+    
+    # Third chart: LULC Initiative Growth & Resolution Combined
+    st.markdown("#### LULC Initiative Growth & Resolution (1985-2024)")
+    fig_combined = create_combined_evolution_chart(metadata, filtered_df, years_df)
+    if fig_combined:
+        st.plotly_chart(fig_combined, use_container_width=True, key="combined_evolution_chart")
+        setup_download_form(fig_combined, default_filename="lulc_initiative_growth_resolution", key_prefix="combined_evolution_tab3")
+    else:
+        st.info("Could not generate combined evolution chart.")
 
 def create_basic_evolution_chart(years_df):
     """Create basic evolution chart as fallback"""
@@ -496,7 +690,7 @@ def create_basic_evolution_chart(years_df):
             title='Evolution of Data Availability Over Time',
             xaxis_title='Year',
             yaxis_title='Number of Active Initiatives',
-            height=450,
+            height=500,  # Standardized height
             showlegend=False,
             plot_bgcolor='rgba(0,0,0,0)',
             xaxis=dict(showgrid=True, gridcolor='rgba(128,128,128,0.2)'),
@@ -507,6 +701,195 @@ def create_basic_evolution_chart(years_df):
     except Exception as e:
         st.error(f"Error creating evolution chart: {e}")
         return None
+
+def create_combined_evolution_chart(metadata, filtered_df, years_df):
+    """Create combined evolution chart showing initiatives count, min/avg resolution over time"""
+    try:
+        import pandas as pd
+        import plotly.graph_objects as go
+        from plotly.subplots import make_subplots
+        
+        if not metadata or filtered_df is None or filtered_df.empty or years_df.empty:
+            return None
+        
+        # Process metadata to extract resolution and years data
+        resolution_data = []
+        
+        for initiative_name, meta_info in metadata.items():
+            if not isinstance(meta_info, dict):
+                continue
+                
+            # Get available years
+            years_key = 'available_years' if 'available_years' in meta_info else 'anos_disponiveis'
+            if years_key not in meta_info or not meta_info[years_key]:
+                continue
+                
+            years = meta_info[years_key]
+            if not isinstance(years, list):
+                continue
+                
+            # Get spatial resolution
+            spatial_res = meta_info.get('spatial_resolution')
+            if spatial_res is None:
+                continue
+                
+            # Parse resolution to get a single representative value
+            resolution_value = _parse_resolution_for_combined_chart(spatial_res)
+            if resolution_value is None:
+                continue
+                
+            # Add data for each year
+            for year in years:
+                if isinstance(year, (int, float)) and 1985 <= year <= 2024:
+                    resolution_data.append({
+                        'initiative': initiative_name,
+                        'year': int(year),
+                        'resolution_value': resolution_value
+                    })
+        
+        if not resolution_data:
+            return None
+        
+        # Create DataFrame and aggregate
+        df_resolution = pd.DataFrame(resolution_data)
+        
+        # Calculate yearly statistics
+        yearly_stats = df_resolution.groupby('year').agg({
+            'resolution_value': ['min', 'mean'],
+            'initiative': 'count'
+        }).reset_index()
+        
+        # Flatten column names
+        yearly_stats.columns = ['year', 'min_res', 'avg_res', 'count']
+        
+        # Ensure we have all years from 1985 to 2024
+        all_years = list(range(1985, 2025))
+        full_df = pd.DataFrame({'year': all_years})
+        full_df = full_df.merge(yearly_stats, on='year', how='left')
+        full_df = full_df.merge(years_df.rename(columns={'Year': 'year', 'Number_Initiatives': 'total_initiatives'}), 
+                               on='year', how='left')
+        
+        # Fill missing values
+        full_df['count'] = full_df['count'].fillna(0)
+        full_df['total_initiatives'] = full_df['total_initiatives'].fillna(0)
+        
+        # Create subplots with secondary y-axis
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        
+        # Add initiatives count (line)
+        fig.add_trace(
+            go.Scatter(
+                x=full_df['year'],
+                y=full_df['total_initiatives'],
+                mode='lines+markers',
+                name='Initiatives',
+                line=dict(color='#26828e', width=3),
+                marker=dict(size=6, color='#26828e'),
+                hovertemplate='<b>Year: %{x}</b><br>Initiatives: %{y}<extra></extra>'
+            ),
+            secondary_y=False,
+        )
+        
+        # Add min resolution (line)
+        fig.add_trace(
+            go.Scatter(
+                x=full_df['year'],
+                y=full_df['min_res'],
+                mode='lines',
+                name='Min Res (m)',
+                line=dict(color='#c62d42', width=2),
+                connectgaps=False,
+                hovertemplate='<b>Year: %{x}</b><br>Min Resolution: %{y}m<extra></extra>'
+            ),
+            secondary_y=True,
+        )
+        
+        # Add avg resolution (line with dots)
+        fig.add_trace(
+            go.Scatter(
+                x=full_df['year'],
+                y=full_df['avg_res'],
+                mode='lines+markers',
+                name='Avg Res (m)',
+                line=dict(color='#f39800', width=2, dash='dot'),
+                marker=dict(size=4, color='#f39800'),
+                connectgaps=False,
+                hovertemplate='<b>Year: %{x}</b><br>Avg Resolution: %{y:.1f}m<extra></extra>'
+            ),
+            secondary_y=True,
+        )
+        
+        # Add milestone annotations
+        milestones = {
+            2000: "Milestone 2000",
+            2010: "Milestone 2010", 
+            2020: "Milestone 2020"
+        }
+        
+        for year, label in milestones.items():
+            fig.add_vline(
+                x=year,
+                line_dash="dash",
+                line_color="rgba(128,128,128,0.4)",
+                line_width=1,
+                annotation_text=label,
+                annotation_position="top",
+                annotation_font_size=10,
+                annotation_font_color="rgba(139,69,19,0.6)"
+            )
+        
+        # Set x-axis title
+        fig.update_xaxes(title_text="Year", range=[1985, 2024])
+        
+        # Set y-axes titles
+        fig.update_yaxes(title_text="<b>Initiatives</b>", secondary_y=False)
+        fig.update_yaxes(title_text="<b>Res (m)</b>", secondary_y=True)
+        
+        # Update layout
+        fig.update_layout(
+            title="LULC Initiative Growth & Resolution (1985-2024)",
+            height=500,
+            showlegend=True,
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            ),
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            xaxis=dict(
+                showgrid=True,
+                gridcolor='rgba(128,128,128,0.2)',
+                tickformat='d',
+                dtick=5
+            )
+        )
+        
+        return fig
+        
+    except Exception as e:
+        st.error(f"Error creating combined evolution chart: {e}")
+        return None
+
+def _parse_resolution_for_combined_chart(spatial_res):
+    """Parse spatial resolution for the combined chart"""
+    if spatial_res is None:
+        return None
+    
+    try:
+        if isinstance(spatial_res, (int, float)):
+            return float(spatial_res)
+        elif isinstance(spatial_res, str):            # Extract numeric value from string
+            import re
+            numbers = re.findall(r'\d+(?:\.\d+)?', spatial_res)
+            if numbers:
+                return float(numbers[0])
+    except (ValueError, TypeError, AttributeError):
+        pass
+    
+    return None
 
 # Non-streamlit version for script execution
 def run_non_streamlit(metadata, df_data, output_dir="graphics/temporal"):
