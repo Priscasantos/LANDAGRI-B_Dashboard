@@ -191,9 +191,10 @@ with st.sidebar:
             "Overview", # Option 1
             "Comparative Analysis", # Option 2
             "Temporal Analysis", # Option 3
-            "Detailed Analysis" # Option 4
+            "Detailed Analysis", # Option 4
+            "CONAB Analysis" # Option 5 - New CONAB tab
         ],
-        icons=["globe-americas", "bar-chart-steps", "clock-history", "layers"], # Icons for each option
+        icons=["globe-americas", "bar-chart-steps", "clock-history", "layers", "seedling"], # Icons for each option
         menu_icon="satellite", # Icon for the menu title
         default_index=0, # Default selected option
         styles={
@@ -271,3 +272,10 @@ elif selected == "Temporal Analysis":
 elif selected == "Detailed Analysis":
     from dashboard import detailed 
     detailed.run()
+
+elif selected == "CONAB Analysis":
+    st.markdown("---") # Visual separator
+    st.markdown("### 🌾 CONAB Analysis") # Page title
+    
+    from dashboard import conab
+    conab.run()

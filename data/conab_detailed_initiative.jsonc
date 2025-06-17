@@ -224,7 +224,7 @@
             { "sensor_key": "MODIS_TERRA" },
             { "sensor_key": "MODIS_AQUA" }
         ],
-        "references": ["https://www.conab.gov.br/", "CONAB Technical Reports", "Brazilian Agricultural Monitoring Program"],
+        "references": ["CONAB Technical Reports", "Brazilian Agricultural Monitoring Program"],
         "data_access": "Public (Brazilian Government)",
         "update_schedule": "Monthly reports during growing seasons, annual summaries",
         "quality_control": "Field validation campaigns, cross-validation with state agricultural agencies",
