@@ -604,7 +604,6 @@ def plot_evolution_heatmap_chart(metadata: Dict[str, Any], filtered_df: pd.DataF
             ))    # Add milestone annotations for key years
     milestones = {
         2000: "Milestone 2000",
-        2010: "Milestone 2010", 
         2020: "Milestone 2020"
     }
     

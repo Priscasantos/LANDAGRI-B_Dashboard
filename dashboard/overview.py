@@ -553,13 +553,9 @@ def run():
                         if years_used_list and isinstance(years_used_list, list):
                             years_used_str = _format_year_ranges(years_used_list) # Use the formatter
                             sensor_display_text_for_badge += f" (Years: {years_used_str})"
-                        sensor_badges_html_parts.append(f'<span class="badge badge-sensor">{sensor_display_text_for_badge}</span>')
-
-                        # Prepare content for expander
+                        sensor_badges_html_parts.append(f'<span class="badge badge-sensor">{sensor_display_text_for_badge}</span>')                        # Prepare content for expander
                         expander_title = f"🛰️ {display_name} Details"
-                        expander_content = f"**Sensor Key:** `{current_sensor_key_str}`\\n\\n"
-                        if years_used_list:
-                            expander_content += f"**Years Used in this Initiative:** {_format_year_ranges(years_used_list)}\\n\\n"
+                        expander_content = ""
                         
                         # Add all details from sensors_meta for this sensor
                         if sensor_info_from_meta: # Check if sensor_info_from_meta is not empty
@@ -585,9 +581,9 @@ def run():
                                     else:
                                         expander_content += f"  - **{formatted_spec_key}:** {spec_value}\n"
                             if 'notes' in sensor_info_from_meta:
-                                 expander_content += f"\\n**Notes:** {sensor_info_from_meta['notes']}\\n"
+                                 expander_content += f"\n**Notes:** {sensor_info_from_meta['notes']}\n"
                         else:
-                            expander_content += "_No detailed specifications found in sensor metadata._\\n"
+                            expander_content += "_No detailed specifications found in sensor metadata._\n"
                         
                         sensor_details_expanders.append((expander_title, expander_content))
                     # else: current_sensor_key_str was None or empty, so this sensor_ref_obj is skipped
@@ -778,81 +774,79 @@ def run():
             pass
         
         # The st.markdown("</div>", unsafe_allow_html=True) that closes "detail-card"
-        # should be placed after all content for the selected initiative is done.
+        # should be placed after all content for the selected initiative is done.        # Additional section for class information
+        # Always show classification details if we have class data
+        st.markdown("#### 🏷️ Classification Details")
+        
+        # Display Number of Classes (Total)
+        num_total_classes_str = str(init_data.get("Classes", init_data.get("Number_of_Classes", "N/A"))).strip()
+        num_total_classes = pd.to_numeric(num_total_classes_str, errors='coerce')
+        if pd.notna(num_total_classes) and num_total_classes_str.lower() not in ["n/a", "none", "not available"]:
+            st.markdown(f"<p><strong>Total Number of Classes:</strong> {num_total_classes:.0f}</p>", unsafe_allow_html=True)
+        else:
+            st.markdown("<p><strong>Total Number of Classes:</strong> Not specified</p>", unsafe_allow_html=True)
 
-        # Additional section for class information
-        class_legend_str = str(init_metadata.get('class_legend', '')).strip()
-        if class_legend_str and class_legend_str.lower() not in ["not available", "none", "n/a"]:
-            st.markdown("#### 🏷️ Classification Details")
-            # Display Number of Classes (Total)
-            num_total_classes_str = str(init_data.get("Classes", init_data.get("Number_of_Classes", "N/A"))).strip()
-            num_total_classes = pd.to_numeric(num_total_classes_str, errors='coerce')
-            if pd.notna(num_total_classes) and num_total_classes_str.lower() not in ["n/a", "none", "not available"]:
-                st.markdown(f"<p><strong>Total Number of Classes:</strong> {num_total_classes:.0f}</p>", unsafe_allow_html=True)
-            else:
-                st.markdown("<p><strong>Total Number of Classes:</strong> Not specified</p>", unsafe_allow_html=True)
+        # Display Class Legend (Total Classes)
+        class_legend_json_str = init_data.get('Class_Legend', '[]') # Get from df_interpreted
+        try:
+            class_legend_list = json.loads(class_legend_json_str) if isinstance(class_legend_json_str, str) else class_legend_json_str
+            if not isinstance(class_legend_list, list):
+                class_legend_list = [] # Ensure it's a list
+        except (json.JSONDecodeError, TypeError):
+            class_legend_list = []
 
-            # Display Class Legend (Total Classes)
-            class_legend_json_str = init_data.get('Class_Legend', '[]') # Get from df_interpreted
-            try:
-                class_legend_list = json.loads(class_legend_json_str) if isinstance(class_legend_json_str, str) else class_legend_json_str
-                if not isinstance(class_legend_list, list):
-                    class_legend_list = [] # Ensure it's a list
-            except (json.JSONDecodeError, TypeError):
-                class_legend_list = []
-
-            if class_legend_list:
-                st.markdown('''<div class="info-section" style="margin-top: 1rem;">
-                                <div class="info-title">📋 Land Cover Classes (Legend)</div>''', unsafe_allow_html=True)
-                classes_html = ""
-                for i, cls in enumerate(class_legend_list):
-                    # Cycle through a few distinct colors for badges
-                    badge_colors = ["#e3f2fd", "#f3e5f5", "#e8f5e8", "#fff3e0", "#fce4ec", "#e0f2f1", 
-                                    "#ede7f6", "#b3e5fc", "#b2ebf2", "#c8e6c9", "#fff9c4", "#ffecb3"]
-                    text_colors =  ["#1976d2", "#7b1fa2", "#388e3c", "#f57c00", "#d81b60", "#00796b"]
-                    border_colors= ["#bbdefb", "#ce93d8", "#a5d6a7", "#ffcc02", "#f8bbd0", "#b2dfdb"]
-                    bg_color = badge_colors[i % len(badge_colors)]
-                    text_color = text_colors[i % len(text_colors)]
-                    border_color = border_colors[i % len(border_colors)]
-                    classes_html += f'<span class="badge" style="background-color: {bg_color}; color: {text_color}; border: 1px solid {border_color}; margin: 0.2rem;">{cls}</span>'
-                
-                st.markdown(f'''<p style="line-height: 2;">{classes_html}</p></div>''', unsafe_allow_html=True)
-            else:
-                st.markdown("<p><em>Class legend not available.</em></p>", unsafe_allow_html=True)
-
-            # Display Number of Agricultural Classes
-            num_agri_classes_str = str(init_data.get("Num_Agri_Classes", "N/A")).strip()
-            num_agri_classes = pd.to_numeric(num_agri_classes_str, errors='coerce')
-            if pd.notna(num_agri_classes) and num_agri_classes_str.lower() not in ["n/a", "none", "not available"]:
-                st.markdown(f"<p style='margin-top: 0.5rem;'><strong>Number of Agricultural Classes:</strong> {num_agri_classes:.0f}</p>", unsafe_allow_html=True)
-            else:
-                st.markdown("<p style='margin-top: 0.5rem;'><strong>Number of Agricultural Classes:</strong> Not specified</p>", unsafe_allow_html=True)
+        if class_legend_list:
+            st.markdown('''<div class="info-section" style="margin-top: 1rem;">
+                            <div class="info-title">📋 Land Cover Classes (Legend)</div>''', unsafe_allow_html=True)
+            classes_html = ""
+            for i, cls in enumerate(class_legend_list):
+                # Cycle through a few distinct colors for badges
+                badge_colors = ["#e3f2fd", "#f3e5f5", "#e8f5e8", "#fff3e0", "#fce4ec", "#e0f2f1", 
+                                "#ede7f6", "#b3e5fc", "#b2ebf2", "#c8e6c9", "#fff9c4", "#ffecb3"]
+                text_colors =  ["#1976d2", "#7b1fa2", "#388e3c", "#f57c00", "#d81b60", "#00796b"]
+                border_colors= ["#bbdefb", "#ce93d8", "#a5d6a7", "#ffcc02", "#f8bbd0", "#b2dfdb"]
+                bg_color = badge_colors[i % len(badge_colors)]
+                text_color = text_colors[i % len(text_colors)]
+                border_color = border_colors[i % len(border_colors)]
+                classes_html += f'<span class="badge" style="background-color: {bg_color}; color: {text_color}; border: 1px solid {border_color}; margin: 0.2rem;">{cls}</span>'
             
-            # Display Agricultural Class Legend (if available)
-            # This assumes a field like 'Agricultural_Class_Legend' might exist in init_data (from json_interpreter)
-            agri_class_legend_json_str = init_data.get('Agricultural_Class_Legend', '[]')
-            try:
-                agri_class_legend_list = json.loads(agri_class_legend_json_str) if isinstance(agri_class_legend_json_str, str) else agri_class_legend_json_str
-                if not isinstance(agri_class_legend_list, list):
-                    agri_class_legend_list = [] # Ensure it's a list
-            except (json.JSONDecodeError, TypeError):
-                agri_class_legend_list = []
+            st.markdown(f'''<p style="line-height: 2;">{classes_html}</p></div>''', unsafe_allow_html=True)
+        else:
+            st.markdown("<p><em>Class legend not available.</em></p>", unsafe_allow_html=True)
 
-            if agri_class_legend_list:
-                st.markdown('''<div class="info-section" style="margin-top: 1rem;">
-                                <div class="info-title">🌾 Agricultural Classes (Legend)</div>''', unsafe_allow_html=True)
-                agri_classes_html = ""
-                for i, cls in enumerate(agri_class_legend_list):
-                    badge_colors = ["#e8f5e8", "#fff3e0", "#e3f2fd", "#f3e5f5", "#fce4ec", "#e0f2f1"] # Different color set for agri
-                    text_colors =  ["#388e3c", "#f57c00", "#1976d2", "#7b1fa2", "#d81b60", "#00796b"]
-                    border_colors= ["#a5d6a7", "#ffcc02", "#bbdefb", "#ce93d8", "#f8bbd0", "#b2dfdb"]
-                    bg_color = badge_colors[i % len(badge_colors)]
-                    text_color = text_colors[i % len(text_colors)]
-                    border_color = border_colors[i % len(border_colors)]
-                    agri_classes_html += f'<span class="badge" style="background-color: {bg_color}; color: {text_color}; border: 1px solid {border_color}; margin: 0.2rem;">{cls}</span>'
-                st.markdown(f'''<p style="line-height: 2;">{agri_classes_html}</p></div>''', unsafe_allow_html=True)
-            elif pd.notna(num_agri_classes) and num_agri_classes > 0:
-                 st.markdown("<p><em>Agricultural class legend not specified.</em></p>", unsafe_allow_html=True)
+        # Display Number of Agricultural Classes
+        num_agri_classes_str = str(init_data.get("Num_Agri_Classes", "N/A")).strip()
+        num_agri_classes = pd.to_numeric(num_agri_classes_str, errors='coerce')
+        if pd.notna(num_agri_classes) and num_agri_classes_str.lower() not in ["n/a", "none", "not available"]:
+            st.markdown(f"<p style='margin-top: 0.5rem;'><strong>Number of Agricultural Classes:</strong> {num_agri_classes:.0f}</p>", unsafe_allow_html=True)
+        else:
+            st.markdown("<p style='margin-top: 0.5rem;'><strong>Number of Agricultural Classes:</strong> Not specified</p>", unsafe_allow_html=True)
+        
+        # Display Agricultural Class Legend (if available)
+        # This assumes a field like 'Agricultural_Class_Legend' might exist in init_data (from json_interpreter)
+        agri_class_legend_json_str = init_data.get('Agricultural_Class_Legend', '[]')
+        try:
+            agri_class_legend_list = json.loads(agri_class_legend_json_str) if isinstance(agri_class_legend_json_str, str) else agri_class_legend_json_str
+            if not isinstance(agri_class_legend_list, list):
+                agri_class_legend_list = [] # Ensure it's a list
+        except (json.JSONDecodeError, TypeError):
+            agri_class_legend_list = []
+
+        if agri_class_legend_list:
+            st.markdown('''<div class="info-section" style="margin-top: 1rem;">
+                            <div class="info-title">🌾 Agricultural Classes (Legend)</div>''', unsafe_allow_html=True)
+            agri_classes_html = ""
+            for i, cls in enumerate(agri_class_legend_list):
+                badge_colors = ["#e8f5e8", "#fff3e0", "#e3f2fd", "#f3e5f5", "#fce4ec", "#e0f2f1"] # Different color set for agri
+                text_colors =  ["#388e3c", "#f57c00", "#1976d2", "#7b1fa2", "#d81b60", "#00796b"]
+                border_colors= ["#a5d6a7", "#ffcc02", "#bbdefb", "#ce93d8", "#f8bbd0", "#b2dfdb"]
+                bg_color = badge_colors[i % len(badge_colors)]
+                text_color = text_colors[i % len(text_colors)]
+                border_color = border_colors[i % len(border_colors)]
+                agri_classes_html += f'<span class="badge" style="background-color: {bg_color}; color: {text_color}; border: 1px solid {border_color}; margin: 0.2rem;">{cls}</span>'
+            st.markdown(f'''<p style="line-height: 2;">{agri_classes_html}</p></div>''', unsafe_allow_html=True)
+        elif pd.notna(num_agri_classes) and num_agri_classes > 0:
+             st.markdown("<p><em>Agricultural class legend not specified.</em></p>", unsafe_allow_html=True)
 
         # New Technical Specifications Section (from df_interpreted)
         # This section focuses on data from df_interpreted (init_data)

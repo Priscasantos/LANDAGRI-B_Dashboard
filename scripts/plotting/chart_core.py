@@ -246,8 +246,6 @@ def apply_standard_layout(fig, title: str, xaxis_title: str = "", yaxis_title: s
             )
         )
 
-    # Add more specific styling based on chart_type if needed
-    # e.g., fig.update_layout(legend_orientation='h') for certain charts
 
 
 def get_color_mapping(names_list: list) -> Dict[str, str]:
