@@ -27,18 +27,18 @@
         "detailed_crop_coverage": {
             "Cotton": {
                 "regions": ["GO", "MS"],
-                "first_semester_years": {
+                "first_crop_years": {
                     "GO": ["2018-2019", "2019-2020", "2021-2022", "2022-2023"],
                     "MS": ["2021-2022"]
                 },
-                "second_semester_years": {
+                "second_crop_years": {
                     "GO": [],
                     "MS": []
                 }
             },
             "Irrigated Rice": {
                 "regions": ["TO", "GO", "MS", "PR", "SC", "RS"],
-                "first_semester_years": {
+                "first_crop_years": {
                     "TO": ["2017-2018"],
                     "GO": ["2018-2019"],
                     "MS": ["2018-2019"],
@@ -46,7 +46,7 @@
                     "SC": ["2018-2019"],
                     "RS": ["2019-2020", "2022-2023"]
                 },
-                "second_semester_years": {
+                "second_crop_years": {
                     "TO": [],
                     "GO": [],
                     "MS": [],
@@ -57,12 +57,12 @@
             },
             "Coffee": {
                 "regions": ["GO", "RJ", "SP"],
-                "first_semester_years": {
+                "first_crop_years": {
                     "GO": ["2020-2021"],
                     "RJ": ["2020-2021"],
                     "SP": ["2015-2016", "2016-2017", "2018-2019"]
                 },
-                "second_semester_years": {
+                "second_crop_years": {
                     "GO": [],
                     "RJ": [],
                     "SP": []
@@ -70,13 +70,13 @@
             },
             "Sugar cane": {
                 "regions": ["GO", "MT", "MS", "SP"],
-                "first_semester_years": {
+                "first_crop_years": {
                     "GO": ["2010-2011", "2011-2012"],
                     "MT": ["2012-2013"],
                     "MS": ["2012-2013"],
                     "SP": ["2012-2013"]
                 },
-                "second_semester_years": {
+                "second_crop_years": {
                     "GO": [],
                     "MT": [],
                     "MS": [],
@@ -85,19 +85,19 @@
             },
             "Other winter crops": {
                 "regions": ["SP", "PR", "RS"],
-                "first_semester_years": {
+                "first_crop_years": {
                     "SP": ["2013-2014"],
                     "PR": ["2009-2010", "2010-2011", "2011-2012", "2012-2013"],
                     "RS": ["2000-2015"]
                 },
-                "second_semester_years": {
+                "second_crop_years": {
                     "SP": [],
                     "PR": [],
                     "RS": []
                 }
             },            "Other summer crops": {
                 "regions": ["RO", "PA", "TO", "BA", "MA", "PI", "GO", "DF", "MG", "MT", "MS", "PR", "SP", "SC", "RS"],
-                "first_semester_years": {
+                "first_crop_years": {
                     "RO": ["2011-2012", "2013-2014", "2020-2021"],
                     "PA": ["2011-2012", "2020-2021"],
                     "TO": ["2000-2014", "2019-2020", "2020-2021"],
@@ -114,7 +114,7 @@
                     "SC": ["2003-2004", "2005-2010", "2011-2014", "2020-2021"],
                     "RS": ["2004-2015", "2020-2021"]
                 },
-                "second_semester_years": {
+                "second_crop_years": {
                     "RO": [],
                     "PA": [],
                     "TO": ["2011-2012", "2012-2013", "2013-2014"],
@@ -134,15 +134,15 @@
             },
             "Corn": {
                 "regions": ["PR"],
-                "first_semester_years": {
+                "first_crop_years": {
                     "PR": ["2022-2023"]
                 },
-                "second_semester_years": {
+                "second_crop_years": {
                     "PR": []
                 }
             },            "Soybean": {
                 "regions": ["RO", "TO", "PI", "BA", "MA", "GO", "MT", "MS", "PR", "SC", "RS"],
-                "first_semester_years": {
+                "first_crop_years": {
                     "RO": ["2000-2021"],
                     "TO": ["2021-2022"],
                     "PI": ["2021-2022"],
@@ -155,7 +155,7 @@
                     "SC": ["2022-2023"],
                     "RS": ["2022-2023"]
                 },
-                "second_semester_years": {
+                "second_crop_years": {
                     "RO": [],
                     "TO": [],
                     "PI": [],
@@ -170,11 +170,11 @@
                 }
             },
             "Sugar cane mill": {
-                "regions": ["Brazil"],
-                "first_semester_years": {
+                "regions": ["BR"],
+                "first_crop_years": {
                     "Brazil": ["2020-2021"]
                 },
-                "second_semester_years": {
+                "second_crop_years": {
                     "Brazil": []
                 }
             }

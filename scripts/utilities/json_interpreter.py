@@ -465,6 +465,303 @@ def get_conab_crop_availability(conab_file_path: Optional[Union[str, Path]] = No
         "temporal_coverage_notes": conab_initiative.get("temporal_coverage_notes", {})
     }
 
+def load_mesoregions_dictionary(dictionary_path: Optional[Union[str, Path]] = None) -> Dict[str, Any]:
+    """
+    Loads the mesoregions dictionary JSON file.
+    
+    Args:
+        dictionary_path: Path to the json_dictionary.json file
+        
+    Returns:
+        Dictionary with mesoregions data
+    """
+    if dictionary_path is None:
+        dictionary_path = Path(__file__).resolve().parent.parent.parent / "data" / "json_dictionary.json"
+    else:
+        dictionary_path = Path(dictionary_path)
+    
+    try:
+        with open(dictionary_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Dictionary file not found at {dictionary_path}")
+        return {}
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON from {dictionary_path}: {e}")
+        return {}
+
+def get_mesoregion_by_state(state_code: str, mesoregions_dict: Optional[Dict[str, Any]] = None) -> Optional[str]:
+    """
+    Returns the mesoregion name for a given state code.
+    
+    Args:
+        state_code: Two-letter state code (e.g., 'SP', 'RJ')
+        mesoregions_dict: Optional dictionary with mesoregions data
+        
+    Returns:
+        Mesoregion name or None if not found
+    """
+    if mesoregions_dict is None:
+        mesoregions_dict = load_mesoregions_dictionary()
+    
+    if not mesoregions_dict or 'mesoregions' not in mesoregions_dict:
+        return None
+    
+    state_code_upper = state_code.upper()
+    
+    for mesoregion_name, mesoregion_data in mesoregions_dict['mesoregions'].items():
+        if 'states' in mesoregion_data:
+            for state in mesoregion_data['states']:
+                if isinstance(state, dict) and state.get('sigla', '').upper() == state_code_upper:
+                    return mesoregion_name
+    
+    return None
+
+def get_states_by_mesoregion(mesoregion_name: str, mesoregions_dict: Optional[Dict[str, Any]] = None) -> List[Dict[str, str]]:
+    """
+    Returns list of states for a given mesoregion.
+    
+    Args:
+        mesoregion_name: Name of the mesoregion
+        mesoregions_dict: Optional dictionary with mesoregions data
+        
+    Returns:
+        List of dictionaries with state information
+    """
+    if mesoregions_dict is None:
+        mesoregions_dict = load_mesoregions_dictionary()
+    
+    if not mesoregions_dict or 'mesoregions' not in mesoregions_dict:
+        return []
+    
+    mesoregion_data = mesoregions_dict['mesoregions'].get(mesoregion_name, {})
+    return mesoregion_data.get('states', [])
+
+def enrich_conab_data_with_mesoregions(conab_data: Dict[str, Any], mesoregions_dict: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """
+    Enriches CONAB crop availability data with mesoregion information.
+    
+    Args:
+        conab_data: CONAB crop availability data
+        mesoregions_dict: Optional dictionary with mesoregions data
+        
+    Returns:
+        Enriched CONAB data with mesoregion mappings
+    """
+    if mesoregions_dict is None:
+        mesoregions_dict = load_mesoregions_dictionary()
+    
+    enriched_data = conab_data.copy()
+    
+    if 'crop_coverage' in enriched_data:
+        for crop_name, crop_data in enriched_data['crop_coverage'].items():
+            if 'regions' in crop_data:
+                # Add mesoregion mapping for each state
+                regions_with_mesoregions = []
+                for state_code in crop_data['regions']:
+                    mesoregion = get_mesoregion_by_state(state_code, mesoregions_dict)
+                    mesoregion_info = get_mesoregion_info(mesoregion, mesoregions_dict) if mesoregion else None
+                    
+                    regions_with_mesoregions.append({
+                        'state_code': state_code,
+                        'mesoregion': mesoregion,
+                        'mesoregion_color': mesoregion_info.get('color') if mesoregion_info else None,
+                        'mesoregion_pt': mesoregion_info.get('name_pt') if mesoregion_info else None
+                    })
+                
+                crop_data['regions_with_mesoregions'] = regions_with_mesoregions
+                
+                # Group by mesoregion with enhanced information
+                mesoregion_groups = {}
+                for region_info in regions_with_mesoregions:
+                    mesoregion = region_info['mesoregion']
+                    if mesoregion:
+                        if mesoregion not in mesoregion_groups:
+                            mesoregion_groups[mesoregion] = {
+                                'states': [],
+                                'color': region_info['mesoregion_color'],
+                                'name_pt': region_info['mesoregion_pt']
+                            }
+                        mesoregion_groups[mesoregion]['states'].append(region_info['state_code'])
+                
+                crop_data['mesoregion_groups'] = mesoregion_groups
+    
+    # Add mesoregion mapping for regional_coverage with enhanced information
+    if 'regional_coverage' in enriched_data:
+        regional_coverage_with_mesoregions = []
+        for region_name in enriched_data['regional_coverage']:
+            # Extract state code from region name (e.g., "Rondônia (RO)" -> "RO")
+            state_code_match = re.search(r'\(([A-Z]{2})\)', region_name)
+            if state_code_match:
+                state_code = state_code_match.group(1)
+                mesoregion = get_mesoregion_by_state(state_code, mesoregions_dict)
+                mesoregion_info = get_mesoregion_info(mesoregion, mesoregions_dict) if mesoregion else None
+                
+                regional_coverage_with_mesoregions.append({
+                    'region_name': region_name,
+                    'state_code': state_code,
+                    'mesoregion': mesoregion,
+                    'mesoregion_color': mesoregion_info.get('color') if mesoregion_info else None,
+                    'mesoregion_pt': mesoregion_info.get('name_pt') if mesoregion_info else None
+                })
+            else:
+                regional_coverage_with_mesoregions.append({
+                    'region_name': region_name,
+                    'state_code': None,
+                    'mesoregion': None,
+                    'mesoregion_color': None,
+                    'mesoregion_pt': None
+                })
+        
+        enriched_data['regional_coverage_with_mesoregions'] = regional_coverage_with_mesoregions
+    
+    # Add mesoregions color palette
+    enriched_data['mesoregions_palette'] = get_all_mesoregions_with_colors(mesoregions_dict)
+    
+    return enriched_data
+
+def get_integrated_conab_analysis(
+    conab_file_path: Optional[Union[str, Path]] = None,
+    dictionary_path: Optional[Union[str, Path]] = None
+) -> Dict[str, Any]:
+    """
+    Gets integrated analysis of CONAB data with mesoregion information.
+    
+    Args:
+        conab_file_path: Path to CONAB detailed initiative file
+        dictionary_path: Path to json_dictionary.json file
+        
+    Returns:
+        Dictionary with integrated analysis
+    """
+    # Load both datasets
+    conab_data = get_conab_crop_availability(conab_file_path)
+    mesoregions_dict = load_mesoregions_dictionary(dictionary_path)
+    
+    if not conab_data or not mesoregions_dict:
+        return {}
+    
+    # Enrich CONAB data with mesoregion information
+    enriched_data = enrich_conab_data_with_mesoregions(conab_data, mesoregions_dict)
+    
+    # Create summary analysis
+    analysis = {
+        'enriched_conab_data': enriched_data,
+        'mesoregions_dict': mesoregions_dict,
+        'summary': {
+            'total_crops': len(enriched_data.get('crop_coverage', {})),
+            'total_states_covered': len(set(
+                region['state_code'] for crop_data in enriched_data.get('crop_coverage', {}).values()
+                for region in crop_data.get('regions_with_mesoregions', [])
+                if region['state_code']
+            )),
+            'mesoregions_covered': list(set(
+                region['mesoregion'] for crop_data in enriched_data.get('crop_coverage', {}).values()
+                for region in crop_data.get('regions_with_mesoregions', [])
+                if region['mesoregion']
+            )),
+            'crops_by_mesoregion': {}
+        }
+    }
+      # Analyze crops by mesoregion with enhanced information
+    crops_by_mesoregion = {}
+    for crop_name, crop_data in enriched_data.get('crop_coverage', {}).items():
+        for mesoregion, mesoregion_info in crop_data.get('mesoregion_groups', {}).items():
+            if mesoregion not in crops_by_mesoregion:
+                crops_by_mesoregion[mesoregion] = {
+                    'crops': [],
+                    'color': mesoregion_info.get('color'),
+                    'name_pt': mesoregion_info.get('name_pt'),
+                    'total_states': len(set())
+                }
+            crops_by_mesoregion[mesoregion]['crops'].append({
+                'crop': crop_name,
+                'states': mesoregion_info.get('states', []),                'first_crop_years': crop_data.get('first_crop_years', {}),
+                'second_crop_years': crop_data.get('second_crop_years', {})
+            })
+            
+            # Update total states for this mesoregion
+            all_states = set()
+            for crop_info in crops_by_mesoregion[mesoregion]['crops']:
+                all_states.update(crop_info['states'])
+            crops_by_mesoregion[mesoregion]['total_states'] = len(all_states)
+    
+    analysis['summary']['crops_by_mesoregion'] = crops_by_mesoregion
+    
+    return analysis
+
+def get_mesoregion_info(mesoregion_name: str, mesoregions_dict: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
+    """
+    Returns complete mesoregion information including color and names in both languages.
+    
+    Args:
+        mesoregion_name: Name of the mesoregion (in English or Portuguese)
+        mesoregions_dict: Optional dictionary with mesoregions data
+        
+    Returns:
+        Dictionary with mesoregion information or None if not found
+    """
+    if mesoregions_dict is None:
+        mesoregions_dict = load_mesoregions_dictionary()
+    
+    if not mesoregions_dict or 'mesoregions' not in mesoregions_dict:
+        return None
+    
+    # First try direct match (English names)
+    if mesoregion_name in mesoregions_dict['mesoregions']:
+        data = mesoregions_dict['mesoregions'][mesoregion_name].copy()
+        data['name_en'] = mesoregion_name
+        return data
+    
+    # Try matching Portuguese names
+    for eng_name, mesoregion_data in mesoregions_dict['mesoregions'].items():
+        if mesoregion_data.get('name_pt') == mesoregion_name:
+            data = mesoregion_data.copy()
+            data['name_en'] = eng_name
+            return data
+    
+    return None
+
+def get_mesoregion_color(mesoregion_name: str, mesoregions_dict: Optional[Dict[str, Any]] = None) -> Optional[str]:
+    """
+    Returns the color code for a given mesoregion.
+    
+    Args:
+        mesoregion_name: Name of the mesoregion (in English or Portuguese)
+        mesoregions_dict: Optional dictionary with mesoregions data
+        
+    Returns:
+        Color code (hex) or None if not found
+    """
+    info = get_mesoregion_info(mesoregion_name, mesoregions_dict)
+    return info.get('color') if info else None
+
+def get_all_mesoregions_with_colors(mesoregions_dict: Optional[Dict[str, Any]] = None) -> Dict[str, Dict[str, str]]:
+    """
+    Returns all mesoregions with their colors and names.
+    
+    Args:
+        mesoregions_dict: Optional dictionary with mesoregions data
+        
+    Returns:
+        Dictionary mapping English names to color and Portuguese name info
+    """
+    if mesoregions_dict is None:
+        mesoregions_dict = load_mesoregions_dictionary()
+    
+    if not mesoregions_dict or 'mesoregions' not in mesoregions_dict:
+        return {}
+    
+    result = {}
+    for eng_name, data in mesoregions_dict['mesoregions'].items():
+        result[eng_name] = {
+            'color': data.get('color', '#CCCCCC'),
+            'name_pt': data.get('name_pt', eng_name),
+            'name_en': eng_name
+        }
+    
+    return result
+
 if __name__ == '__main__':
     # Example usage:
     # Ensure the path to initiatives_metadata.jsonc is correct relative to where you run this.
@@ -493,21 +790,3 @@ if __name__ == '__main__':
         for col in key_cols_for_nan_check:
             if col in df_initiatives.columns:
                  print(f"NaNs in {col}: {df_initiatives[col].isnull().sum()}")
-            else:
-                print(f"Column {col} not found for NaN check.")
-
-        # Example: Filter for initiatives with resolution <= 10m
-        # high_res_initiatives = df_initiatives[df_initiatives['Resolution'] <= 10]
-        # print("\nHigh-resolution initiatives (<=10m):")
-        # print(high_res_initiatives[['Display_Name', 'Resolution', 'Accuracy']])
-    else:
-        print("\nNo data processed or an error occurred.")
-
-    # Test with default path (if run from a context where it resolves correctly)
-    # print("\n--- Testing with default path ---")
-    # df_default = interpret_initiatives_metadata()
-    # if not df_default.empty:
-    #     print(df_default[['Display_Name', 'Resolution', 'Accuracy']].head())
-    # else:
-    #     print("Processing with default path failed or returned empty.")
-

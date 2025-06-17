@@ -10,12 +10,13 @@ Author: Dashboard Iniciativas LULC
 Date: 2024
 """
 
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-from typing import Dict, Any
 import json
+from typing import Dict, Any
 from pathlib import Path
 from scripts.plotting.chart_core import apply_standard_layout
 from scripts.utilities.type_safety import safe_bool_conversion, validate_plotly_params
@@ -90,14 +91,13 @@ def plot_conab_spatial_temporal_distribution(conab_data: Dict[str, Any]) -> go.F
     # Prepare data for timeline chart
     timeline_data = []
     all_states = set()
-    
     for crop, crop_info in crop_coverage.items():
         regions = crop_info.get("regions", [])
-        first_semester = crop_info.get("first_semester_years", {})
-        second_semester = crop_info.get("second_semester_years", {})
+        first_crop_years = crop_info.get("first_crop_years", {})
+        second_crop_years = crop_info.get("second_crop_years", {})
         
-        # Process first semester data
-        for state, years in first_semester.items():
+        # Process first safra data
+        for state, years in first_crop_years.items():
             if state in regions:
                 all_states.add(state)
                 for year_range in years:
@@ -112,11 +112,11 @@ def plot_conab_spatial_temporal_distribution(conab_data: Dict[str, Any]) -> go.F
                             'Year': year,
                             'Crop': crop,
                             'Semester': 'First',
-                            'Coverage': 1
-                        })
+                            'Coverage': 1                        
+                            })
         
         # Process second semester data
-        for state, years in second_semester.items():
+        for state, years in second_crop_years.items():
             if state in regions:
                 all_states.add(state)
                 for year_range in years:
@@ -143,14 +143,22 @@ def plot_conab_spatial_temporal_distribution(conab_data: Dict[str, Any]) -> go.F
     crop_types = sorted(df['Crop'].unique())
     colors = px.colors.qualitative.Set3
     crop_colors = {crop: colors[i % len(colors)] for i, crop in enumerate(crop_types)}
+      # Track which crops have already been added to legend
     
-    # Track which crops have already been added to legend
+    # all_states = all_states - {"Brazil"}
+    states_list = sorted(list(all_states), reverse=True)  # Reverse order for top-to-bottom alphabetical
+    # Add Brazil at the end (bottom) of the list
+    states_list.append("Brazil")
+
     legend_added = set()
+
+
     
-    # Add traces for each state, colored by crop type
-    states_list = sorted(list(all_states))
-    
+    # Add traces for each state, colored by crop type (skip Brazil for now)
     for state in states_list:
+        if state == "Brazil":
+            continue  # Skip Brazil, handle it separately
+        
         state_data = df[df['State'] == state]
         if not state_data.empty:
             # Group by crop type for this state
@@ -186,17 +194,85 @@ def plot_conab_spatial_temporal_distribution(conab_data: Dict[str, Any]) -> go.F
                             y=[state, state],
                             mode='lines',
                             line=dict(width=15, color=crop_colors[crop]),
-                            name=crop,
-                            legendgroup=crop,
+                            name=crop,                            legendgroup=crop,
                             showlegend=safe_bool_conversion(show_in_legend),
                             hovertemplate=f"<b>{state}</b><br>Crop: {crop}<br>Period: {start}-{end}<br><extra></extra>"
                         )
                         fig.add_trace(go.Scatter(**trace_params))
-      # Update layout with type-safe parameters
+    
+    # Add Brazil trace at the bottom showing the overall temporal coverage
+    if timeline_data:
+        # Get the overall time range for Brazil
+        all_years = sorted(df['Year'].unique())
+        if all_years:
+            brazil_start = min(all_years)
+            brazil_end = max(all_years)
+              # Add a trace for Brazil spanning the entire period
+            trace_params = validate_plotly_params(
+                x=[brazil_start, brazil_end],
+                y=["Brazil", "Brazil"],
+                mode='lines',
+                line=dict(width=15, color='#808080'),  # Gray color for Brazil
+                name='Sugar cane mill',
+                showlegend=True,
+                hovertemplate=f"<b>Brazil</b><br>Overall Period: {brazil_start}-{brazil_end}<br><extra></extra>"
+            )
+            fig.add_trace(go.Scatter(**trace_params)) 
+
+    # Carregue o dicionário de mesorregiões   
+    # with open(r'd:\Users\prisc\OneDrive\Doutorado_INPE\Tese\DEV\dashboard-iniciativas\data\json_dictionary.json', encoding='utf-8') as f:
+    #     mesoregions_dict = json.load(f)["mesoregions"]
+    
+    # # Crie um mapeamento de sigla do estado para cor
+    # state_color_map = {}
+    # for region in mesoregions_dict.values():
+    #     color = region["color"]
+    #     for state in region["states"]:
+    #         state_color_map[state["sigla"]] = color
+    
+    # # Monte tickvals e ticktext coloridos (inclua o Brazil)
+    # tickvals = []
+    # ticktext = []
+    # for state in states_list:
+    #     if state == "Brazil":
+    #         color = "#808080"  # Cor cinza para o Brazil
+    #     else:
+    #         color = state_color_map.get(state, "#000000")
+    #     tickvals.append(state)
+    #     ticktext.append(f'<span style="color:{color}">{state}</span>')
+    
+    # # Adicione um trace fantasma para o título das mesorregiões
+    # fig.add_trace(
+    #     go.Scatter(
+    #         x=[None], y=[None],
+    #         mode='markers',
+    #         marker=dict(size=0, color='rgba(0,0,0,0)'),
+    #         showlegend=True,
+    #         name="<b>Mesoregion</b>",
+    #         legendgroup="mesoregion_title"
+    #     )
+    # )
+    
+    # # Adicione traces "fantasmas" para a legenda das mesorregiões (não inclua o Brazil)
+    # for region_key, region in mesoregions_dict.items():
+    #     mesoregion_name = region_key
+    #     color = region["color"]
+    #     fig.add_trace(
+    #         go.Scatter(
+    #             x=[None], y=[None],
+    #             mode='markers',
+    #             marker=dict(size=15, color=color),
+    #             legendgroup="mesoregion",
+    #             showlegend=True,
+    #             name=f"  {mesoregion_name}",  # Indentação para mostrar hierarquia
+    #         )
+    #     )
+    
+    # Update layout with type-safe parameters
     layout_params = validate_plotly_params(
-        title="Spatial and Temporal Distribution of CONAB Mapping Initiatives (2000-2023)",
-        xaxis_title="Year",
-        yaxis_title="State/Area",
+        title="<b>Distribuição Espacial e Temporal das Iniciativas de Mapeamento da CONAB</b>",
+        xaxis_title="<b>Ano</b>",
+        yaxis_title="<b>Região</b>",
         height=600,
         showlegend=True,
         legend=dict(
@@ -204,12 +280,40 @@ def plot_conab_spatial_temporal_distribution(conab_data: Dict[str, Any]) -> go.F
             yanchor="top",
             y=1,
             xanchor="left",
-            x=1.02
+            x=1.02,
+            title=dict(text="<b>Crop Type</b>")
+        ),   
+  
+        yaxis=dict(
+            categoryorder='array',
+            categoryarray=states_list,
+            showgrid=False,      # Remove o grid do eixo y
+            gridcolor='#E5ECF6',  # Cor do grid do eixo y
+            ticks='outside',     # Adiciona ticks externos no eixo y
+            ticklen=8,            # Tamanho dos ticks (opcional)
+            tickcolor='black',  # Cor dos ticks do eixo y
+            # tickvals=tickvals,
+            # ticktext=ticktext,
+            tickfont=dict(size=14),  # Ajuste o tamanho se quiser
+            showline=True,      # Remove a linha externa do eixo y
+            linewidth=0,         # Define espessura da linha como 0
+            zeroline=False
+        ),
+        xaxis=dict(
+            dtick =1,  # Define o espaçamento entre os ticks do eixo x
+            showgrid=False,      # Remove o grid do eixo x
+            gridcolor='#E5ECF6',  # Cor do grid do eixo x
+            ticks='outside',     # Adiciona ticks externos no eixo x
+            ticklen=8,            # Tamanho dos ticks (opcional)
+            tickcolor='black', # Cor dos ticks do eixo x
+            showline=True,      # Remove a linha externa do eixo x
+            linewidth=0,         # Define espessura da linha como 0
+            zeroline=False
         )
     )
+    
     fig.update_layout(**layout_params)
-      # Apply standard layout
-    apply_standard_layout(fig, "Spatial and Temporal Distribution of CONAB Mapping Initiatives (2000-2023)", "Year", "State/Area")
+
     
     return fig
 
@@ -226,13 +330,12 @@ def plot_conab_temporal_coverage(conab_data: Dict[str, Any]) -> go.Figure:
     
     # Count states per year
     year_coverage = {}
-    
     for crop, crop_info in crop_coverage.items():
-        first_semester = crop_info.get("first_semester_years", {})
-        second_semester = crop_info.get("second_semester_years", {})
+        first_crop_years = crop_info.get("first_crop_years", {})
+        second_crop_years = crop_info.get("second_crop_years", {})
         
         # Process first semester data
-        for state, years in first_semester.items():
+        for state, years in first_crop_years.items():
             for year_range in years:
                 start_year = int(year_range.split('-')[0])
                 end_year = int(year_range.split('-')[1])
@@ -241,9 +344,8 @@ def plot_conab_temporal_coverage(conab_data: Dict[str, Any]) -> go.Figure:
                     if year not in year_coverage:
                         year_coverage[year] = set()
                     year_coverage[year].add(state)
-        
-        # Process second semester data
-        for state, years in second_semester.items():
+          # Process second semester data
+        for state, years in second_crop_years.items():
             for year_range in years:
                 start_year = int(year_range.split('-')[0])
                 end_year = int(year_range.split('-')[1])
@@ -305,11 +407,10 @@ def plot_conab_spatial_coverage(conab_data: Dict[str, Any]) -> go.Figure:
     
     # Count coverage by state
     state_coverage = {}
-    
     for crop, crop_info in crop_coverage.items():
         regions = crop_info.get("regions", [])
-        first_semester = crop_info.get("first_semester_years", {})
-        second_semester = crop_info.get("second_semester_years", {})
+        first_crop_years = crop_info.get("first_crop_years", {})
+        second_crop_years = crop_info.get("second_crop_years", {})
         
         # Count years of coverage for each state
         for state in regions:
@@ -317,16 +418,15 @@ def plot_conab_spatial_coverage(conab_data: Dict[str, Any]) -> go.Figure:
                 state_coverage[state] = set()
             
             # Add years from first semester
-            if state in first_semester:
-                for year_range in first_semester[state]:
+            if state in first_crop_years:
+                for year_range in first_crop_years[state]:
                     start_year = int(year_range.split('-')[0])
                     end_year = int(year_range.split('-')[1])
                     for year in range(start_year, end_year + 1):
                         state_coverage[state].add(year)
-            
-            # Add years from second semester
-            if state in second_semester:
-                for year_range in second_semester[state]:
+              # Add years from second semester
+            if state in second_crop_years:
+                for year_range in second_crop_years[state]:
                     start_year = int(year_range.split('-')[0])
                     end_year = int(year_range.split('-')[1])
                     for year in range(start_year, end_year + 1):

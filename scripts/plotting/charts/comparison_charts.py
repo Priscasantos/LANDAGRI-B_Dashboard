@@ -16,7 +16,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from typing import Dict, Any
 
-from scipy.__config__ import show
+
 from scripts.plotting.chart_core import get_display_name, apply_standard_layout
 from scripts.plotting.universal_cache import smart_cache_data
 
