@@ -1,0 +1,8 @@
+{
+  "id": "ef3eb9c5-5441-4211-b625-41ea88f64f1d",
+  "title": "Fluxogramas Mermaid e Graphviz",
+  "details": "Discussão sobre fluxogramas para metodologia científica do dashboard LULC:\n\n- Inicialmente sugerido o uso do Mermaid para fluxogramas, com código exemplo e instruções de uso.\n- Identificado que o Mermaid pode apresentar erros de parsing com tags HTML ou caracteres especiais, e que a versão gratuita tem limitações.\n- Sugerido o uso do Python com Graphviz para gerar fluxogramas, com exemplo de código para criar e salvar o diagrama em PNG, usando '\\n' para quebras de linha.\n- Fornecido código ajustado para uso no Mermaid, sem tags HTML e com rótulos simples, para máxima compatibilidade.\n- Orientações sobre como usar e exportar fluxogramas em diferentes ferramentas e formatos.\n\nExemplo de fluxograma Mermaid:\nflowchart TD\n    A[Coleta de Metadados JSONC] --> B[Interpretacao e Limpeza dos Dados]\n    B --> C[Processamento Unificado: Padronizacao, Validacao, Categorizacao]\n    C --> D[Geracao de Estruturas Auxiliares: Matrizes, Analises Temporais]\n    D --> E[Preparacao dos Dados para Visualizacao]\n    E --> F[Renderizacao dos Graficos Interativos: Streamlit + Plotly]\n    F --> G[Interface do Usuario: Navegacao, Filtros e Exploracao]\n    G --> H[Validacao e Relatorios de Qualidade]\n\nExemplo de código Graphviz:\nfrom graphviz import Digraph\n# ... (código conforme resposta anterior)\n\ndot.render('fluxograma_dashboard_lulc', view=True)\n\nDicas sobre compatibilidade, acentuação e exportação também foram registradas.",
+  "category": "mermaid_fluxograma_metodologia",
+  "dateCreated": "2025-07-16T23:56:32.903Z",
+  "dateUpdated": "2025-07-16T23:56:32.903Z"
+}

@@ -39,5 +39,4 @@ setup_dependencies.py
 system_report.json
 
 # Large data files (>100MB)
-data/brazil-vector/*.shp
-data/brazil-vector/BR_Municipios_2023.*
+data/brazil-vector/

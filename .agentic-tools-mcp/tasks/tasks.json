@@ -1,0 +1,227 @@
+{
+  "projects": [
+    {
+      "id": "ec6394ad-5e69-4852-b623-b9c0a6b7639e",
+      "name": "Dashboard LULC - Temporal Charts Module",
+      "description": "Desenvolvimento e refinamento do módulo de gráficos temporais para análise de iniciativas LULC. Este projeto inclui implementação de funções placeholder, otimização de performance, e melhoria da visualização de dados temporais incluindo timeline, heatmaps, gaps analysis e evolution charts.",
+      "createdAt": "2025-06-28T17:26:09.735Z",
+      "updatedAt": "2025-06-28T17:26:09.735Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "d065e1d1-0c12-4659-b4ae-c9e347655c5e",
+      "name": "Implementar plot_coverage_heatmap_chart",
+      "details": "Implementar a função plot_coverage_heatmap_chart() que atualmente está como placeholder. A função deve gerar um heatmap mostrando a disponibilidade de diferentes tipos de iniciativas por ano. Usar como referência as implementações fallback em create_comprehensive_coverage_heatmap() e create_basic_coverage_heatmap().",
+      "projectId": "ec6394ad-5e69-4852-b623-b9c0a6b7639e",
+      "completed": false,
+      "createdAt": "2025-06-28T17:26:17.464Z",
+      "updatedAt": "2025-06-28T17:26:17.464Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "implementation",
+        "heatmap",
+        "visualization",
+        "placeholder"
+      ],
+      "estimatedHours": 4,
+      "level": 0
+    },
+    {
+      "id": "e7bd497b-b75f-4abb-95b0-621e05ac973f",
+      "name": "Implementar plot_gaps_bar_chart",
+      "details": "Implementar a função plot_gaps_bar_chart() que atualmente está como placeholder. A função deve gerar um gráfico de barras para análise de gaps temporais. Usar como referência as implementações fallback em create_comprehensive_gaps_chart() e create_basic_gaps_chart().",
+      "projectId": "ec6394ad-5e69-4852-b623-b9c0a6b7639e",
+      "completed": false,
+      "createdAt": "2025-06-28T17:26:25.268Z",
+      "updatedAt": "2025-06-28T17:26:25.268Z",
+      "dependsOn": [],
+      "priority": 8,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "implementation",
+        "gaps-analysis",
+        "visualization",
+        "placeholder"
+      ],
+      "estimatedHours": 3,
+      "level": 0
+    },
+    {
+      "id": "3de5ab0d-415b-455c-bcdd-fd6ea6066e8b",
+      "name": "Validar plot_evolution_line_chart (COMPLETA)",
+      "details": "A função plot_evolution_line_chart() já está implementada completamente. Revisar o código para verificar se está funcionando corretamente e otimizar performance se necessário. Validar a integração com as funções que a chamam (show_evolution_analysis).",
+      "projectId": "ec6394ad-5e69-4852-b623-b9c0a6b7639e",
+      "completed": false,
+      "createdAt": "2025-06-28T17:26:33.591Z",
+      "updatedAt": "2025-06-28T17:26:33.591Z",
+      "dependsOn": [],
+      "priority": 5,
+      "complexity": 4,
+      "status": "done",
+      "tags": [
+        "validation",
+        "evolution-chart",
+        "completed",
+        "review"
+      ],
+      "estimatedHours": 2,
+      "level": 0
+    },
+    {
+      "id": "991d64ba-edd9-4a2c-8295-420394634c05",
+      "name": "Validar plot_evolution_heatmap_chart (COMPLETA)",
+      "details": "A função plot_evolution_heatmap_chart() já está implementada completamente. Revisar o código para verificar se está funcionando corretamente e otimizar performance se necessário. Validar a integração com as funções que a chamam e a funcionalidade de parsing de resolução espacial.",
+      "projectId": "ec6394ad-5e69-4852-b623-b9c0a6b7639e",
+      "completed": false,
+      "createdAt": "2025-06-28T17:26:40.073Z",
+      "updatedAt": "2025-06-28T17:26:40.073Z",
+      "dependsOn": [],
+      "priority": 5,
+      "complexity": 4,
+      "status": "done",
+      "tags": [
+        "validation",
+        "evolution-heatmap",
+        "completed",
+        "review"
+      ],
+      "estimatedHours": 2,
+      "level": 0
+    },
+    {
+      "id": "5c140857-fe0d-4555-ad7a-985ad53ed577",
+      "name": "Validar plot_timeline_chart (COMPLETA)",
+      "details": "A função plot_timeline_chart() já está implementada completamente. Revisar o código para verificar se está funcionando corretamente e otimizar performance se necessário. Validar a funcionalidade de timeline_with_controls que permite personalização interativa.",
+      "projectId": "ec6394ad-5e69-4852-b623-b9c0a6b7639e",
+      "completed": false,
+      "createdAt": "2025-06-28T17:26:45.937Z",
+      "updatedAt": "2025-06-28T17:26:45.937Z",
+      "dependsOn": [],
+      "priority": 6,
+      "complexity": 4,
+      "status": "done",
+      "tags": [
+        "validation",
+        "timeline",
+        "completed",
+        "review"
+      ],
+      "estimatedHours": 2,
+      "level": 0
+    },
+    {
+      "id": "1dee0754-f22a-4ef4-88a1-9eabcb3a14d8",
+      "name": "Otimização de Performance",
+      "details": "Otimizar a performance do módulo temporal_charts.py implementando cache inteligente, reduzindo redundância de processamento de dados, e melhorando a eficiência das funções de parsing de resolução espacial (_parse_resolution_for_categorization).",
+      "projectId": "ec6394ad-5e69-4852-b623-b9c0a6b7639e",
+      "completed": false,
+      "createdAt": "2025-06-28T17:26:52.550Z",
+      "updatedAt": "2025-06-28T17:26:52.550Z",
+      "dependsOn": [],
+      "priority": 6,
+      "complexity": 7,
+      "status": "pending",
+      "tags": [
+        "optimization",
+        "performance",
+        "cache",
+        "refactoring"
+      ],
+      "estimatedHours": 6,
+      "level": 0
+    },
+    {
+      "id": "07715196-b8bb-4f1b-9d76-3c2d0f8be777",
+      "name": "Melhorar Documentação do Módulo",
+      "details": "Melhorar a documentação das funções em temporal_charts.py, incluindo exemplos de uso, parâmetros detalhados, e comentários sobre lógica complexa. Padronizar docstrings seguindo o formato Google/NumPy style.",
+      "projectId": "ec6394ad-5e69-4852-b623-b9c0a6b7639e",
+      "completed": false,
+      "createdAt": "2025-06-28T17:26:58.876Z",
+      "updatedAt": "2025-06-28T17:26:58.876Z",
+      "dependsOn": [],
+      "priority": 4,
+      "complexity": 5,
+      "status": "pending",
+      "tags": [
+        "documentation",
+        "docstrings",
+        "code-quality"
+      ],
+      "estimatedHours": 3,
+      "level": 0
+    },
+    {
+      "id": "6e0606e0-e109-4095-9fc6-89d98c8b09bc",
+      "name": "Implementar Testes Unitários",
+      "details": "Criar testes unitários para todas as funções do módulo temporal_charts.py, incluindo casos de borda, validação de entrada de dados, e testes de integração com as funções do dashboard temporal.py.",
+      "projectId": "ec6394ad-5e69-4852-b623-b9c0a6b7639e",
+      "completed": false,
+      "createdAt": "2025-06-28T17:27:05.920Z",
+      "updatedAt": "2025-06-28T17:27:05.920Z",
+      "dependsOn": [],
+      "priority": 7,
+      "complexity": 6,
+      "status": "pending",
+      "tags": [
+        "testing",
+        "unit-tests",
+        "quality-assurance"
+      ],
+      "estimatedHours": 8,
+      "level": 0
+    },
+    {
+      "id": "0c98fa53-46bf-4f19-9742-e4341e1df992",
+      "name": "Análise de Estrutura de Dados",
+      "details": "Analisar os dados de entrada esperados pela função plot_coverage_heatmap_chart e definir a estrutura de dados temporal_data necessária. Estudar como as funções fallback processam estes dados (create_comprehensive_coverage_heatmap).",
+      "projectId": "ec6394ad-5e69-4852-b623-b9c0a6b7639e",
+      "parentId": "d065e1d1-0c12-4659-b4ae-c9e347655c5e",
+      "completed": false,
+      "createdAt": "2025-06-28T17:27:13.938Z",
+      "updatedAt": "2025-06-28T17:27:13.938Z",
+      "dependsOn": [],
+      "priority": 9,
+      "complexity": 3,
+      "status": "pending",
+      "tags": [
+        "analysis",
+        "data-structure",
+        "prerequisite"
+      ],
+      "estimatedHours": 1,
+      "level": 1
+    },
+    {
+      "id": "f701715d-c4ef-40df-9887-c3004badfc25",
+      "name": "Implementar Lógica Core do Heatmap",
+      "details": "Implementar a lógica core da função plot_coverage_heatmap_chart, incluindo processamento de dados temporais, criação da pivot table, e geração do heatmap usando plotly.graph_objects. Aplicar apply_standard_layout para consistência visual.",
+      "projectId": "ec6394ad-5e69-4852-b623-b9c0a6b7639e",
+      "parentId": "d065e1d1-0c12-4659-b4ae-c9e347655c5e",
+      "completed": false,
+      "createdAt": "2025-06-28T17:27:21.506Z",
+      "updatedAt": "2025-06-28T17:27:21.506Z",
+      "dependsOn": [
+        "0c98fa53-46bf-4f19-9742-e4341e1df992"
+      ],
+      "priority": 8,
+      "complexity": 4,
+      "status": "pending",
+      "tags": [
+        "implementation",
+        "core-logic",
+        "heatmap"
+      ],
+      "estimatedHours": 2.5,
+      "level": 1
+    }
+  ],
+  "subtasks": [],
+  "migration": {
+    "version": "1.8.1"
+  }
+}
