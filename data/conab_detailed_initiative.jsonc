@@ -1,0 +1,237 @@
+{
+    //
+    // CONAB (Companhia Nacional de Abastecimento) Detailed Initiative Data
+    // Based on crop availability data for different regions and time periods
+    //
+    "CONAB Crop Monitoring Initiative": {
+        "coverage": "Brazil",
+        "acronym": "CONAB",
+        "provider": "Companhia Nacional de Abastecimento (CONAB)",
+        "source": "Multiple satellite sensors and ground surveys",
+        "spatial_resolution": 30,
+        "available_years": [
+            2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
+            2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021,
+            2022, 2023, 2024
+        ],
+        "temporal_frequency": "Bi-annual (1st and 2nd semester)",
+        "update_frequency": "Seasonal",
+        "reference_system": "EPSG:4326",
+        "methodology": "Hybrid (Remote Sensing + Ground Truth)",
+        "classification_method": "Supervised Classification with Field Validation",
+        "number_of_classes": 9,
+        "class_legend": "Cotton, Irrigated Rice, Coffee, Sugar cane, Other winter crops, Other summer crops, Corn, Soybean, Sugar cane mill",
+        "overall_accuracy": 90.0,
+        "number_of_agriculture_classes": 9,
+        "agricultural_capabilities": "Comprehensive crop monitoring including temporary and permanent crops",
+        "detailed_crop_coverage": {
+            "Cotton": {
+                "regions": ["GO", "MS"],
+                "first_crop_years": {
+                    "GO": ["2018-2019", "2019-2020", "2021-2022", "2022-2023"],
+                    "MS": ["2021-2022"]
+                },
+                "second_crop_years": {
+                    "GO": [],
+                    "MS": []
+                }
+            },
+            "Irrigated Rice": {
+                "regions": ["TO", "GO", "MS", "PR", "SC", "RS"],
+                "first_crop_years": {
+                    "TO": ["2017-2018"],
+                    "GO": ["2018-2019"],
+                    "MS": ["2018-2019"],
+                    "PR": ["2017-2018"],
+                    "SC": ["2018-2019"],
+                    "RS": ["2019-2020", "2022-2023"]
+                },
+                "second_crop_years": {
+                    "TO": [],
+                    "GO": [],
+                    "MS": [],
+                    "PR": [],
+                    "SC": [],
+                    "RS": []
+                }
+            },
+            "Coffee": {
+                "regions": ["GO", "RJ", "SP"],
+                "first_crop_years": {
+                    "GO": ["2020-2021"],
+                    "RJ": ["2020-2021"],
+                    "SP": ["2015-2016", "2016-2017", "2018-2019"]
+                },
+                "second_crop_years": {
+                    "GO": [],
+                    "RJ": [],
+                    "SP": []
+                }
+            },
+            "Sugar cane": {
+                "regions": ["GO", "MT", "MS", "SP"],
+                "first_crop_years": {
+                    "GO": ["2010-2011", "2011-2012"],
+                    "MT": ["2012-2013"],
+                    "MS": ["2012-2013"],
+                    "SP": ["2012-2013"]
+                },
+                "second_crop_years": {
+                    "GO": [],
+                    "MT": [],
+                    "MS": [],
+                    "SP": []
+                }
+            },
+            "Other winter crops": {
+                "regions": ["SP", "PR", "RS"],
+                "first_crop_years": {
+                    "SP": ["2013-2014"],
+                    "PR": ["2009-2010", "2010-2011", "2011-2012", "2012-2013"],
+                    "RS": ["2000-2015"]
+                },
+                "second_crop_years": {
+                    "SP": [],
+                    "PR": [],
+                    "RS": []
+                }
+            },            "Other summer crops": {
+                "regions": ["RO", "PA", "TO", "BA", "MA", "PI", "GO", "DF", "MG", "MT", "MS", "PR", "SP", "SC", "RS"],
+                "first_crop_years": {
+                    "RO": ["2011-2012", "2013-2014", "2020-2021"],
+                    "PA": ["2011-2012", "2020-2021"],
+                    "TO": ["2000-2014", "2019-2020", "2020-2021"],
+                    "BA": ["2000-2014", "2020-2021"],
+                    "MA": ["2000-2014", "2020-2021"],
+                    "PI": ["2000-2014", "2020-2021"],
+                    "GO": ["2020-2021"],
+                    "DF": ["2008-2009", "2011-2015", "2017-2018", "2020-2021"],
+                    "MG": ["2000-2014", "2020-2021"],
+                    "MT": ["2004-2015", "2020-2021"],
+                    "MS": ["2000-2015", "2020-2021"],
+                    "PR": ["2000-2014", "2020-2021"],
+                    "SP": ["2005-2006", "2009-2015", "2020-2021"],
+                    "SC": ["2003-2004", "2005-2010", "2011-2014", "2020-2021"],
+                    "RS": ["2004-2015", "2020-2021"]
+                },
+                "second_crop_years": {
+                    "RO": [],
+                    "PA": [],
+                    "TO": ["2011-2012", "2012-2013", "2013-2014"],
+                    "BA": [],
+                    "MA": ["2011-2012", "2012-2013", "2013-2014"],
+                    "PI": ["2011-2012", "2012-2013", "2013-2014"],
+                    "GO": ["2011-2012", "2012-2013", "2013-2014"],
+                    "DF": ["2013-2014"],
+                    "MG": ["2011-2012", "2012-2013", "2013-2014"],
+                    "MT": ["2011-2012", "2012-2013", "2013-2014"],
+                    "MS": ["2011-2012", "2012-2013", "2013-2014"],
+                    "PR": ["2009-2010", "2010-2011", "2011-2012", "2012-2013"],
+                    "SP": ["2011-2012", "2012-2013", "2013-2014"],
+                    "SC": [],
+                    "RS": []
+                }
+            },
+            "Corn": {
+                "regions": ["PR"],
+                "first_crop_years": {
+                    "PR": ["2022-2023"]
+                },
+                "second_crop_years": {
+                    "PR": []
+                }
+            },            "Soybean": {
+                "regions": ["RO", "TO", "PI", "BA", "MA", "GO", "MT", "MS", "PR", "SC", "RS"],
+                "first_crop_years": {
+                    "RO": ["2000-2021"],
+                    "TO": ["2021-2022"],
+                    "PI": ["2021-2022"],
+                    "BA": ["2021-2022"],
+                    "MA": ["2021-2022"],
+                    "GO": ["2020-2021"],
+                    "MT": ["2020-2021"],
+                    "MS": ["2020-2021"],
+                    "PR": ["2022-2023"],
+                    "SC": ["2022-2023"],
+                    "RS": ["2022-2023"]
+                },
+                "second_crop_years": {
+                    "RO": [],
+                    "TO": [],
+                    "PI": [],
+                    "BA": [],
+                    "MA": [],
+                    "GO": [],
+                    "MT": [],
+                    "MS": [],
+                    "PR": [],
+                    "SC": [],
+                    "RS": []
+                }
+            },
+            "Sugar cane mill": {
+                "regions": ["BR"],
+                "first_crop_years": {
+                    "Brazil": ["2020-2021"]
+                },
+                "second_crop_years": {
+                    "Brazil": []
+                }
+            }
+        },        "regional_coverage": [
+            "Rondônia (RO)",
+            "Pará (PA)", 
+            "Tocantins (TO)",
+            "Piauí (PI)",
+            "Maranhão (MA)",
+            "Bahia (BA)",
+            "Goiás (GO)",
+            "Distrito Federal (DF)",
+            "Minas Gerais (MG)",
+            "Mato Grosso (MT)",
+            "Mato Grosso do Sul (MS)",
+            "Paraná (PR)",
+            "São Paulo (SP)",
+            "Santa Catarina (SC)",
+            "Rio Grande do Sul (RS)",
+            "Rio de Janeiro (RJ)"
+        ],
+        "data_products": [
+            {
+                "product_name": "Crop Area Estimates",
+                "description": "Planted area estimates for major crops by state",
+                "temporal_resolution": "Seasonal",
+                "spatial_coverage": "State level"
+            },
+            {
+                "product_name": "Production Forecasts",
+                "description": "Crop production forecasts based on satellite monitoring",
+                "temporal_resolution": "Monthly updates during growing season",
+                "spatial_coverage": "State and regional level"
+            },
+            {
+                "product_name": "Yield Estimates",
+                "description": "Crop yield estimates and productivity analysis",
+                "temporal_resolution": "Seasonal",
+                "spatial_coverage": "State level"
+            }
+        ],
+        "algorithm": "Hybrid approach combining satellite remote sensing analysis with ground survey validation",
+        "sensors_referenced": [
+            { "sensor_key": "LANDSAT_8_OLI" },
+            { "sensor_key": "LANDSAT_9_OLI" },
+            { "sensor_key": "SENTINEL_2_MSI" },
+            { "sensor_key": "MODIS_TERRA" },
+            { "sensor_key": "MODIS_AQUA" }
+        ],
+        "references": ["CONAB Technical Reports", "Brazilian Agricultural Monitoring Program"],
+        "data_access": "Public (Brazilian Government)",
+        "update_schedule": "Monthly reports during growing seasons, annual summaries",
+        "quality_control": "Field validation campaigns, cross-validation with state agricultural agencies",
+        "temporal_coverage_notes": {
+            "historical_data": "Some crops have historical data dating back to 2000",
+            "recent_focus": "Most comprehensive coverage from 2017 onwards",
+            "seasonal_splits": "Data organized by first semester (1S) and second semester (2S) agricultural years"
+        }
+    }
+}

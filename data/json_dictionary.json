@@ -1,0 +1,68 @@
+{
+  "mesoregions": {
+    "North": {
+      "name_pt": "Norte",
+      "color": "#CCEBC5",
+      "states": [
+        {"sigla": "AC", "nome": "Acre"},
+        {"sigla": "AP", "nome": "Amapá"},
+        {"sigla": "AM", "nome": "Amazonas"},
+        {"sigla": "PA", "nome": "Pará"},
+        {"sigla": "RO", "nome": "Rondônia"},
+        {"sigla": "RR", "nome": "Roraima"},
+        {"sigla": "TO", "nome": "Tocantins"}
+      ]
+    },
+    "Northeast": {
+      "name_pt": "Nordeste",
+      "color": "#B3CDE3",
+      "states": [
+        {"sigla": "AL", "nome": "Alagoas"},
+        {"sigla": "BA", "nome": "Bahia"},
+        {"sigla": "CE", "nome": "Ceará"},
+        {"sigla": "MA", "nome": "Maranhão"},
+        {"sigla": "PB", "nome": "Paraíba"},
+        {"sigla": "PE", "nome": "Pernambuco"},
+        {"sigla": "PI", "nome": "Piauí"},
+        {"sigla": "RN", "nome": "Rio Grande do Norte"},
+        {"sigla": "SE", "nome": "Sergipe"}
+      ]
+    },
+    "Central-West": {
+      "name_pt": "Centro-Oeste",
+      "color": "#FBB4AE",
+      "states": [
+        {"sigla": "DF", "nome": "Distrito Federal"},
+        {"sigla": "GO", "nome": "Goiás"},
+        {"sigla": "MT", "nome": "Mato Grosso"},
+        {"sigla": "MS", "nome": "Mato Grosso do Sul"}
+      ]
+    },
+    "Southeast": {
+      "name_pt": "Sudeste",
+      "color": "#DECBE4",
+      "states": [
+        {"sigla": "ES", "nome": "Espírito Santo"},
+        {"sigla": "MG", "nome": "Minas Gerais"},
+        {"sigla": "RJ", "nome": "Rio de Janeiro"},
+        {"sigla": "SP", "nome": "São Paulo"}
+      ]
+    },
+    "South": {
+      "name_pt": "Sul",
+      "color": "#FED9A6",
+      "states": [
+        {"sigla": "PR", "nome": "Paraná"},
+        {"sigla": "RS", "nome": "Rio Grande do Sul"},
+        {"sigla": "SC", "nome": "Santa Catarina"}
+      ]
+    },
+    "Country": {
+      "name_pt": "Brasil",
+      "color": "#000000",
+      "states": [
+        {"sigla": "BR", "nome": "Brazil"}
+      ]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+streamlit
+plotly
+pandas
+numpy
+scikit-learn
+kaleido
+pytest
+pytest-cov
+commentjson
+folium
+streamlit-folium
+geopandas
+shapely
