@@ -82,25 +82,23 @@ def test_json_interpreter():
 def test_data_engine():
     """Testa o data engine com novos caminhos."""
     print("\n🔍 Testando data engine...")
-
+    
     try:
-        from scripts.data_generation.lulc_data_engine import LULCDataParser
-
-        parser = LULCDataParser()
-        data = parser.load_data_from_jsonc()
-
+        from scripts.data_generation.lulc_data_engine import UnifiedDataProcessor
+        
+        processor = UnifiedDataProcessor()
+        data = processor.load_data_from_jsonc()
+        
         if len(data) > 0:
             print(f"   ✅ Data engine funcionando: {len(data)} registros processados")
             return True
         else:
             print("   ⚠️ Data engine retornou dados vazios")
             return False
-
+            
     except Exception as e:
         print(f"   ❌ Erro no data engine: {e}")
         return False
-
-
 def test_dashboard_imports():
     """Testa se os dashboards podem importar os dados."""
     print("\n🔍 Testando imports dos dashboards...")
