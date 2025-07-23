@@ -17,8 +17,8 @@ Author: Dashboard Iniciativas LULC
 Date: 2025
 """
 
-import json
 from datetime import datetime
+import json
 from pathlib import Path
 from typing import Any
 
@@ -82,7 +82,7 @@ class CONABProcessor(AgriculturalDataProcessor, SeasonalDataMixin):
                 return data
 
         except Exception as e:
-            raise ValueError(f"Erro ao carregar dados CONAB: {e}")
+            raise ValueError(f"Erro ao carregar dados CONAB: {e}") from e
 
     def validate_data(self, data: dict[str, Any]) -> bool:
         """
@@ -103,7 +103,7 @@ class CONABProcessor(AgriculturalDataProcessor, SeasonalDataMixin):
 
         # Verificar estrutura do calendário
         if "crop_calendar" in data:
-            for crop, states_data in data["crop_calendar"].items():
+            for _crop, states_data in data["crop_calendar"].items():
                 if not isinstance(states_data, list):
                     return False
 
@@ -258,6 +258,40 @@ class CONABProcessor(AgriculturalDataProcessor, SeasonalDataMixin):
     def get_available_regions(self) -> list[str]:
         """Retorna regiões disponíveis."""
         return ["North", "Northeast", "Central-West", "Southeast", "South"]
+
+    def get_dashboard_summary(self) -> dict:
+        """
+        Retorna um resumo dos dados CONAB para uso no dashboard.
+
+        Returns:
+            dict com contagem de iniciativas, culturas, regiões e listas detalhadas
+        """
+        # Certifique-se de que os dados estão carregados e válidos
+        if "crop_calendar" not in self._data_cache:
+            raise ValueError(
+                "Dados de calendário não carregados. Execute process_data primeiro."
+            )
+
+        calendar_df = self._data_cache["crop_calendar"]
+
+        # Contagem de iniciativas (estados), culturas e regiões
+        initiatives = calendar_df["state_code"].unique().tolist()
+        crops = calendar_df["crop"].unique().tolist()
+        regions = calendar_df["region"].unique().tolist()
+
+        summary = {
+            "initiative_count": len(initiatives),
+            "crop_count": len(crops),
+            "region_count": len(regions),
+            "initiatives": initiatives,
+            "crops": crops,
+            "regions": regions,
+            "states": calendar_df[["state_code", "state_name", "region"]]
+            .drop_duplicates()
+            .to_dict(orient="records"),
+        }
+
+        return summary
 
     def get_data_period(self) -> dict[str, str]:
         """Retorna período dos dados."""

@@ -1,20 +1,4 @@
-"""
-Overview Dashboard - Versão Moderna e Responsiva
-==============================================
-
-Dashboard principal para iniciativas LULC com:
-- Interface moderna e responsiva
-- Componentes colapsáveis para melhor organização
-- Filtros interativos otimizados
-- Visualizações temporais melhoradas
-- Detalhes organizados por iniciativa
-
-Author: Dashboard Iniciativas LULC
-Date: 2025-07-22
-Version: 2.0 - Otimizada
-"""
-
-import json
+import json  # Ensure json is imported
 import sys
 from pathlib import Path
 
@@ -22,24 +6,28 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
+from dashboard.components.overview import filters, lulc_classes
 from scripts.utilities.ui_elements import setup_download_form
 
-# Configuração de caminhos
-current_dir = Path(__file__).parent.parent
+# Add scripts to path if necessary
+# Correct current_dir to point to the project root (dashboard-iniciativas)
+current_dir = Path(__file__).parent.parent  # This should be dashboard-iniciativas/
 scripts_path = str(current_dir / "scripts")
 if scripts_path not in sys.path:
     sys.path.insert(0, scripts_path)
 
 
 def _format_year_ranges(years_list: list) -> str:
-    """Formata lista de anos em ranges consecutivos."""
+    """Formats a list of years into a string with consecutive years as ranges."""
     if not years_list:
         return ""
 
+    # Ensure years are integers and sorted uniquely
     try:
-        years = sorted({int(y) for y in years_list if str(y).isdigit()})
-    except ValueError:
-        return ", ".join(sorted({str(y) for y in years_list}))
+        years = sorted(list(set(int(y) for y in years_list if str(y).isdigit())))
+    except ValueError:  # Handle cases where conversion might fail for unexpected data
+        # Fallback to simple comma-separated list if conversion to int fails for any element
+        return ", ".join(sorted(list(set(str(y) for y in years_list))))
 
     if not years:
         return ""
@@ -49,13 +37,14 @@ def _format_year_ranges(years_list: list) -> str:
 
     for i in range(1, len(years)):
         if years[i] != years[i - 1] + 1:
+            # End of a range
             if start_range == years[i - 1]:
                 ranges.append(str(start_range))
             else:
                 ranges.append(f"{start_range}-{years[i - 1]}")
             start_range = years[i]
 
-    # Adiciona o último range
+    # Add the last range
     if start_range == years[-1]:
         ranges.append(str(start_range))
     else:
@@ -64,506 +53,14 @@ def _format_year_ranges(years_list: list) -> str:
     return ", ".join(ranges)
 
 
-def _load_data():
-    """Carrega dados da sessão e sensores."""
-    # Verifica dados na sessão
-    if (
-        "df_interpreted" not in st.session_state
-        or st.session_state.df_interpreted.empty
-    ):
-        st.error(
-            "❌ Dados não encontrados na sessão. Verifique se o app.py carregou os dados corretamente."
-        )
-        return pd.DataFrame(), {}, {}
+def _render_key_metrics(filtered_df: pd.DataFrame):
+    """
+    Render key aggregated metrics cards.
 
-    df = st.session_state.get("df_interpreted", pd.DataFrame())
-    meta = st.session_state.get("metadata", {})
-
-    # Carrega metadados dos sensores
-    sensors_meta = {}
-    try:
-        from scripts.utilities.json_interpreter import _load_jsonc_file
-
-        sensors_metadata_path = current_dir / "data" / "json" / "sensors_metadata.jsonc"
-        if sensors_metadata_path.exists():
-            sensors_meta_loaded = _load_jsonc_file(sensors_metadata_path)
-            if isinstance(sensors_meta_loaded, dict):
-                sensors_meta = sensors_meta_loaded
-                st.session_state.sensors_meta = sensors_meta
-    except Exception as e:
-        st.warning(f"⚠️ Erro ao carregar metadados dos sensores: {e}")
-
-    return df, meta, sensors_meta
-
-
-def _create_filters(df):
-    """Cria filtros interativos com layout responsivo e moderno."""
-    st.markdown("### 🔎 **Filtros de Iniciativas**")
-
-    # Layout responsivo - adapta para mobile
-    if "mobile_view" not in st.session_state:
-        st.session_state.mobile_view = False
-
-    # Toggle para view mobile/desktop
-    view_toggle = st.toggle(
-        "📱 Visualização Compacta", value=st.session_state.mobile_view
-    )
-    st.session_state.mobile_view = view_toggle
-
-    if st.session_state.mobile_view:
-        # Layout mobile - filtros em acordeões
-        with st.expander("🏷️ **Filtros por Tipo e Resolução**", expanded=True):
-            col1, col2 = st.columns(2)
-
-            with col1:
-                tipos = (
-                    df["Type"].unique().tolist()
-                    if not df.empty and "Type" in df.columns
-                    else []
-                )
-                selected_types = st.multiselect(
-                    "📋 Tipo de Iniciativa",
-                    options=tipos,
-                    default=tipos,
-                    help="Selecione os tipos de iniciativas para filtrar",
-                )
-
-            with col2:
-                if not df.empty and "Resolution" in df.columns:
-                    resolutions_numeric = pd.to_numeric(
-                        df["Resolution"], errors="coerce"
-                    ).dropna()
-                    if not resolutions_numeric.empty:
-                        min_res, max_res = (
-                            int(resolutions_numeric.min()),
-                            int(resolutions_numeric.max()),
-                        )
-                        selected_res = st.slider(
-                            "🔍 Resolução Espacial (metros)",
-                            min_value=min_res,
-                            max_value=max_res,
-                            value=(min_res, max_res),
-                            help=f"Filtrar por resolução espacial entre {min_res}m e {max_res}m",
-                        )
-                    else:
-                        selected_res = st.slider(
-                            "🔍 Resolução Espacial (metros)",
-                            min_value=0,
-                            max_value=1000,
-                            value=(0, 1000),
-                            disabled=True,
-                            help="Dados de resolução não disponíveis",
-                        )
-                else:
-                    selected_res = st.slider(
-                        "🔍 Resolução Espacial (metros)",
-                        min_value=0,
-                        max_value=1000,
-                        value=(0, 1000),
-                        disabled=True,
-                        help="Dados de resolução não disponíveis",
-                    )
-
-        with st.expander("🎯 **Filtros por Precisão e Classes**", expanded=False):
-            col3, col4 = st.columns(2)
-
-            with col3:
-                if not df.empty and "Accuracy" in df.columns:
-                    accuracy_numeric = pd.to_numeric(
-                        df["Accuracy"], errors="coerce"
-                    ).dropna()
-                    if not accuracy_numeric.empty:
-                        min_acc, max_acc = (
-                            float(accuracy_numeric.min()),
-                            float(accuracy_numeric.max()),
-                        )
-                        selected_acc = st.slider(
-                            "🎯 Precisão (%)",
-                            min_value=min_acc,
-                            max_value=max_acc,
-                            value=(min_acc, max_acc),
-                            step=0.1,
-                            help=f"Filtrar por precisão entre {min_acc:.1f}% e {max_acc:.1f}%",
-                        )
-                    else:
-                        selected_acc = st.slider(
-                            "🎯 Precisão (%)",
-                            min_value=0.0,
-                            max_value=100.0,
-                            value=(0.0, 100.0),
-                            disabled=True,
-                            help="Dados de precisão não disponíveis",
-                        )
-                else:
-                    selected_acc = st.slider(
-                        "🎯 Precisão (%)",
-                        min_value=0.0,
-                        max_value=100.0,
-                        value=(0.0, 100.0),
-                        disabled=True,
-                        help="Dados de precisão não disponíveis",
-                    )
-
-            with col4:
-                if not df.empty and "Classes" in df.columns:
-                    classes_numeric = pd.to_numeric(
-                        df["Classes"], errors="coerce"
-                    ).dropna()
-                    if not classes_numeric.empty:
-                        min_classes, max_classes = (
-                            int(classes_numeric.min()),
-                            int(classes_numeric.max()),
-                        )
-                        selected_classes = st.slider(
-                            "🏷️ Número de Classes",
-                            min_value=min_classes,
-                            max_value=max_classes,
-                            value=(min_classes, max_classes),
-                            help=f"Filtrar por número de classes entre {min_classes} e {max_classes}",
-                        )
-                    else:
-                        selected_classes = st.slider(
-                            "🏷️ Número de Classes",
-                            min_value=1,
-                            max_value=50,
-                            value=(1, 50),
-                            disabled=True,
-                            help="Dados de classes não disponíveis",
-                        )
-                else:
-                    selected_classes = st.slider(
-                        "🏷️ Número de Classes",
-                        min_value=1,
-                        max_value=50,
-                        value=(1, 50),
-                        disabled=True,
-                        help="Dados de classes não disponíveis",
-                    )
-
-        with st.expander("📅 **Filtros Temporais**", expanded=False):
-            anos_disponiveis = set()
-            if not df.empty and "Available_Years" in df.columns:
-                for anos_str in df["Available_Years"].dropna():
-                    try:
-                        anos_data = (
-                            json.loads(anos_str)
-                            if isinstance(anos_str, str)
-                            else anos_str
-                        )
-                        if isinstance(anos_data, list):
-                            anos_disponiveis.update(anos_data)
-                    except (json.JSONDecodeError, TypeError):
-                        continue
-
-            if anos_disponiveis:
-                anos_sorted = sorted(
-                    [int(ano) for ano in anos_disponiveis if str(ano).isdigit()]
-                )
-                if anos_sorted:
-                    selected_year_range = st.slider(
-                        "🗓️ Período de Interesse",
-                        min_value=min(anos_sorted),
-                        max_value=max(anos_sorted),
-                        value=(min(anos_sorted), max(anos_sorted)),
-                        help=f"Filtrar iniciativas por período entre {min(anos_sorted)} e {max(anos_sorted)}",
-                    )
-                else:
-                    selected_year_range = None
-            else:
-                selected_year_range = None
-
-    else:
-        # Layout desktop - filtros em linha
-        col1, col2, col3, col4, col5 = st.columns(5)
-
-        with col1:
-            tipos = (
-                df["Type"].unique().tolist()
-                if not df.empty and "Type" in df.columns
-                else []
-            )
-            selected_types = st.multiselect("📋 Tipo", options=tipos, default=tipos)
-
-        with col2:
-            if not df.empty and "Resolution" in df.columns:
-                resolutions_numeric = pd.to_numeric(
-                    df["Resolution"], errors="coerce"
-                ).dropna()
-                if not resolutions_numeric.empty:
-                    min_res, max_res = (
-                        int(resolutions_numeric.min()),
-                        int(resolutions_numeric.max()),
-                    )
-                    selected_res = st.slider(
-                        "🔍 Resolução (m)",
-                        min_value=min_res,
-                        max_value=max_res,
-                        value=(min_res, max_res),
-                    )
-                else:
-                    selected_res = st.slider(
-                        "🔍 Resolução (m)",
-                        min_value=0,
-                        max_value=1000,
-                        value=(0, 1000),
-                        disabled=True,
-                    )
-            else:
-                selected_res = st.slider(
-                    "🔍 Resolução (m)",
-                    min_value=0,
-                    max_value=1000,
-                    value=(0, 1000),
-                    disabled=True,
-                )
-
-        with col3:
-            if not df.empty and "Accuracy" in df.columns:
-                accuracy_numeric = pd.to_numeric(
-                    df["Accuracy"], errors="coerce"
-                ).dropna()
-                if not accuracy_numeric.empty:
-                    min_acc, max_acc = (
-                        float(accuracy_numeric.min()),
-                        float(accuracy_numeric.max()),
-                    )
-                    selected_acc = st.slider(
-                        "🎯 Precisão (%)",
-                        min_value=min_acc,
-                        max_value=max_acc,
-                        value=(min_acc, max_acc),
-                        step=0.1,
-                    )
-                else:
-                    selected_acc = st.slider(
-                        "🎯 Precisão (%)",
-                        min_value=0.0,
-                        max_value=100.0,
-                        value=(0.0, 100.0),
-                        disabled=True,
-                    )
-            else:
-                selected_acc = st.slider(
-                    "🎯 Precisão (%)",
-                    min_value=0.0,
-                    max_value=100.0,
-                    value=(0.0, 100.0),
-                    disabled=True,
-                )
-
-        with col4:
-            if not df.empty and "Classes" in df.columns:
-                classes_numeric = pd.to_numeric(df["Classes"], errors="coerce").dropna()
-                if not classes_numeric.empty:
-                    min_classes, max_classes = (
-                        int(classes_numeric.min()),
-                        int(classes_numeric.max()),
-                    )
-                    selected_classes = st.slider(
-                        "🏷️ Classes",
-                        min_value=min_classes,
-                        max_value=max_classes,
-                        value=(min_classes, max_classes),
-                    )
-                else:
-                    selected_classes = st.slider(
-                        "🏷️ Classes",
-                        min_value=1,
-                        max_value=50,
-                        value=(1, 50),
-                        disabled=True,
-                    )
-            else:
-                selected_classes = st.slider(
-                    "🏷️ Classes",
-                    min_value=1,
-                    max_value=50,
-                    value=(1, 50),
-                    disabled=True,
-                )
-
-        with col5:
-            anos_disponiveis = set()
-            if not df.empty and "Available_Years" in df.columns:
-                for anos_str in df["Available_Years"].dropna():
-                    try:
-                        anos_data = (
-                            json.loads(anos_str)
-                            if isinstance(anos_str, str)
-                            else anos_str
-                        )
-                        if isinstance(anos_data, list):
-                            anos_disponiveis.update(anos_data)
-                    except (json.JSONDecodeError, TypeError):
-                        continue
-
-            if anos_disponiveis:
-                anos_sorted = sorted(
-                    [int(ano) for ano in anos_disponiveis if str(ano).isdigit()]
-                )
-                if anos_sorted:
-                    selected_year_range = st.slider(
-                        "🗓️ Período",
-                        min_value=min(anos_sorted),
-                        max_value=max(anos_sorted),
-                        value=(min(anos_sorted), max(anos_sorted)),
-                    )
-                else:
-                    selected_year_range = None
-            else:
-                selected_year_range = None
-
-    # Aplicar filtros ao dataframe
-    filtered_df = df.copy()
-
-    if selected_types:
-        filtered_df = filtered_df[filtered_df["Type"].isin(selected_types)]
-
-    if "Resolution" in filtered_df.columns:
-        resolutions_numeric = pd.to_numeric(filtered_df["Resolution"], errors="coerce")
-        mask_resolution = (resolutions_numeric >= selected_res[0]) & (
-            resolutions_numeric <= selected_res[1]
-        )
-        filtered_df = filtered_df[mask_resolution | resolutions_numeric.isna()]
-
-    if "Accuracy" in filtered_df.columns:
-        accuracy_numeric = pd.to_numeric(filtered_df["Accuracy"], errors="coerce")
-        mask_accuracy = (accuracy_numeric >= selected_acc[0]) & (
-            accuracy_numeric <= selected_acc[1]
-        )
-        filtered_df = filtered_df[mask_accuracy | accuracy_numeric.isna()]
-
-    if "Classes" in filtered_df.columns:
-        classes_numeric = pd.to_numeric(filtered_df["Classes"], errors="coerce")
-        mask_classes = (classes_numeric >= selected_classes[0]) & (
-            classes_numeric <= selected_classes[1]
-        )
-        filtered_df = filtered_df[mask_classes | classes_numeric.isna()]
-
-    if selected_year_range and "Available_Years" in filtered_df.columns:
-        year_mask = []
-        for _, row in filtered_df.iterrows():
-            try:
-                anos_str = row["Available_Years"]
-                if pd.isna(anos_str):
-                    year_mask.append(False)
-                    continue
-
-                anos_data = (
-                    json.loads(anos_str) if isinstance(anos_str, str) else anos_str
-                )
-                if isinstance(anos_data, list):
-                    anos_numeric = [int(ano) for ano in anos_data if str(ano).isdigit()]
-                    has_overlap = any(
-                        selected_year_range[0] <= ano <= selected_year_range[1]
-                        for ano in anos_numeric
-                    )
-                    year_mask.append(has_overlap)
-                else:
-                    year_mask.append(False)
-            except (json.JSONDecodeError, TypeError, ValueError):
-                year_mask.append(False)
-
-        filtered_df = filtered_df[year_mask]
-
-    return filtered_df
-
-
-def _apply_filters(
-    df,
-    selected_types,
-    selected_res,
-    selected_acc,
-    selected_methods,
-    selected_agri_range,
-):
-    """Aplica filtros ao DataFrame."""
-    conditions = []
-
-    if "Type" in df.columns and selected_types:
-        conditions.append(df["Type"].isin(selected_types))
-
-    if "Resolution" in df.columns and selected_res:
-        df_temp = df.copy()
-        df_temp["Resolution_numeric"] = pd.to_numeric(
-            df_temp["Resolution"], errors="coerce"
-        )
-        conditions.append(
-            df_temp["Resolution_numeric"].between(selected_res[0], selected_res[1])
-        )
-
-    if "Accuracy (%)" in df.columns and selected_acc:
-        df_temp = df.copy()
-        df_temp["Accuracy_numeric"] = pd.to_numeric(
-            df_temp["Accuracy (%)"], errors="coerce"
-        )
-        conditions.append(
-            df_temp["Accuracy_numeric"].between(selected_acc[0], selected_acc[1])
-        )
-
-    if "Methodology" in df.columns and selected_methods:
-        conditions.append(df["Methodology"].isin(selected_methods))
-
-    if "Num_Agri_Classes" in df.columns and selected_agri_range:
-        df_temp = df.copy()
-        df_temp["Num_Agri_Classes_numeric"] = pd.to_numeric(
-            df_temp["Num_Agri_Classes"], errors="coerce"
-        )
-        conditions.append(
-            df_temp["Num_Agri_Classes_numeric"].between(
-                selected_agri_range[0], selected_agri_range[1]
-            )
-        )
-
-    if conditions:
-        final_condition = pd.Series(True, index=df.index)
-        for cond in conditions:
-            final_condition &= cond
-        return df[final_condition]
-
-    return df.copy()
-
-
-def _display_key_metrics(filtered_df):
-    """Exibe métricas-chave agregadas."""
-    st.subheader("📈 Métricas Principais")
-
-    # CSS para cartões de métricas
-    st.markdown(
-        """
-    <style>
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1.5rem;
-        border-radius: 15px;
-        color: white;
-        text-align: center;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        margin: 0.5rem 0;
-        transition: transform 0.3s ease;
-    }
-    .metric-card:hover {
-        transform: translateY(-5px);
-    }
-    .metric-value {
-        font-size: 2.8rem;
-        font-weight: 700;
-        margin: 0.5rem 0;
-    }
-    .metric-label {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        text-transform: uppercase;
-    }
-    .metric-sublabel {
-        font-size: 0.9rem;
-        opacity: 0.7;
-        margin-top: 0.3rem;
-    }
-    </style>
-    """,
-        unsafe_allow_html=True,
-    )
+    Args:
+        filtered_df: Filtered dataframe to calculate metrics from
+    """
+    st.subheader("📈 Key Aggregated Metrics")
 
     col1, col2, col3, col4 = st.columns(4)
 
@@ -575,10 +72,11 @@ def _display_key_metrics(filtered_df):
             avg_accuracy = avg_accuracy_series.mean()
             st.markdown(
                 f"""
-            <div class="metric-card">
-                <div class="metric-value">🎯 {avg_accuracy:.1f}%</div>
-                <div class="metric-label">Acurácia Média</div>
-                <div class="metric-sublabel">Iniciativas filtradas</div>
+            <div class="metric-card accuracy">
+                <span class="metric-icon">🎯</span>
+                <div class="metric-value">{avg_accuracy:.1f}%</div>
+                <div class="metric-label">Average Accuracy</div>
+                <div class="metric-sublabel">Across filtered initiatives</div>
             </div>
             """,
                 unsafe_allow_html=True,
@@ -592,10 +90,11 @@ def _display_key_metrics(filtered_df):
             avg_resolution = avg_resolution_series.mean()
             st.markdown(
                 f"""
-            <div class="metric-card">
-                <div class="metric-value">🔬 {avg_resolution:.0f}m</div>
-                <div class="metric-label">Resolução Média</div>
-                <div class="metric-sublabel">Precisão espacial</div>
+            <div class="metric-card resolution">
+                <span class="metric-icon">🔬</span>
+                <div class="metric-value">{avg_resolution:.0f}m</div>
+                <div class="metric-label">Average Resolution</div>
+                <div class="metric-sublabel">Spatial precision</div>
             </div>
             """,
                 unsafe_allow_html=True,
@@ -609,14 +108,21 @@ def _display_key_metrics(filtered_df):
             ).dropna()
             if not classes_series.empty:
                 total_classes = classes_series.sum()
+        elif "Number_of_Classes" in filtered_df.columns:
+            num_classes_series = pd.to_numeric(
+                filtered_df["Number_of_Classes"], errors="coerce"
+            ).dropna()
+            if not num_classes_series.empty:
+                total_classes = num_classes_series.sum()
 
         if total_classes > 0:
             st.markdown(
                 f"""
-            <div class="metric-card">
-                <div class="metric-value">🏷️ {total_classes}</div>
-                <div class="metric-label">Total de Classes</div>
-                <div class="metric-sublabel">Categorias de classificação</div>
+            <div class="metric-card classes">
+                <span class="metric-icon">🏷️</span>
+                <div class="metric-value">{total_classes}</div>
+                <div class="metric-label">Total Classes</div>
+                <div class="metric-sublabel">Classification categories</div>
             </div>
             """,
                 unsafe_allow_html=True,
@@ -628,29 +134,32 @@ def _display_key_metrics(filtered_df):
             if global_initiatives > 0:
                 st.markdown(
                     f"""
-                <div class="metric-card">
-                    <div class="metric-value">🌍 {global_initiatives}</div>
-                    <div class="metric-label">Iniciativas Globais</div>
-                    <div class="metric-sublabel">Cobertura mundial</div>
+                <div class="metric-card global">
+                    <span class="metric-icon">🌍</span>
+                    <div class="metric-value">{global_initiatives}</div>
+                    <div class="metric-label">Global Initiatives</div>
+                    <div class="metric-sublabel">Worldwide coverage</div>
                 </div>
                 """,
                     unsafe_allow_html=True,
                 )
 
 
-def _display_initiative_details(filtered_df, meta, sensors_meta):
-    """Exibe detalhes das iniciativas selecionadas."""
-    st.markdown("---")
-    st.subheader("🔍 Exploração Detalhada por Iniciativa")
+def _render_detailed_exploration(
+    filtered_df: pd.DataFrame, meta: dict, sensors_meta: dict, nome_to_sigla: dict
+):
+    """
+    Render the detailed exploration section for individual initiatives.
 
-    # Mapeamento nome -> sigla
-    nome_to_sigla = {}
-    if "Acronym" in filtered_df.columns and "Name" in filtered_df.columns:
-        for _, row in filtered_df.iterrows():
-            if pd.notna(row["Name"]) and pd.notna(row["Acronym"]):
-                nome_to_sigla[row["Name"]] = row["Acronym"]
+    Args:
+        filtered_df: Filtered dataframe with initiatives
+        meta: Metadata dictionary
+        sensors_meta: Sensor metadata dictionary
+        nome_to_sigla: Name to acronym mapping
+    """
+    st.subheader("🔍 Detailed Exploration by Initiative")
 
-    # Opções formatadas para selectbox
+    # Create formatted options for the selectbox
     formatted_options = []
     formatted_to_original_name = {}
 
@@ -662,403 +171,1383 @@ def _display_initiative_details(filtered_df, meta, sensors_meta):
             formatted_to_original_name[formatted_display] = name
 
     selected_initiative_formatted = st.selectbox(
-        "Selecione uma iniciativa para ver detalhes:",
+        "Select an initiative to see details:",
         options=formatted_options,
-        help="Escolha uma iniciativa para informações detalhadas",
+        help="Choose an initiative for detailed information",
+        key="overview_detailed_select",
     )
 
-    selected_initiative = formatted_to_original_name.get(selected_initiative_formatted)
+    # Get the original initiative name from the formatted selection
+    selected_initiative_detailed = formatted_to_original_name.get(
+        selected_initiative_formatted
+    )
 
-    if selected_initiative:
-        init_data = filtered_df[filtered_df["Name"] == selected_initiative].iloc[0]
-        init_metadata = meta.get(selected_initiative, {})
+    if selected_initiative_detailed:
+        init_data = filtered_df[
+            filtered_df["Name"] == selected_initiative_detailed
+        ].iloc[0]
+        init_metadata = meta.get(selected_initiative_detailed, {})
+        # Get the acronym for the selected initiative
         initiative_acronym = nome_to_sigla.get(
-            selected_initiative, selected_initiative[:10]
+            selected_initiative_detailed, selected_initiative_detailed[:10]
         )
 
-        # Header da iniciativa
+        # Modern initiative header
         st.markdown(
             f"""
-        <div style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-                    color: white; padding: 1.5rem; border-radius: 15px; margin: 1rem 0;">
-            <h2 style="margin: 0;">🛰️ {initiative_acronym}</h2>
-            <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">{selected_initiative}</p>
+        <div class="initiative-header">
+            <h2 class="initiative-title">🛰️ {initiative_acronym}</h2>
+            <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">{selected_initiative_detailed}</p>
         </div>
         """,
             unsafe_allow_html=True,
         )
 
-        col1_detail, col2_detail = st.columns([1, 2])
+        st.markdown("""<div class="detail-card">""", unsafe_allow_html=True)
+
+        col1_detail, col2_detail = st.columns([2, 3])
 
         with col1_detail:
-            st.markdown("#### 📊 Métricas Principais")
-
-            # Métricas específicas da iniciativa
-            accuracy_val = pd.to_numeric(init_data.get("Accuracy (%)"), errors="coerce")
-            resolution_val = pd.to_numeric(init_data.get("Resolution"), errors="coerce")
-            classes_val = pd.to_numeric(
-                init_data.get("Classes", init_data.get("Number_of_Classes", "")),
-                errors="coerce",
-            )
-
-            if pd.notna(accuracy_val):
-                st.metric("🎯 Acurácia", f"{accuracy_val:.1f}%")
-            if pd.notna(resolution_val):
-                st.metric("🔬 Resolução", f"{resolution_val:.0f}m")
-            if pd.notna(classes_val):
-                st.metric("🏷️ Classes", f"{classes_val:.0f}")
-
-            # Informações técnicas
-            st.markdown("#### ⚙️ Informações Técnicas")
-
-            type_val = str(init_data.get("Type", "")).strip()
-            if type_val and type_val.lower() not in ["n/a", "none"]:
-                st.info(f"🏷️ **Tipo:** {type_val}")
-
-            methodology_val = str(init_data.get("Methodology", "")).strip()
-            if methodology_val and methodology_val.lower() not in ["n/a", "none"]:
-                st.info(f"🔬 **Metodologia:** {methodology_val}")
-
-            coverage_val = str(init_data.get("Coverage", "")).strip()
-            if coverage_val and coverage_val.lower() not in ["n/a", "none"]:
-                st.info(f"🌍 **Cobertura:** {coverage_val}")
+            _render_initiative_metrics(init_data)
+            _render_initiative_tech_info(init_data, sensors_meta)
 
         with col2_detail:
-            st.markdown("#### 📋 Detalhes Metodológicos")
+            _render_initiative_methodology(init_data, init_metadata, sensors_meta)
 
-            # Abordagem e algoritmo
+        _render_initiative_classification_details(init_data)
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+
+def _render_initiative_metrics(init_data: pd.Series):
+    """Render key metrics for a specific initiative."""
+    st.markdown("#### 📊 Key Metrics")
+
+    metrics_html_parts = []
+    accuracy_val = pd.to_numeric(init_data.get("Accuracy (%)"), errors="coerce")
+    if pd.notna(accuracy_val):
+        metrics_html_parts.append(
+            f"""<div class="mini-metric">
+            <div class="mini-metric-value">🎯 {accuracy_val:.1f}%</div>
+            <div class="mini-metric-label">Accuracy</div></div>"""
+        )
+
+    resolution_val = pd.to_numeric(init_data.get("Resolution"), errors="coerce")
+    if pd.notna(resolution_val):
+        metrics_html_parts.append(
+            f"""<div class="mini-metric">
+            <div class="mini-metric-value">🔬 {resolution_val:.0f}m</div>
+            <div class="mini-metric-label">Resolution</div></div>"""
+        )
+
+    classes_val_str = str(
+        init_data.get("Classes", init_data.get("Number_of_Classes", ""))
+    ).strip()
+    classes_val = pd.to_numeric(classes_val_str, errors="coerce")
+    if pd.notna(classes_val) and classes_val_str:
+        metrics_html_parts.append(
+            f"""<div class="mini-metric">
+            <div class="mini-metric-value">🏷️ {classes_val:.0f}</div>
+            <div class="mini-metric-label">Classes</div></div>"""
+        )
+
+    frequency_val = str(init_data.get("Temporal_Frequency", "")).strip()
+    if frequency_val and frequency_val.lower() not in ["n/a", "none"]:
+        metrics_html_parts.append(
+            f"""<div class="mini-metric">
+            <div class="mini-metric-value">📅 {frequency_val}</div>
+            <div class="mini-metric-label">Frequency</div></div>"""
+        )
+
+    if metrics_html_parts:
+        st.markdown(
+            f"""<div class="metric-grid">{"".join(metrics_html_parts)}</div>""",
+            unsafe_allow_html=True,
+        )
+
+
+def _render_initiative_tech_info(init_data: pd.Series, sensors_meta: dict):
+    """Render technical information for a specific initiative."""
+    st.markdown("#### ⚙️ Technical Information")
+    tech_info_html_parts = []
+
+    type_val = str(init_data.get("Type", "")).strip()
+    if type_val and type_val.lower() not in ["n/a", "none"]:
+        tech_info_html_parts.append(
+            f"""<div class="info-section" style="border-left-color: #17a2b8;">
+                                            <div class="info-title">🏷️ Type</div>
+                                            <p>{type_val}</p></div>"""
+        )
+
+    methodology_val = str(init_data.get("Methodology", "")).strip()
+    if methodology_val and methodology_val.lower() not in ["n/a", "none"]:
+        tech_info_html_parts.append(
+            f"""<div class="info-section" style="border-left-color: #6f42c1;">
+                                            <div class="info-title">🔬 Methodology</div>
+                                            <p>{methodology_val}</p></div>"""
+        )
+
+    scope_val = str(init_data.get("Coverage", "")).strip()
+    if scope_val and scope_val.lower() not in ["n/a", "none"]:
+        tech_info_html_parts.append(
+            f"""<div class="info-section" style="border-left-color: #28a745;">
+                                            <div class="info-title">🌍 Scope</div>
+                                            <p>{scope_val}</p></div>"""
+        )
+
+    # Get available_years from DataFrame
+    available_years_str_from_df = init_data.get("Available_Years_List", "[]")
+    try:
+        available_years_list = (
+            json.loads(available_years_str_from_df)
+            if available_years_str_from_df
+            else []
+        )
+    except json.JSONDecodeError:
+        available_years_list = []
+
+    if isinstance(available_years_list, list) and available_years_list:
+        formatted_years_str = _format_year_ranges(available_years_list)
+        if formatted_years_str:
+            tech_info_html_parts.append(
+                f"""<div class="info-section" style="border-left-color: #fd7e14;">
+                                                <div class="info-title">📅 Available Years</div>
+                                                <p>{formatted_years_str}</p></div>"""
+            )
+
+    # Display Sensors Referenced
+    _render_sensors_referenced(init_data, sensors_meta, tech_info_html_parts)
+
+    if tech_info_html_parts:
+        st.markdown(
+            f"""<div style="margin: 1rem 0;">{"".join(tech_info_html_parts)}</div>""",
+            unsafe_allow_html=True,
+        )
+
+
+def _render_sensors_referenced(
+    init_data: pd.Series, sensors_meta: dict, tech_info_html_parts: list
+):
+    """Render sensors referenced information."""
+    sensors_referenced_str_from_df = init_data.get("Sensors_Referenced", "[]")
+    try:
+        sensors_referenced_list_for_display = (
+            json.loads(sensors_referenced_str_from_df)
+            if sensors_referenced_str_from_df
+            else []
+        )
+    except json.JSONDecodeError:
+        sensors_referenced_list_for_display = []
+
+    if (
+        isinstance(sensors_referenced_list_for_display, list)
+        and sensors_referenced_list_for_display
+    ):
+        sensor_badges_html_parts = []
+        sensor_details_expanders = []
+
+        for sensor_ref_obj in sensors_referenced_list_for_display:
+            current_sensor_key_str = None
+            years_used_list = []
+
+            if isinstance(sensor_ref_obj, dict):
+                _key_from_dict = sensor_ref_obj.get("sensor_key")
+                if _key_from_dict is not None:
+                    current_sensor_key_str = str(_key_from_dict)
+                years_used_list = sensor_ref_obj.get("years_used", [])
+            elif isinstance(sensor_ref_obj, str):
+                current_sensor_key_str = sensor_ref_obj
+
+            if current_sensor_key_str:
+                sensor_info_from_meta = sensors_meta.get(
+                    str(current_sensor_key_str), {}
+                )
+                display_name = sensor_info_from_meta.get(
+                    "display_name",
+                    str(current_sensor_key_str).replace("_", " ").title(),
+                )
+
+                sensor_display_text_for_badge = display_name
+                if years_used_list and isinstance(years_used_list, list):
+                    years_used_str = _format_year_ranges(years_used_list)
+                    sensor_display_text_for_badge += f" (Years: {years_used_str})"
+                sensor_badges_html_parts.append(
+                    f'<span class="badge badge-sensor">{sensor_display_text_for_badge}</span>'
+                )
+
+                # Prepare content for expander
+                expander_title = f"🛰️ {display_name} Details"
+                expander_content = _build_sensor_expander_content(sensor_info_from_meta)
+                sensor_details_expanders.append((expander_title, expander_content))
+
+        if sensor_badges_html_parts:
+            tech_info_html_parts.append(
+                f"""<div class="info-section" style="border-left-color: #00bcd4;">
+                                                <div class="info-title">🛰️ Sensors Referenced</div>
+                                                <p>{" ".join(sensor_badges_html_parts)}</p></div>"""
+            )
+
+        # Display expanders for sensor details
+        if sensor_details_expanders:
+            st.markdown("#### 🛰️ Detailed Sensor Specifications")
+            for title, content in sensor_details_expanders:
+                with st.expander(title):
+                    st.markdown(content, unsafe_allow_html=True)
+
+
+def _build_sensor_expander_content(sensor_info_from_meta: dict) -> str:
+    """Build content for sensor details expander."""
+    expander_content = ""
+
+    if sensor_info_from_meta:
+        expander_content += "**General Specifications:**\n"
+        for spec_key, spec_value in sensor_info_from_meta.items():
+            if spec_key not in ["display_name", "notes"]:
+                formatted_spec_key = spec_key.replace("_", " ").title()
+                if isinstance(spec_value, list):
+                    # If list of dicts (like spectral_bands)
+                    if all(isinstance(item, dict) for item in spec_value):
+                        expander_content += f"  - **{formatted_spec_key}:**\n"
+                        for item_dict in spec_value:
+                            band_details = []
+                            for k, v in item_dict.items():
+                                band_details.append(
+                                    f"{k.replace('_', ' ').title()}: {v}"
+                                )
+                            expander_content += f"    - {', '.join(band_details)}\n"
+                    else:  # Simple list
+                        expander_content += f"  - **{formatted_spec_key}:** {', '.join(map(str, spec_value))}\n"
+                elif isinstance(spec_value, dict):
+                    expander_content += f"  - **{formatted_spec_key}:**\n"
+                    for sub_k, sub_v in spec_value.items():
+                        expander_content += (
+                            f"    - {sub_k.replace('_', ' ').title()}: {sub_v}\n"
+                        )
+                else:
+                    expander_content += f"  - **{formatted_spec_key}:** {spec_value}\n"
+        if "notes" in sensor_info_from_meta:
+            expander_content += f"\n**Notes:** {sensor_info_from_meta['notes']}\n"
+    else:
+        expander_content += "_No detailed specifications found in sensor metadata._\n"
+
+    return expander_content
+
+
+def _render_initiative_methodology(
+    init_data: pd.Series, init_metadata: dict, sensors_meta: dict
+):
+    """Render methodological details for a specific initiative."""
+    st.markdown("#### 📋 Methodological Details")
+
+    methodology_section_html = []
+
+    # Approach and Algorithm
+    methodology_approach = str(init_metadata.get("methodology", "")).strip()
+    algorithm_info = str(
+        init_metadata.get("algorithm", init_metadata.get("classification_method", ""))
+    ).strip()
+    approach_algo_html = []
+    if methodology_approach and methodology_approach.lower() not in [
+        "not available",
+        "none",
+        "n/a",
+    ]:
+        approach_algo_html.append(
+            f"<p><strong>Approach:</strong> {methodology_approach}</p>"
+        )
+    if algorithm_info and algorithm_info.lower() not in [
+        "not available",
+        "none",
+        "n/a",
+    ]:
+        approach_algo_html.append(
+            f"<p><strong>Algorithm:</strong> {algorithm_info}</p>"
+        )
+    if approach_algo_html:
+        methodology_section_html.append(
+            f"""<div class="info-section">
+                                            <div class="info-title">🔬 Methodology</div>
+                                            {"".join(approach_algo_html)}</div>"""
+        )
+
+    # Provider & Sources
+    provider_info = str(init_metadata.get("provider", "")).strip()
+    source_info = str(init_metadata.get("source", "")).strip()
+    provider_source_html = []
+    if provider_info and provider_info.lower() not in ["not available", "none", "n/a"]:
+        provider_source_html.append(
+            f"<p><strong>Provider:</strong> {provider_info}</p>"
+        )
+    if source_info and source_info.lower() not in ["not available", "none", "n/a"]:
+        provider_source_html.append(
+            f"<p><strong>Data Source:</strong> {source_info}</p>"
+        )
+    if provider_source_html:
+        methodology_section_html.append(
+            f"""<div class="info-section" style="border-left-color: #28a745;">
+                                            <div class="info-title">🏢 Provider & Sources</div>
+                                            {"".join(provider_source_html)}</div>"""
+        )
+
+    # Update Information & Temporal Info
+    update_freq_info = str(init_metadata.get("update_frequency", "")).strip()
+    temporal_freq_init_data = str(init_data.get("Temporal_Frequency", "")).strip()
+    update_info_html_parts = []
+
+    if update_freq_info and update_freq_info.lower() not in [
+        "not available",
+        "none",
+        "n/a",
+    ]:
+        update_info_html_parts.append(
+            f"<p><strong>Update Frequency (Metadata):</strong> {update_freq_info}</p>"
+        )
+    if temporal_freq_init_data and temporal_freq_init_data.lower() not in [
+        "not available",
+        "none",
+        "n/a",
+    ]:
+        update_info_html_parts.append(
+            f"<p><strong>Temporal Frequency (Data):</strong> {temporal_freq_init_data}</p>"
+        )
+
+    if update_info_html_parts:
+        methodology_section_html.append(
+            f"""<div class="info-section" style="border-left-color: #fd7e14;">
+                                            <div class="info-title">🔄 Update & Temporal Info</div>
+                                            {"".join(update_info_html_parts)}</div>"""
+        )
+
+    # Detailed Sensor Information in methodology section
+    _render_detailed_sensor_info(init_data, sensors_meta, methodology_section_html)
+
+    # Temporal Coverage Analysis
+    _render_temporal_coverage(init_data, methodology_section_html)
+
+    if methodology_section_html:
+        st.markdown("".join(methodology_section_html), unsafe_allow_html=True)
+
+
+def _render_detailed_sensor_info(
+    init_data: pd.Series, sensors_meta: dict, methodology_section_html: list
+):
+    """Render detailed sensor information in methodology section."""
+    sensors_referenced_str = init_data.get("Sensors_Referenced", "[]")
+    try:
+        sensors_referenced_metadata = (
+            json.loads(sensors_referenced_str) if sensors_referenced_str else []
+        )
+    except json.JSONDecodeError:
+        sensors_referenced_metadata = []
+
+    if isinstance(sensors_referenced_metadata, list) and sensors_referenced_metadata:
+        detailed_sensor_info_html = [
+            '<div class="info-section" style="border-left-color: #6f42c1;"><div class="info-title">🛰️ Detailed Sensor Specifications</div>'
+        ]
+        for sensor_ref in sensors_referenced_metadata:
+            if isinstance(sensor_ref, dict):
+                sensor_key_from_ref = sensor_ref.get("sensor_key")
+
+                key_to_use_for_get = None
+                if isinstance(sensor_key_from_ref, str) and sensor_key_from_ref.strip():
+                    key_to_use_for_get = sensor_key_from_ref.strip()
+
+                sensor_details_from_meta = {}
+                display_name_for_sensor_heading = "Unknown Sensor"
+
+                if key_to_use_for_get:
+                    sensor_details_from_meta = sensors_meta.get(key_to_use_for_get, {})
+                    display_name_for_sensor_heading = sensor_details_from_meta.get(
+                        "display_name", key_to_use_for_get
+                    )
+                elif sensor_key_from_ref is not None:
+                    display_name_for_sensor_heading = (
+                        f"Invalid Sensor Key ({str(sensor_key_from_ref)})"
+                    )
+
+                detailed_sensor_info_html.append(
+                    f"<h5 style='margin-top: 1rem; color: #6f42c1;'>{display_name_for_sensor_heading}</h5><ul style='list-style-type: disc; margin-left: 20px;'>"
+                )
+
+                # Add sensor details
+                sensor_specs = [
+                    "sensor_family",
+                    "platform_name",
+                    "sensor_type_description",
+                    "agency",
+                    "status",
+                    "revisit_time_days",
+                ]
+                for spec in sensor_specs:
+                    spec_value = sensor_details_from_meta.get(spec)
+                    if spec_value:
+                        spec_label = spec.replace("_", " ").title()
+                        if spec == "revisit_time_days":
+                            detailed_sensor_info_html.append(
+                                f"<li><strong>Revisit Time:</strong> {spec_value} days</li>"
+                            )
+                        else:
+                            detailed_sensor_info_html.append(
+                                f"<li><strong>{spec_label}:</strong> {spec_value}</li>"
+                            )
+
+                detailed_sensor_info_html.append("</ul>")
+        detailed_sensor_info_html.append("</div>")
+        methodology_section_html.append("".join(detailed_sensor_info_html))
+
+
+def _render_temporal_coverage(init_data: pd.Series, methodology_section_html: list):
+    """Render temporal coverage analysis."""
+    available_years_str = init_data.get("Available_Years_List", "[]")
+    try:
+        available_years_metadata = (
+            json.loads(available_years_str) if available_years_str else []
+        )
+    except json.JSONDecodeError:
+        available_years_metadata = []
+
+    processed_years_as_int = []
+    if isinstance(available_years_metadata, list):
+        for year in available_years_metadata:
+            try:
+                processed_years_as_int.append(int(year))
+            except (ValueError, TypeError):
+                continue
+
+    if processed_years_as_int:
+        min_year = min(processed_years_as_int)
+        max_year = max(processed_years_as_int)
+        year_range = f"{min_year} - {max_year}"
+        temporal_coverage_html = f"<p><strong>🕒 Temporal Coverage:</strong> {year_range} (from metadata)</p>"
+    else:
+        temporal_coverage_html = (
+            "<p><strong>🕒 Temporal Coverage:</strong> Not available</p>"
+        )
+
+    methodology_section_html.append(
+        f"""<div class="info-section" style="border-left-color: #fd7e14;">
+                                        <div class="info-title">📅 Temporal Coverage</div>
+                                        {temporal_coverage_html}
+                                      </div>"""
+    )
+
+
+def _render_initiative_classification_details(init_data: pd.Series):
+    """Render classification details for a specific initiative."""
+    st.markdown("#### 🏷️ Classification Details")
+
+    # Get class legend data
+    class_legend_json_str = init_data.get("Class_Legend", "[]")
+
+    # Use new modular component for LULC classes
+    lulc_classes.render_lulc_classes_section(class_legend_json_str)
+
+
+def run():
+    """
+    Main orchestrator function for the overview dashboard.
+
+    This function coordinates all components of the overview page:
+    1. Data loading and validation
+    2. UI styling
+    3. Filters rendering
+    4. Key metrics display
+    5. Detailed exploration interface
+    """
+    # Load data from session state
+    if "metadata" not in st.session_state or "df_interpreted" not in st.session_state:
+        st.error(
+            "❌ Interpreted data not found in session state. Ensure app.py loads data correctly."
+        )
+        return  # Stop if data isn't loaded
+
+    df = st.session_state.get("df_interpreted", pd.DataFrame())
+    meta = st.session_state.get("metadata", {})
+
+    # --- Load Sensor Metadata ---
+    sensors_meta = {}
+    try:
+        from scripts.utilities.json_interpreter import _load_jsonc_file
+
+        # Correct path to sensors_metadata.jsonc relative to app.py or a known base directory
+        # Assuming current_dir is dashboard-iniciativas/
+        current_dir = Path.cwd()
+        sensors_metadata_path = current_dir / "data" / "json" / "sensors_metadata.jsonc"
+        if sensors_metadata_path.exists():
+            sensors_meta_loaded = _load_jsonc_file(sensors_metadata_path)
+            if isinstance(
+                sensors_meta_loaded, dict
+            ):  # Ensure it loaded as a dictionary
+                sensors_meta = sensors_meta_loaded
+                st.session_state.sensors_meta = (
+                    sensors_meta  # Store in session state if needed by other parts
+                )
+            else:
+                sensors_meta = {}
+        else:
+            st.warning(f"⚠️ Sensors metadata file not found at {sensors_metadata_path}")
+    except Exception as e:
+        st.warning(f"⚠️ Error loading sensors metadata: {e}")
+        sensors_meta = {}
+
+    # Load name to acronym mapping
+    nome_to_sigla = meta.get("Nome_to_Sigla", {})
+
+    # Title and introduction
+    st.title("🌍 Visão Geral das Iniciativas LULC")
+    st.markdown(
+        "Explore and analyze land use and land cover (LULC) classification initiatives with rich interactive features."
+    )
+    st.markdown("---")
+
+    # Render initiative filters and apply them
+    filter_values = filters.render_initiative_filters(df)
+    filtered_df = filters.apply_filters(df, *filter_values)
+
+    # Display filter results
+    filters.display_filter_results(len(df), len(filtered_df))
+
+    # Store filtered data in session state
+    st.session_state.filtered_df = filtered_df
+
+    # Check if no data after filtering
+    if filtered_df.empty:
+        st.warning(
+            "⚠️ No initiatives match the selected filters. Adjust the filters to view data."
+        )
+        st.stop()
+    st.subheader("📈 Key Aggregated Metrics")
+
+    # Custom CSS for modern metric cards
+    st.markdown(
+        """
+    <style>
+    .metric-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        color: white;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        border: 1px solid rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        margin: 0.5rem 0;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    }
+    .metric-card.accuracy { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .metric-card.resolution { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .metric-card.classes { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .metric-card.global { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .metric-card.agri-classes { background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%); } /* New style for agri classes */
+
+    .metric-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .metric-value {
+        font-size: 2.8rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .metric-label {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .metric-sublabel {
+        font-size: 0.9rem;
+        opacity: 0.7;
+        margin-top: 0.3rem;
+    }
+    .badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        margin: 0.2rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+    }
+    .badge-type { background: #e3f2fd; color: #1976d2; border: 1px solid #bbdefb; }
+    .badge-methodology { background: #f3e5f5; color: #7b1fa2; border: 1px solid #ce93d8; }
+    .badge-scope { background: #e8f5e8; color: #388e3c; border: 1px solid #a5d6a7; }
+    .badge-years { background: #fff3e0; color: #f57c00; border: 1px solid #ffcc02; }
+    .badge-sensor { background: #e0f7fa; color: #00796b; border: 1px solid #b2dfdb; margin-right: 0.5rem; margin-bottom: 0.5rem; } /* Added style for sensor badges */
+    .info-section {
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #28a745;
+    }
+    }
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        # Calculate mean only on numeric 'Accuracy (%)' data, dropping NaNs
+        avg_accuracy_series = pd.to_numeric(
+            filtered_df["Accuracy (%)"], errors="coerce"
+        ).dropna()  # Changed "Accuracy" to "Accuracy (%)"
+        if not avg_accuracy_series.empty:
+            avg_accuracy = avg_accuracy_series.mean()
+            st.markdown(
+                f"""
+            <div class="metric-card accuracy">
+                <span class="metric-icon">🎯</span>
+                <div class="metric-value">{avg_accuracy:.1f}%</div>
+                <div class="metric-label">Average Accuracy</div>
+                <div class="metric-sublabel">Across filtered initiatives</div>
+            </div>
+            """,
+                unsafe_allow_html=True,
+            )
+
+    with col2:
+        # Calculate mean only on numeric 'Resolution' data, dropping NaNs
+        avg_resolution_series = pd.to_numeric(
+            filtered_df["Resolution"], errors="coerce"
+        ).dropna()
+        if not avg_resolution_series.empty:
+            avg_resolution = avg_resolution_series.mean()
+            st.markdown(
+                f"""
+            <div class="metric-card resolution">
+                <span class="metric-icon">🔬</span>
+                <div class="metric-value">{avg_resolution:.0f}m</div>
+                <div class="metric-label">Average Resolution</div>
+                <div class="metric-sublabel">Spatial precision</div>
+            </div>
+            """,
+                unsafe_allow_html=True,
+            )
+
+    with col3:
+        total_classes = 0
+        if "Classes" in filtered_df.columns:
+            classes_series = pd.to_numeric(
+                filtered_df["Classes"], errors="coerce"
+            ).dropna()
+            if not classes_series.empty:
+                total_classes = classes_series.sum()
+        elif "Number_of_Classes" in filtered_df.columns:
+            num_classes_series = pd.to_numeric(
+                filtered_df["Number_of_Classes"], errors="coerce"
+            ).dropna()
+            if not num_classes_series.empty:
+                total_classes = num_classes_series.sum()
+
+        if total_classes > 0:  # Only show if there are classes to sum
+            st.markdown(
+                f"""
+            <div class="metric-card classes">
+                <span class="metric-icon">🏷️</span>
+                <div class="metric-value">{total_classes}</div>
+                <div class="metric-label">Total Classes</div>
+                <div class="metric-sublabel">Classification categories</div>
+            </div>
+            """,
+                unsafe_allow_html=True,
+            )
+
+    with col4:
+        if "Type" in filtered_df.columns:
+            global_initiatives = len(filtered_df[filtered_df["Type"] == "Global"])
+            if global_initiatives > 0:  # Only show if there are global initiatives
+                st.markdown(
+                    f"""
+                <div class="metric-card global">
+                    <span class="metric-icon">🌍</span>
+                    <div class="metric-value">{global_initiatives}</div>
+                    <div class="metric-label">Global Initiatives</div>
+                    <div class="metric-sublabel">Worldwide coverage</div>
+                </div>
+                """,
+                    unsafe_allow_html=True,
+                )
+
+    st.markdown("---")
+
+    st.subheader("🔍 Detailed Exploration by Initiative")
+
+    # CSS for modern initiative details
+    st.markdown(
+        """
+    <style>
+    .initiative-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 15px 15px 0 0;
+        margin: 1rem 0 0 0;
+    }
+    .initiative-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .detail-card {
+        background: white;
+        border: 1px solid #e1e5e9;
+        border-radius: 0 0 15px 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+    .mini-metric {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+        border-left: 4px solid #007bff;
+    }
+    .mini-metric-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #007bff;
+        margin: 0.3rem 0;
+    }
+    .mini-metric-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    .badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        margin: 0.2rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+    }
+    .badge-type { background: #e3f2fd; color: #1976d2; border: 1px solid #bbdefb; }
+    .badge-methodology { background: #f3e5f5; color: #7b1fa2; border: 1px solid #ce93d8; }
+    .badge-scope { background: #e8f5e8; color: #388e3c; border: 1px solid #a5d6a7; }
+    .badge-years { background: #fff3e0; color: #f57c00; border: 1px solid #ffcc02; }
+    .badge-sensor { background: #e0f7fa; color: #00796b; border: 1px solid #b2dfdb; margin-right: 0.5rem; margin-bottom: 0.5rem; } /* Added style for sensor badges */
+    .info-section {
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #28a745;
+    }
+    .info-title {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
+
+    # Create formatted options for the selectbox
+    formatted_options = []
+    # Create a reverse mapping from formatted string to original name for easy lookup
+    formatted_to_original_name = {}
+
+    if not filtered_df.empty and "Name" in filtered_df.columns:
+        for name in filtered_df["Name"].tolist():
+            acronym = nome_to_sigla.get(
+                name, "N/A"
+            )  # Get acronym, default to N/A if not found
+            formatted_display = f"{name} ({acronym})"
+            formatted_options.append(formatted_display)
+            formatted_to_original_name[formatted_display] = name
+
+    selected_initiative_formatted = st.selectbox(
+        "Select an initiative to see details:",
+        options=formatted_options,  # Use the new formatted options
+        help="Choose an initiative for detailed information",
+        key="overview_detailed_select",
+    )
+
+    # Get the original initiative name from the formatted selection
+    selected_initiative_detailed = formatted_to_original_name.get(
+        selected_initiative_formatted
+    )
+
+    if selected_initiative_detailed:
+        init_data = filtered_df[
+            filtered_df["Name"] == selected_initiative_detailed
+        ].iloc[0]
+        init_metadata = meta.get(selected_initiative_detailed, {})
+        # Get the acronym for the selected initiative
+        initiative_acronym = nome_to_sigla.get(
+            selected_initiative_detailed, selected_initiative_detailed[:10]
+        )
+
+        # Modern initiative header
+        st.markdown(
+            f"""
+        <div class="initiative-header">
+            <h2 class="initiative-title">🛰️ {initiative_acronym}</h2>
+            <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">{selected_initiative_detailed}</p>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+        st.markdown("""<div class="detail-card">""", unsafe_allow_html=True)
+
+        col1_detail, col2_detail = st.columns([2, 3])
+
+        with col1_detail:
+            st.markdown("#### 📊 Key Metrics")
+
+            # Modern metric grid - Conditional rendering
+            metrics_html_parts = []
+            accuracy_val = pd.to_numeric(
+                init_data.get("Accuracy (%)"), errors="coerce"
+            )  # Corrected key to 'Accuracy (%)'
+            if pd.notna(accuracy_val):
+                metrics_html_parts.append(
+                    f"""<div class="mini-metric">
+                    <div class="mini-metric-value">🎯 {accuracy_val:.1f}%</div>
+                    <div class="mini-metric-label">Accuracy</div></div>"""
+                )
+
+            resolution_val = pd.to_numeric(init_data.get("Resolution"), errors="coerce")
+            if pd.notna(resolution_val):
+                metrics_html_parts.append(
+                    f"""<div class="mini-metric">
+                    <div class="mini-metric-value">🔬 {resolution_val:.0f}m</div>
+                    <div class="mini-metric-label">Resolution</div></div>"""
+                )
+
+            classes_val_str = str(
+                init_data.get("Classes", init_data.get("Number_of_Classes", ""))
+            ).strip()
+            classes_val = pd.to_numeric(classes_val_str, errors="coerce")
+            if (
+                pd.notna(classes_val) and classes_val_str
+            ):  # Ensure original was not empty
+                metrics_html_parts.append(
+                    f"""<div class="mini-metric">
+                    <div class="mini-metric-value">🏷️ {classes_val:.0f}</div>
+                    <div class="mini-metric-label">Classes</div></div>"""
+                )
+
+            frequency_val = str(init_data.get("Temporal_Frequency", "")).strip()
+            if (
+                frequency_val
+                and frequency_val.lower() != "n/a"
+                and frequency_val.lower() != "none"
+            ):
+                metrics_html_parts.append(
+                    f"""<div class="mini-metric">
+                    <div class="mini-metric-value">📅 {frequency_val}</div>
+                    <div class="mini-metric-label">Frequency</div></div>"""
+                )
+
+            if metrics_html_parts:
+                st.markdown(
+                    f"""<div class="metric-grid">{"".join(metrics_html_parts)}</div>""",
+                    unsafe_allow_html=True,
+                )
+
+            st.markdown("#### ⚙️ Technical Information")
+            tech_info_html_parts = []
+            type_val = str(init_data.get("Type", "")).strip()
+            if type_val and type_val.lower() != "n/a" and type_val.lower() != "none":
+                tech_info_html_parts.append(
+                    f"""<div class="info-section" style="border-left-color: #17a2b8;">
+                                                    <div class="info-title">🏷️ Type</div>
+                                                    <p>{type_val}</p></div>"""
+                )
+
+            methodology_val = str(init_data.get("Methodology", "")).strip()
+            if (
+                methodology_val
+                and methodology_val.lower() != "n/a"
+                and methodology_val.lower() != "none"
+            ):
+                tech_info_html_parts.append(
+                    f"""<div class="info-section" style="border-left-color: #6f42c1;">
+                                                    <div class="info-title">🔬 Methodology</div>
+                                                    <p>{methodology_val}</p></div>"""
+                )
+
+            scope_val = str(
+                init_data.get("Coverage", "")
+            ).strip()  # Using Coverage for scope
+            if scope_val and scope_val.lower() != "n/a" and scope_val.lower() != "none":
+                tech_info_html_parts.append(
+                    f"""<div class="info-section" style="border-left-color: #28a745;">
+                                                    <div class="info-title">🌍 Scope</div>
+                                                    <p>{scope_val}</p></div>"""
+                )
+
+            # Get available_years from DataFrame (already processed as JSON string then list)
+            available_years_str_from_df = init_data.get("Available_Years_List", "[]")
+            try:
+                available_years_list = (
+                    json.loads(available_years_str_from_df)
+                    if available_years_str_from_df
+                    else []
+                )
+            except json.JSONDecodeError:
+                available_years_list = []
+
+            if isinstance(available_years_list, list) and available_years_list:
+                # sorted_years_str = ", ".join(sorted(map(str, set(available_years_list)))) # Old way
+                formatted_years_str = _format_year_ranges(
+                    available_years_list
+                )  # New way
+                if formatted_years_str:  # Check if the formatted string is not empty
+                    tech_info_html_parts.append(
+                        f"""<div class="info-section" style="border-left-color: #fd7e14;">
+                                                        <div class="info-title">📅 Available Years</div>
+                                                        <p>{formatted_years_str}</p></div>"""
+                    )
+
+            # Display Sensors Referenced using info-section and badges inside it
+            sensors_referenced_str_from_df = init_data.get("Sensors_Referenced", "[]")
+            try:
+                sensors_referenced_list_for_display = (
+                    json.loads(sensors_referenced_str_from_df)
+                    if sensors_referenced_str_from_df
+                    else []
+                )
+            except json.JSONDecodeError:
+                sensors_referenced_list_for_display = []
+
+            if (
+                isinstance(sensors_referenced_list_for_display, list)
+                and sensors_referenced_list_for_display
+            ):
+                sensor_badges_html_parts = (
+                    []
+                )  # Keep using badges for individual sensors within the section
+                sensor_details_expanders = []  # For expanders
+
+                for sensor_ref_obj in sensors_referenced_list_for_display:
+                    current_sensor_key_str = None  # Initialize
+                    years_used_list = []
+
+                    if isinstance(sensor_ref_obj, dict):
+                        _key_from_dict = sensor_ref_obj.get("sensor_key")
+                        if _key_from_dict is not None:
+                            current_sensor_key_str = str(
+                                _key_from_dict
+                            )  # Ensure string
+                        years_used_list = sensor_ref_obj.get("years_used", [])
+                    elif isinstance(sensor_ref_obj, str):
+                        current_sensor_key_str = sensor_ref_obj  # Already a string
+
+                    # Proceed only if current_sensor_key_str is a valid (non-empty) string
+                    if (
+                        current_sensor_key_str
+                    ):  # Check if current_sensor_key_str is not None and not empty
+                        sensor_info_from_meta = sensors_meta.get(
+                            str(current_sensor_key_str), {}
+                        )
+                        display_name = sensor_info_from_meta.get(
+                            "display_name",
+                            str(current_sensor_key_str).replace("_", " ").title(),
+                        )
+
+                        sensor_display_text_for_badge = display_name
+                        if years_used_list and isinstance(years_used_list, list):
+                            years_used_str = _format_year_ranges(
+                                years_used_list
+                            )  # Use the formatter
+                            sensor_display_text_for_badge += (
+                                f" (Years: {years_used_str})"
+                            )
+                        sensor_badges_html_parts.append(
+                            f'<span class="badge badge-sensor">{sensor_display_text_for_badge}</span>'
+                        )  # Prepare content for expander
+                        expander_title = f"🛰️ {display_name} Details"
+                        expander_content = ""
+
+                        # Add all details from sensors_meta for this sensor
+                        if (
+                            sensor_info_from_meta
+                        ):  # Check if sensor_info_from_meta is not empty
+                            expander_content += "**General Specifications:**\n"
+                            for spec_key, spec_value in sensor_info_from_meta.items():
+                                if spec_key not in ["display_name", "notes"]:
+                                    formatted_spec_key = spec_key.replace(
+                                        "_", " "
+                                    ).title()
+                                    if isinstance(spec_value, list):
+                                        # If list of dicts (like spectral_bands)
+                                        if all(
+                                            isinstance(item, dict)
+                                            for item in spec_value
+                                        ):
+                                            expander_content += (
+                                                f"  - **{formatted_spec_key}:**\n"
+                                            )
+                                            for item_dict in spec_value:
+                                                band_details = []
+                                                for k, v in item_dict.items():
+                                                    band_details.append(
+                                                        f"{k.replace('_', ' ').title()}: {v}"
+                                                    )
+                                                expander_content += (
+                                                    f"    - {', '.join(band_details)}\n"
+                                                )
+                                        else:  # Simple list
+                                            expander_content += f"  - **{formatted_spec_key}:** {', '.join(map(str, spec_value))}\n"
+                                    elif isinstance(spec_value, dict):
+                                        expander_content += (
+                                            f"  - **{formatted_spec_key}:**\n"
+                                        )
+                                        for sub_k, sub_v in spec_value.items():
+                                            expander_content += f"    - {sub_k.replace('_', ' ').title()}: {sub_v}\n"
+                                    else:
+                                        expander_content += f"  - **{formatted_spec_key}:** {spec_value}\n"
+                            if "notes" in sensor_info_from_meta:
+                                expander_content += (
+                                    f"\n**Notes:** {sensor_info_from_meta['notes']}\n"
+                                )
+                        else:
+                            expander_content += "_No detailed specifications found in sensor metadata._\n"
+
+                        sensor_details_expanders.append(
+                            (expander_title, expander_content)
+                        )
+                    # else: current_sensor_key_str was None or empty, so this sensor_ref_obj is skipped
+
+                if sensor_badges_html_parts:
+                    tech_info_html_parts.append(
+                        f"""<div class="info-section" style="border-left-color: #00bcd4;">
+                                                        <div class="info-title">🛰️ Sensors Referenced</div>
+                                                        <p>{" ".join(sensor_badges_html_parts)}</p></div>"""
+                    )
+
+                # Display expanders for sensor details
+                if sensor_details_expanders:
+                    st.markdown("#### 🛰️ Detailed Sensor Specifications")
+                    for title, content in sensor_details_expanders:
+                        with st.expander(title):
+                            st.markdown(
+                                content, unsafe_allow_html=True
+                            )  # Allow markdown for formatting
+
+            if tech_info_html_parts:
+                st.markdown(
+                    f"""<div style="margin: 1rem 0;">{"".join(tech_info_html_parts)}</div>""",
+                    unsafe_allow_html=True,
+                )
+
+        with col2_detail:
+            st.markdown("#### 📋 Methodological Details")
+
+            methodology_section_html = []
+
+            # Approach and Algorithm
             methodology_approach = str(init_metadata.get("methodology", "")).strip()
-            algorithm_info = str(init_metadata.get("algorithm", "")).strip()
-
+            algorithm_info = str(
+                init_metadata.get(
+                    "algorithm", init_metadata.get("classification_method", "")
+                )
+            ).strip()
+            approach_algo_html = []
             if methodology_approach and methodology_approach.lower() not in [
                 "not available",
                 "none",
                 "n/a",
             ]:
-                st.success(f"**Abordagem:** {methodology_approach}")
-
+                approach_algo_html.append(
+                    f"<p><strong>Approach:</strong> {methodology_approach}</p>"
+                )
             if algorithm_info and algorithm_info.lower() not in [
                 "not available",
                 "none",
                 "n/a",
             ]:
-                st.success(f"**Algoritmo:** {algorithm_info}")
+                approach_algo_html.append(
+                    f"<p><strong>Algorithm:</strong> {algorithm_info}</p>"
+                )
+            if approach_algo_html:
+                methodology_section_html.append(
+                    f"""<div class="info-section">
+                                                    <div class="info-title">🔬 Methodology</div>
+                                                    {"".join(approach_algo_html)}</div>"""
+                )
 
-            # Provedor e fontes
+            # Provider & Sources
             provider_info = str(init_metadata.get("provider", "")).strip()
             source_info = str(init_metadata.get("source", "")).strip()
-
+            provider_source_html = []
             if provider_info and provider_info.lower() not in [
                 "not available",
                 "none",
                 "n/a",
             ]:
-                st.info(f"**Provedor:** {provider_info}")
-
+                provider_source_html.append(
+                    f"<p><strong>Provider:</strong> {provider_info}</p>"
+                )
             if source_info and source_info.lower() not in [
                 "not available",
                 "none",
                 "n/a",
             ]:
-                st.info(f"**Fonte de Dados:** {source_info}")
+                provider_source_html.append(
+                    f"<p><strong>Data Source:</strong> {source_info}</p>"
+                )
+            if provider_source_html:
+                methodology_section_html.append(
+                    f"""<div class="info-section" style="border-left-color: #28a745;">
+                                                    <div class="info-title">🏢 Provider & Sources</div>
+                                                    {"".join(provider_source_html)}</div>"""
+                )
 
-            # Anos disponíveis
+            # Update Information & Sensors Referenced (Combined Section)
+            update_freq_info = str(init_metadata.get("update_frequency", "")).strip()
+            temporal_freq_init_data = str(
+                init_data.get("Temporal_Frequency", "")
+            ).strip()
+            # Initialize sensors_referenced_metadata earlier to ensure it's available
+            # sensors_referenced_metadata = init_metadata.get('sensors_referenced', [])
+            # Now, get it from the DataFrame (it was stored as a JSON string)
+            sensors_referenced_str = init_data.get("Sensors_Referenced", "[]")
+            try:
+                sensors_referenced_metadata = (
+                    json.loads(sensors_referenced_str) if sensors_referenced_str else []
+                )
+            except json.JSONDecodeError:
+                sensors_referenced_metadata = []  # Default to empty list on error
+
+            update_info_html_parts = []
+
+            if update_freq_info and update_freq_info.lower() not in [
+                "not available",
+                "none",
+                "n/a",
+            ]:
+                update_info_html_parts.append(
+                    f"<p><strong>Update Frequency (Metadata):</strong> {update_freq_info}</p>"
+                )
+            if temporal_freq_init_data and temporal_freq_init_data.lower() not in [
+                "not available",
+                "none",
+                "n/a",
+            ]:
+                update_info_html_parts.append(
+                    f"<p><strong>Temporal Frequency (Data):</strong> {temporal_freq_init_data}</p>"
+                )
+
+            # Display Sensors Referenced in this section as well, if not already covered or if more detail is needed here
+            if (
+                isinstance(sensors_referenced_metadata, list)
+                and sensors_referenced_metadata
+            ):
+                sensors_display_parts = []
+                for sensor_ref in sensors_referenced_metadata:
+                    if isinstance(sensor_ref, dict):
+                        sensor_key_from_dict = sensor_ref.get("sensor_key")
+                        sensor_key = (
+                            str(sensor_key_from_dict)
+                            if sensor_key_from_dict is not None
+                            else None
+                        )  # Ensure string or None
+                        years_used = sensor_ref.get("years_used")
+
+                        # Get display_name from sensors_meta for this section as well
+                        sensor_details_from_meta = {}
+                        if sensor_key:  # Only proceed if sensor_key is a valid string
+                            sensor_details_from_meta = sensors_meta.get(sensor_key, {})
+                        display_name = sensor_details_from_meta.get(
+                            "display_name",
+                            sensor_key if sensor_key else "Unknown Sensor",
+                        )
+
+                        sensor_detail_display = display_name
+                        if years_used and isinstance(years_used, list):
+                            years_used_str = ", ".join(
+                                map(str, sorted(list(set(years_used))))
+                            )
+                            sensor_detail_display += f" (Used in: {years_used_str})"
+                        sensors_display_parts.append(
+                            f"<li>{sensor_detail_display}</li>"
+                        )
+
+            # New section for detailed sensor information
+            if (
+                isinstance(sensors_referenced_metadata, list)
+                and sensors_referenced_metadata
+            ):
+                detailed_sensor_info_html = [
+                    '<div class="info-section" style="border-left-color: #6f42c1;"><div class="info-title">🛰️ Detailed Sensor Specifications</div>'
+                ]
+                for sensor_ref in sensors_referenced_metadata:
+                    if isinstance(sensor_ref, dict):
+                        sensor_key_from_ref = sensor_ref.get("sensor_key")
+
+                        key_to_use_for_get = None
+                        if (
+                            isinstance(sensor_key_from_ref, str)
+                            and sensor_key_from_ref.strip()
+                        ):
+                            key_to_use_for_get = sensor_key_from_ref.strip()
+
+                        sensor_details_from_meta = {}
+                        display_name_for_sensor_heading = "Unknown Sensor"
+
+                        if (
+                            key_to_use_for_get
+                        ):  # This ensures key_to_use_for_get is a non-empty string
+                            sensor_details_from_meta = sensors_meta.get(
+                                key_to_use_for_get, {}
+                            )
+                            display_name_for_sensor_heading = (
+                                sensor_details_from_meta.get(
+                                    "display_name", key_to_use_for_get
+                                )
+                            )
+                        elif (
+                            sensor_key_from_ref is not None
+                        ):  # Original key was present but not a valid string
+                            display_name_for_sensor_heading = (
+                                f"Invalid Sensor Key ({str(sensor_key_from_ref)})"
+                            )
+                        # else: sensor_key_from_ref was None, display_name_for_sensor_heading remains 'Unknown Sensor'
+
+                        detailed_sensor_info_html.append(
+                            f"<h5 style='margin-top: 1rem; color: #6f42c1;'>{display_name_for_sensor_heading}</h5><ul style='list-style-type: disc; margin-left: 20px;'>"
+                        )
+
+                        family = sensor_details_from_meta.get("sensor_family")
+                        platform = sensor_details_from_meta.get("platform_name")
+                        sensor_type = sensor_details_from_meta.get(
+                            "sensor_type_description"
+                        )
+                        agency = sensor_details_from_meta.get("agency")
+                        status = sensor_details_from_meta.get("status")
+                        revisit = sensor_details_from_meta.get("revisit_time_days")
+
+                        if family:
+                            detailed_sensor_info_html.append(
+                                f"<li><strong>Family:</strong> {family}</li>"
+                            )
+                        if platform:
+                            detailed_sensor_info_html.append(
+                                f"<li><strong>Platform:</strong> {platform}</li>"
+                            )
+                        if sensor_type:
+                            detailed_sensor_info_html.append(
+                                f"<li><strong>Type:</strong> {sensor_type}</li>"
+                            )
+                        if agency:
+                            detailed_sensor_info_html.append(
+                                f"<li><strong>Agency:</strong> {agency}</li>"
+                            )
+                        if status:
+                            detailed_sensor_info_html.append(
+                                f"<li><strong>Status:</strong> {status}</li>"
+                            )
+                        if revisit:
+                            detailed_sensor_info_html.append(
+                                f"<li><strong>Revisit Time:</strong> {revisit} days</li>"
+                            )
+
+                        detailed_sensor_info_html.append("</ul>")
+                detailed_sensor_info_html.append("</div>")
+                # Ensure this is appended to methodology_section_html, not update_info_html_parts, to place it correctly.
+                methodology_section_html.append("".join(detailed_sensor_info_html))
+
+            if update_info_html_parts:  # This section is for update frequency, etc.
+                methodology_section_html.append(
+                    f"""<div class="info-section" style="border-left-color: #fd7e14;">
+                                                    <div class="info-title">🔄 Update & Temporal Info</div>
+                                                    {"".join(update_info_html_parts)}</div>"""
+                )
+
+            # Detailed Temporal Coverage Analysis from init_metadata['available_years']
+            # available_years_metadata = init_metadata.get('available_years', [])
+            # Get available_years_list from the DataFrame instead
+            # available_years_metadata = init_data.get('Available_Years_List', [])
+            # Parse Available_Years_List from JSON string
             available_years_str = init_data.get("Available_Years_List", "[]")
             try:
-                available_years_list = (
+                available_years_metadata = (
                     json.loads(available_years_str) if available_years_str else []
                 )
-                if isinstance(available_years_list, list) and available_years_list:
-                    formatted_years_str = _format_year_ranges(available_years_list)
-                    if formatted_years_str:
-                        st.warning(f"📅 **Anos Disponíveis:** {formatted_years_str}")
             except json.JSONDecodeError:
-                pass
+                available_years_metadata = []
+            # sensors_referenced_metadata is already defined above
 
-        # Seção de detalhes de classificação - VERSÃO MODERNA E RESPONSIVA
-        with st.expander("🏷️ **Detalhes de Classificação**", expanded=False):
-            col1, col2 = st.columns([1, 2])
+            processed_years_as_int = []
+            if isinstance(available_years_metadata, list):
+                for year in available_years_metadata:
+                    try:
+                        processed_years_as_int.append(int(year))
+                    except (ValueError, TypeError):
+                        continue  # Skip invalid year values
 
-            with col1:
-                # Métricas principais em cards
-                num_total_classes = pd.to_numeric(
-                    init_data.get("Classes", init_data.get("Number_of_Classes", "N/A")),
-                    errors="coerce",
-                )
-                if pd.notna(num_total_classes):
-                    st.metric(
-                        "🔢 Total de Classes",
-                        f"{num_total_classes:.0f}",
-                        help="Número total de classes de cobertura da terra",
-                    )
-
-                # Classes agrícolas
-                num_agri_classes = pd.to_numeric(
-                    init_data.get("Num_Agri_Classes", "N/A"), errors="coerce"
-                )
-                if pd.notna(num_agri_classes):
-                    st.metric(
-                        "🌾 Classes Agrícolas",
-                        f"{num_agri_classes:.0f}",
-                        help="Número de classes relacionadas à agricultura",
-                    )
-
-            with col2:
-                # Legenda de classes em formato responsivo
-                class_legend_str = init_data.get("Class_Legend", "[]")
-                try:
-                    class_legend_list = (
-                        json.loads(class_legend_str)
-                        if isinstance(class_legend_str, str)
-                        else class_legend_str
-                    )
-                    if isinstance(class_legend_list, list) and class_legend_list:
-                        st.markdown("**🌍 Classes de Cobertura da Terra:**")
-
-                        # Organizar classes em colunas para melhor layout
-                        if len(class_legend_list) <= 5:
-                            # Para poucas classes, mostrar em lista simples
-                            for cls in class_legend_list:
-                                st.markdown(f"• {cls}")
-                        else:
-                            # Para muitas classes, usar acordeão
-                            with st.container():
-                                # Mostrar primeiras 10 classes
-                                primary_classes = class_legend_list[:10]
-
-                                # Classes principais em duas colunas
-                                subcol1, subcol2 = st.columns(2)
-                                mid_point = len(primary_classes) // 2
-
-                                with subcol1:
-                                    for cls in primary_classes[:mid_point]:
-                                        st.markdown(f"• **{cls}**")
-
-                                with subcol2:
-                                    for cls in primary_classes[mid_point:]:
-                                        st.markdown(f"• **{cls}**")
-
-                                # Mostrar classes adicionais se houver
-                                if len(class_legend_list) > 10:
-                                    remaining_classes = class_legend_list[10:]
-                                    with st.expander(
-                                        f"➕ Ver mais {len(remaining_classes)} classes",
-                                        expanded=False,
-                                    ):
-                                        # Organizar classes restantes em 3 colunas
-                                        num_cols = min(3, len(remaining_classes))
-                                        cols = st.columns(num_cols)
-
-                                        for i, cls in enumerate(remaining_classes):
-                                            col_idx = i % num_cols
-                                            with cols[col_idx]:
-                                                st.markdown(f"• {cls}")
-
-                except (json.JSONDecodeError, TypeError):
-                    st.info("⚠️ Informações de classificação não disponíveis")
-
-        # Informações adicionais em componente colapsável
-        additional_info = []
-        if "Methodology" in init_data and init_data["Methodology"] != "N/A":
-            additional_info.append(f"**🔬 Metodologia:** {init_data['Methodology']}")
-
-        if "Reference" in init_data and init_data["Reference"] != "N/A":
-            additional_info.append(f"**📚 Referência:** {init_data['Reference']}")
-
-        # Nova seção: Informações dos Sensores
-        with st.expander("🛰️ **Informações de Sensores e Satélites**", expanded=False):
-            # Primeiro, verificar se há dados de sensores referenciados
-            sensors_referenced = init_data.get("Sensors_Referenced", "")
-            source_column = init_data.get("Source", "")
-
-            if sensors_referenced and str(sensors_referenced).strip().lower() not in [
-                "n/a",
-                "none",
-                "",
-                "[]",
-            ]:
-                # Processar dados estruturados de sensores
-                try:
-                    import json
-
-                    sensors_list = (
-                        json.loads(sensors_referenced)
-                        if isinstance(sensors_referenced, str)
-                        else sensors_referenced
-                    )
-                    if sensors_list and isinstance(sensors_list, list):
-                        st.markdown(f"**📡 Fonte de Dados:** {source_column}")
-
-                        # Processar cada sensor referenciado
-                        sensor_info_found = False
-                        for sensor_ref in sensors_list:
-                            if (
-                                isinstance(sensor_ref, dict)
-                                and "sensor_key" in sensor_ref
-                            ):
-                                sensor_key = sensor_ref["sensor_key"]
-
-                                # Buscar metadados do sensor
-                                if sensors_meta and sensor_key in sensors_meta:
-                                    sensor_info = sensors_meta[sensor_key]
-                                    sensor_info_found = True
-
-                                    # Mostrar nome do sensor
-                                    if "display_name" in sensor_info:
-                                        st.markdown(
-                                            f"**🛰️ Sensor:** {sensor_info['display_name']}"
-                                        )
-
-                                    # Criar layout em colunas para organizar informações
-                                    sensor_col1, sensor_col2 = st.columns(2)
-
-                                    with sensor_col1:
-                                        if "platform_name" in sensor_info:
-                                            st.info(
-                                                f"🛰️ **Plataforma:** {sensor_info['platform_name']}"
-                                            )
-
-                                        if "spatial_resolutions_m" in sensor_info:
-                                            resolutions = sensor_info[
-                                                "spatial_resolutions_m"
-                                            ]
-                                            if (
-                                                isinstance(resolutions, list)
-                                                and resolutions
-                                            ):
-                                                res_str = (
-                                                    f"{min(resolutions)}-{max(resolutions)}m"
-                                                    if len(resolutions) > 1
-                                                    else f"{resolutions[0]}m"
-                                                )
-                                                st.metric(
-                                                    "🔍 Resolução Espacial", res_str
-                                                )
-
-                                        if "revisit_time_days" in sensor_info:
-                                            st.metric(
-                                                "⏰ Tempo de Revisita",
-                                                f"{sensor_info['revisit_time_days']} dias",
-                                            )
-
-                                    with sensor_col2:
-                                        if "spectral_bands" in sensor_info:
-                                            bands = sensor_info["spectral_bands"]
-                                            if isinstance(bands, list):
-                                                st.metric(
-                                                    "🌈 Bandas Espectrais", len(bands)
-                                                )
-                                            elif isinstance(bands, str):
-                                                st.metric("🌈 Bandas Espectrais", bands)
-
-                                        if "swath_width_km" in sensor_info:
-                                            st.metric(
-                                                "📐 Largura de Varredura",
-                                                f"{sensor_info['swath_width_km']} km",
-                                            )
-
-                                        if "sensor_type_description" in sensor_info:
-                                            st.info(
-                                                f"� **Tipo:** {sensor_info['sensor_type_description']}"
-                                            )
-
-                                    # Informações técnicas adicionais
-                                    technical_info = []
-                                    if "launch_date" in sensor_info:
-                                        technical_info.append(
-                                            f"**🚀 Data de Lançamento:** {sensor_info['launch_date']}"
-                                        )
-
-                                    if "status" in sensor_info:
-                                        technical_info.append(
-                                            f"**📊 Status:** {sensor_info['status']}"
-                                        )
-
-                                    if "agency" in sensor_info:
-                                        technical_info.append(
-                                            f"**🏢 Agência:** {sensor_info['agency']}"
-                                        )
-
-                                    if "data_access_url" in sensor_info:
-                                        technical_info.append(
-                                            f"**� Acesso aos Dados:** [Link]({sensor_info['data_access_url']})"
-                                        )
-
-                                    if technical_info:
-                                        st.markdown("---")
-                                        st.markdown(
-                                            "**ℹ️ Informações Técnicas Adicionais:**"
-                                        )
-                                        for info in technical_info:
-                                            st.markdown(info)
-
-                                    # Quebra de linha entre sensores se houver múltiplos
-                                    if len(sensors_list) > 1:
-                                        st.markdown("---")
-
-                        if not sensor_info_found:
-                            # Caso não encontre metadados específicos
-                            st.info("🔍 Metadados detalhados do sensor não disponíveis")
-
-                            # Tentar extrair informações básicas de outras colunas
-                            resolution_info = init_data.get("Resolution", "")
-                            if resolution_info and str(
-                                resolution_info
-                            ).strip().lower() not in ["n/a", "none", ""]:
-                                st.metric("🔍 Resolução", f"{resolution_info}m")
-
-                except (json.JSONDecodeError, Exception):
-                    # Fallback para dados de origem básicos
-                    st.markdown(f"**📡 Fonte de Dados:** {source_column}")
-                    st.info("🔍 Erro ao processar metadados detalhados do sensor")
-
-                    # Tentar extrair informações básicas de outras colunas
-                    resolution_info = init_data.get("Resolution", "")
-                    if resolution_info and str(resolution_info).strip().lower() not in [
-                        "n/a",
-                        "none",
-                        "",
-                    ]:
-                        st.metric("🔍 Resolução", f"{resolution_info}m")
-
-            elif source_column and str(source_column).strip().lower() not in [
-                "n/a",
-                "none",
-                "",
-            ]:
-                # Fallback para coluna Source
-                st.markdown(f"**📡 Fonte de Dados:** {source_column}")
-
-                # Tentar extrair informações básicas de outras colunas
-                resolution_info = init_data.get("Resolution", "")
-                if resolution_info and str(resolution_info).strip().lower() not in [
-                    "n/a",
-                    "none",
-                    "",
-                ]:
-                    st.metric("🔍 Resolução", f"{resolution_info}m")
-
+            if processed_years_as_int:
+                min_year = min(processed_years_as_int)
+                max_year = max(processed_years_as_int)
+                year_range = f"{min_year} - {max_year}"
+                temporal_coverage_html = f"<p><strong>🕒 Temporal Coverage:</strong> {year_range} (from metadata)</p>"
             else:
-                st.info(
-                    "📡 Informações de sensor não especificadas para esta iniciativa"
+                temporal_coverage_html = (
+                    "<p><strong>🕒 Temporal Coverage:</strong> Not available</p>"
                 )
 
-        if additional_info:
-            with st.expander("📋 **Informações Adicionais**", expanded=False):
-                for info in additional_info:
-                    st.markdown(info)
+            # Append temporal coverage info to the methodology section
+            methodology_section_html.append(
+                f"""<div class="info-section" style="border-left-color: #fd7e14;">
+                                                <div class="info-title">📅 Temporal Coverage</div>
+                                                {temporal_coverage_html}
+                                              </div>"""
+            )
 
+            # Append all methodology sections to the main column
+            if methodology_section_html:
+                st.markdown("".join(methodology_section_html), unsafe_allow_html=True)
 
-def _display_temporal_analysis(filtered_df, meta):
-    """Exibe análise temporal das iniciativas."""
+        # Additional section for class information
+        # Always show classification details if we have class data
+        st.markdown("#### 🏷️ Classification Details")
+
+        # Get class legend data and use new modular component
+        class_legend_json_str = init_data.get("Class_Legend", "[]")
+        lulc_classes.render_lulc_classes_section(class_legend_json_str)
+
+        # Ensure the detail-card div is closed after all content for the selected initiative
+        st.markdown("</div>", unsafe_allow_html=True)  # Closes detail-card
+
+    # Link to detailed comparisons
     st.markdown("---")
-    st.subheader("🌊 Densidade Temporal das Iniciativas LULC")
+    st.info(
+        "💡 **For detailed comparisons between multiple initiatives**, go to the **'🔍 Detailed Analyses'** page in the sidebar."
+    )
+    st.markdown("---")
 
-    if meta:
+    # --- START OF MOVED TEMPORAL DENSITY AND METRICS ---
+    # Temporal density chart
+    st.subheader("🌊 Temporal Density of LULC Initiatives")
+
+    if meta:  # Create density data using metadata
         density_data = []
         all_years = set()
 
         for nome, meta_item in meta.items():
+            # Ensure the initiative is in the filtered_df before processing
             if nome in filtered_df["Name"].values:
                 if "available_years" in meta_item and meta_item["available_years"]:
                     for ano in meta_item["available_years"]:
@@ -1069,139 +1558,157 @@ def _display_temporal_analysis(filtered_df, meta):
             density_df = pd.DataFrame(density_data)
             year_counts = density_df["ano"].value_counts().sort_index()
 
-            # Gráfico de densidade por ano
-            fig_density = go.Figure()
-            fig_density.add_trace(
+            # Density chart by year (discrete bars)
+            fig_density_line = go.Figure()
+            fig_density_line.add_trace(
                 go.Bar(
                     x=year_counts.index,
                     y=year_counts.values,
-                    name="Iniciativas Ativas",
-                    marker={
-                        "color": "rgba(0,150,136,0.8)",
-                        "line": {"color": "rgba(0,150,136,1)", "width": 1},
-                    },
-                    hovertemplate="<b>Ano: %{x}</b><br>Iniciativas Ativas: %{y}<extra></extra>",
+                    name="Active Initiatives",
+                    marker=dict(
+                        color="rgba(0,150,136,0.8)",
+                        line=dict(color="rgba(0,150,136,1)", width=1),
+                    ),
+                    hovertemplate="<b>Year: %{x}</b><br>"
+                    + "Active Initiatives: %{y}<extra></extra>",
                 )
             )
 
-            fig_density.update_layout(
-                title="📊 Densidade Temporal: Número de Iniciativas por Ano",
-                xaxis_title="Ano",
-                yaxis_title="Número de Iniciativas Ativas",
+            fig_density_line.update_layout(
+                title="📊 Temporal Density: Number of Initiatives per Year",
+                xaxis_title="Year",
+                yaxis_title="Number of Active Initiatives",
                 height=450,
+                hovermode="x unified",
                 showlegend=False,
                 plot_bgcolor="rgba(0,0,0,0)",
                 paper_bgcolor="rgba(0,0,0,0)",
+                xaxis=dict(
+                    showgrid=True,
+                    gridwidth=1,
+                    gridcolor="rgba(128,128,128,0.2)",
+                    tickmode="linear",
+                    dtick=2,
+                ),
+                yaxis=dict(
+                    showgrid=True, gridwidth=1, gridcolor="rgba(128,128,128,0.2)"
+                ),
             )
+            st.plotly_chart(fig_density_line, use_container_width=True)
 
-            st.plotly_chart(fig_density, use_container_width=True)
-
-            # Botão de download
-            if fig_density:
+            # Add download button using the new UI
+            # Ensure all old save logic is removed and only setup_download_form is used.
+            if fig_density_line:  # Check if the figure exists
                 setup_download_form(
-                    fig_density,
-                    default_filename="densidade_temporal_overview",
-                    key_prefix="densidade_overview",
+                    fig_density_line,
+                    default_filename="temporal_density_overview",
+                    key_prefix="density_overview_final",
                 )
 
-            # Métricas temporais
-            st.markdown("#### 📈 Métricas Temporais")
+            # Enhanced temporal metrics - Modern cards
+            st.markdown("#### 📈 Temporal Metrics")
 
-            if all_years:
-                first_year = min(all_years)
-                last_year = max(all_years)
-                peak_activity_year = year_counts.idxmax()
-                avg_initiatives_per_year = year_counts.mean()
+            # CSS for temporal metrics
+            st.markdown(
+                """
+            <style>
+            .temporal-metric {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 1.2rem;
+                border-radius: 12px;
+                text-align: center;
+                margin: 0.5rem 0;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
+            .temporal-metric-value {
+                font-size: 1.8rem;
+                font-weight: 700;
+                margin: 0.3rem 0;
+            }
+            .temporal-metric-label {
+                font-size: 0.9rem;
+                opacity: 0.9;
+            }
+            .temporal-metric-delta {
+                font-size: 0.8rem;
+                opacity: 0.8;
+                margin-top: 0.2rem;
+            }
+            .timeline-card { /* This style might be for the timeline details you mentioned */
+                background: white;
+                border: 1px solid #e9ecef;
+                border-radius: 12px;
+                padding: 1.5rem;
+                margin: 1rem 0;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            }
+            </style>
+            """,
+                unsafe_allow_html=True,
+            )
+
+            # Calculate and display temporal metrics
+            if all_years:  # Ensure all_years is not empty
+                first_year = min(all_years) if all_years else "N/A"
+                last_year = max(all_years) if all_years else "N/A"
+                peak_activity_year = (
+                    year_counts.idxmax() if not year_counts.empty else "N/A"
+                )
+                avg_initiatives_per_year = (
+                    year_counts.mean() if not year_counts.empty else 0
+                )
 
                 tm_col1, tm_col2, tm_col3, tm_col4 = st.columns(4)
-
                 with tm_col1:
-                    st.metric("🗓️ Primeiro Ano", first_year)
+                    st.markdown(
+                        f"""<div class="temporal-metric">
+                                        <div class="temporal-metric-value">🗓️ {first_year}</div>
+                                        <div class="temporal-metric-label">First Year Covered</div>
+                                    </div>""",
+                        unsafe_allow_html=True,
+                    )
                 with tm_col2:
-                    st.metric("🗓️ Último Ano", last_year)
+                    st.markdown(
+                        f"""<div class="temporal-metric">
+                                        <div class="temporal-metric-value">🗓️ {last_year}</div>
+                                        <div class="temporal-metric-label">Last Year Covered</div>
+                                    </div>""",
+                        unsafe_allow_html=True,
+                    )
                 with tm_col3:
-                    st.metric("🚀 Pico de Atividade", peak_activity_year)
+                    st.markdown(
+                        f"""<div class="temporal-metric">
+                                        <div class="temporal-metric-value">🚀 {peak_activity_year}</div>
+                                        <div class="temporal-metric-label">Peak Activity Year</div>
+                                    </div>""",
+                        unsafe_allow_html=True,
+                    )
                 with tm_col4:
-                    st.metric("📊 Média/Ano", f"{avg_initiatives_per_year:.1f}")
+                    st.markdown(
+                        f"""<div class="temporal-metric">
+                                        <div class="temporal-metric-value">📊 {avg_initiatives_per_year:.1f}</div>
+                                        <div class="temporal-metric-label">Avg. Initiatives/Year</div>
+                                    </div>""",
+                        unsafe_allow_html=True,
+                    )
+            else:
+                st.info(
+                    "ℹ️ Temporal metrics cannot be calculated as no year data is available from the filtered initiatives' metadata."
+                )
         else:
-            st.info("ℹ️ Nenhum dado temporal disponível com os filtros atuais.")
-
-
-def run():
-    """Função principal do dashboard overview."""
-    # Carrega dados
-    df, meta, sensors_meta = _load_data()
-
-    if df.empty:
-        st.error(
-            "❌ Nenhum dado disponível. Verifique o processo de carregamento de dados."
-        )
-        return
-
-    # Usa a nova função de filtros responsivos
-    filtered_df = _create_filters(df)
-
-    # Aplica filtros básicos de metodologia se necessário
-    if "Methodology" in filtered_df.columns:
-        metodologias = filtered_df["Methodology"].unique().tolist()
-        selected_methods = metodologias  # Usar todas por padrão
-    else:
-        selected_methods = []
-
-    # Aplica filtros básicos de classes agrícolas se necessário
-    if "Num_Agri_Classes" in filtered_df.columns:
-        num_agri_classes_numeric = pd.to_numeric(
-            filtered_df["Num_Agri_Classes"], errors="coerce"
-        ).dropna()
-        if not num_agri_classes_numeric.empty:
-            min_agri, max_agri = (
-                int(num_agri_classes_numeric.min()),
-                int(num_agri_classes_numeric.max()),
+            st.info(
+                "ℹ️ No temporal density data to display based on current filters and available metadata."
             )
-            selected_agri_range = (min_agri, max_agri)
-        else:
-            selected_agri_range = (0, 50)
-    else:
-        selected_agri_range = (0, 50)
+    # --- END OF MOVED TEMPORAL DENSITY AND METRICS ---
 
-    # Aplica filtros adicionais se necessário (mantém compatibilidade)
-    if "Methodology" in filtered_df.columns and selected_methods:
-        filtered_df = filtered_df[filtered_df["Methodology"].isin(selected_methods)]
+    # Placeholder for any other final content or footers if needed.
+    # For example, if there was a "Timeline Details" section showing most/oldest,
+    # it would have been *before* the "Temporal Density" and "Temporal Metrics" above.
 
-    if "Num_Agri_Classes" in filtered_df.columns and selected_agri_range:
-        df_temp = filtered_df.copy()
-        df_temp["Num_Agri_Classes_numeric"] = pd.to_numeric(
-            df_temp["Num_Agri_Classes"], errors="coerce"
-        )
-        filtered_df = filtered_df[
-            df_temp["Num_Agri_Classes_numeric"].between(
-                selected_agri_range[0], selected_agri_range[1]
-            )
-        ]
 
-    # Armazena dados filtrados na sessão
-    st.session_state.filtered_df = filtered_df
-
-    if filtered_df.empty:
-        st.warning(
-            "⚠️ Nenhuma iniciativa corresponde aos filtros selecionados. Ajuste os filtros para visualizar dados."
-        )
-        st.stop()
-
-    # Exibe métricas principais
-    _display_key_metrics(filtered_df)
-
-    # Exibe detalhes das iniciativas
-    _display_initiative_details(filtered_df, meta, sensors_meta)
-
-    # Exibe análise temporal
-    _display_temporal_analysis(filtered_df, meta)
-
-    # Link para análises detalhadas
-    st.markdown("---")
-    st.info(
-        "💡 **Para comparações detalhadas entre múltiplas iniciativas**, vá para a página **'🔍 Análises Detalhadas'** na barra lateral."
-    )
+if __name__ == "__main__":
+    run()
 
 
 if __name__ == "__main__":
