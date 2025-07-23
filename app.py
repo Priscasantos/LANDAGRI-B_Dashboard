@@ -41,8 +41,10 @@ warnings.filterwarnings("ignore")
 def load_cached_data():
     """Loads and caches the main dashboard data using JSON interpreter"""
     try:
-        # Path already corrected in previous step to remove "raw"
-        metadata_file_path = current_dir / "data" / "initiatives_metadata.jsonc"
+        # Correct path to new data/json structure
+        metadata_file_path = (
+            current_dir / "data" / "json" / "initiatives_metadata.jsonc"
+        )
         df = interpret_initiatives_metadata(metadata_file_path)
         if df.empty:
             st.error("❌ No data loaded from JSON interpreter.")
@@ -165,18 +167,18 @@ if "df_interpreted" not in st.session_state or st.session_state.df_interpreted i
     df_loaded = load_cached_data()  # Call the cached function
     if df_loaded is not None and not df_loaded.empty:
         st.session_state.df_interpreted = df_loaded
-        # Optionally, store raw metadata if your interpreter provides it separately
-        # and if it's not already handled by load_cached_data or needed globally earlier.
-        # For now, assuming interpret_initiatives_metadata primarily returns the DataFrame.
-        # If raw metadata is also needed in session_state from the start:
-        # try:
-        #     from scripts.utilities.json_interpreter import _load_jsonc_file
-        #     metadata_file_path = current_dir / "data" / "initiatives_metadata.jsonc"
-        #     raw_metadata = _load_jsonc_file(metadata_file_path)
-        #     st.session_state.metadata = raw_metadata
-        # except Exception as e_meta:
-        #     st.error(f"❌ Error loading initial raw metadata in app.py: {e_meta}")
-        #     st.session_state.metadata = {}
+        # Load raw metadata for overview and other components
+        try:
+            from scripts.utilities.json_interpreter import _load_jsonc_file
+
+            metadata_file_path = (
+                current_dir / "data" / "json" / "initiatives_metadata.jsonc"
+            )
+            raw_metadata = _load_jsonc_file(metadata_file_path)
+            st.session_state.metadata = raw_metadata
+        except Exception as e_meta:
+            st.error(f"❌ Error loading initial raw metadata in app.py: {e_meta}")
+            st.session_state.metadata = {}
     elif df_loaded is None:
         # Error messages are handled within load_cached_data, but we might want to stop
         # or ensure pages handle the lack of data gracefully.
@@ -256,7 +258,7 @@ with st.sidebar:
 
 # --- Page navigation with new structure ---
 if selected == "Overview":
-    from dashboard import overview  # Corrected import
+    from dashboard import overview  # Use the main overview
 
     overview.run()
 
@@ -266,7 +268,7 @@ elif selected == "Comparative Analysis":
     # The comparison type is now primarily defined by the sidebar menu.
     # If sub-selections are needed within this page, they should be handled inside comparison.run()
 
-    import dashboard.comparison as comparison  # Ensure this module is translated
+    import dashboard.comparison_new as comparison  # Use new modular comparison
 
     comparison.run()
 
@@ -282,8 +284,10 @@ elif selected == "Temporal Analysis":
             from scripts.utilities.json_interpreter import _load_jsonc_file
 
             # current_dir is already defined at the top of app.py
-            # Adjusted path: removed "raw"
-            metadata_file_path = current_dir / "data" / "initiatives_metadata.jsonc"
+            # Correct path to new data/json structure
+            metadata_file_path = (
+                current_dir / "data" / "json" / "initiatives_metadata.jsonc"
+            )
             raw_metadata = _load_jsonc_file(metadata_file_path)
             st.session_state.metadata = raw_metadata
         except Exception as e:
