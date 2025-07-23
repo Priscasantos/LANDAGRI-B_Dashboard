@@ -1,14 +1,24 @@
+import os
+import sys
+import warnings
+from pathlib import Path
+
+import pandas as pd  # Added import for pandas
 import streamlit as st
 from streamlit_option_menu import option_menu
-import os
-import warnings
-import sys
-from pathlib import Path
-import pandas as pd # Added import for pandas
 
 # Add scripts directory to path
 current_dir = Path(__file__).parent
 sys.path.append(str(current_dir / "scripts"))
+
+# Initialize modern themes system
+try:
+    from scripts.utilities.modern_themes import ModernThemes
+
+    # Setup the modern theme globally
+    ModernThemes.setup_modern_theme()
+except ImportError:
+    st.warning("⚠️ Modern themes system not available. Using default styling.")
 
 # Updated import using the new JSON interpreter
 try:
@@ -23,8 +33,11 @@ os.environ["STREAMLIT_BROWSER_GATHER_USAGE_STATS"] = "false"
 # Suppress warnings to clean up output
 warnings.filterwarnings("ignore")
 
+
 # Cache main data for better performance
-@st.cache_data(ttl=300)  # Cache por 5 minutos para permitir atualizações mais frequentes
+@st.cache_data(
+    ttl=300
+)  # Cache por 5 minutos para permitir atualizações mais frequentes
 def load_cached_data():
     """Loads and caches the main dashboard data using JSON interpreter"""
     try:
@@ -39,18 +52,15 @@ def load_cached_data():
         st.error(f"❌ Error loading data: {e}")
         return None
 
+
 # Page configuration with performance optimizations
 st.set_page_config(
-    page_title="LULC Dashboard", 
+    page_title="LULC Dashboard",
     layout="wide",
     page_icon="🌍",
     initial_sidebar_state="expanded",
     # Performance optimizations
-    menu_items={
-        'Report a bug': None,
-        'Get Help': None,
-        'About': None
-    }
+    menu_items={"Report a bug": None, "Get Help": None, "About": None},
 )
 
 # Custom CSS for fonts and modern layout
@@ -151,8 +161,8 @@ st.markdown(
 )
 
 # --- Load and cache data early ---
-if 'df_interpreted' not in st.session_state or st.session_state.df_interpreted is None:
-    df_loaded = load_cached_data() # Call the cached function
+if "df_interpreted" not in st.session_state or st.session_state.df_interpreted is None:
+    df_loaded = load_cached_data()  # Call the cached function
     if df_loaded is not None and not df_loaded.empty:
         st.session_state.df_interpreted = df_loaded
         # Optionally, store raw metadata if your interpreter provides it separately
@@ -168,119 +178,131 @@ if 'df_interpreted' not in st.session_state or st.session_state.df_interpreted i
         #     st.error(f"❌ Error loading initial raw metadata in app.py: {e_meta}")
         #     st.session_state.metadata = {}
     elif df_loaded is None:
-        # Error messages are handled within load_cached_data, but we might want to stop 
+        # Error messages are handled within load_cached_data, but we might want to stop
         # or ensure pages handle the lack of data gracefully.
         st.error("Initial data loading failed. Some dashboard features may not work.")
         # To prevent pages from running without data, you might initialize df_interpreted to an empty df
         # or handle this explicitly in each page's run() method.
-        st.session_state.df_interpreted = pd.DataFrame() # Ensure it exists, even if empty
+        st.session_state.df_interpreted = (
+            pd.DataFrame()
+        )  # Ensure it exists, even if empty
 
 # Hide Streamlit's default sidebar navigation (multipage menu)
 # This is done because we are using streamlit-option-menu for a custom sidebar.
-st.markdown("""
+st.markdown(
+    """
     <style>
     [data-testid="stSidebarNav"] {display: none !important;}
     </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # --- Custom sidebar with new structure ---
 with st.sidebar:
     selected = option_menu(
-        menu_title="🛰️ LULC Dashboard", # Main title of the menu
+        menu_title="🛰️ LULC Dashboard",  # Main title of the menu
         options=[
-            "Overview", # Option 1
-            "Comparative Analysis", # Option 2
-            "Temporal Analysis", # Option 3
-            "Detailed Analysis", # Option 4
-            "CONAB Analysis" # Option 5 - New CONAB tab
-        ],        icons=["house", "bar-chart", "calendar", "zoom-in", "map"], # Icons for each option
-        menu_icon="rocket", # Icon for the menu title
-        default_index=0, # Default selected option
+            "Overview",  # Option 1
+            "Comparative Analysis",  # Option 2
+            "Temporal Analysis",  # Option 3
+            "Detailed Analysis",  # Option 4
+            "CONAB Analysis",  # Option 5 - New CONAB tab
+        ],
+        icons=[
+            "house",
+            "bar-chart",
+            "calendar",
+            "zoom-in",
+            "map",
+        ],  # Icons for each option
+        menu_icon="rocket",  # Icon for the menu title
+        default_index=0,  # Default selected option
         styles={
             "container": {"padding": "0.5rem", "background-color": "transparent"},
-            "icon": {"color": "#60a5fa", "font-size": "20px"}, # Icon color and size
+            "icon": {"color": "#60a5fa", "font-size": "20px"},  # Icon color and size
             "nav-link": {
-                "font-size": "16px", 
-                "text-align": "left", 
+                "font-size": "16px",
+                "text-align": "left",
                 "margin": "0.2rem 0",
                 "padding": "0.8rem 1rem",
                 "border-radius": "0.7rem",
                 "font-family": "Inter, Roboto, Segoe UI, Arial, sans-serif",
-                "background": "rgba(148, 163, 184, 0.1)", # Default nav link background
-                "border-left": "3px solid transparent", # For hover effect
-                "transition": "all 0.3s ease" # Smooth transition
+                "background": "rgba(148, 163, 184, 0.1)",  # Default nav link background
+                "border-left": "3px solid transparent",  # For hover effect
+                "transition": "all 0.3s ease",  # Smooth transition
             },
             "nav-link-selected": {
-                "background": "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)", # Selected nav link background
-                "color": "#ffffff", # Selected nav link text color
+                "background": "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",  # Selected nav link background
+                "color": "#ffffff",  # Selected nav link text color
                 "font-weight": "600",
-                "border-left": "3px solid #60a5fa", # Accent border for selected link
-                "box-shadow": "0 3px 10px rgba(59, 130, 246, 0.3)" # Subtle shadow for selected link
+                "border-left": "3px solid #60a5fa",  # Accent border for selected link
+                "box-shadow": "0 3px 10px rgba(59, 130, 246, 0.3)",  # Subtle shadow for selected link
             },
             "menu-title": {
-                "color": "#60a5fa", # Menu title color
-                "font-weight": "700", 
+                "color": "#60a5fa",  # Menu title color
+                "font-weight": "700",
                 "font-size": "20px",
                 "text-align": "center",
                 "margin-bottom": "1rem",
                 "padding": "0.5rem",
-                "background": "rgba(59, 130, 246, 0.1)", # Light background for menu title
-                "border-radius": "0.5rem" # Rounded corners for menu title background
-            }
-        }
+                "background": "rgba(59, 130, 246, 0.1)",  # Light background for menu title
+                "border-radius": "0.5rem",  # Rounded corners for menu title background
+            },
+        },
     )
-    
-    # Botão para limpar cache e forçar atualização
-    st.markdown("---")
-    if st.button("🔄 Limpar Cache & Atualizar", help="Limpa o cache e força o recarregamento dos dados e gráficos"):
-        st.cache_data.clear()
-        st.rerun()
-    
+
     # Removed: sub-comparison filter, now handled directly on the main page if needed.
 
 # --- Page navigation with new structure ---
 if selected == "Overview":
-    from dashboard import overview # Corrected import
+    from dashboard import overview  # Corrected import
+
     overview.run()
-    
+
 elif selected == "Comparative Analysis":
-    st.markdown("---") # Visual separator
-    st.markdown("### 📊 Comparative Analysis") # Page title
+    st.markdown("---")  # Visual separator
+    st.markdown("### 📊 Comparative Analysis")  # Page title
     # The comparison type is now primarily defined by the sidebar menu.
     # If sub-selections are needed within this page, they should be handled inside comparison.run()
-    
-    import dashboard.comparison as comparison # Ensure this module is translated
+
+    import dashboard.comparison as comparison  # Ensure this module is translated
+
     comparison.run()
 
 elif selected == "Temporal Analysis":
-    st.markdown("---") # Visual separator
-    st.markdown("### ⏳ Temporal Analysis") # Page title
-    
+    st.markdown("---")  # Visual separator
+    st.markdown("### ⏳ Temporal Analysis")  # Page title
+
     # Load raw metadata for temporal analysis if not already loaded
-    if 'metadata' not in st.session_state:
+    if "metadata" not in st.session_state:
         try:
-            from scripts.utilities.json_interpreter import _load_jsonc_file
             from pathlib import Path
-            
+
+            from scripts.utilities.json_interpreter import _load_jsonc_file
+
             # current_dir is already defined at the top of app.py
             # Adjusted path: removed "raw"
-            metadata_file_path = current_dir / "data" / "initiatives_metadata.jsonc" 
+            metadata_file_path = current_dir / "data" / "initiatives_metadata.jsonc"
             raw_metadata = _load_jsonc_file(metadata_file_path)
             st.session_state.metadata = raw_metadata
         except Exception as e:
             st.error(f"❌ Error loading raw metadata for temporal analysis: {e}")
             st.stop()
-    
+
     import dashboard.temporal as temporal
+
     temporal.run()
-    
+
 elif selected == "Detailed Analysis":
-    from dashboard import detailed 
+    from dashboard import detailed
+
     detailed.run()
 
 elif selected == "CONAB Analysis":
-    st.markdown("---") # Visual separator
-    st.markdown("### 🌾 CONAB Analysis") # Page title
-    
+    st.markdown("---")  # Visual separator
+    st.markdown("### 🌾 CONAB Analysis")  # Page title
+
     from dashboard import conab
+
     conab.run()

@@ -1,0 +1,175 @@
+﻿Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September
+Cotton;RO;;;;P;P;;;;H;H;H;
+Cotton;TO;;;P;P;P;;;;H;H;H;
+Cotton;MA;;;P;P;;;;;H;H;H;H
+Cotton;PI;;;P;P;;;;;H;H;H;
+Cotton;CE;;;;P;P;P;;;H;H;H;
+Cotton;RN;;;;H;H;H;;;;P;P;
+Cotton;PB;;;;P;P;P;P;P;;H;H;H
+Cotton;BA;;P;P;P;P;;;H;H;H;H;H
+Cotton;MT;;;P;P;P;;;;H;H;H;H
+Cotton;MS;;P;P;P;;;H;H;H;H;H;
+Cotton;GO;;;;;;;;H;H;H;H;H
+Cotton;MG;;;P;P;P;;;H;H;H;H;
+Cotton;SP;P;P;P;;;;H;H;H;H;;
+Cotton;PR;;P;P;P;;;H;H;H;H;;
+Rice;RR;P;P;P;H;H;H;H;P;;;H;H
+Rice;RO;;P;P;P;;H;H;P;;;;
+Rice;AC;P;P;P;;H;H;H;;;;;
+Rice;AM;H;;;P;P;P;;;;;;
+Rice;AP;;;;P;P;P;;H;H;H;;
+Rice;PA;P;P;P;P;PH;PH;H;H;H;H;;
+Rice;TO;P;P;P;PH;H;H;H;H;;;;
+Rice;MA;;P;P;P;P;H;H;H;;;;
+Rice;PI;;;P;P;;;H;H;H;;;
+Rice;CE;;;;P;P;P;;;;H;H;
+Rice;RN;;;;P;P;P;;H;H;H;H;
+Rice;PB;;;;P;P;P;;H;H;H;H;
+Rice;PE;H;H;;;P;P;P;PH;H;H;H;H
+Rice;AL;;P;P;H;H;H;;P;P;;P;P
+Rice;SE;;;H;PH;P;P;;;;H;H;PH
+Rice;MT;;P;P;P;;H;H;H;H;;;
+Rice;MS;P;P;P;H;H;H;H;;;;P;P
+Rice;GO;P;P;P;;;H;H;H;;;;
+Rice;MG;P;P;P;;;H;H;H;;;;
+Rice;ES;P;P;;;;H;H;H;;;;
+Rice;RJ;P;P;P;;;H;H;H;;;;
+Rice;SP;P;P;P;;;H;H;H;;;;P
+Rice;PR;P;P;P;;H;H;H;H;;;;P
+Rice;SC;P;P;;H;H;H;H;H;;;;P
+Rice;RS;P;P;P;;H;H;H;H;;;;P
+Beans (1st harvest);AM;P;;;H;H;;;;;;;P
+Beans (1st harvest);PA;;P;P;P;PH;H;H;H;;;;
+Beans (1st harvest);TO;;P;P;P;;H;H;;;;;
+Beans (1st harvest);PI;;;P;P;P;H;H;H;H;;;
+Beans (1st harvest);BA;P;P;P;PH;PH;H;H;H;;;;
+Beans (1st harvest);MA;;;P;P;;H;H;H;;;;
+Beans (1st harvest);MT;;P;P;H;H;H;;;;;;
+Beans (1st harvest);GO;P;P;;H;H;;;;;;;
+Beans (1st harvest);DF;P;P;;H;H;;;;;;;
+Beans (1st harvest);MG;P;P;P;H;H;H;;;;;;
+Beans (1st harvest);ES;P;P;P;H;H;H;;;;;;
+Beans (1st harvest);RJ;P;P;P;H;H;H;;;;;;
+Beans (1st harvest);SP;;H;H;H;;;;;;P;P;P
+Beans (1st harvest);PR;P;P;PH;H;H;H;;;;;P;P
+Beans (1st harvest);SC;P;P;PH;H;H;H;H;;;;;P
+Beans (1st harvest);RS;P;P;PH;H;H;H;H;;;;P;P
+Beans (2nd harvest);RO;;;;;;P;P;;H;H;H;
+Beans (2nd harvest);AC;;;;;;P;P;P;H;H;H;
+Beans (2nd harvest);AP;;;;;;;P;P;P;H;H;H
+Beans (2nd harvest);TO;;;;;P;P;P;PH;H;H;H;H
+Beans (2nd harvest);MA;;;;;;P;P;P;H;H;H;
+Beans (2nd harvest);PI;;;;;P;P;;H;H;H;;
+Beans (2nd harvest);CE;;;;P;P;P;H;H;H;H;;
+Beans (2nd harvest);RN;;;;P;P;P;P;H;H;H;H;
+Beans (2nd harvest);PB;;;;;;P;P;P;H;H;H;H
+Beans (2nd harvest);PE;;;P;P;P;PH;H;H;H;;;
+Beans (2nd harvest);BA;;;;;;P;P;P;H;H;H;H
+Beans (2nd harvest);MT;;;;;P;P;P;H;H;H;H;
+Beans (2nd harvest);MS;;;;;;P;P;;H;H;H;
+Beans (2nd harvest);GO;;;;P;P;;H;H;H;;;
+Beans (2nd harvest);DF;;;;P;P;P;H;H;P;;;
+Beans (2nd harvest);MG;;;;;P;P;P;H;H;H;H;
+Beans (2nd harvest);ES;;;;;P;P;P;H;H;H;;
+Beans (2nd harvest);RJ;;;;;P;P;P;H;H;H;;
+Beans (2nd harvest);SP;;;;P;P;P;H;H;H;H;;
+Beans (2nd harvest);PR;;;;P;P;P;H;H;H;H;;
+Beans (2nd harvest);SC;;;;P;P;P;H;H;H;;;
+Beans (2nd harvest);RS;;;;P;P;P;H;H;H;;;
+Beans (3th harvest);PA;H;;;;;;;P;P;P;H;H
+Beans (3th harvest);TO;;;;;;;;P;P;H;H;H
+Beans (3th harvest);CE;;;;;;P;P;;;H;H;
+Beans (3th harvest);PE;;;;;;;P;P;P;H;H;H
+Beans (3th harvest);AL;;;;;;;P;P;P;H;H;H
+Beans (3th harvest);SE;H;;;;;;P;P;P;;H;H
+Beans (3th harvest);BA;H;;;;;;P;P;P;H;H;H
+Beans (3th harvest);MT;H;;;;;;;P;P;P;H;H
+Beans (3th harvest);GO;;;;;;;P;P;P;H;H;H
+Beans (3th harvest);DF;;;;;;;P;P;;H;H;H
+Beans (3th harvest);MG;H;;;;;;P;P;P;PH;PH;PH
+Beans (3th harvest);SP;H;;;;;;;P;P;;H;H
+Beans (3th harvest);PR;;;;;;P;P;P;PH;H;H;H
+Corn (1st harvest);RO;P;P;P;;H;H;H;H;;;;P
+Corn (1st harvest);AC;P;P;P;;H;H;H;H;;;;
+Corn (1st harvest);AM;P;P;;H;H;H;;;;;P;P
+Corn (1st harvest);PA;P;P;P;;H;H;H;H;H;;;
+Corn (1st harvest);TO;;P;P;P;;H;H;H;H;;;
+Corn (1st harvest);MA;;P;P;P;;;H;H;H;H;H;
+Corn (1st harvest);PI;;P;P;P;;;H;H;H;H;H;
+Corn (1st harvest);BA;P;P;P;P;H;H;H;H;H;H;H;
+Corn (1st harvest);MT;P;P;P;;H;H;H;H;;;;
+Corn (1st harvest);MS;P;P;P;;H;H;H;H;;;;P
+Corn (1st harvest);GO;P;P;P;;;H;H;H;H;;;P
+Corn (1st harvest);DF;P;P;;;H;H;H;;;;;P
+Corn (1st harvest);MG;P;P;P;;H;H;H;H;H;;;
+Corn (1st harvest);ES;P;P;P;;H;H;H;H;;;;
+Corn (1st harvest);RJ;P;P;P;;H;H;H;H;;;;
+Corn (1st harvest);PR;P;P;P;H;H;H;H;H;;;;P
+Corn (1st harvest);SC;P;P;P;H;H;H;H;H;;;P;P
+Corn (1st harvest);RS;P;P;PH;PH;H;H;H;H;H;;P;P
+Corn (2nd harvest);RO;;;;P;P;P;;;H;H;H;
+Corn (2nd harvest);TO;;;;P;P;P;;;H;H;H;
+Corn (2nd harvest);MA;;;;;P;P;;;H;H;H;
+Corn (2nd harvest);PI;;;;;;P;P;H;H;H;H;H
+Corn (2nd harvest);PE;;;P;P;P;P;H;H;H;H;;
+Corn (2nd harvest);CE;;;;P;P;P;H;H;H;H;H;H
+Corn (2nd harvest);RN;;;;;P;P;P;;H;H;H;H
+Corn (2nd harvest);PB;H;;;P;P;P;P;P;;;;
+Corn (2nd harvest);BA;;;;;;P;;;;H;H;
+Corn (2nd harvest);MT;;;;P;P;P;;H;H;H;H;
+Corn (2nd harvest);MS;;;;P;P;P;;;H;H;H;H
+Corn (2nd harvest);GO;;;;P;P;;;;H;H;H;
+Corn (2nd harvest);DF;H;H;;;P;P;P;;H;H;H;H
+Corn (2nd harvest);MG;;;;P;P;P;;;H;H;H;
+Corn (2nd harvest);SP;;;;;P;P;P;;H;H;H;H
+Corn (2nd harvest);PR;;;;P;P;P;P;H;H;H;H;H
+Corn (3th harvest);AP;;;;;P;P;P;P;H;H;H;H
+Corn (3th harvest);RR;H;H;;;;;;P;P;;;
+Corn (3th harvest);AL;H;H;;;;;P;P;P;;H;H
+Corn (3th harvest);BA;H;H;H;;;;P;P;P;H;H;H
+Corn (3th harvest);PE;H;;;;;P;P;P;P;H;H;H
+Corn (3th harvest);SE;H;H;H;;;;P;P;P;;H;H
+Soybean;RR;H;;;;;;P;P;P;;H;H
+Soybean;RO;P;P;P;H;H;H;H;;;;;
+Soybean;PA;P;P;P;P;PH;PH;PH;H;H;H;H;
+Soybean;TO;P;P;P;;P;P;P;P;;;;
+Soybean;AP;;;;;P;P;P;P;H;H;H;
+Soybean;MA;P;P;P;PH;PH;H;H;H;H;;;
+Soybean;PI;P;P;P;P;H;H;H;H;;;;
+Soybean;AL;H;;;;;;P;P;;;;H
+Soybean;BA;P;P;P;PH;H;H;H;H;;;;
+Soybean;MT;P;P;P;H;H;H;H;;;;;P
+Soybean;MS;P;P;P;H;H;H;H;;;;;P
+Soybean;GO;P;P;P;H;H;H;H;;;;;
+Soybean;DF;P;P;P;H;H;H;H;;;;;
+Soybean;MG;P;P;P;H;H;H;H;;;;;
+Soybean;SP;P;P;P;;H;H;H;;;;;P
+Soybean;PR;P;P;P;PH;H;H;H;H;;;;P
+Soybean;SC;P;P;P;P;H;H;H;H;;;;P
+Soybean;RS;P;P;P;P;H;H;H;H;;;;
+Wheat;BA;H;;;;;;;;P;;;
+Wheat;MS;;;;;;;P;P;;;H;H
+Wheat;GO;;;;;;P;;P;H;;H;H
+Wheat;DF;;;;;;P;P;P;;H;H;H
+Wheat;MG;;;;;;;P;;;;H;H
+Wheat;SP;H;;;;;;P;P;;;;H
+Wheat;PR;H;H;;;;;P;P;P;P;H;H
+Wheat;SC;H;H;H;;;;;P;P;P;;
+Wheat;RS;H;H;H;;;;;P;P;P;;
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
