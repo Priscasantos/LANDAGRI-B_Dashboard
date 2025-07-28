@@ -10,11 +10,17 @@ Author: Dashboard Iniciativas LULC
 Date: 2025
 """
 
-from typing import Any
+from typing import Any, Dict, Optional
 
 import pandas as pd
 
 from scripts.utilities.config import get_initiative_color_map
+from scripts.utilities.modern_themes import (
+    apply_modern_theme, 
+    get_modern_colors, 
+    get_modern_colorscale,
+    ModernThemes
+)
 
 # Centralized Visual Configuration - Simplified
 CHART_CONFIG = {
@@ -190,165 +196,73 @@ def apply_standard_layout(
     fig,
     xaxis_title: str = "",
     yaxis_title: str = "",
-    xaxis_tickangle: int | None = None,
-    legend_title: str = "",
-    legend_position: str = "right",
-    show_legend: bool = True,
     chart_type: str = "default",
-    num_items: int | None = None,
-    aspect_override: str | None = None,
-    custom_margins: dict[str, int] | None = None,
+    num_items: Optional[int] = None,
+    **kwargs
 ) -> None:
     """
-    Applies standardized layout configuration to a Plotly figure.
-
-    Configurações padronizadas:
-    - Fonte: Times New Roman para todo o gráfico
-    - Sem título na figura
-    - Títulos dos eixos: negrito, tamanho 16
-    - Conteúdo dos eixos: tamanho 14
-    - Layout visual padrão: grid, ticks, linhas dos eixos, etc.
-    - Margem inferior aumentada para acomodar título do eixo X
-    - Ângulo padrão de 45 graus para rótulos do eixo X
-    - Legenda padronizada com tamanho e espaçamento consistentes
-    - Dimensões padronizadas baseadas no tipo de gráfico e número de itens
-
+    Applies modern standardized layout configuration to a Plotly figure.
+    
+    This function now uses the modern theme system for consistent, professional styling.
+    
     Args:
         fig: Plotly figure object
         xaxis_title: X-axis title
         yaxis_title: Y-axis title
-        xaxis_tickangle: Override for x-axis tick angle (default: uses standard 45 degrees)
-        legend_title: Legend title (optional)
-        legend_position: Legend position ("right", "top", "bottom", "left")
-        show_legend: Whether to show the legend
-        chart_type: Type of chart for dimension calculation ("bar_chart", "heatmap", etc.)
-        num_items: Number of data items for dynamic sizing
-        aspect_override: Override aspect ratio ("square", "tall", "wide", "default")
-        custom_margins: Custom margins dict to override defaults (e.g., {"right": 200})
+        chart_type: Type of chart for specific optimizations
+        num_items: Number of items for responsive height calculation
+        **kwargs: Additional layout parameters
     """
-    config = CHART_CONFIG  # Configuração global da fonte e margens
-
-    # Get standardized dimensions
-    dimensions = get_standard_dimensions(
-        chart_type=chart_type, num_items=num_items, aspect_override=aspect_override
+    # Use the modern theme system instead of legacy configuration
+    apply_modern_theme(
+        fig,
+        title="",  # No title by default
+        xaxis_title=xaxis_title,
+        yaxis_title=yaxis_title,
+        chart_type=chart_type,
+        num_items=num_items,
+        **kwargs
     )
 
-    # Prepare margins - use custom margins if provided, otherwise use defaults
-    if custom_margins:
-        margins = {
-            "b": custom_margins.get("bottom", config["margins"]["bottom"]),
-            "l": custom_margins.get("left", config["margins"]["left"]),
-            "r": custom_margins.get("right", config["margins"]["right"]),
-            "t": custom_margins.get("top", config["margins"]["top"]),
-        }
-    else:
-        margins = {
-            "b": config["margins"]["bottom"],
-            "l": config["margins"]["left"],
-            "r": config["margins"]["right"],
-            "t": config["margins"]["top"],
-        }
 
-    fig.update_layout(
-        font={"family": config["font_family"], "color": config["font_color"]},
-        margin=margins,  # Use prepared margins
-        width=dimensions["width"],  # Largura padronizada
-        height=dimensions["height"],  # Altura padronizada
-    )
-
-    # Aplicar configuração padronizada da legenda
-    if show_legend:
-        legend_config = get_standard_legend_config(
-            title=legend_title, position=legend_position
-        )
-        fig.update_layout(showlegend=True, legend=legend_config)
-    else:
-        fig.update_layout(showlegend=False)
-
-    # Configuração padrão dos eixos (layout visual)
-    layout_config = config["layout"]
-
-    # Aplicar configurações do eixo X
-    xaxis_config = {
-        "showgrid": layout_config["showgrid"],
-        "gridcolor": layout_config["gridcolor"],
-        "ticks": layout_config["ticks"],
-        "ticklen": layout_config["ticklen"],
-        "tickcolor": layout_config["tickcolor"],
-        "tickangle": (
-            xaxis_tickangle
-            if xaxis_tickangle is not None
-            else layout_config["tickangle"]
-        ),  # Use override or standard 45 degrees
-        "showline": layout_config["showline"],
-        "linewidth": layout_config["linewidth"],
-        "zeroline": layout_config["zeroline"],
-        "tickfont": {
-            "size": config["axis"]["tick_font_size"],
-            "family": config["font_family"],
-            "color": config["font_color"],
-        },
-    }
-
-    # Adicionar título do eixo X se fornecido
-    if xaxis_title:
-        xaxis_config["title"] = {
-            "text": xaxis_title,
-            "font": {
-                "size": config["axis"]["title_font_size"],
-                "family": config["font_family"],
-                "color": config["font_color"],
-                "weight": "bold",
-            },
-            "standoff": 25,  # Espaçamento entre título e ticks
-        }
-
-    fig.update_xaxes(**xaxis_config)
-
-    # Aplicar configurações do eixo Y
-    yaxis_config = {
-        "showgrid": layout_config["showgrid"],
-        "gridcolor": layout_config["gridcolor"],
-        "ticks": layout_config["ticks"],
-        "ticklen": layout_config["ticklen"],
-        "tickcolor": layout_config["tickcolor"],
-        "showline": layout_config["showline"],
-        "linewidth": layout_config["linewidth"],
-        "zeroline": layout_config["zeroline"],
-        "tickfont": {
-            "size": config["axis"]["tick_font_size"],
-            "family": config["font_family"],
-            "color": config["font_color"],
-        },
-    }
-
-    # Adicionar título do eixo Y se fornecido
-    if yaxis_title:
-        yaxis_config["title"] = {
-            "text": yaxis_title,
-            "font": {
-                "size": config["axis"]["title_font_size"],
-                "family": config["font_family"],
-                "color": config["font_color"],
-                "weight": "bold",
-            },
-            "standoff": 25,  # Espaçamento entre título e ticks
-        }
-
-    fig.update_yaxes(**yaxis_config)
-
-
-def get_color_mapping(names_list: list) -> dict[str, str]:
+def get_color_mapping(names_list: list) -> Dict[str, str]:
     """
-    Gets consistent color mapping for initiative names.
-
+    Gets consistent color mapping for initiative names using modern colors.
+    
     Args:
         names_list: List of initiative names
-
+        
     Returns:
         Dict mapping names to colors
     """
-    return get_initiative_color_map(names_list)
+    modern_colors = get_modern_colors(len(names_list))
+    return {name: color for name, color in zip(names_list, modern_colors)}
+
+
+def get_chart_colors(num_colors: int = 12) -> list:
+    """
+    Get modern color sequence for charts.
+    
+    Args:
+        num_colors: Number of colors needed
+        
+    Returns:
+        List of modern colors
+    """
+    return get_modern_colors(num_colors)
+
+
+def get_chart_colorscale(scale_type: str = 'modern_blue') -> list:
+    """
+    Get modern colorscale for heatmaps and continuous data.
+    
+    Args:
+        scale_type: Type of colorscale ('modern_blue', 'modern_green', 'performance', etc.)
+        
+    Returns:
+        Colorscale array for Plotly
+    """
+    return get_modern_colorscale(scale_type)
 
 
 def prepare_temporal_display_data(

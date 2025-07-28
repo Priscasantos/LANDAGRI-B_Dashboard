@@ -1,73 +1,87 @@
 """
 Comparison Filters Component
-===========================
+============================
 
-Componente de filtros para análise comparativa.
+Componente para filtros de análise comparativa.
 
 Author: Dashboard Iniciativas LULC
-Date: 2025-07-23
+Date: 2025-07-28
 """
-
-from typing import Any
 
 import pandas as pd
 import streamlit as st
 
 
-def render(df: pd.DataFrame) -> dict[str, Any]:
+def render(df: pd.DataFrame) -> dict:
     """
-    Renderiza filtros para comparação.
-
+    Renderiza filtros para análise comparativa.
+    
     Args:
         df: DataFrame com dados das iniciativas
-
+        
     Returns:
-        Dict com os filtros selecionados
+        dict: Filtros selecionados
     """
-    st.subheader("🔧 Configurar Comparação")
-
-    # Filtros básicos
-    with st.expander("Filtros de Dados", expanded=True):
-        # Filtro por país
-        countries = (
-            ["Todos"] + sorted(df["Country"].unique().tolist())
-            if "Country" in df.columns
-            else ["Todos"]
-        )
-        selected_countries = st.multiselect(
-            "Países:",
-            options=countries[1:],  # Exclude 'Todos'
-            default=countries[1:3] if len(countries) > 3 else countries[1:],
-            key="comp_countries",
-        )
-
-        # Filtro por período
-        year_columns = [col for col in df.columns if col.isdigit() and len(col) == 4]
-        if year_columns:
-            min_year, max_year = (
-                min(map(int, year_columns)),
-                max(map(int, year_columns)),
-            )
-            year_range = st.slider(
-                "Período:",
-                min_value=min_year,
-                max_value=max_year,
-                value=(min_year, max_year),
-                key="comp_years",
+    st.sidebar.subheader("🔍 Filtros de Comparação")
+    
+    # Show data info for debugging
+    if st.sidebar.checkbox("🔍 Debug - Mostrar Info dos Dados", key="debug_data"):
+        st.sidebar.write(f"Linhas: {len(df)}")
+        st.sidebar.write(f"Colunas: {len(df.columns)}")
+        st.sidebar.write("Colunas disponíveis:")
+        st.sidebar.write(list(df.columns))
+    
+    filters = {}
+    
+    # Filtro por país
+    if "Country" in df.columns:
+        countries = df["Country"].dropna().unique()
+        if len(countries) > 0:
+            filters["countries"] = st.sidebar.multiselect(
+                "Países",
+                options=sorted(countries),
+                default=list(sorted(countries)[:3]) if len(countries) >= 3 else list(sorted(countries)),  # Default to first 3 or all
+                key="comp_countries"
             )
         else:
-            year_range = None
-
-        # Tipo de comparação
-        comparison_type = st.selectbox(
-            "Tipo de Análise:",
-            options=["Contagem de Iniciativas", "Uso de Sensores", "Evolução Temporal"],
-            key="comp_type",
+            st.sidebar.warning("Nenhum país encontrado nos dados.")
+    else:
+        st.sidebar.warning("Coluna 'Country' não encontrada.")
+    
+    # Filtro por tipo
+    if "Type" in df.columns:
+        types = df["Type"].dropna().unique()
+        if len(types) > 0:
+            filters["types"] = st.sidebar.multiselect(
+                "Tipos",
+                options=sorted(types),
+                default=list(sorted(types)),  # Default to all types
+                key="comp_types"
+            )
+        else:
+            st.sidebar.warning("Nenhum tipo encontrado nos dados.")
+    else:
+        st.sidebar.warning("Coluna 'Type' não encontrada.")
+    
+    # Filtro por período
+    year_columns = [col for col in df.columns if col.isdigit() and len(col) == 4]
+    if year_columns:
+        min_year = int(min(year_columns))
+        max_year = int(max(year_columns))
+        filters["year_range"] = st.sidebar.slider(
+            "Período",
+            min_value=min_year,
+            max_value=max_year,
+            value=(min_year, max_year),
+            key="comp_years"
         )
-
-    return {
-        "countries": selected_countries,
-        "year_range": year_range,
-        "comparison_type": comparison_type,
-        "available": bool(selected_countries),
-    }
+    else:
+        st.sidebar.warning("Nenhuma coluna de ano encontrada.")
+    
+    # Show selected filters for debugging
+    if st.sidebar.checkbox("🔍 Debug - Mostrar Filtros", key="debug_filters"):
+        st.sidebar.write("Filtros selecionados:")
+        st.sidebar.json(filters)
+    
+    # Return filters even if some are empty - let individual components handle the logic
+    return filters

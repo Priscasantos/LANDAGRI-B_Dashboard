@@ -19,11 +19,19 @@ import streamlit as st
 
 from scripts.plotting.chart_core import add_display_names_to_df, apply_standard_layout
 from scripts.utilities.config import get_initiative_color_map
+from scripts.utilities.modern_themes import apply_modern_theme, get_modern_colors, get_modern_colorscale
+from scripts.utilities.modern_chart_theme import (
+    apply_modern_styling,
+    get_modern_layout_config,
+    get_modern_color_palette,
+    get_modern_timeline_config,
+    get_modern_line_config
+)
 from scripts.utilities.table_charts import (
     create_brazilian_regions_table,
     create_mesoregions_table,
 )
-from scripts.utilities.ui_elements import setup_download_form
+# Download form import removed for cleaner interface
 
 
 # Renamed from plot_timeline to plot_timeline_chart
@@ -260,7 +268,7 @@ def plot_timeline_chart(
                     )
                 )
 
-    apply_standard_layout(fig_timeline, "Year", "Initiatives")
+    apply_modern_theme(fig_timeline, "Initiative Timeline", "Year", "Initiatives", chart_type="timeline")
 
     # Custom margins for timeline - preserve left margin for initiative names
     # Use chart_core margins as base but increase left for initiative names
@@ -283,7 +291,13 @@ def plot_timeline_chart(
     # Padronizar espessura dos ticks
     tick_width_standard = 0.8
 
+    # Get modern config without margin to avoid conflict
+    modern_config = get_modern_timeline_config()
+    # Remove margin from modern config to use the specific margins calculated
+    modern_config.pop('margin', None)
+    
     fig_timeline.update_layout(
+        **modern_config,
         height=calculated_height,
         margin=margins,
         yaxis={
@@ -293,12 +307,11 @@ def plot_timeline_chart(
             "type": "category",
             "categoryorder": "array",
             "categoryarray": display_acronyms_sorted,
-            # tickfont removed - using chart_core standard configuration
             "showgrid": False,
             "ticks": "outside",
             "ticklen": 8,
             "tickwidth": tick_width_standard,
-            "tickcolor": "black",
+            "tickcolor": "#4A5568",  # Modern gray
             "showline": True,
             "linewidth": 1,
             "linecolor": "black",
@@ -422,11 +435,9 @@ def timeline_with_controls(metadata: dict[str, Any], filtered_df: pd.DataFrame):
     # Display chart
     st.plotly_chart(fig, use_container_width=True)
 
-    # Add download functionality
+    # Download functionality removed for cleaner interface
     if fig:
-        setup_download_form(
-            fig, default_filename="timeline_chart", key_prefix="timeline_download"
-        )
+        pass
 
     # Show current settings
     with st.sidebar.expander("📊 Current Settings"):
@@ -445,24 +456,174 @@ def timeline_with_controls(metadata: dict[str, Any], filtered_df: pd.DataFrame):
 
 def plot_coverage_heatmap_chart(temporal_data: pd.DataFrame) -> go.Figure:
     """Generates the Plotly figure for the coverage heatmap."""
-    fig = go.Figure()
-    apply_standard_layout(fig, "Year", "Initiative Type")
-    fig.add_annotation(
-        text="plot_coverage_heatmap_chart - Not Implemented", showarrow=False
-    )
-    if temporal_data.empty:  # Basic check to use the parameter and avoid unused warning
-        pass
-    return fig
+    if temporal_data.empty:
+        fig = go.Figure()
+        apply_modern_theme(fig, "Coverage Heatmap (No Data Available)", chart_type="heatmap")
+        return fig
+    
+    try:
+        # Create pivot table for heatmap - availability by type and year
+        if "Tipo" in temporal_data.columns and "Anos_Lista" in temporal_data.columns:
+            # Explode years for each initiative
+            heatmap_data = []
+            for _, row in temporal_data.iterrows():
+                if row["Anos_Lista"]:
+                    for year in row["Anos_Lista"]:
+                        heatmap_data.append({
+                            "Year": year,
+                            "Type": row.get("Tipo", "Unknown"),
+                            "Initiative": row.get("Display_Name", "Unknown"),
+                            "Count": 1
+                        })
+            
+            if heatmap_data:
+                heatmap_df = pd.DataFrame(heatmap_data)
+                pivot_df = heatmap_df.groupby(["Type", "Year"]).size().reset_index(name="Count")
+                pivot_table = pivot_df.pivot(index="Type", columns="Year", values="Count").fillna(0)
+                
+                # Create heatmap
+                fig = px.imshow(
+                    pivot_table.values,
+                    x=pivot_table.columns,
+                    y=pivot_table.index,
+                    color_continuous_scale=get_modern_colorscale("blues"),
+                    aspect="auto",
+                    labels={"x": "Year", "y": "Initiative Type", "color": "Active Initiatives"}
+                )
+                
+                apply_modern_theme(
+                    fig,
+                    title="Initiative Coverage Heatmap by Type and Year",
+                    xaxis_title="Year",
+                    yaxis_title="Initiative Type",
+                    chart_type="heatmap",
+                    num_items=len(pivot_table)
+                )
+                return fig
+        
+        # Fallback basic heatmap
+        fig = go.Figure()
+        apply_modern_theme(fig, "Coverage Heatmap (Insufficient Data)", chart_type="heatmap")
+        return fig
+        
+    except Exception as e:
+        fig = go.Figure()
+        apply_modern_theme(fig, f"Coverage Heatmap (Error: {str(e)})", chart_type="heatmap")
+        return fig
 
 
 def plot_gaps_bar_chart(gaps_data: pd.DataFrame) -> go.Figure:
     """Generates the Plotly bar chart for temporal gaps analysis."""
-    fig = go.Figure()
-    apply_standard_layout(fig, "Missing Years", "Initiative")
-    fig.add_annotation(text="plot_gaps_bar_chart - Not Implemented", showarrow=False)
-    if gaps_data.empty:  # Basic check
-        pass
-    return fig
+    if gaps_data.empty:
+        fig = go.Figure()
+        apply_modern_theme(fig, "Data Gaps Analysis (No Data Available)", chart_type="bar")
+        return fig
+    
+    try:
+        # Calculate data gaps by analyzing years coverage
+        gap_analysis = []
+        
+        for _, row in gaps_data.iterrows():
+            initiative_name = row.get("Display_Name", "Unknown")
+            years_list = row.get("Anos_Lista", [])
+            
+            if years_list and len(years_list) > 1:
+                # Convert all years to integers and filter out invalid values
+                try:
+                    years_int = []
+                    for year in years_list:
+                        if isinstance(year, (int, float)):
+                            years_int.append(int(year))
+                        elif isinstance(year, str) and year.strip().isdigit():
+                            years_int.append(int(year.strip()))
+                    
+                    if len(years_int) > 1:
+                        # Calculate gaps in year coverage
+                        years_sorted = sorted(years_int)
+                        total_years = years_sorted[-1] - years_sorted[0] + 1
+                        actual_years = len(years_int)
+                        gap_percentage = ((total_years - actual_years) / total_years) * 100 if total_years > 0 else 0
+                        
+                        gap_analysis.append({
+                            "Initiative": initiative_name,
+                            "Type": row.get("Tipo", "Unknown"),
+                            "Gap_Percentage": gap_percentage,
+                            "Missing_Years": total_years - actual_years,
+                            "Total_Period": total_years,
+                            "Available_Years": actual_years
+                        })
+                except (ValueError, TypeError):
+                    # Skip initiatives with invalid year data
+                    continue
+        
+        if gap_analysis:
+            gaps_df = pd.DataFrame(gap_analysis)
+            gaps_df = gaps_df.sort_values("Gap_Percentage", ascending=True)
+            
+            # Top 15 initiatives with gaps
+            top_gaps = gaps_df.head(15)
+            
+            # Create bar chart
+            colors = get_modern_colors(f"distinct_{len(top_gaps)}")
+            
+            fig = go.Figure(data=[
+                go.Bar(
+                    x=top_gaps["Gap_Percentage"],
+                    y=top_gaps["Initiative"],
+                    orientation='h',
+                    marker=dict(
+                        color=colors,
+                        line=dict(color='white', width=1)
+                    ),
+                    text=[f"{gap:.1f}% ({missing}/{total})" 
+                          for gap, missing, total in zip(
+                              top_gaps["Gap_Percentage"], 
+                              top_gaps["Missing_Years"], 
+                              top_gaps["Total_Period"]
+                          )],
+                    textposition='auto',
+                    hovertemplate="<b>%{y}</b><br>" +
+                                  "Gap: %{x:.1f}%<br>" +
+                                  "Missing: %{customdata[0]} years<br>" +
+                                  "Available: %{customdata[1]} years<br>" +
+                                  "Total Period: %{customdata[2]} years<extra></extra>",
+                    customdata=top_gaps[["Missing_Years", "Available_Years", "Total_Period"]].values
+                )
+            ])
+            
+            apply_modern_theme(
+                fig,
+                title="Data Gaps Analysis - Top 15 Initiatives with Missing Years",
+                xaxis_title="Gap Percentage (%)",
+                yaxis_title="Initiative",
+                chart_type="bar",
+                num_items=len(top_gaps)
+            )
+            
+            # Adjust layout for horizontal bar chart
+            fig.update_layout(
+                height=max(400, len(top_gaps) * 30),
+                xaxis=dict(range=[0, max(100, top_gaps["Gap_Percentage"].max() * 1.1)])
+            )
+            
+            return fig
+        
+        # No gaps found
+        fig = go.Figure()
+        apply_modern_theme(fig, "Data Gaps Analysis (No Gaps Detected)", chart_type="bar")
+        fig.add_annotation(
+            text="All initiatives have complete year coverage",
+            xref="paper", yref="paper",
+            x=0.5, y=0.5,
+            showarrow=False,
+            font=dict(size=16, color="green")
+        )
+        return fig
+        
+    except Exception as e:
+        fig = go.Figure()
+        apply_modern_theme(fig, f"Data Gaps Analysis (Error: {str(e)})", chart_type="bar")
+        return fig
 
 
 def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
@@ -477,7 +638,7 @@ def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
     """
     if temporal_data.empty or "Anos_Lista" not in temporal_data.columns:
         fig = go.Figure()
-        apply_standard_layout(fig, "Year", "Number of Active Initiatives")
+        apply_modern_theme(fig, "Evolution Line Chart (No Data Available)", chart_type="line")
         fig.add_annotation(
             text="No temporal data available for evolution analysis",
             xref="paper",
@@ -497,7 +658,7 @@ def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
 
     if not all_years:
         fig = go.Figure()
-        apply_standard_layout(fig, "Year", "Number of Active Initiatives")
+        apply_modern_theme(fig, "Evolution Line Chart (No Year Data)", chart_type="line")
         fig.add_annotation(
             text="No year data available for evolution analysis",
             xref="paper",
@@ -557,29 +718,31 @@ def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
         )
     )
     # Apply standard layout with line chart dimensions
-    apply_standard_layout(
+    apply_modern_theme(
         fig,
-        "Year",
-        "Number of Active Initiatives",
-        chart_type="line_chart",
+        "Initiative Evolution Over Time",
+        xaxis_title="Year",
+        yaxis_title="Number of Active Initiatives",
+        chart_type="line",
         num_items=len(years_df),
     )
 
+    # Apply modern styling
+    fig = apply_modern_styling(fig, **get_modern_line_config())
+    
     # Enhanced layout specific to evolution chart
     fig.update_layout(
         showlegend=True,
         legend={
             "orientation": "h",
             "yanchor": "bottom",
-            "y": 2.97,
-            "xanchor": "right",
-            "x": 1,
+            "y": 1.02,
+            "xanchor": "center",
+            "x": 0.5,
         },
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
         xaxis={
             "showgrid": True,
-            "gridcolor": "rgba(128,128,128,0.2)",
+            "gridcolor": "rgba(0,0,0,0.08)",
             "gridwidth": 1,
             "tickformat": "d",
             "dtick": 2,  # Show every 2 years for better readability
@@ -587,7 +750,7 @@ def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
         },
         yaxis={
             "showgrid": True,
-            "gridcolor": "rgba(128,128,128,0.2)",
+            "gridcolor": "rgba(0,0,0,0.08)",
             "gridwidth": 1,
             "tickformat": "d",
             "zeroline": True,
@@ -625,7 +788,7 @@ def plot_evolution_heatmap_chart(
     """
     if not metadata or filtered_df is None or filtered_df.empty:
         fig = go.Figure()
-        apply_standard_layout(fig, "Year", "Initiatives")
+        apply_modern_theme(fig, "Resolution Evolution (No Data Available)", chart_type="area")
         fig.add_annotation(
             text="No data available for resolution evolution analysis",
             xref="paper",
@@ -690,7 +853,7 @@ def plot_evolution_heatmap_chart(
 
     if not resolution_data:
         fig = go.Figure()
-        apply_standard_layout(fig, "Year", "Initiatives")
+        apply_modern_theme(fig, "Resolution Evolution (No Data Available)", chart_type="area")
         fig.add_annotation(
             text="No resolution data available for the selected initiatives",
             xref="paper",
@@ -718,13 +881,14 @@ def plot_evolution_heatmap_chart(
     # Ensure we have all years from 1985 to 2024
     all_years = list(range(1985, 2025))
     pivot_df = pivot_df.reindex(all_years, fill_value=0)
-    # Parametrize legend/category order and colors to match categorization logic
+    # Parametrize legend/category order and colors using modern theme
     category_order = ["<30m", "30≥SR>50m", "50≥SR>100m", "≥100m"]
+    modern_colors = get_modern_colors(4) if get_modern_colors else None
     colors = {
-        "<30m": "#5e4fa2",  # Spectral blue
-        "30≥SR>50m": "#66c2a5",  # Spectral green
-        "50≥SR>100m": "#fdae61",  # Spectral orange
-        "≥100m": "#d53e4f",  # Spectral red
+        "<30m": modern_colors[0] if modern_colors else "#5e4fa2",  # Modern blue
+        "30≥SR>50m": modern_colors[1] if modern_colors else "#66c2a5",  # Modern green
+        "50≥SR>100m": modern_colors[2] if modern_colors else "#fdae61",  # Modern orange
+        "≥100m": modern_colors[3] if modern_colors else "#d53e4f",  # Modern red
     }
 
     # Ensure all categories exist in the DataFrame
@@ -769,15 +933,17 @@ def plot_evolution_heatmap_chart(
                 annotation_font_size=20,
                 annotation_font_color="rgba(64,64,64,0.9)",
             )
+    
+    # Apply modern styling
+    fig = apply_modern_styling(fig, **get_modern_line_config())
+    
     fig.update_layout(
-        plot_bgcolor="white",
-        paper_bgcolor="white",
         showlegend=True,
         margin={"b": 120},  # Increase bottom margin for legend
         xaxis={
             "range": [1985, 2024],
             "showgrid": True,
-            "gridcolor": "rgba(128,128,128,0.15)",
+            "gridcolor": "rgba(0,0,0,0.08)",
             "gridwidth": 1,
             "tickformat": "d",
             "dtick": 1,
@@ -786,9 +952,13 @@ def plot_evolution_heatmap_chart(
         },
     )
 
-    # Apply standard layout
-    apply_standard_layout(
-        fig, "Year", "Number of Initiatives", chart_type="line_chart"
+    # Apply modern theme
+    apply_modern_theme(
+        fig, 
+        title="Spatial Resolution Evolution", 
+        xaxis_title="Year", 
+        yaxis_title="Number of Initiatives", 
+        chart_type="area"
     )  # Customize layout for modern area chart
     # do layout padrão, desabilite as alterações na legenda
     fig.update_layout(
@@ -873,9 +1043,8 @@ def add_chart_download(fig: go.Figure, default_filename: str, key_prefix: str):
         key_prefix: Unique prefix for widget keys
     """
     if fig:
-        setup_download_form(
-            fig, default_filename=default_filename, key_prefix=key_prefix
-        )
+        # Download functionality removed for cleaner interface
+        pass
 
 
 def display_brazilian_geographic_tables():

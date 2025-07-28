@@ -15,7 +15,14 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 from scripts.plotting.chart_core import apply_standard_layout, get_display_name
+from scripts.utilities.modern_themes import apply_modern_theme, get_modern_colors, get_modern_colorscale
 from scripts.plotting.universal_cache import smart_cache_data
+from scripts.utilities.modern_chart_theme import (
+    apply_modern_styling,
+    get_modern_layout_config,
+    get_modern_color_palette,
+    get_modern_bar_config
+)
 
 
 @smart_cache_data(ttl=300)
@@ -42,10 +49,14 @@ def plot_distribuicao_classes(filtered_df):
         fig.update_layout(title="Number of Classes Distribution (No valid data)")
         return fig
 
-    # Determinar cor baseada na coluna Type se existir
+    # Determinar cor baseada na coluna Type se existir com cores modernas
     color_column = "Type" if "Type" in valid_data.columns else None
     color_map = (
-        {"Global": "#ff6b6b", "Nacional": "#4dabf7", "Regional": "#51cf66"}
+        {
+            "Global": get_modern_colors(3)[0] if get_modern_colors else "#ff6b6b", 
+            "Nacional": get_modern_colors(3)[1] if get_modern_colors else "#4dabf7", 
+            "Regional": get_modern_colors(3)[2] if get_modern_colors else "#51cf66"
+        }
         if color_column
         else None
     )
@@ -58,7 +69,7 @@ def plot_distribuicao_classes(filtered_df):
         color_discrete_map=color_map,
     )
     # Apply standardized layout
-    apply_standard_layout(fig, "Classes", "Count")
+    apply_modern_theme(fig, "Classes Distribution", "Classes", "Count", chart_type="bar")
     return fig
 
 
@@ -80,14 +91,15 @@ def plot_classes_por_iniciativa(filtered_df):
         y="Display_Name",  # Use the new Display_Name column
         color="Type",
         orientation="h",
+        # Use modern color scheme for consistency
         color_discrete_map={
-            "Global": "#ff6b6b",
-            "Nacional": "#4dabf7",
-            "Regional": "#51cf66",
+            "Global": get_modern_colors(3)[0] if get_modern_colors else "#ff6b6b",
+            "Nacional": get_modern_colors(3)[1] if get_modern_colors else "#4dabf7",
+            "Regional": get_modern_colors(3)[2] if get_modern_colors else "#51cf66",
         },
     )
-    # Apply standardized layout
-    apply_standard_layout(fig, "Classes", "Initiative")
+    # Apply standardized layout with chart type
+    apply_modern_theme(fig, "Classes by Initiative", "Classes", "Initiative", chart_type="bar")
     fig.update_layout(
         height=max(400, len(plot_df) * 25),  # Adjust height dynamically
         yaxis={"type": "category"},  # Ensure y-axis is treated as categorical
@@ -108,7 +120,7 @@ def plot_distribuicao_metodologias(method_counts):
     fig = px.pie(values=method_counts.values, names=method_counts.index)
 
     # Apply standardized layout
-    apply_standard_layout(fig, "", "")
+    apply_modern_theme(fig, "Methodology Distribution", chart_type="pie")
 
     return fig
 
@@ -125,16 +137,17 @@ def plot_acuracia_por_metodologia(filtered_df):
         x="Methodology",
         y="Accuracy (%)",
         color="Type",
+        # Modern color palette for better branding
         color_discrete_map={
-            "Global": "#ff6b6b",
-            "Nacional": "#4dabf7",
-            "Regional": "#51cf66",
+            "Global": get_modern_colors(3)[0] if get_modern_colors else "#ff6b6b",
+            "Nacional": get_modern_colors(3)[1] if get_modern_colors else "#4dabf7",
+            "Regional": get_modern_colors(3)[2] if get_modern_colors else "#51cf66",
         },
     )
     fig.update_xaxes(tickangle=45)
 
-    # Apply standardized layout
-    apply_standard_layout(fig, "Methodology", "Accuracy (%)")
+    # Apply standardized layout with chart type
+    apply_modern_theme(fig, "Accuracy by Methodology", "Methodology", "Accuracy (%)", chart_type="box")
 
     return fig
 
@@ -166,16 +179,21 @@ def plot_resolution_accuracy(filtered_df: pd.DataFrame) -> go.Figure:
         color="Type",  # Optional: color by Type or another category
         size="Classes",  # Optional: size by number of Classes
         hover_name="Display_Name",
+        # Use modern color scheme for visual consistency
         color_discrete_map={
-            "Global": "#ff6b6b",
-            "Nacional": "#4dabf7",
-            "Regional": "#51cf66",
+            "Global": get_modern_colors(3)[0] if get_modern_colors else "#ff6b6b",
+            "Nacional": get_modern_colors(3)[1] if get_modern_colors else "#4dabf7",
+            "Regional": get_modern_colors(3)[2] if get_modern_colors else "#51cf66",
         },
     )
 
-    # Apply standardized layout
-    apply_standard_layout(
-        fig, "Resolution (m)", "Accuracy (%)", chart_type="scatter_plot"
+    # Apply standardized layout with correct chart type
+    apply_modern_theme(
+        fig, 
+        "Resolution vs Accuracy",
+        "Resolution (m)", 
+        "Accuracy (%)", 
+        chart_type="scatter"
     )
 
     return fig

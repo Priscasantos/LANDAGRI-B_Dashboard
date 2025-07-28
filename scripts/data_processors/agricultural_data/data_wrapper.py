@@ -50,7 +50,7 @@ class AgriculturalDataWrapper:
     def _initialize_processors(self) -> None:
         """Inicializa processadores disponíveis."""
         # Inicializar processador CONAB
-        conab_data_path = self.data_directory / "conab_crop_calendar.jsonc"
+        conab_data_path = self.data_directory / "json" / "conab_crop_calendar.jsonc"
         if conab_data_path.exists():
             try:
                 self.processors["CONAB"] = create_conab_processor(conab_data_path)
@@ -273,7 +273,7 @@ class AgriculturalDataWrapper:
             if source in self.processors:
                 # Recarregar fonte específica
                 if source == "CONAB":
-                    conab_data_path = self.data_directory / "conab_crop_calendar.jsonc"
+                    conab_data_path = self.data_directory / "json" / "conab_crop_calendar.jsonc"
                     if conab_data_path.exists():
                         self.processors["CONAB"] = create_conab_processor(
                             conab_data_path
