@@ -18,6 +18,15 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from scripts.plotting.chart_core import apply_standard_layout
+from scripts.utilities.modern_themes import apply_modern_theme, get_modern_colors, get_modern_colorscale
+from scripts.utilities.modern_chart_theme import (
+    apply_modern_styling,
+    get_modern_layout_config,
+    get_modern_color_palette,
+    get_modern_bar_config,
+    get_modern_line_config,
+    get_modern_scatter_config
+)
 from scripts.utilities.type_safety import validate_plotly_params
 
 # Brazilian states and their abbreviations
@@ -82,7 +91,7 @@ def load_conab_detailed_data() -> dict[str, Any]:
     """Load CONAB detailed data from JSON file."""
     try:
         current_dir = Path(__file__).parent.parent.parent.parent
-        file_path = current_dir / "data" / "conab_detailed_initiative.jsonc"
+        file_path = current_dir / "data" / "json" / "conab_detailed_initiative.jsonc"
 
         with open(file_path, encoding="utf-8") as f:
             content = f.read()
@@ -297,22 +306,29 @@ def plot_conab_spatial_temporal_distribution(conab_data: dict[str, Any]) -> go.F
         xaxis={
             "dtick": 1,
             "showgrid": False,
-            "gridcolor": "#E5ECF6",
+            "gridcolor": "rgba(0,0,0,0.08)",
             "ticks": "outside",
             "ticklen": 8,
-            "tickcolor": "black",
+            "tickcolor": "#4A5568",
             "showline": True,
             "linewidth": 0,
             "zeroline": False,
             "tickangle": 45,
         },
     )
+    
+    # Apply modern styling
+    fig = apply_modern_styling(fig, **get_modern_layout_config())
     fig.update_layout(**layout_params)
-    apply_standard_layout(fig, "Year", "Region")
-    # aplicar aqui um aumento no tamanho da fonte da legenda para 20
-    fig.update_layout(legend={"font": {"size": 20}})
-    # aumentar agora o tamanho da fonte do titulo da legenda para 22
-    fig.update_layout(legend_title={"font": {"size": 22}})
+    
+    # Enhanced legend styling
+    fig.update_layout(legend={
+        "font": {"size": 14, "family": "Inter, Arial, sans-serif"},
+        "bgcolor": "rgba(255,255,255,0.9)",
+        "bordercolor": "rgba(0,0,0,0.1)",
+        "borderwidth": 1
+    })
+    fig.update_layout(legend_title={"font": {"size": 16, "family": "Inter, Arial, sans-serif"}})
     return fig
 
 
@@ -374,14 +390,15 @@ def plot_conab_temporal_coverage(conab_data: dict[str, Any]) -> go.Figure:
             x=years,
             y=coverage_percentages,
             mode="lines+markers",
-            line={"width": 3, "color": "#17a2b8"},
-            marker={"size": 8, "color": "#17a2b8"},
+            line={"width": 3, "color": get_modern_colors(1)[0] if get_modern_colors else "#17a2b8"},
+            marker={"size": 8, "color": get_modern_colors(1)[0] if get_modern_colors else "#17a2b8"},
             name="Coverage %",
             hovertemplate="<b>Year:</b> %{x}<br><b>Coverage:</b> %{y:.1f}%<br><extra></extra>",
         )
     )
 
-    # Update layout
+    # Apply modern styling and update layout
+    fig = apply_modern_styling(fig, **get_modern_line_config())
     fig.update_layout(
         title="Temporal Coverage of CONAB Mapping Initiatives",
         xaxis_title="Year",
@@ -391,8 +408,8 @@ def plot_conab_temporal_coverage(conab_data: dict[str, Any]) -> go.Figure:
         showlegend=False,
     )
 
-    # Apply standard layout
-    apply_standard_layout(fig, "Year", "Pct States")
+    # Apply standard layout with chart type
+    apply_standard_layout(fig, "Year", "Pct States", chart_type="line")
 
     # Set X-axis tick angle for temporal data
     fig.update_xaxes(tickangle=45)
@@ -480,17 +497,14 @@ def plot_conab_spatial_coverage(conab_data: dict[str, Any]) -> go.Figure:
         )
     )
     # Update layout
-    from scripts.plotting.chart_core import get_standard_bar_config
-
+    
+    # Apply modern styling
+    fig = apply_modern_styling(fig, **get_modern_bar_config())
     fig.update_layout(
         title="Spatial Coverage of CONAB Mapping Initiatives (2000-2023)",
         showlegend=False,
-        **get_standard_bar_config(),  # Apply standard bar configuration
-    )
-
-    # Apply standard layout with bar chart dimensions
-    apply_standard_layout(
-        fig, "Coverage (%)", "Region", chart_type="bar_chart", num_items=len(states)
+        xaxis_title="Coverage (%)",
+        yaxis_title="Region"
     )
 
     return fig
@@ -607,23 +621,31 @@ def plot_conab_crop_diversity(conab_data: dict[str, Any]) -> go.Figure:
         },
         xaxis={
             "showgrid": False,
-            "gridcolor": "#E5ECF6",
+            "gridcolor": "rgba(0,0,0,0.08)",
             "ticks": "outside",
             "ticklen": 8,
-            "tickcolor": "black",
+            "tickcolor": "#4A5568",
             "showline": True,
             "linewidth": 0,
             "zeroline": False,
         },
     )
+    
+    # Apply modern styling
+    fig = apply_modern_styling(fig, **get_modern_layout_config())
     fig.update_layout(**layout_params)
-    apply_standard_layout(fig, "Number of Crop Types", "Region")
+    
     fig.update_xaxes(tickangle=0)
     fig.update_yaxes(tickangle=0)
-    # aplicar aqui um aumento no tamanho da fonte da legenda para 20
-    fig.update_layout(legend={"font": {"size": 20}})
-    # aumentar agora o tamanho da fonte do titulo da legenda para 22
-    fig.update_layout(legend_title={"font": {"size": 22}})
+    
+    # Enhanced legend styling
+    fig.update_layout(legend={
+        "font": {"size": 14, "family": "Inter, Arial, sans-serif"},
+        "bgcolor": "rgba(255,255,255,0.9)",
+        "bordercolor": "rgba(0,0,0,0.1)",
+        "borderwidth": 1
+    })
+    fig.update_layout(legend_title={"font": {"size": 16, "family": "Inter, Arial, sans-serif"}})
     # aumente um pouco a margem inferior do gráfico
     fig.update_layout(margin={"b": 85})
     return fig

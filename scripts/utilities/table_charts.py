@@ -14,7 +14,19 @@ from typing import Any
 import pandas as pd
 import plotly.graph_objects as go
 
-from .modern_themes import modern_colors, modern_table_config
+from .modern_themes import get_modern_colors, apply_modern_theme
+
+# Configurações de cores modernas para tabelas
+modern_colors = {
+    "text_primary": "#1f2937",
+    "border": "#e5e7eb"
+}
+
+# Configuração padrão para tabelas modernas
+modern_table_config = {
+    "responsive": True,
+    "displayModeBar": False
+}
 
 
 def create_brazilian_regions_table() -> go.Figure:

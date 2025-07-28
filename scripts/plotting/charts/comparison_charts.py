@@ -16,9 +16,17 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from scripts.plotting.chart_core import apply_standard_layout, get_display_name
+from scripts.plotting.chart_core import apply_standard_layout, get_display_name, get_chart_colors, get_chart_colorscale
 from scripts.plotting.universal_cache import smart_cache_data
-from scripts.utilities.ui_elements import setup_download_form
+# Download form import removed for cleaner interface
+from scripts.utilities.modern_themes import apply_modern_theme, get_modern_colors, get_modern_colorscale
+from scripts.utilities.modern_chart_theme import (
+    apply_modern_styling,
+    get_modern_layout_config,
+    get_modern_color_palette,
+    get_modern_scatter_config,
+    get_modern_bar_config
+)
 
 
 @smart_cache_data(ttl=300)
@@ -71,16 +79,21 @@ def plot_resolution_accuracy_scatter(filtered_df: pd.DataFrame) -> go.Figure:
             if all(col in plot_df.columns for col in ["Classes", "Type"])
             else None
         ),
+        # Use modern semantic colors instead of hardcoded colors
         color_discrete_map={
-            "Global": "#ff6b6b",
-            "Nacional": "#4dabf7",
-            "Regional": "#51cf66",
+            "Global": get_modern_colors(3)[0] if get_modern_colors else "#ff6b6b",
+            "Nacional": get_modern_colors(3)[1] if get_modern_colors else "#4dabf7", 
+            "Regional": get_modern_colors(3)[2] if get_modern_colors else "#51cf66",
         },
     )
 
-    # Apply standardized layout
-    apply_standard_layout(
-        fig, "Resolution (m)", "Accuracy (%)", chart_type="scatter_plot"
+    # Apply modern standardized layout
+    apply_modern_theme(
+        fig, 
+        title="Accuracy vs Resolution",
+        xaxis_title="Resolution (m)", 
+        yaxis_title="Accuracy (%)", 
+        chart_type="scatter"
     )
 
     return fig
@@ -109,47 +122,60 @@ def plot_spatial_resolution_comparison(filtered_df: pd.DataFrame) -> go.Figure:
         "Resolution (m)" in plot_df.columns and plot_df["Resolution (m)"].notna().any()
     ):
         resolution_col = "Resolution (m)"
+    elif "Resolution" in plot_df.columns:
+        # Standardize to expected column name
+        plot_df.rename(columns={"Resolution": "Resolution (m)"}, inplace=True)
+        resolution_col = "Resolution (m)"
 
     if not resolution_col:
         fig = go.Figure()
-        fig.update_layout(
-            title="Spatial Resolution Comparison (Missing Resolution Data)"
-        )
+        fig.update_layout(title="Spatial Resolution Comparison (Missing resolution data)")
         return fig
 
+    # Ensure Display_Name exists
     if "Display_Name" not in plot_df.columns or plot_df["Display_Name"].isnull().any():
         plot_df["Display_Name"] = plot_df.apply(get_display_name, axis=1)
 
-    # Sort by resolution for better visualization (lower is better)
-    plot_df = plot_df.sort_values(by=resolution_col, ascending=True)
+    # Remove rows where resolution data is missing
+    plot_df = plot_df.dropna(subset=[resolution_col])
+
+    if plot_df.empty:
+        fig = go.Figure()
+        fig.update_layout(title="Spatial Resolution Comparison (No valid resolution data)")
+        return fig
+
+    # Sort by resolution for better visualization
+    plot_df = plot_df.sort_values(by=resolution_col)
 
     fig = px.bar(
         plot_df,
         x="Display_Name",
         y=resolution_col,
         color="Type" if "Type" in plot_df.columns else None,
-        labels={resolution_col: "Resolution (m)", "Display_Name": "Initiative"},
-        hover_name="Display_Name",
-        hover_data={
-            resolution_col: True,
-            "Type": "Type" in plot_df.columns,
-            # Corrected to use 'Acronym' or 'Source' if 'Acronym' is not available
-            "Acronym": (
-                True
-                if "Acronym" in plot_df.columns
-                else ("Source" if "Source" in plot_df.columns else False)
-            ),
-        },
+        hover_data=["Country"] if "Country" in plot_df.columns else None,
         color_discrete_map={
-            "Global": "#ff6b6b",
-            "Nacional": "#4dabf7",
-            "Regional": "#51cf66",
+            "Global": get_modern_colors(3)[0] if get_modern_colors else "#3b82f6",
+            "Nacional": get_modern_colors(3)[1] if get_modern_colors else "#10b981", 
+            "Regional": get_modern_colors(3)[2] if get_modern_colors else "#f59e0b",
         },
     )
 
-    apply_standard_layout(fig, "Initiative", "Resolution (m)")
-    fig.update_layout(xaxis_tickangle=-45)  # Angle initiative names for readability
+    # Apply modern theme
+    apply_modern_theme(
+        fig,
+        title="Spatial Resolution Comparison", 
+        xaxis_title="Initiatives",
+        yaxis_title="Resolution (m)",
+        chart_type="bar"
+    )
+
+    # Rotate x-axis labels for better readability
+    fig.update_layout(xaxis_tickangle=-45)
+
     return fig
+
+
+
 
 
 @smart_cache_data(ttl=300)
@@ -205,14 +231,15 @@ def plot_global_accuracy_comparison(filtered_df: pd.DataFrame) -> go.Figure:
                 else ("Source" if "Source" in plot_df.columns else False)
             ),
         },
+        # Use modern semantic colors for better consistency
         color_discrete_map={
-            "Global": "#ff6b6b",
-            "Nacional": "#4dabf7",
-            "Regional": "#51cf66",
+            "Global": get_modern_colors(3)[0] if get_modern_colors else "#ff6b6b",
+            "Nacional": get_modern_colors(3)[1] if get_modern_colors else "#4dabf7",
+            "Regional": get_modern_colors(3)[2] if get_modern_colors else "#51cf66",
         },
     )
 
-    apply_standard_layout(fig, "Global Accuracy (%)", "Initiative")
+    apply_modern_theme(fig, "Accuracy Comparison by Initiative", "Global Accuracy (%)", "Initiative", chart_type="bar")
     fig.update_layout(
         yaxis={"autorange": "reversed"},  # Ensure highest accuracy is at the top
         height=max(
@@ -314,7 +341,7 @@ def plot_temporal_evolution_frequency(filtered_df: pd.DataFrame) -> go.Figure:
         hover_template_parts.append("<extra></extra>")
         fig.update_traces(hovertemplate="<br>".join(hover_template_parts))
 
-    apply_standard_layout(fig, "Year", "Initiative")
+    apply_modern_theme(fig, "Initiative Timeline", "Year", "Initiative", chart_type="timeline")
     fig.update_layout(
         height=max(400, len(plot_df) * 30),  # Adjust height
         xaxis_type="linear",  # Ensure years are treated linearly
@@ -329,7 +356,7 @@ def plot_temporal_evolution_frequency(filtered_df: pd.DataFrame) -> go.Figure:
 
 @smart_cache_data(ttl=300)
 def plot_class_diversity_focus(filtered_df: pd.DataFrame) -> go.Figure:
-    """Create a grouped bar chart for number of agricultural classes vs. total classes."""
+    """Create an enhanced scatter plot for class diversity and agricultural focus analysis."""
     if filtered_df is None or filtered_df.empty:
         fig = go.Figure()
         fig.update_layout(
@@ -340,8 +367,6 @@ def plot_class_diversity_focus(filtered_df: pd.DataFrame) -> go.Figure:
     plot_df = filtered_df.copy()
 
     # Required columns
-    # Assuming 'Number_of_Classes' is total classes and 'Number_of_Agricultural_Classes' for agricultural ones.
-    # These names might need to be adjusted based on the actual DataFrame columns.
     required_cols = ["Number_of_Classes", "Number_of_Agricultural_Classes"]
     if "Display_Name" not in plot_df.columns or plot_df["Display_Name"].isnull().any():
         plot_df["Display_Name"] = plot_df.apply(get_display_name, axis=1)
@@ -370,50 +395,143 @@ def plot_class_diversity_focus(filtered_df: pd.DataFrame) -> go.Figure:
         fig.update_layout(title="Class Diversity (No valid class count data)")
         return fig
 
-    # Sort by total number of classes for better visualization
-    plot_df = plot_df.sort_values(by="Number_of_Classes", ascending=False)
+    # Calculate agricultural focus percentage
+    plot_df["Agricultural_Focus_Percent"] = (
+        plot_df["Number_of_Agricultural_Classes"] / plot_df["Number_of_Classes"] * 100
+    ).round(1)
+    
+    # Create size column based on total classes for bubble size
+    plot_df["Bubble_Size"] = plot_df["Number_of_Classes"]
+    
+    # Normalize bubble sizes for better visualization
+    max_size = plot_df["Bubble_Size"].max()
+    min_size = plot_df["Bubble_Size"].min()
+    if max_size != min_size:
+        plot_df["Normalized_Size"] = (
+            (plot_df["Bubble_Size"] - min_size) / (max_size - min_size) * 30 + 10
+        )
+    else:
+        plot_df["Normalized_Size"] = 20
+    
+    # Get initiative types for color coding
+    initiative_types = plot_df.get("Type", "Unknown").fillna("Unknown")
+    unique_types = initiative_types.unique()
+    
+    # Create modern color palette
+    colors = [
+        "#2E8B57",  # Sea green
+        "#4682B4",  # Steel blue
+        "#CD5C5C",  # Indian red
+        "#DAA520",  # Goldenrod
+        "#9370DB",  # Medium purple
+        "#20B2AA",  # Light sea green
+        "#FF6347",  # Tomato
+        "#4169E1"   # Royal blue
+    ]
+    
+    color_map = {t: colors[i % len(colors)] for i, t in enumerate(unique_types)}
 
-    # Prepare data for grouped bar chart
-    # We need to melt the DataFrame to have 'variable' (Total Classes, Agri Classes) and 'value' columns
-    plot_df_melted = plot_df.melt(
-        id_vars=(
-            ["Display_Name", "Type"] if "Type" in plot_df.columns else ["Display_Name"]
-        ),
-        value_vars=["Number_of_Classes", "Number_of_Agricultural_Classes"],
-        var_name="Class Category",
-        value_name="Number of Classes",
-    )
-    # Make Class Category more readable
-    plot_df_melted["Class Category"] = plot_df_melted["Class Category"].replace(
-        {
-            "Number_of_Classes": "Total Classes",
-            "Number_of_Agricultural_Classes": "Agricultural Classes",
-        }
-    )
+    # Create enhanced scatter plot
+    fig = go.Figure()
+    
+    for init_type in unique_types:
+        type_data = plot_df[initiative_types == init_type]
+        
+        fig.add_trace(go.Scatter(
+            x=type_data["Number_of_Classes"],
+            y=type_data["Agricultural_Focus_Percent"],
+            mode="markers",
+            marker=dict(
+                size=type_data["Normalized_Size"],
+                color=color_map[init_type],
+                opacity=0.7,
+                line=dict(width=2, color="white"),
+                sizemode="diameter"
+            ),
+            name=str(init_type),
+            text=type_data["Display_Name"],
+            hovertemplate=(
+                "<b>%{text}</b><br>"
+                "Total Classes: %{x}<br>"
+                "Agricultural Focus: %{y}%<br>"
+                "Agricultural Classes: %{customdata}<br>"
+                "Type: " + str(init_type) + "<extra></extra>"
+            ),
+            customdata=type_data["Number_of_Agricultural_Classes"]
+        ))
 
-    fig = px.bar(
-        plot_df_melted,
-        x="Display_Name",
-        y="Number of Classes",
-        color="Class Category",
-        barmode="group",  # Grouped bar chart
-        hover_name="Display_Name",
-        labels={
-            "Display_Name": "Initiative",
-            "Number of Classes": "Count",
-            "Class Category": "Category",
-        },
-        color_discrete_map={
-            "Total Classes": "#1f77b4",  # Muted blue
-            "Agricultural Classes": "#2ca02c",  # Cooked asparagus green
-        },
-    )
+    # Add reference lines
+    # Average agricultural focus line
+    if not plot_df.empty:
+        avg_focus = plot_df["Agricultural_Focus_Percent"].mean()
+        fig.add_hline(
+            y=avg_focus,
+            line_dash="dash",
+            line_color="gray",
+            annotation_text=f"Avg Focus: {avg_focus:.1f}%",
+            annotation_position="bottom right"
+        )
+        
+        # Average total classes line
+        avg_classes = plot_df["Number_of_Classes"].mean()
+        fig.add_vline(
+            x=avg_classes,
+            line_dash="dash", 
+            line_color="gray",
+            annotation_text=f"Avg Classes: {avg_classes:.1f}",
+            annotation_position="top left"
+        )
 
-    apply_standard_layout(fig, "Initiative", "Number of Classes")
+    # Apply modern styling
     fig.update_layout(
-        xaxis_tickangle=-45,
-        height=max(500, len(plot_df) * 35),  # Adjust height
+        title={
+            'text': "Diversidade de Classes e Foco Agrícola",
+            'x': 0.5,
+            'xanchor': 'center',
+            'font': {'size': 18, 'family': 'Arial, sans-serif', 'color': '#2E3440'}
+        },
+        xaxis={
+            'title': 'Total Number of Classes',
+            'showgrid': True,
+            'gridcolor': 'rgba(128,128,128,0.1)',
+            'zeroline': False,
+            'title_font': {'family': 'Arial, sans-serif', 'size': 14},
+            'tickfont': {'family': 'Arial, sans-serif', 'size': 12}
+        },
+        yaxis={
+            'title': 'Agricultural Focus (%)',
+            'showgrid': True,
+            'gridcolor': 'rgba(128,128,128,0.1)',
+            'zeroline': False,
+            'range': [-5, 105],
+            'title_font': {'family': 'Arial, sans-serif', 'size': 14},
+            'tickfont': {'family': 'Arial, sans-serif', 'size': 12}
+        },
+        height=600,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        legend={
+            'title': 'Initiative Type',
+            'orientation': 'v',
+            'yanchor': 'top',
+            'y': 1,
+            'xanchor': 'left',
+            'x': 1.02,
+            'font': {'family': 'Arial, sans-serif', 'size': 12}
+        },
+        margin=dict(l=80, r=120, t=80, b=60)
     )
+    
+    # Add annotation explaining bubble sizes
+    fig.add_annotation(
+        text="Bubble size represents total number of classes",
+        xref="paper", yref="paper",
+        x=0, y=-0.08,
+        showarrow=False,
+        font=dict(size=10, color="gray"),
+        xanchor="left"
+    )
+
     return fig
 
 
@@ -460,7 +578,7 @@ def plot_classification_methodology(
             hole=0.3,  # Donut-like pie chart
         )
         fig.update_traces(textposition="inside", textinfo="percent+label")
-        apply_standard_layout(fig, "", "")  # Pass empty strings for axis titles for pie
+        apply_standard_layout(fig, "", "", chart_type="pie")  # Pass empty strings for axis titles for pie
     elif chart_type == "bar":
         # Sort by count for bar chart
         methodology_counts = methodology_counts.sort_values(by="Count", ascending=False)
@@ -473,8 +591,13 @@ def plot_classification_methodology(
             hover_name=methodology_col,
         )
 
-        apply_standard_layout(fig, "Methodology", "Number of Initiatives")
-        fig.update_layout(xaxis_tickangle=-45)
+        # Apply modern styling
+        fig = apply_modern_styling(fig, **get_modern_bar_config())
+        fig.update_layout(
+            xaxis_title="Methodology",
+            yaxis_title="Number of Initiatives",
+            xaxis_tickangle=-45
+        )
     else:
         fig = go.Figure()
         fig.update_layout(
@@ -530,21 +653,21 @@ def plot_comparison_matrix(filtered_df: pd.DataFrame) -> go.Figure:
     numeric_df = plot_df[numeric_columns].fillna(plot_df[numeric_columns].mean())
     normalized_data = scaler.fit_transform(numeric_df)
 
-    # Create heatmap
+    # Create heatmap with modern colorscale
     fig = go.Figure(
         data=go.Heatmap(
             z=normalized_data,
             x=numeric_columns,
             y=plot_df["Display_Name"].values,
-            colorscale="RdYlBu_r",
+            colorscale=get_modern_colorscale("diverging") if get_modern_colorscale else "RdYlBu_r",
             hoverongaps=False,
             showscale=True,
             colorbar={"title": "Normalized Value"},
         )
     )
 
-    # Apply standardized layout
-    apply_standard_layout(fig, "Metrics", "Initiative")
+    # Apply standardized layout for heatmap
+    apply_standard_layout(fig, "Metrics", "Initiative", chart_type="heatmap")
 
     return fig
 
@@ -703,14 +826,14 @@ def plot_normalized_performance_heatmap(filtered_df: pd.DataFrame) -> go.Figure:
     # Transpose to get the correct shape for the heatmap (initiatives x metrics)
     normalized_data = list(map(list, zip(*normalized_data)))
 
-    # Create heatmap with custom colorscale
+    # Create heatmap with modern colorscale for better visual consistency
 
     fig = go.Figure(
         data=go.Heatmap(
             z=normalized_data,
             x=display_metric_names,
             y=plot_df["Display_Name"].values,
-            colorscale="RdYlGn",
+            colorscale=get_modern_colorscale("sequential") if get_modern_colorscale else "RdYlGn",
             hoverongaps=False,
             showscale=True,
             # Colorbar será aplicada separadamente para melhor controle do título
@@ -808,10 +931,11 @@ def plot_initiative_ranking(
         y="Display_Name",
         color="Type" if "Type" in plot_df.columns else None,
         orientation="h",
+        # Use modern colors for consistent branding
         color_discrete_map={
-            "Global": "#ff6b6b",
-            "Nacional": "#4dabf7",
-            "Regional": "#51cf66",
+            "Global": get_modern_colors(3)[0] if get_modern_colors else "#ff6b6b",
+            "Nacional": get_modern_colors(3)[1] if get_modern_colors else "#4dabf7",
+            "Regional": get_modern_colors(3)[2] if get_modern_colors else "#51cf66",
         },
         hover_data=[col for col in available_criteria if col in plot_df.columns],
     )
@@ -821,7 +945,7 @@ def plot_initiative_ranking(
         fig,
         "Composite Score",
         "Initiative",
-        chart_type="bar_chart",
+        chart_type="bar_horizontal",
         num_items=len(plot_df),
     )
 
@@ -862,13 +986,13 @@ def plot_correlation_matrix(filtered_df: pd.DataFrame) -> go.Figure:
     # Import padronized colorbar configuration
     from scripts.plotting.chart_core import get_standard_colorbar_config
 
-    # Create heatmap
+    # Create correlation heatmap with modern colorscale
     fig = go.Figure(
         data=go.Heatmap(
             z=corr_matrix.values,
             x=corr_matrix.columns,
             y=corr_matrix.columns,
-            colorscale="RdBu",
+            colorscale=get_modern_colorscale("diverging") if get_modern_colorscale else "RdBu",
             zmid=0,
             text=corr_matrix.round(2).values,
             texttemplate="%{text}",
@@ -962,13 +1086,16 @@ def plot_radar_comparison(
     # Create radar chart
     fig = go.Figure()
 
+    # Get modern colors for the two initiatives
+    colors = get_modern_colors(2) if get_modern_colors else ["#ff6b6b", "#4dabf7"]
+    
     fig.add_trace(
         go.Scatterpolar(
             r=values1 + [values1[0]],
             theta=available_categories + [available_categories[0]],
             fill="toself",
             name=display_name_1,
-            line_color="#ff6b6b",
+            line_color=colors[0],
         )
     )
 
@@ -978,7 +1105,7 @@ def plot_radar_comparison(
             theta=available_categories + [available_categories[0]],
             fill="toself",
             name=display_name_2,
-            line_color="#4dabf7",
+            line_color=colors[1],
         )
     )
 
@@ -1031,14 +1158,15 @@ def plot_classes_frequency_boxplot(filtered_df: pd.DataFrame) -> go.Figure:
         hover_name="Display_Name" if "Display_Name" in plot_df.columns else None,
         points="all",  # Show all data points
         notched=True,  # Add notches for median comparison
+        # Use modern color palette for consistency
         color_discrete_map={
-            "Global": "#ff6b6b",
-            "Nacional": "#4dabf7",
-            "Regional": "#51cf66",
+            "Global": get_modern_colors(3)[0] if get_modern_colors else "#ff6b6b",
+            "Nacional": get_modern_colors(3)[1] if get_modern_colors else "#4dabf7",
+            "Regional": get_modern_colors(3)[2] if get_modern_colors else "#51cf66",
         },
     )
 
-    apply_standard_layout(fig, "Temporal Frequency", "Number of Classes")
+    apply_standard_layout(fig, "Temporal Frequency", "Number of Classes", chart_type="box")
     fig.update_layout(
         xaxis_categoryorder="category ascending"
     )  # Ensure consistent ordering
@@ -1089,7 +1217,12 @@ def plot_methodology_type_barchart(filtered_df: pd.DataFrame) -> go.Figure:
         },  # Customize hover data
     )
 
-    apply_standard_layout(fig, "Initiative Type", "Number of Initiatives")
+    # Apply modern styling
+    fig = apply_modern_styling(fig, **get_modern_bar_config())
+    fig.update_layout(
+        xaxis_title="Initiative Type",
+        yaxis_title="Number of Initiatives"
+    )
     fig.update_layout(xaxis_categoryorder="category ascending")
     return fig
 
@@ -1106,6 +1239,5 @@ def add_comparison_chart_download(
         key_prefix: Unique prefix for widget keys
     """
     if fig:
-        setup_download_form(
-            fig, default_filename=default_filename, key_prefix=key_prefix
-        )
+        # Download functionality removed for cleaner interface
+        pass

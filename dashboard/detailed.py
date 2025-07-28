@@ -6,8 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-# Import the new setup_download_form function
-from scripts.utilities.ui_elements import setup_download_form
+# Removed download form import to clean up interface
 
 # Add scripts to path for imports
 current_dir = Path(__file__).parent.parent.parent
@@ -15,11 +14,15 @@ scripts_path = str(current_dir / "scripts")
 if scripts_path not in sys.path:
     sys.path.insert(0, scripts_path)
 
-# Import chart_core at module level
+# Import chart_core and modern themes at module level
 try:
-    from scripts.plotting.chart_core import apply_standard_layout
+    from scripts.plotting.chart_core import apply_standard_layout, get_chart_colors, get_chart_colorscale
+    from scripts.utilities.modern_themes import apply_modern_theme, get_modern_colors, get_modern_colorscale
 except ImportError:
     apply_standard_layout = None  # Fallback if import fails
+    get_chart_colors = None
+    get_chart_colorscale = None
+    apply_modern_theme = None
 
 
 def run():
@@ -103,6 +106,9 @@ def run():
             1 / df_filtered["Resolution"]
         ).max()
         fig = go.Figure()
+        # Get modern colors for the two metrics
+        modern_colors = get_chart_colors(2) if get_chart_colors else ['#3b82f6', '#f59e0b']
+        
         fig.add_trace(
             go.Bar(
                 y=df_filtered["Display_Name"],  # Use siglas
@@ -111,7 +117,7 @@ def run():
                 ],  # Changed from 'Overall_Accuracy' to 'Accuracy (%)'
                 name="Accuracy (%)",
                 orientation="h",
-                marker_color="royalblue",
+                marker_color=modern_colors[0],
             )
         )
         fig.add_trace(
@@ -120,24 +126,33 @@ def run():
                 x=df_filtered["resolution_norm"] * 100,
                 name="Resolution (Normalized)",  # Translated
                 orientation="h",
-                marker_color="orange",
+                marker_color=modern_colors[1],
             )
         )
-        fig.update_layout(
-            barmode="group",
-            xaxis_title="Value (%)",
-            yaxis_title="Initiative",
-            title="Comparison: Accuracy vs Resolution",
-            height=max(
-                400, len(df_filtered) * 30 + 100
-            ),  # Adjusted height for better readability
-        )
+        
+        # Apply modern theme
+        if apply_modern_theme:
+            apply_modern_theme(
+                fig,
+                title="Accuracy vs Resolution Comparison",
+                xaxis_title="Value (%)",
+                yaxis_title="Initiative",
+                chart_type="bar_horizontal",
+                num_items=len(df_filtered)
+            )
+        else:
+            # Fallback layout
+            fig.update_layout(
+                barmode="group",
+                xaxis_title="Value (%)",
+                yaxis_title="Initiative",
+                title="Comparison: Accuracy vs Resolution",
+                height=max(
+                    400, len(df_filtered) * 30 + 100
+                ),  # Adjusted height for better readability
+            )
         st.plotly_chart(fig, use_container_width=True)
-        # Use the new download form setup
-        if fig:
-            setup_download_form(
-                fig, default_filename="dual_bars_detailed", key_prefix="dual_bars"
-            )
+        # Download functionality removed for cleaner interface
 
     with tab2:
         st.subheader("Multi-dimensional Performance Radar")  # Added subheader
@@ -218,13 +233,7 @@ def run():
             )
             st.plotly_chart(fig_radar, use_container_width=True)
 
-            # Use the new download form setup
-            if fig_radar:
-                setup_download_form(
-                    fig_radar,
-                    default_filename="radar_chart_detailed",
-                    key_prefix="radar_chart",
-                )
+            # Download functionality removed for cleaner interface
 
         elif len(available_radar_cols) == 2:
             st.warning(
@@ -251,7 +260,8 @@ def run():
                     radar_df[col] = 0.5
 
             fig_radar = go.Figure()
-            colors = px.colors.qualitative.Plotly
+            # Use modern color palette instead of hardcoded colors
+            modern_colors = get_chart_colors(len(radar_df)) if get_chart_colors else px.colors.qualitative.Plotly
 
             for i, (_idx, row) in enumerate(radar_df.iterrows()):
                 values = row[extended_radar_cols].tolist()
@@ -264,38 +274,45 @@ def run():
                         theta=theta_closed,
                         fill="toself",
                         name=row["Display_Name"],
-                        line_color=colors[i % len(colors)],
+                        line_color=modern_colors[i % len(modern_colors)],
                         line_width=2,
                     )
                 )
 
-            fig_radar.update_layout(
-                polar={
-                    "radialaxis": {
-                        "visible": True,
-                        "range": [0, 1],
-                        "showticklabels": True,
-                        "ticks": "outside",
+            # Apply modern theme to radar chart
+            if apply_modern_theme:
+                apply_modern_theme(
+                    fig_radar,
+                    title="Multi-dimensional Performance Radar",
+                    chart_type="radar",
+                    num_items=len(radar_df)
+                )
+            else:
+                # Fallback layout if modern theme not available
+                fig_radar.update_layout(
+                    polar={
+                        "radialaxis": {
+                            "visible": True,
+                            "range": [0, 1],
+                            "showticklabels": True,
+                            "ticks": "outside",
+                        },
+                        "angularaxis": {
+                            "showticklabels": True,
+                            "rotation": 90,
+                            "direction": "counterclockwise",
+                        },
                     },
-                    "angularaxis": {
-                        "showticklabels": True,
-                        "rotation": 90,
-                        "direction": "counterclockwise",
-                    },
-                },
-                showlegend=True,
-                title="Multi-dimensional Performance Radar (with Temporal Coverage)",
-                height=600,
-                font={"size": 12},
-            )
+                    showlegend=True,
+                    title="Multi-dimensional Performance Radar",
+                    height=600,
+                    font={"size": 12},
+                )
             st.plotly_chart(fig_radar, use_container_width=True)
 
             if fig_radar:
-                setup_download_form(
-                    fig_radar,
-                    default_filename="radar_chart_detailed",
-                    key_prefix="radar_chart",
-                )
+                # Download functionality removed for cleaner interface
+                pass
         else:
             st.warning(
                 "⚠️ Insufficient data for radar chart. At least 2 dimensions needed. Select more initiatives or ensure data includes accuracy, resolution, and class information."
@@ -327,24 +344,38 @@ def run():
             heatmap_df = radar_df.set_index("Display_Name")[
                 available_radar_cols
             ]  # Use siglas
+            
+            # Get modern colorscale for heatmap
+            modern_colorscale = get_chart_colorscale('performance') if get_chart_colorscale else 'Viridis'
+            
             fig_heatmap = px.imshow(
                 heatmap_df.values,
                 x=heatmap_df.columns,
                 y=heatmap_df.index,
-                color_continuous_scale="Viridis",  # Changed to Viridis for better perception
+                color_continuous_scale=modern_colorscale,
                 aspect="auto",
                 title="Performance Heatmap (Normalized Values)",  # Translated
                 labels={"x": "Metric", "y": "Initiative", "color": "Normalized Value"},
             )
-            fig_heatmap.update_layout(height=max(400, len(df_filtered) * 30 + 100))
+            
+            # Apply modern theme
+            if apply_modern_theme:
+                apply_modern_theme(
+                    fig_heatmap,
+                    title="Performance Heatmap",
+                    xaxis_title="Metric",
+                    yaxis_title="Initiative",
+                    chart_type="heatmap",
+                    num_items=len(df_filtered)
+                )
+            else:
+                # Fallback layout
+                fig_heatmap.update_layout(height=max(400, len(df_filtered) * 30 + 100))
             st.plotly_chart(fig_heatmap, use_container_width=True)
             # Use the new download form setup
             if fig_heatmap:
-                setup_download_form(
-                    fig_heatmap,
-                    default_filename="heatmap_detailed",
-                    key_prefix="heatmap_detailed",
-                )
+                # Download functionality removed for cleaner interface
+                pass
         else:
             st.warning(
                 "Insufficient data for heatmap. Select more metrics or initiatives."
@@ -376,11 +407,8 @@ def run():
                 st.plotly_chart(fig_annual, use_container_width=True)
                 # Use the new download form setup
                 if fig_annual:
-                    setup_download_form(
-                        fig_annual,
-                        default_filename="annual_coverage_detailed",
-                        key_prefix="annual_coverage",
-                    )
+                    # Download functionality removed for cleaner interface
+                    pass
 
             except ImportError:
                 st.error("Annual coverage function not available.")  # Translated
@@ -468,9 +496,8 @@ def run():
             )
 
             st.plotly_chart(fig_gaps, use_container_width=True)
-            setup_download_form(
-                fig_gaps, default_filename="temporal_gaps", key_prefix="temporal_gaps"
-            )
+            # Download functionality removed for cleaner interface
+            pass
 
             # Show detailed gap information
             with st.expander("📋 Detailed Gap Information"):
@@ -541,11 +568,8 @@ def run():
             )
 
             st.plotly_chart(fig_evolution, use_container_width=True)
-            setup_download_form(
-                fig_evolution,
-                default_filename="availability_evolution",
-                key_prefix="availability_evolution",
-            )
+            # Download functionality removed for cleaner interface
+            pass
 
         # === INITIATIVE AVAILABILITY HEATMAP ===
         st.markdown("### 🔥 Initiative Availability Heatmap (by Type and Year)")
@@ -585,13 +609,16 @@ def run():
                 fill_value=0,
             )
 
+            # Get modern colorscale for temporal heatmap
+            modern_colorscale = get_chart_colorscale('modern_blue') if get_chart_colorscale else 'Viridis'
+
             # Create heatmap
             fig_heatmap_temporal = go.Figure(
                 data=go.Heatmap(
                     z=pivot_df.values,
                     x=pivot_df.columns,
                     y=pivot_df.index,
-                    colorscale="Viridis",
+                    colorscale=modern_colorscale,
                     hoverongaps=False,
                     hovertemplate="<b>Type: %{y}</b><br>"
                     + "Year: %{x}<br>"
@@ -599,21 +626,30 @@ def run():
                 )
             )
 
-            fig_heatmap_temporal.update_layout(
-                title="Initiative Availability by Type and Year",
-                xaxis_title="Year",
-                yaxis_title="Initiative Type",
-                height=400,
-                xaxis={"type": "category"},
-                yaxis={"type": "category"},
-            )
+            # Apply modern theme
+            if apply_modern_theme:
+                apply_modern_theme(
+                    fig_heatmap_temporal,
+                    title="Initiative Availability by Type and Year",
+                    xaxis_title="Year",
+                    yaxis_title="Initiative Type",
+                    chart_type="heatmap",
+                    num_items=len(pivot_df.index)
+                )
+            else:
+                # Fallback layout
+                fig_heatmap_temporal.update_layout(
+                    title="Initiative Availability by Type and Year",
+                    xaxis_title="Year",
+                    yaxis_title="Initiative Type",
+                    height=400,
+                    xaxis={"type": "category"},
+                    yaxis={"type": "category"},
+                )
 
             st.plotly_chart(fig_heatmap_temporal, use_container_width=True)
-            setup_download_form(
-                fig_heatmap_temporal,
-                default_filename="heatmap_type_year",
-                key_prefix="heatmap_type_year",
-            )
+            # Download functionality removed for cleaner interface
+            pass
 
             # Summary statistics
             st.markdown("#### 📊 Temporal Coverage Summary")
@@ -796,6 +832,10 @@ def create_dual_bars_chart(df_filtered_chart):
         df_filtered_chart["resolution_norm"] = (1 / df_filtered_chart["Resolution"]) / (
             1 / df_filtered_chart["Resolution"]
         ).max()
+        
+        # Get modern colors for the dual bars
+        modern_colors = get_chart_colors(2) if get_chart_colors else ['#3b82f6', '#f59e0b']
+        
         fig = go.Figure()
         fig.add_trace(
             go.Bar(
@@ -803,7 +843,7 @@ def create_dual_bars_chart(df_filtered_chart):
                 x=df_filtered_chart["Accuracy (%)"],
                 name="Accuracy (%)",
                 orientation="h",
-                marker_color="royalblue",
+                marker_color=modern_colors[0],
             )
         )
         fig.add_trace(
@@ -812,25 +852,37 @@ def create_dual_bars_chart(df_filtered_chart):
                 x=df_filtered_chart["resolution_norm"] * 100,
                 name="Resolution (Normalized)",  # Translated
                 orientation="h",
-                marker_color="orange",
+                marker_color=modern_colors[1],
             )
         )
 
-        if apply_standard_layout:
-            apply_standard_layout(
-                fig, "Comparison: Accuracy vs Resolution", "Value (%)", "Initiative"
-            )
-        else:
-            fig.update_layout(
-                title="Comparison: Accuracy vs Resolution",
+        # Apply modern theme layout
+        if apply_modern_theme:
+            apply_modern_theme(
+                fig,
+                title="Accuracy vs Resolution Comparison",
                 xaxis_title="Value (%)",
                 yaxis_title="Initiative",
+                chart_type="bar_horizontal",
+                num_items=len(df_filtered_chart)
             )
+        else:
+            # Fallback to legacy layout
+            if apply_standard_layout:
+                apply_standard_layout(
+                    fig, "Comparison: Accuracy vs Resolution", "Value (%)", "Initiative"
+                )
+            else:
+                fig.update_layout(
+                    title="Comparison: Accuracy vs Resolution",
+                    xaxis_title="Value (%)",
+                    yaxis_title="Initiative",
+                )
 
-        fig.update_layout(
-            barmode="group",
-            height=max(400, len(df_filtered_chart) * 30 + 100),  # Adjusted height
-        )
+            fig.update_layout(
+                barmode="group",
+                height=max(400, len(df_filtered_chart) * 30 + 100),  # Adjusted height
+            )
         return fig
     except Exception as e:
         print(f"Error creating dual bars chart: {e}")  # Translated
@@ -871,7 +923,9 @@ def create_radar_chart(df_filtered_chart):
                 radar_df_chart[col] = 0.5
 
         fig_radar = go.Figure()
-        colors = px.colors.qualitative.Plotly  # Using Plotly colors
+        # Use modern colors instead of hardcoded Plotly colors
+        modern_colors = get_chart_colors(len(radar_df_chart)) if get_chart_colors else px.colors.qualitative.Plotly
+        
         for i, (_idx, row) in enumerate(radar_df_chart.iterrows()):
             values = row[available_radar_cols_chart].tolist()
             values_closed = values + [values[0]]
@@ -882,21 +936,31 @@ def create_radar_chart(df_filtered_chart):
                     theta=theta_closed,
                     fill="toself",
                     name=row["Display_Name"],
-                    line_color=colors[i % len(colors)],
+                    line_color=modern_colors[i % len(modern_colors)],
                     line_width=2,
                 )
             )
 
-        if apply_standard_layout:
-            apply_standard_layout(
-                fig_radar, "Multi-dimensional Comparison (Radar)", "", ""
+        # Apply modern theme layout
+        if apply_modern_theme:
+            apply_modern_theme(
+                fig_radar,
+                title="Multi-dimensional Performance Radar",
+                chart_type="radar",
+                num_items=len(radar_df_chart)
             )
         else:
-            fig_radar.update_layout(title="Multi-dimensional Comparison (Radar)")
+            # Fallback to legacy layout
+            if apply_standard_layout:
+                apply_standard_layout(
+                    fig_radar, "Multi-dimensional Comparison (Radar)", "", ""
+                )
+            else:
+                fig_radar.update_layout(title="Multi-dimensional Comparison (Radar)")
 
-        fig_radar.update_layout(
-            polar={
-                "radialaxis": {"visible": True, "range": [0, 1]},
+            fig_radar.update_layout(
+                polar={
+                    "radialaxis": {"visible": True, "range": [0, 1]},
                 "angularaxis": {"rotation": 90, "direction": "counterclockwise"},
             },
             showlegend=True,
@@ -945,28 +1009,44 @@ def create_heatmap_chart(df_filtered_chart):
         heatmap_df_chart = radar_df_chart.set_index("Display_Name")[
             available_radar_cols_chart
         ]
+        
+        # Get modern colorscale for heatmap
+        modern_colorscale = get_chart_colorscale('performance') if get_chart_colorscale else 'Viridis'
+        
         fig_heatmap = px.imshow(
             heatmap_df_chart.values,
             x=heatmap_df_chart.columns,
             y=heatmap_df_chart.index,
-            color_continuous_scale="Viridis",
+            color_continuous_scale=modern_colorscale,
             aspect="auto",
             labels={"x": "Metric", "y": "Initiative", "color": "Normalized Value"},
         )
 
-        if apply_standard_layout:
-            apply_standard_layout(
+        # Apply modern theme layout
+        if apply_modern_theme:
+            apply_modern_theme(
                 fig_heatmap,
-                "Performance Heatmap (Normalized Values)",
-                "Metric",
-                "Initiative",
+                title="Performance Heatmap (Normalized Values)",
+                xaxis_title="Metric",
+                yaxis_title="Initiative",
+                chart_type="heatmap",
+                num_items=len(df_filtered_chart)
             )
         else:
-            fig_heatmap.update_layout(title="Performance Heatmap (Normalized Values)")
+            # Fallback to legacy layout
+            if apply_standard_layout:
+                apply_standard_layout(
+                    fig_heatmap,
+                    "Performance Heatmap (Normalized Values)",
+                    "Metric",
+                    "Initiative",
+                )
+            else:
+                fig_heatmap.update_layout(title="Performance Heatmap (Normalized Values)")
 
-        fig_heatmap.update_layout(
-            height=max(400, len(df_filtered_chart) * 30 + 100)
-        )  # Adjusted height
+            fig_heatmap.update_layout(
+                height=max(400, len(df_filtered_chart) * 30 + 100)
+            )  # Adjusted height
         return fig_heatmap
     except Exception as e:
         print(f"Error creating heatmap: {e}")  # Translated

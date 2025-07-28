@@ -126,9 +126,7 @@ def display_chart_with_download(
         st.plotly_chart(fig, use_container_width=container_width, config=config)
 
         # Add download functionality
-        from scripts.utilities.ui_elements import setup_download_form
-
-        setup_download_form(fig, default_filename=filename, key_prefix=key_prefix)
+        # Download functionality removed for cleaner interface
     else:
         st.error("❌ Chart could not be generated")
 

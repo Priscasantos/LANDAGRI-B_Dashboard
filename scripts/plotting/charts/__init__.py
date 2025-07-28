@@ -54,6 +54,17 @@ from .temporal_charts import (
     timeline_with_controls,
 )
 
+# Import agricultural charts
+from .agricultural_charts import (
+    load_conab_data,
+    plot_crop_calendar_heatmap,
+    plot_regional_crop_coverage,
+    plot_temporal_crop_trends,
+    plot_crop_diversity_by_region,
+    plot_agricultural_performance_metrics,
+    create_agricultural_summary_stats
+)
+
 __all__ = [
     # Timeline charts
     "plot_timeline_chart",  # Updated to plot_timeline_chart
@@ -89,4 +100,12 @@ __all__ = [
     "plot_resolution_coverage_heatmap",
     "plot_resolution_by_sensor_family",
     "plot_resolution_slopegraph",
+    # Agricultural charts
+    "load_conab_data",
+    "plot_crop_calendar_heatmap",
+    "plot_regional_crop_coverage",
+    "plot_temporal_crop_trends",
+    "plot_crop_diversity_by_region",
+    "plot_agricultural_performance_metrics",
+    "create_agricultural_summary_stats"
 ]

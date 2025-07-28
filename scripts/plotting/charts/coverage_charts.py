@@ -17,8 +17,16 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 from scripts.plotting.chart_core import apply_standard_layout, get_display_name
+from scripts.utilities.modern_themes import apply_modern_theme, get_modern_colors, get_modern_colorscale
 from scripts.plotting.universal_cache import smart_cache_data
 from scripts.utilities.config import get_initiative_color_map
+from scripts.utilities.modern_chart_theme import (
+    apply_modern_styling,
+    get_modern_layout_config,
+    get_modern_color_palette,
+    get_modern_line_config,
+    get_modern_bar_config
+)
 
 
 @smart_cache_data(ttl=300)
@@ -102,15 +110,15 @@ def plot_annual_coverage_multiselect(
                     mode="markers+lines",
                     name=display_name_plot,
                     marker={
-                        "color": color_map.get(original_name_for_color, "#1f77b4"),
+                        "color": color_map.get(original_name_for_color, get_modern_colors(1)[0] if get_modern_colors else "#1f77b4"),
                         "size": 12,
                         "line": {
                             "width": 2,
-                            "color": color_map.get(original_name_for_color, "#1f77b4"),
+                            "color": color_map.get(original_name_for_color, get_modern_colors(1)[0] if get_modern_colors else "#1f77b4"),
                         },
                     },
                     line={
-                        "color": color_map.get(original_name_for_color, "#1f77b4"),
+                        "color": color_map.get(original_name_for_color, get_modern_colors(1)[0] if get_modern_colors else "#1f77b4"),
                         "width": 3,
                     },
                     showlegend=True,
@@ -132,23 +140,23 @@ def plot_annual_coverage_multiselect(
             tickangle=45,
         )
 
-    apply_standard_layout(fig, "Year", "Initiative")
+    apply_modern_theme(fig, "Annual Coverage Timeline", "Year", "Initiative", chart_type="timeline")
 
-    from scripts.plotting.chart_core import get_standard_legend_config
-
+    # Apply modern styling
+    fig = apply_modern_styling(fig, **get_modern_line_config())
+    
     fig.update_layout(
         yaxis={
             "type": "category",
             "categoryorder": "array",
             "categoryarray": unique_display_names_sorted,
         },
-        legend=get_standard_legend_config(title="Initiative", position="right"),
         margin={
             "l": 150,
             "r": 50,
-            "t": 60,
-            "b": 50,
-        },  # Adjusted left margin for potentially longer display names
+            "t": 80,
+            "b": 60,
+        },  # Adjusted margins for modern layout
     )
     return fig
 
@@ -203,10 +211,10 @@ def plot_ano_overlap(metadata: dict[str, Any], filtered_df: pd.DataFrame) -> go.
         x="Ano",
         y="N_iniciativas",
         color="N_iniciativas",
-        color_continuous_scale="Blues",
+        color_continuous_scale=get_modern_colorscale("sequential") if get_modern_colorscale else "Blues",
     )
 
-    apply_standard_layout(fig, "Year", "Number of Initiatives")
+    apply_modern_theme(fig, "Year Overlap Analysis", "Year", "Number of Initiatives", chart_type="bar")
     fig.update_layout(
         xaxis={"tickformat": "d", "tickangle": 45}
     )  # Ensure year is displayed as integer
@@ -283,11 +291,11 @@ def plot_heatmap(metadata: dict[str, Any], filtered_df: pd.DataFrame) -> go.Figu
     fig = px.imshow(
         pivot,
         aspect="auto",
-        color_continuous_scale="Blues",
+        color_continuous_scale=get_modern_colorscale("sequential") if get_modern_colorscale else "Blues",
         labels={"color": "Coverage"},
     )
 
-    apply_standard_layout(fig, "Year", "Initiative")
+    apply_modern_theme(fig, "Coverage Heatmap", "Year", "Initiative", chart_type="heatmap")
     fig.update_layout(
         height=max(400, 25 * len(pivot.index)),
         xaxis={

@@ -10,6 +10,12 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from scripts.plotting.chart_core import apply_standard_layout
+from scripts.utilities.modern_chart_theme import (
+    apply_modern_styling,
+    get_modern_layout_config,
+    get_modern_color_palette,
+    get_modern_scatter_config
+)
 
 
 def plot_resolution_vs_launch_year(filtered_df: pd.DataFrame) -> go.Figure:
@@ -104,7 +110,7 @@ def plot_resolution_coverage_heatmap(filtered_df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def plot_resolution_by_sensor_family(filtered_df: pd.DataFrame) -> go.Figure:
+def plot_resolution_by_sensor_family(filtered_df: pd.DataFrame, sensors_meta_data: dict = None) -> go.Figure:
     """Create a chart showing resolution distribution by sensor family."""
     fig = go.Figure()
 
@@ -132,7 +138,7 @@ def plot_resolution_by_sensor_family(filtered_df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def plot_resolution_slopegraph(filtered_df: pd.DataFrame) -> go.Figure:
+def plot_resolution_slopegraph(filtered_df: pd.DataFrame, sensors_meta_data: dict = None) -> go.Figure:
     """Create a slopegraph showing resolution evolution."""
     fig = go.Figure()
 

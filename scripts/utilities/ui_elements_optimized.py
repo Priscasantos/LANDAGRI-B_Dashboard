@@ -161,14 +161,15 @@ def loading_placeholder(message: str = "Loading...") -> None:
         st.empty()
 
 
-def data_table_modern(df, title: str = "", show_download: bool = True) -> None:
+def data_table_modern(df, title: str = "", show_download: bool = False) -> None:
     """
     Display data in modern table format with optional download.
+    CSV downloads disabled per user request.
 
     Args:
         df: DataFrame to display
         title: Table title
-        show_download: Whether to show download button
+        show_download: Whether to show download button (disabled by default)
     """
     if title:
         st.subheader(title)
