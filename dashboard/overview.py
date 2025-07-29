@@ -143,16 +143,19 @@ def _render_initiative_tech_info(init_data: pd.Series, sensors_meta: dict):
     .info-section {
         margin: 1.5rem 0;
         padding: 1rem;
-        background: #f8f9fa;
+        background: transparent !important;
         border-radius: 10px;
         border-left: 4px solid #28a745;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: none !important;
+        color: #e0e6f0 !important;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
     }
     .info-title {
         font-weight: 600;
-        color: #495057;
+        color: #e0e6f0 !important;
         margin-bottom: 0.5rem;
         font-size: 1.1em;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
     }
     .badge {
         display: inline-block;
@@ -162,10 +165,12 @@ def _render_initiative_tech_info(init_data: pd.Series, sensors_meta: dict):
         font-size: 0.9rem;
         font-weight: 500;
         text-decoration: none;
+        background: transparent !important;
+        color: #e0e6f0 !important;
     }
     .badge-sensor { 
-        background: #e0f7fa; 
-        color: #00796b; 
+        background: transparent !important; 
+        color: #e0e6f0 !important; 
         border: 1px solid #b2dfdb; 
         margin-right: 0.5rem; 
         margin-bottom: 0.5rem; 
@@ -175,12 +180,15 @@ def _render_initiative_tech_info(init_data: pd.Series, sensors_meta: dict):
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 0.5rem;
         margin: 0.5rem 0;
+        background: transparent !important;
     }
     .metric-item {
-        background: #ffffff;
+        background: transparent !important;
         padding: 0.5rem;
         border-radius: 5px;
-        border: 1px solid #e9ecef;
+        border: 1px solid #444a5a;
+        color: #e0e6f0 !important;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
     }
     </style>
     """,
@@ -301,11 +309,12 @@ def _render_initiative_tech_info(init_data: pd.Series, sensors_meta: dict):
         combined_resolutions = []
         combined_bands = []
         
+        # Start the sensor details section with proper opening div
         sensor_details_html += """
-        <div class='info-section' style='border-left-color:#00bcd4;'>
+        <div class='info-section' style='border-left-color:#00bcd4; background: transparent !important; color: #e0e6f0;'>
           <div class='info-title'>🛰️ Sensor & Satellite Details</div>
         """
-        
+
         for sensor_ref_obj in sensors_referenced_list_for_display:
             current_sensor_key_str = None
             if isinstance(sensor_ref_obj, dict):
@@ -314,7 +323,7 @@ def _render_initiative_tech_info(init_data: pd.Series, sensors_meta: dict):
                     current_sensor_key_str = str(_key_from_dict)
             elif isinstance(sensor_ref_obj, str):
                 current_sensor_key_str = sensor_ref_obj
-                
+
             if current_sensor_key_str:
                 sensor_info = sensors_meta.get(str(current_sensor_key_str), {})
                 display_name = sensor_info.get("display_name", str(current_sensor_key_str).replace("_", " ").title())
@@ -329,7 +338,7 @@ def _render_initiative_tech_info(init_data: pd.Series, sensors_meta: dict):
                 launch = sensor_info.get("launch_date", "-")
                 resolutions = sensor_info.get("spatial_resolutions_m", [])
                 spectral_bands = sensor_info.get("spectral_bands", [])
-                
+
                 # Aggregate for summary
                 if platform != "-": all_platforms.append(platform)
                 if family != "-": all_families.append(family)
@@ -337,11 +346,12 @@ def _render_initiative_tech_info(init_data: pd.Series, sensors_meta: dict):
                 if agency != "-": all_agencies.append(agency)
                 if resolutions: combined_resolutions.extend(resolutions)
                 if spectral_bands: combined_bands.extend(spectral_bands)
-                
+
                 instrument_str = ", ".join(instrument) if instrument else "-"
-                sensor_details_html += f"""
-                  <div style='background:#ffffff; margin:0.5rem 0; padding:0.8rem; border-radius:5px; border:1px solid #dee2e6;'>
-                    <h5 style='margin:0 0 0.5rem 0; color:#00796b;'>🛰️ {display_name}</h5>
+                # Build HTML for each sensor, ensuring all tags are closed and not wrapped in code formatting
+                sensor_html = f"""
+                  <div style='background: transparent !important; margin:0.5rem 0; padding:0.8rem; border-radius:5px; border: 1px solid #444a5a; color: #e0e6f0;'>
+                    <h5 style='margin:0 0 0.5rem 0; color:#56b6c2;'>🛰️ {display_name}</h5>
                     <div class="metric-grid">
                       <div class="metric-item"><b>Platform:</b> {platform}</div>
                       <div class="metric-item"><b>Family:</b> {family}</div>
@@ -352,11 +362,14 @@ def _render_initiative_tech_info(init_data: pd.Series, sensors_meta: dict):
                       <div class="metric-item"><b>Status:</b> {status}</div>
                       <div class="metric-item"><b>Launch:</b> {launch}</div>
                     </div>
-                    <p style='margin:0.5rem 0 0 0;'><b>Instruments:</b> {instrument_str}</p>
-                    {f'<p style="margin:0.5rem 0 0 0;"><b>Resolutions (m):</b> {", ".join(map(str, sorted(set(resolutions))))}' if resolutions else ''}
-                    {f'<p style="margin:0.5rem 0 0 0;"><b>Spectral Bands:</b> {len(spectral_bands)} bands' if spectral_bands else ''}
-                  </div>
+                    <p style='margin:0.5rem 0 0 0; color: #e0e6f0;'><b>Instruments:</b> {instrument_str}</p>
                 """
+                if resolutions:
+                    sensor_html += f"<p style='margin:0.5rem 0 0 0; color: #e0e6f0;'><b>Resolutions (m):</b> {', '.join(map(str, sorted(set(resolutions))))}</p>"
+                if spectral_bands:
+                    sensor_html += f"<p style='margin:0.5rem 0 0 0; color: #e0e6f0;'><b>Spectral Bands:</b> {len(spectral_bands)} bands</p>"
+                sensor_html += "</div>"  # Close main sensor div
+                sensor_details_html += sensor_html
         
         # Add aggregated summary if multiple sensors
         if len(sensors_referenced_list_for_display) > 1:
@@ -366,27 +379,28 @@ def _render_initiative_tech_info(init_data: pd.Series, sensors_meta: dict):
             unique_resolutions = sorted(set(combined_resolutions))
             
             sensor_details_html += f"""
-              <div style='background:#e8f5e8; margin:0.5rem 0; padding:0.8rem; border-radius:5px; border:1px solid #c3e6c3;'>
-                <h6 style='margin:0 0 0.5rem 0; color:#2e7d2e;'>📊 Aggregated Sensor Summary</h6>
+              <div style='background: transparent !important; margin:0.5rem 0; padding:0.8rem; border-radius:5px; border: 1px solid #444a5a; color: #e0e6f0;'>
+                <h6 style='margin:0 0 0.5rem 0; color:#56b6c2;'>📊 Aggregated Sensor Summary</h6>
                 <div class="metric-grid">
                   <div class="metric-item"><b>Total Sensors:</b> {len(sensors_referenced_list_for_display)}</div>
                   <div class="metric-item"><b>Platforms:</b> {len(unique_platforms)}</div>
                   <div class="metric-item"><b>Families:</b> {', '.join(unique_families) if unique_families else '-'}</div>
                   <div class="metric-item"><b>Agencies:</b> {', '.join(unique_agencies) if unique_agencies else '-'}</div>
                 </div>
-                <p style='margin:0.5rem 0 0 0;'><b>Combined Resolutions (m):</b> {', '.join(map(str, unique_resolutions)) if unique_resolutions else '-'}</p>
-                <p style='margin:0.5rem 0 0 0;'><b>Total Spectral Bands:</b> {len(combined_bands) if combined_bands else 0}</p>
+                <p style='margin:0.5rem 0 0 0; color: #e0e6f0;'><b>Combined Resolutions (m):</b> {', '.join(map(str, unique_resolutions)) if unique_resolutions else '-'}</p>
+                <p style='margin:0.5rem 0 0 0; color: #e0e6f0;'><b>Total Spectral Bands:</b> {len(combined_bands) if combined_bands else 0}</p>
               </div>
             """
         
-        sensor_details_html += "</div>"
+        sensor_details_html += "</div>"  # Close the sensor details section
     else:
         sensor_details_html += """
-        <div class='info-section' style='border-left-color:#00bcd4;'>
+        <div class='info-section' style='border-left-color:#00bcd4; background: transparent !important; color: #e0e6f0;'>
           <div class='info-title'>🛰️ Sensor Details</div>
           <p>No sensor metadata available for this initiative.</p>
         </div>
         """
+    # Ensure all tags are closed and no raw HTML is left open
     tech_info_html_parts.append(sensor_details_html)
 
     # --- Other Technical Info ---
@@ -906,65 +920,55 @@ def _render_detailed_exploration(filtered_df: pd.DataFrame, meta: dict, sensors_
             filtered_df["Name"] == selected_initiative_detailed
         ].iloc[0]
         init_metadata = meta.get(selected_initiative_detailed, {})
-        # Get the acronym for the selected initiative
         initiative_acronym = nome_to_sigla.get(
             selected_initiative_detailed, selected_initiative_detailed[:10]
         )
 
-        # Modern initiative header
-        st.markdown(f"### 🛰️ {initiative_acronym}")
-        st.markdown(f"**{selected_initiative_detailed}**")
-        
-        col1_detail, col2_detail = st.columns([1, 1])
+        st.markdown(f"## {selected_initiative_detailed}")
+        st.markdown(f"### {initiative_acronym}")
 
-        with col1_detail:
+        left_col, right_col = st.columns([1, 1])
+
+        with left_col:
             st.markdown("#### 📊 Key Metrics")
-            
-            # Display key metrics
-            accuracy_val = pd.to_numeric(
-                init_data.get("Accuracy (%)", ""), errors="coerce"
-            )
-            if pd.notna(accuracy_val):
-                st.metric("🎯 Accuracy", f"{accuracy_val:.1f}%")
-
+            accuracy_val = pd.to_numeric(init_data.get("Accuracy (%)", ""), errors="coerce")
             resolution_val = pd.to_numeric(init_data.get("Resolution", ""), errors="coerce")
-            if pd.notna(resolution_val):
-                st.metric("🔬 Resolution", f"{resolution_val:.0f}m")
+            classes_val = pd.to_numeric(init_data.get("Classes", init_data.get("Number_of_Classes", "")), errors="coerce")
+            freq_val = str(init_data.get("Temporal_Frequency", "")).strip()
+            st.markdown("""
+                <div style='display: flex; gap: 1rem;'>
+                    <div style='background: #181c2a; color: #e06c75; padding: 1rem; border-radius: 10px; min-width: 120px; text-align: center;'>
+                        <div style='font-size: 1.5rem; font-weight: bold;'>🎯 {}</div>
+                        <div style='font-size: 1rem;'>Accuracy</div>
+                    </div>
+                    <div style='background: #181c2a; color: #61afef; padding: 1rem; border-radius: 10px; min-width: 120px; text-align: center;'>
+                        <div style='font-size: 1.5rem; font-weight: bold;'>🔬 {}</div>
+                        <div style='font-size: 1rem;'>Resolution</div>
+                    </div>
+                    <div style='background: #181c2a; color: #e5c07b; padding: 1rem; border-radius: 10px; min-width: 120px; text-align: center;'>
+                        <div style='font-size: 1.5rem; font-weight: bold;'>🏷️ {}</div>
+                        <div style='font-size: 1rem;'>Classes</div>
+                    </div>
+                    <div style='background: #181c2a; color: #56b6c2; padding: 1rem; border-radius: 10px; min-width: 120px; text-align: center;'>
+                        <div style='font-size: 1.5rem; font-weight: bold;'>📅 {}</div>
+                        <div style='font-size: 1rem;'>Frequency</div>
+                    </div>
+                </div>
+            """.format(
+                f"{accuracy_val:.1f}%" if pd.notna(accuracy_val) else "-",
+                f"{resolution_val:.0f}m" if pd.notna(resolution_val) else "-",
+                f"{classes_val:.0f}" if pd.notna(classes_val) else "-",
+                freq_val if freq_val else "-"
+            ), unsafe_allow_html=True)
 
-            classes_val = pd.to_numeric(
-                init_data.get("Classes", init_data.get("Number_of_Classes", "")), 
-                errors="coerce"
-            )
-            if pd.notna(classes_val):
-                st.metric("🏷️ Classes", f"{classes_val:.0f}")
+            st.markdown("#### ⚙️ Technical Information")
+            # Sensor Details, Type, Methodology, Scope, Available Years, Sensors Referenced
+            _render_initiative_tech_info(init_data, sensors_meta)
 
-        with col2_detail:
-            st.markdown("#### 🌍 Coverage Information")
-            
-            coverage_val = str(init_data.get("Coverage", "")).strip()
-            if coverage_val and coverage_val.lower() not in ["n/a", "none", ""]:
-                st.info(f"🌍 **Coverage:** {coverage_val}")
+        with right_col:
+            st.markdown("#### 📋 Methodological Details")
+            _render_initiative_methodology(init_data, init_metadata, sensors_meta)
 
-            scope_val = str(init_data.get("Scope", "")).strip()
-            if scope_val and scope_val.lower() not in ["n/a", "none", ""]:
-                st.info(f"🎯 **Scope:** {scope_val}")
-
-        # Description section
-        description_val = str(init_data.get("Description", "")).strip()
-        if (
-            description_val
-            and description_val.lower() not in ["n/a", "none", ""]
-            and len(description_val) > 10
-        ):
-            st.markdown("#### 📋 Description")
-            st.markdown(description_val)
-
-        # Classification details
-        st.markdown("#### 🏷️ Classification Details")
-        class_legend_json_str = init_data.get("Class_Legend", "[]")
-        lulc_classes.render_lulc_classes_section(class_legend_json_str)
-
-    # Link to detailed comparisons
     st.markdown("---")
     st.info(
         "💡 **For detailed comparisons between multiple initiatives**, go to the **'🔍 Detailed Analyses'** page in the sidebar."
@@ -972,7 +976,7 @@ def _render_detailed_exploration(filtered_df: pd.DataFrame, meta: dict, sensors_
 
 
 def run():
-    st.warning("[TEST] This is the REAL dashboard/overview.py in use! If you see this, the correct file is loaded.")
+    # Removed test/debug message
     """Main function to run the LULC overview dashboard."""
     # Check session state for required data
     if "metadata" not in st.session_state or "df_interpreted" not in st.session_state:
