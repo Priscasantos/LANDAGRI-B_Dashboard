@@ -77,7 +77,9 @@ def get_modern_layout_config(**kwargs):
             "linewidth": 1,
             "linecolor": "rgba(0,0,0,0.2)",
             "tickfont": {"size": 11, "color": "#4A5568"},
-            "titlefont": {"size": 13, "color": "#2D3748"}
+            "title": {
+                "font": {"size": 13, "color": "#2D3748"}
+            }
         },
         
         "yaxis": {
@@ -89,7 +91,9 @@ def get_modern_layout_config(**kwargs):
             "linewidth": 1,
             "linecolor": "rgba(0,0,0,0.2)",
             "tickfont": {"size": 11, "color": "#4A5568"},
-            "titlefont": {"size": 13, "color": "#2D3748"}
+            "title": {
+                "font": {"size": 13, "color": "#2D3748"}
+            }
         }
     }
     
@@ -139,11 +143,20 @@ def apply_modern_styling(fig, **custom_config):
     # Apply the configuration
     fig.update_layout(**layout_config)
     
-    # Set modern color sequence
-    fig.update_traces(
-        marker_line_width=0,  # Remove outline for cleaner look
-        opacity=0.85  # Subtle transparency for modern feel
-    )
+    # Apply trace-specific modern styling based on trace type
+    for i, trace in enumerate(fig.data):
+        # Only apply marker properties to trace types that support them
+        if hasattr(trace, 'type') and trace.type in ['scatter', 'bar', 'box', 'violin', 'scattergl']:
+            fig.update_traces(
+                marker_line_width=0,  # Remove outline for cleaner look
+                selector=dict(type=trace.type)
+            )
+        
+        # Apply opacity to all trace types (this is universally supported)
+        fig.update_traces(
+            opacity=0.85,  # Subtle transparency for modern feel
+            selector=dict(uid=trace.uid) if hasattr(trace, 'uid') and trace.uid else None
+        )
     
     return fig
 

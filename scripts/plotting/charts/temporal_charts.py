@@ -291,55 +291,63 @@ def plot_timeline_chart(
     # Padronizar espessura dos ticks
     tick_width_standard = 0.8
 
-    # Get modern config without margin to avoid conflict
+    # Get modern config and remove conflicting parameters
     modern_config = get_modern_timeline_config()
-    # Remove margin from modern config to use the specific margins calculated
+    # Remove parameters that will be specifically set to avoid conflicts
     modern_config.pop('margin', None)
+    modern_config.pop('yaxis', None)
+    modern_config.pop('xaxis', None)
     
     fig_timeline.update_layout(
         **modern_config,
         height=calculated_height,
         margin=margins,
-        yaxis={
-            "tickmode": "array",
-            "tickvals": display_acronyms_sorted,
-            "ticktext": display_acronyms_sorted,
-            "type": "category",
-            "categoryorder": "array",
-            "categoryarray": display_acronyms_sorted,
-            "showgrid": False,
-            "ticks": "outside",
-            "ticklen": 8,
-            "tickwidth": tick_width_standard,
-            "tickcolor": "#4A5568",  # Modern gray
-            "showline": True,
-            "linewidth": 1,
-            "linecolor": "black",
-        },
-        xaxis={
-            "range": [chart_min_year - 0.5, chart_max_year + 0.5],
-            "tickmode": "array",
-            "tickvals": list(range(chart_min_year, chart_max_year + 2)),
-            "ticktext": [
-                str(year) for year in range(chart_min_year, chart_max_year + 2)
-            ],
-            "tickformat": "d",
-            "tickangle": 45,
-            # tickfont removed - using chart_core standard configuration
-            "ticks": "outside",
-            "ticklen": 8,
-            "tickwidth": tick_width_standard,
-            "tickcolor": "black",
-            "showgrid": True,
-            "zeroline": False,
-            "showline": True,
-            "linewidth": 1,
-            "linecolor": "black",
-            "type": "linear",
-            "dtick": 1,
-            "autorange": False,
-            "fixedrange": False,
-        },
+    )
+    
+    # Apply specific axis configurations after modern config
+    fig_timeline.update_yaxes(
+        tickmode="array",
+        tickvals=display_acronyms_sorted,
+        ticktext=display_acronyms_sorted,
+        type="category",
+        categoryorder="array",
+        categoryarray=display_acronyms_sorted,
+        showgrid=False,
+        ticks="outside",
+        ticklen=8,
+        tickwidth=tick_width_standard,
+        tickcolor="#4A5568",  # Modern gray
+        showline=True,
+        linewidth=1,
+        linecolor="black",
+    )
+    
+    fig_timeline.update_xaxes(
+        range=[chart_min_year - 0.5, chart_max_year + 0.5],
+        tickmode="array",
+        tickvals=list(range(chart_min_year, chart_max_year + 2)),
+        ticktext=[
+            str(year) for year in range(chart_min_year, chart_max_year + 2)
+        ],
+        tickformat="d",
+        tickangle=45,
+        # tickfont removed - using chart_core standard configuration
+        ticks="outside",
+        ticklen=8,
+        tickwidth=tick_width_standard,
+        tickcolor="black",
+        showgrid=True,
+        zeroline=False,
+        showline=True,
+        linewidth=1,
+        linecolor="black",
+        type="linear",
+        dtick=1,
+        autorange=False,
+        fixedrange=False,
+    )
+    
+    fig_timeline.update_layout(
         showlegend=True,
         legend={"traceorder": "normal"},
     )
