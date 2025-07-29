@@ -143,21 +143,21 @@ def apply_modern_styling(fig, **custom_config):
     # Apply the configuration
     fig.update_layout(**layout_config)
     
-    # Apply trace-specific modern styling based on trace type
+    print("[DEBUG] Running latest apply_modern_styling: per-trace only, no global update_traces.")
     for i, trace in enumerate(fig.data):
         # Only apply marker properties to trace types that support them
         if hasattr(trace, 'type') and trace.type in ['scatter', 'bar', 'box', 'violin', 'scattergl']:
-            fig.update_traces(
-                marker_line_width=0,  # Remove outline for cleaner look
-                selector=dict(type=trace.type)
-            )
-        
-        # Apply opacity to all trace types (this is universally supported)
-        fig.update_traces(
-            opacity=0.85,  # Subtle transparency for modern feel
-            selector=dict(uid=trace.uid) if hasattr(trace, 'uid') and trace.uid else None
-        )
-    
+            try:
+                if hasattr(trace, 'marker') and hasattr(trace.marker, 'line'):
+                    trace.marker.line.width = 0  # Remove outline for cleaner look
+            except Exception:
+                pass
+        # Only apply opacity directly to compatible trace types (never Indicator, Pie, etc.)
+        if hasattr(trace, 'type') and trace.type not in ['indicator', 'pie', 'funnel', 'table', 'sunburst', 'treemap', 'parcats', 'sankey', 'icicle', 'parcoords']:
+            try:
+                trace.opacity = 0.85
+            except Exception:
+                pass
     return fig
 
 

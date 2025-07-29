@@ -654,6 +654,33 @@ def plot_comparison_matrix(filtered_df: pd.DataFrame) -> go.Figure:
     normalized_data = scaler.fit_transform(numeric_df)
 
     # Create heatmap with modern colorscale
+    # --- Colorbar configuration: Only valid Plotly properties allowed ---
+    # See: https://plotly.com/python-api-reference/generated/plotly.graph_objects.Heatmap.html#plotly.graph_objects.heatmap.ColorBar
+    # To customize, use only the properties listed in the user-provided list.
+    colorbar_config = dict(
+        # --- Main label and ticks ---
+        title="Normalized Value",
+        tickvals=[0, 0.25, 0.5, 0.75, 1.0],
+        ticktext=["Low", "Below Avg", "Average", "Good", "High"],
+        # --- Size and orientation ---
+        thickness=18,
+        len=0.8,
+        orientation="v",
+        # --- Positioning ---
+        x=1.02,
+        xanchor="left",
+        y=0.5,
+        yanchor="middle",
+        # --- Border and background ---
+        outlinewidth=1,
+        outlinecolor="#888",
+        bgcolor="rgba(255,255,255,0.8)",
+        bordercolor="#ccc",
+        borderwidth=1,
+        # --- Font ---
+        tickfont=dict(family="Inter, Arial, sans-serif", size=12, color="#222"),
+        titlefont=dict(family="Inter, Arial, sans-serif", size=14, color="#222"),
+    )
     fig = go.Figure(
         data=go.Heatmap(
             z=normalized_data,
@@ -662,7 +689,7 @@ def plot_comparison_matrix(filtered_df: pd.DataFrame) -> go.Figure:
             colorscale=get_modern_colorscale("diverging") if get_modern_colorscale else "RdYlBu_r",
             hoverongaps=False,
             showscale=True,
-            colorbar={"title": "Normalized Value"},
+            colorbar=colorbar_config,
         )
     )
 
@@ -826,47 +853,69 @@ def plot_normalized_performance_heatmap(filtered_df: pd.DataFrame) -> go.Figure:
     # Transpose to get the correct shape for the heatmap (initiatives x metrics)
     normalized_data = list(map(list, zip(*normalized_data)))
 
-    # Create heatmap with modern colorscale for better visual consistency
 
+    # --- Colorbar configuration: Only valid Plotly properties allowed ---
+    # See: https://plotly.com/python-api-reference/generated/plotly.graph_objects.Heatmap.html#plotly.graph_objects.heatmap.ColorBar
+    # To customize, use only the properties listed in the user-provided list.
+    colorbar_config = dict(
+        # --- Main label and ticks ---
+        title="Performance Score",
+        tickvals=[0, 0.25, 0.5, 0.75, 1.0],
+        ticktext=["Poor", "Below Avg", "Average", "Good", "Excellent"],
+        # --- Size and orientation ---
+        thickness=18,  # px
+        len=0.8,       # fraction of plot
+        orientation="v",
+        # --- Positioning ---
+        x=1.02,
+        xanchor="left",
+        y=0.5,
+        yanchor="middle",
+        # --- Border and background ---
+        outlinewidth=1,
+        outlinecolor="#888",
+        bgcolor="rgba(255,255,255,0.8)",
+        bordercolor="#ccc",
+        borderwidth=1,
+        # --- Font ---
+        tickfont=dict(family="Inter, Arial, sans-serif", size=12, color="#222"),
+        titlefont=dict(family="Inter, Arial, sans-serif", size=14, color="#222"),
+    )
     fig = go.Figure(
         data=go.Heatmap(
             z=normalized_data,
             x=display_metric_names,
             y=plot_df["Display_Name"].values,
-            colorscale=get_modern_colorscale("sequential") if get_modern_colorscale else "RdYlGn",
+            colorscale="Viridis",
             hoverongaps=False,
             showscale=True,
-            # Colorbar será aplicada separadamente para melhor controle do título
-            # Customdata for hoverinfo: show original values
+            colorbar=colorbar_config,
             customdata=plot_df[internal_metric_names].values,
             hovertemplate="<b>Initiative:</b> %{y}<br>"
-            + "<b>Metric:</b> %{x}<br>"
-            + "<b>Original Value:</b> <b>%{customdata:.2f}</b><br>"
-            + "<b>Performance Score:</b> <b>%{z:.2f}</b><br>"
-            + "<b>Rating:</b> <b>%{z|.0%}</b><extra></extra>",
+                + "<b>Metric:</b> %{x}<br>"
+                + "<b>Original Value:</b> <b>%{customdata:.2f}</b><br>"
+                + "<b>Performance Score:</b> <b>%{z:.2f}</b><br>"
+                + "<b>Rating:</b> <b>%{z|.0%}</b><extra></extra>",
             zmin=0,
             zmax=1,
         )
     )
 
-    # Aplicar layout simplificado para heatmap com título "Performance Score"
-    from scripts.plotting.chart_core import apply_heatmap_with_performance_title
-
-    apply_heatmap_with_performance_title(
-        fig,
-        custom_tickvals=[0, 0.25, 0.5, 0.75, 1.0],
-        custom_ticktext=[
-            "<b>Poor</b>",
-            "<b>Below Average</b>",
-            "<b>Average</b>",
-            "<b>Good</b>",
-            "<b>Excellent</b>",
-        ],
+    # Modern, clean layout for heatmap
+    fig.update_layout(
+        title={
+            'text': "🔥 Heatmap de Performance Normalizada",
+            'x': 0.5,
+            'xanchor': 'center',
+            'font': {'size': 20, 'family': 'Inter, Arial, sans-serif'}
+        },
         xaxis_title="Metrics",
         yaxis_title="Initiative",
-        num_items=len(plot_df["Display_Name"].unique()),
-        title_x=1.01,  # Ajuste horizontal: mova para esquerda/direita
-        title_y=0.95,  # Ajuste vertical: mova para cima/baixo
+        margin=dict(l=80, r=40, t=60, b=60),
+        height=480 + 18 * len(plot_df["Display_Name"].unique()),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Inter, Arial, sans-serif", size=14),
     )
 
     return fig

@@ -207,6 +207,9 @@ def show_timeline_chart(df_for_analysis, raw_initiatives_metadata):
 def create_basic_timeline_chart(metadata, df_for_analysis):
     """Create a basic timeline chart as fallback"""
     try:
+        # Import chart sizing utility
+        from scripts.utilities.chart_sizing import get_standard_chart_height
+
         # Create name to acronym mapping
         nome_to_sigla = {}
         if (
@@ -249,11 +252,13 @@ def create_basic_timeline_chart(metadata, df_for_analysis):
                     )
                     y_pos += 1
 
+        # Use standardized chart height based on number of initiatives
+        chart_height = get_standard_chart_height(y_pos)
         fig.update_layout(
             title="LULC Initiatives Timeline",
             xaxis_title="Year",
             yaxis_title="Initiative",
-            height=600,  # Standardized height like CONAB
+            height=chart_height,
             showlegend=True,
             plot_bgcolor="rgba(0,0,0,0)",
             xaxis={

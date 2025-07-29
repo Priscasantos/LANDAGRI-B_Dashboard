@@ -20,6 +20,7 @@ def render(df: pd.DataFrame) -> None:
         df: DataFrame com dados das iniciativas
     """
     st.subheader("📋 Detalhes das Iniciativas")
+    st.markdown("<div style='color: red; font-size: 20px; font-weight: bold;'>[TESTE: detail_tables.py]</div>", unsafe_allow_html=True)
 
     # Seleção de colunas para exibir
     available_columns = df.columns.tolist()

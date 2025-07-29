@@ -26,6 +26,8 @@ except ImportError:
 
 
 def run():
+    # Import chart sizing utility
+    from scripts.utilities.chart_sizing import get_standard_chart_height
     st.header("🔍 Detailed Analysis - Custom Comparisons")
     st.markdown("Select two or more initiatives for detailed comparative analysis.")
 
@@ -101,20 +103,15 @@ def run():
     )
     with tab1:
         st.subheader("Accuracy vs. Resolution (Normalized)")  # Added subheader
-        # Dual Bars using siglas
         df_filtered["resolution_norm"] = (1 / df_filtered["Resolution"]) / (
             1 / df_filtered["Resolution"]
         ).max()
         fig = go.Figure()
-        # Get modern colors for the two metrics
         modern_colors = get_chart_colors(2) if get_chart_colors else ['#3b82f6', '#f59e0b']
-        
         fig.add_trace(
             go.Bar(
-                y=df_filtered["Display_Name"],  # Use siglas
-                x=df_filtered[
-                    "Accuracy (%)"
-                ],  # Changed from 'Overall_Accuracy' to 'Accuracy (%)'
+                y=df_filtered["Display_Name"],
+                x=df_filtered["Accuracy (%)"],
                 name="Accuracy (%)",
                 orientation="h",
                 marker_color=modern_colors[0],
@@ -122,15 +119,13 @@ def run():
         )
         fig.add_trace(
             go.Bar(
-                y=df_filtered["Display_Name"],  # Use siglas
+                y=df_filtered["Display_Name"],
                 x=df_filtered["resolution_norm"] * 100,
-                name="Resolution (Normalized)",  # Translated
+                name="Resolution (Normalized)",
                 orientation="h",
                 marker_color=modern_colors[1],
             )
         )
-        
-        # Apply modern theme
         if apply_modern_theme:
             apply_modern_theme(
                 fig,
@@ -141,18 +136,14 @@ def run():
                 num_items=len(df_filtered)
             )
         else:
-            # Fallback layout
             fig.update_layout(
                 barmode="group",
                 xaxis_title="Value (%)",
                 yaxis_title="Initiative",
                 title="Comparison: Accuracy vs Resolution",
-                height=max(
-                    400, len(df_filtered) * 30 + 100
-                ),  # Adjusted height for better readability
+                height=get_standard_chart_height(len(df_filtered)),
             )
-        st.plotly_chart(fig, use_container_width=True)
-        # Download functionality removed for cleaner interface
+        st.plotly_chart(fig, use_container_width=True, height=get_standard_chart_height(len(df_filtered)))
 
     with tab2:
         st.subheader("Multi-dimensional Performance Radar")  # Added subheader
@@ -228,10 +219,10 @@ def run():
                 },
                 showlegend=True,
                 title="Multi-dimensional Performance Radar",
-                height=600,
+                height=get_standard_chart_height(len(radar_df)),
                 font={"size": 12},
             )
-            st.plotly_chart(fig_radar, use_container_width=True)
+            st.plotly_chart(fig_radar, use_container_width=True, height=get_standard_chart_height(len(radar_df)))
 
             # Download functionality removed for cleaner interface
 
@@ -305,10 +296,10 @@ def run():
                     },
                     showlegend=True,
                     title="Multi-dimensional Performance Radar",
-                    height=600,
+                    height=get_standard_chart_height(len(radar_df)),
                     font={"size": 12},
                 )
-            st.plotly_chart(fig_radar, use_container_width=True)
+            st.plotly_chart(fig_radar, use_container_width=True, height=get_standard_chart_height(len(radar_df)))
 
             if fig_radar:
                 # Download functionality removed for cleaner interface
@@ -370,8 +361,8 @@ def run():
                 )
             else:
                 # Fallback layout
-                fig_heatmap.update_layout(height=max(400, len(df_filtered) * 30 + 100))
-            st.plotly_chart(fig_heatmap, use_container_width=True)
+                fig_heatmap.update_layout(height=get_standard_chart_height(len(df_filtered)))
+            st.plotly_chart(fig_heatmap, use_container_width=True, height=get_standard_chart_height(len(df_filtered)))
             # Use the new download form setup
             if fig_heatmap:
                 # Download functionality removed for cleaner interface
@@ -384,7 +375,7 @@ def run():
     with tab4:
         st.subheader("Detailed Data Table")  # Added subheader
         # Table
-        st.dataframe(df_filtered, use_container_width=True)
+        st.dataframe(df_filtered, use_container_width=True, height=get_standard_chart_height(len(df_filtered)))
 
     with tab5:
         st.subheader("Annual Coverage by Initiative")  # Translated and added subheader
@@ -404,7 +395,7 @@ def run():
                 fig_annual = plot_annual_coverage_multiselect(
                     meta, df_filtered, selected_initiatives
                 )
-                st.plotly_chart(fig_annual, use_container_width=True)
+                st.plotly_chart(fig_annual, use_container_width=True, height=get_standard_chart_height(len(df_filtered)))
                 # Use the new download form setup
                 if fig_annual:
                     # Download functionality removed for cleaner interface
@@ -495,7 +486,7 @@ def run():
                 showlegend=False,
             )
 
-            st.plotly_chart(fig_gaps, use_container_width=True)
+            st.plotly_chart(fig_gaps, use_container_width=True, height=get_standard_chart_height(len(gap_df)))
             # Download functionality removed for cleaner interface
             pass
 
@@ -567,7 +558,7 @@ def run():
                 yaxis={"showgrid": True, "gridcolor": "rgba(128,128,128,0.2)"},
             )
 
-            st.plotly_chart(fig_evolution, use_container_width=True)
+            st.plotly_chart(fig_evolution, use_container_width=True, height=get_standard_chart_height(len(year_counts)))
             # Download functionality removed for cleaner interface
             pass
 
@@ -647,7 +638,7 @@ def run():
                     yaxis={"type": "category"},
                 )
 
-            st.plotly_chart(fig_heatmap_temporal, use_container_width=True)
+            st.plotly_chart(fig_heatmap_temporal, use_container_width=True, height=get_standard_chart_height(len(pivot_df.index)))
             # Download functionality removed for cleaner interface
             pass
 
