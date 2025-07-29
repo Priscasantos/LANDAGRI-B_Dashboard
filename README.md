@@ -183,6 +183,18 @@ python -c "import streamlit; print('✓ OK')"
 
 ---
 
+## Rodando o Dashboard (Modo Recomendado)
+
+Para sempre rodar o dashboard durante o desenvolvimento ou produção, utilize o comando padrão:
+
+```sh
+python -m streamlit run app.py --server.port 8501
+```
+
+Isso garante que o Streamlit rode na porta correta e com a configuração recomendada. Você também pode usar a task do VS Code "Run Streamlit Dashboard (Standard)" para maior praticidade.
+
+---
+
 **Dashboard Iniciativas LULC** - Análise moderna de dados LULC para o Brasil 🇧🇷
 
 *Desenvolvido com ❤️ usando Python e Streamlit*
