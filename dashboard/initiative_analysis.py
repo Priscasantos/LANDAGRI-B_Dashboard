@@ -1,22 +1,25 @@
 """
-Initiative Analysis Dashboard - Versão Consolidada
-=================================================
+Initiative Analysis Dashboard - Consolidated Version
+==================================================
 
-Dashboard completo consolidando toda funcionalidade dos arquivos legados:
-- comparative_old.py: filtros avançados, múltiplos gráficos
-- temporal_old.py: análise temporal completa
-- detailed_old.py: seleção de iniciativas, radar charts
+Complete dashboard consolidating all functionality from legacy files:
+- comparative_old.py: advanced filters, multiple charts
+- temporal_old.py: complete temporal analysis
+- detailed_old.py:    # Temporal analysis tabs with modular components
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["📊 Timeline", "📈 Evolution", "🕒 Temporal Coverage", "⚠️ Gap Analysis"]
+    )tiative selection, radar charts
 
-Funcionalidades:
-- Menu lateral funcional com páginas separadas
-- Filtros por tipo, metodologia, resolução, precisão
-- Seleção múltipla de iniciativas para comparação
+Features:
+- Functional sidebar menu with separate pages
+- Filters by type, methodology, resolution, accuracy
+- Multiple initiative selection for comparison
 - Radar charts, dual bars, heatmaps, scatter plots
-- Timeline completo com análise de gaps
-- Análise temporal com evolução e cobertura
+- Complete timeline with gap analysis
+- Temporal analysis with evolution and coverage
 
-Autor: Dashboard Iniciativas LULC
-Data: 2025-07-30
+Author: LULC Initiatives Dashboard
+Date: 2025-07-30
 """
 
 import sys
@@ -32,25 +35,34 @@ _project_root = Path(__file__).resolve().parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-# Importar charts consolidados
-try:
-    from dashboard.components.initiative_analysis.charts.comparison_charts import (
-        plot_accuracy_resolution_scatter,
-    )
-    from dashboard.components.initiative_analysis.charts.detailed_charts import (
-        create_heatmap_chart,
-    )
-    from dashboard.components.initiative_analysis.charts.temporal_charts import (
-        plot_coverage_gaps_chart,
-        plot_temporal_availability_heatmap,
-        plot_temporal_evolution_frequency,
-        plot_timeline_chart,
-    )
 
-    CHARTS_AVAILABLE = True
-except ImportError as e:
-    st.warning(f"Alguns charts não disponíveis: {e}")
-    CHARTS_AVAILABLE = False
+# Importar componentes modulares consolidados (sempre disponíveis no escopo global)
+# Componentes temporais
+from dashboard.components.initiative_analysis.charts.temporal import (
+    render_timeline_tab,
+    render_evolution_analysis,
+    render_coverage_matrix_heatmap,
+    render_gaps_analysis,
+)
+# Componentes de comparação
+from dashboard.components.initiative_analysis.charts.comparison import (
+    render_accuracy_resolution_tab,
+    render_distributions_tab,
+    render_performance_heatmap_tab,
+    render_detailed_table_tab,
+    render_class_details_tab,
+    render_methodology_deepdive_tab,
+)
+from dashboard.components.initiative_analysis.charts.comparison.bar_chart_component import render_bar_chart_tab
+# Componentes detalhados
+from dashboard.components.initiative_analysis.charts.detailed import (
+    render_dual_bars_tab,
+    render_radar_chart_tab,
+    render_heatmap_tab,
+    render_data_table_tab,
+    render_annual_coverage_tab,
+)
+CHARTS_AVAILABLE = True
 
 # Import para download de gráficos
 try:
@@ -145,7 +157,7 @@ def run(metadata=None, df_original=None):
     elif current_page == "Detailed Analysis":
         render_detailed_analysis(df_for_analysis, meta_geral)
     else:
-        # Fallback para análise temporal se a página não for reconhecida
+        # Fallback to temporal analysis if page is not recognized
         render_temporal_analysis(df_for_analysis, meta_geral)
 
 
@@ -153,6 +165,7 @@ def render_comparative_analysis(df: pd.DataFrame, metadata: dict) -> None:
     """
     Renderizar análise comparativa com todos os filtros e gráficos dos arquivos legados.
     """
+
     st.markdown(
         """
     <div style="
@@ -163,196 +176,72 @@ def render_comparative_analysis(df: pd.DataFrame, metadata: dict) -> None:
         box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
     ">
         <h2 style="color: white; margin: 0; font-size: 1.8rem; font-weight: 600;">
-            📊 Advanced Comparative Analysis
+            📊 Análise Comparativa Avançada
         </h2>
         <p style="color: #d1fae5; margin: 0.5rem 0 0 0; font-size: 1rem;">
-            Compare LULC initiatives with advanced filters and multiple visualizations
+            Compare iniciativas LULC com filtros avançados e múltiplas visualizações
         </p>
     </div>
     """,
         unsafe_allow_html=True,
     )
 
-    st.markdown("### 🔎 Initiative Filters")
 
-    # Filtros em colunas - similar ao comparative_old.py
-    filter_col1, filter_col2 = st.columns(2)
-
-    with filter_col1:
-        # Filtro por tipo
-        if "Type" in df.columns:
-            tipos_disponiveis = df["Type"].dropna().unique().tolist()
-            selected_types = st.multiselect(
-                "📑 Initiative Types:",
-                options=tipos_disponiveis,
-                default=tipos_disponiveis,
-                help="Filter by initiative types",
-            )
-        else:
-            selected_types = []
-
-        # Filtro por metodologia
-        if "Methodology" in df.columns:
-            metodologias_disponiveis = df["Methodology"].dropna().unique().tolist()
-            selected_methods = st.multiselect(
-                "🔬 Methodologies:",
-                options=metodologias_disponiveis,
-                default=metodologias_disponiveis[
-                    : min(5, len(metodologias_disponiveis))
-                ],
-                help="Filter by methodologies",
-            )
-        else:
-            selected_methods = []
-
-    with filter_col2:
-        # Filtro por resolução
-        if "Resolution" in df.columns:
-            res_min = float(df["Resolution"].min())
-            res_max = float(df["Resolution"].max())
-            selected_res_range = st.slider(
-                "📐 Resolution Range (m):",
-                min_value=res_min,
-                max_value=res_max,
-                value=(res_min, res_max),
-                help="Filter by spatial resolution range",
-            )
-        else:
-            selected_res_range = None
-
-        # Filtro por precisão
-        if "Accuracy (%)" in df.columns:
-            acc_min = float(df["Accuracy (%)"].min())
-            acc_max = float(df["Accuracy (%)"].max())
-            selected_acc_range = st.slider(
-                "🎯 Accuracy Range (%):",
-                min_value=acc_min,
-                max_value=acc_max,
-                value=(acc_min, acc_max),
-                help="Filter by accuracy range",
-            )
-        else:
-            selected_acc_range = None
-
-    # Aplicar filtros
+    # Filtros removidos conforme solicitado. Usar df diretamente.
     filtered_df = df.copy()
 
-    if selected_types and "Type" in filtered_df.columns:
-        filtered_df = filtered_df[filtered_df["Type"].isin(selected_types)]
-
-    if selected_methods and "Methodology" in filtered_df.columns:
-        filtered_df = filtered_df[filtered_df["Methodology"].isin(selected_methods)]
-
-    if selected_res_range and "Resolution" in filtered_df.columns:
-        filtered_df = filtered_df[
-            (filtered_df["Resolution"] >= selected_res_range[0])
-            & (filtered_df["Resolution"] <= selected_res_range[1])
-        ]
-
-    if selected_acc_range and "Accuracy (%)" in filtered_df.columns:
-        filtered_df = filtered_df[
-            (filtered_df["Accuracy (%)"] >= selected_acc_range[0])
-            & (filtered_df["Accuracy (%)"] <= selected_acc_range[1])
-        ]
-
-    if filtered_df.empty:
-        st.warning("⚠️ Nenhuma iniciativa encontrada com os filtros selecionados.")
-        return
-
     st.markdown("---")
-    st.markdown("### 📊 Comparison Charts")
+    st.markdown("### 📊 Gráficos de Comparação")
 
-    # Abas com diferentes tipos de análise
-    tab1, tab2, tab3, tab4 = st.tabs(
-        [
-            "🎯 Accuracy vs Resolution",
-            "📊 Distributions",
-            "🔥 Performance Heatmap",
-            "📋 Detailed Table",
-        ]
-    )
+    # Abas de análise comparativa usando todos os componentes
+    tab_labels = [
+        "🎯 Precisão vs Resolução Espacial",
+        "📏 Resolução Espacial",
+        "⭐ Acurácia Global",
+        "� Distribuição de Metodologias",
+        "🏷️ Detalhes de Classes",
+        "🔬 Metodologia - Deep Dive",
+        "🔥 Normalized Performance",
+        "📋 Detailed Table",
+    ]
+    (
+        tab_acc_res,
+        tab_res,
+        tab_acc,
+        tab_method_dist,
+        tab_class_details,
+        tab_method_deep,
+        tab_perf_norm,
+        tab_table,
+    ) = st.tabs(tab_labels)
 
-    with tab1:
-        st.markdown("#### 🎯 Accuracy vs Resolution Analysis")
-        if (
-            CHARTS_AVAILABLE
-            and "Accuracy (%)" in filtered_df.columns
-            and "Resolution" in filtered_df.columns
-        ):
-            try:
-                fig_scatter = plot_accuracy_resolution_scatter(filtered_df)
-                if hasattr(fig_scatter, "update_layout"):
-                    fig_scatter.update_layout(title=None)
-                st.plotly_chart(fig_scatter, use_container_width=True)
-                setup_download_form(
-                    fig_scatter, "precision_resolution_scatter", "scatter_comp"
-                )
-            except Exception as e:
-                st.error(f"Erro ao gerar gráfico de dispersão: {e}")
-        else:
-            st.warning("Dados insuficientes para gráfico de dispersão")
-
-    with tab2:
-        st.markdown("#### 📊 Distributions by Type and Methodology")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            if "Type" in filtered_df.columns:
-                st.markdown("##### Distribution by Type")
-                type_counts = filtered_df["Type"].value_counts()
-                fig_pie_type = px.pie(
-                    values=type_counts.values, names=type_counts.index
-                )
-                st.plotly_chart(fig_pie_type, use_container_width=True)
-
-        with col2:
-            if "Methodology" in filtered_df.columns:
-                st.markdown("##### Distribution by Methodology")
-                method_counts = filtered_df["Methodology"].value_counts()
-                fig_pie_method = px.pie(
-                    values=method_counts.values, names=method_counts.index
-                )
-                st.plotly_chart(fig_pie_method, use_container_width=True)
-
-    with tab3:
-        st.markdown("#### 🔥 Normalized Performance Heatmap")
-        try:
-            # Criar heatmap de performance com métricas disponíveis
-            numeric_cols = filtered_df.select_dtypes(include=[int, float]).columns
-            if len(numeric_cols) > 0:
-                fig_heatmap = create_heatmap_chart(filtered_df)
-                if fig_heatmap:
-                    if hasattr(fig_heatmap, "update_layout"):
-                        fig_heatmap.update_layout(title=None)
-                    st.plotly_chart(fig_heatmap, use_container_width=True)
-                    setup_download_form(
-                        fig_heatmap, "performance_heatmap", "heatmap_comp"
-                    )
-            else:
-                st.warning("Nenhuma coluna numérica disponível para heatmap")
-        except Exception as e:
-            st.error(f"Erro ao gerar heatmap: {e}")
-
-    with tab4:
-        st.markdown("#### 📋 Filtered Data Table")
-        st.dataframe(filtered_df, use_container_width=True)
-
-        # Download CSV
-        if not filtered_df.empty:
-            csv = filtered_df.to_csv(index=False).encode("utf-8")
-            st.download_button(
-                label="📥 Download Filtered Data (CSV)",
-                data=csv,
-                file_name="filtered_initiatives_comparison.csv",
-                mime="text/csv",
-                key="download-comparison-csv",
-            )
+    with tab_acc_res:
+        render_accuracy_resolution_tab(filtered_df)
+    with tab_res:
+        # Spatial resolution (distribution)
+        render_distributions_tab(filtered_df)  # includes sub-tabs, can be adjusted
+    with tab_acc:
+        # Global accuracy (bar chart)
+        from dashboard.components.initiative_analysis.charts.comparison.bar_chart_component import render_bar_chart_tab
+        render_bar_chart_tab(filtered_df)
+    with tab_method_dist:
+        # Methodology distribution
+        render_methodology_deepdive_tab(filtered_df)
+    with tab_class_details:
+        render_class_details_tab(filtered_df)
+    with tab_method_deep:
+        # Methodology deep dive (frequency table)
+        render_methodology_deepdive_tab(filtered_df)
+    with tab_perf_norm:
+        render_performance_heatmap_tab(filtered_df)
+    with tab_table:
+        render_detailed_table_tab(filtered_df)
 
 
 def render_temporal_analysis(df: pd.DataFrame, metadata: dict) -> None:
     """
-    Renderizar análise temporal completa baseada no temporal_old.py.
+    Render complete temporal analysis with consolidated modular components.
+    Integrates all temporal components migrated from temporal_old.py.
     """
     st.markdown(
         """
@@ -374,14 +263,16 @@ def render_temporal_analysis(df: pd.DataFrame, metadata: dict) -> None:
         unsafe_allow_html=True,
     )
 
-    # Preparar dados temporais
+    # Prepare temporal data
     temporal_data = prepare_temporal_data(metadata, df)
 
     if temporal_data.empty:
-        st.warning("⚠️ Dados temporais insuficientes para análise.")
+        st.warning("⚠️ Insufficient temporal data for analysis.")
         return
 
-    # Temporal controls
+    # Use only standardized modular components
+
+    # Global temporal controls
     col1, col2 = st.columns(2)
 
     with col1:
@@ -403,85 +294,41 @@ def render_temporal_analysis(df: pd.DataFrame, metadata: dict) -> None:
                 max_value=max_year,
                 value=(min_year, max_year),
                 help="Select the period for temporal analysis",
+                key="temporal_period_range"
             )
 
-    # Dropdown removido conforme solicitado
+    with col2:
+        st.markdown("### 📊 Quick Stats")
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.metric("Active Initiatives", len(temporal_data))
+        with col_b:
+            if "Coverage_Percentage" in temporal_data.columns:
+                avg_coverage = temporal_data["Coverage_Percentage"].mean()
+                st.metric("Average Coverage", f"{avg_coverage:.1f}%")
 
-    # Abas de análise temporal
+    # Abas de análise temporal com componentes modulares
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["📊 Timeline", "📈 Evolution", "🔥 Coverage Heatmap", "⚠️ Gap Analysis"]
+        ["📊 Timeline", "📈 Evolution", "�️ Cobertura Temporal", "⚠️ Gap Analysis"]
     )
+
     with tab1:
-        st.markdown("#### 📊 Complete Initiatives Timeline")
-        if CHARTS_AVAILABLE:
-            try:
-                fig_timeline = plot_timeline_chart(metadata, temporal_data)
-                if hasattr(fig_timeline, "update_layout"):
-                    fig_timeline.update_layout(title=None)
-                st.plotly_chart(fig_timeline, use_container_width=True)
-                setup_download_form(
-                    fig_timeline, "timeline_initiatives", "timeline_temp"
-                )
-            except Exception as e:
-                st.error(f"Error generating timeline: {e}")
-        else:
-            st.warning("Charts not available")
-        # Temporal summary metrics
-        if not temporal_data.empty:
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("Active Initiatives", len(temporal_data))
-            with col2:
-                if "Cobertura_Percentual" in temporal_data.columns:
-                    avg_coverage = temporal_data["Cobertura_Percentual"].mean()
-                    st.metric("Average Coverage", f"{avg_coverage:.1f}%")
-            with col3:
-                if "Periodo_Total_Anos" in temporal_data.columns:
-                    total_span = temporal_data["Periodo_Total_Anos"].sum()
-                    st.metric("Total Span", f"{total_span} years")
+        render_timeline_tab(temporal_data, metadata)
 
     with tab2:
-        st.markdown("#### 📈 Frequency Evolution")
-        if CHARTS_AVAILABLE:
-            try:
-                fig_evolution = plot_temporal_evolution_frequency(df)
-                if hasattr(fig_evolution, "update_layout"):
-                    fig_evolution.update_layout(title=None)
-                st.plotly_chart(fig_evolution, use_container_width=True)
-                setup_download_form(
-                    fig_evolution, "frequency_evolution", "evolution_temp"
-                )
-            except Exception as e:
-                st.error(f"Error generating temporal evolution: {e}")
+        render_evolution_analysis(temporal_data)
 
     with tab3:
-        st.markdown("#### 🔥 Temporal Coverage Heatmap")
-        if CHARTS_AVAILABLE:
-            try:
-                fig_heatmap = plot_temporal_availability_heatmap(df)
-                if hasattr(fig_heatmap, "update_layout"):
-                    fig_heatmap.update_layout(title=None)
-                st.plotly_chart(fig_heatmap, use_container_width=True)
-                setup_download_form(fig_heatmap, "coverage_heatmap", "heatmap_temp")
-            except Exception as e:
-                st.error(f"Error generating temporal heatmap: {e}")
+        from dashboard.components.initiative_analysis.charts.temporal import render_coverage_matrix_heatmap
+        render_coverage_matrix_heatmap(temporal_data, metadata)
 
     with tab4:
-        st.markdown("#### ⚠️ Temporal Gap Analysis")
-        if CHARTS_AVAILABLE:
-            try:
-                fig_gaps = plot_coverage_gaps_chart(df)
-                if hasattr(fig_gaps, "update_layout"):
-                    fig_gaps.update_layout(title=None)
-                st.plotly_chart(fig_gaps, use_container_width=True)
-                setup_download_form(fig_gaps, "gap_analysis", "gaps_temp")
-            except Exception as e:
-                st.error(f"Error generating gap analysis: {e}")
+        render_gaps_analysis(temporal_data)
 
 
 def render_detailed_analysis(df: pd.DataFrame, metadata: dict) -> None:
     """
-    Renderizar análise detalhada com seleção de iniciativas baseada no detailed_old.py.
+    Render detailed analysis with initiative selection based on detailed_old.py.
     """
     st.markdown(
         """
@@ -530,142 +377,24 @@ def render_detailed_analysis(df: pd.DataFrame, metadata: dict) -> None:
         ]
     )
     with tab1:
-        st.markdown("#### 📊 Dual Bars Comparison: Accuracy vs Resolution")
-        if (
-            "Accuracy (%)" in df_filtered.columns
-            and "Resolution" in df_filtered.columns
-        ):
-            try:
-                # Normalize resolution (inverse for better visualization)
-                df_filtered = df_filtered.copy()
-                df_filtered["resolution_norm"] = (1 / df_filtered["Resolution"]) / (
-                    1 / df_filtered["Resolution"]
-                ).max()
-
-                fig = go.Figure()
-                fig.add_trace(
-                    go.Bar(
-                        y=df_filtered["Display_Name"],
-                        x=df_filtered["Accuracy (%)"],
-                        name="Accuracy (%)",
-                        orientation="h",
-                        marker_color="royalblue",
-                    )
-                )
-                fig.add_trace(
-                    go.Bar(
-                        y=df_filtered["Display_Name"],
-                        x=df_filtered["resolution_norm"] * 100,
-                        name="Resolution (Normalized)",
-                        orientation="h",
-                        marker_color="orange",
-                    )
-                )
-                fig.update_layout(
-                    barmode="group",
-                    xaxis_title="Value (%)",
-                    yaxis_title="Initiative",
-                    title=None,
-                    height=max(400, len(df_filtered) * 30 + 100),
-                )
-                st.plotly_chart(fig, use_container_width=True)
-                setup_download_form(fig, "dual_bars_comparison", "dual_bars_det")
-
-            except Exception as e:
-                st.error(f"Error generating dual bars: {e}")
-        else:
-            st.warning("Required columns not available for dual bars")
+        render_dual_bars_tab(df_filtered)
 
     with tab2:
-        st.markdown("#### 🎯 Multidimensional Radar Chart")
-        try:
-            # Numeric columns for radar chart
-            radar_columns = []
-            potential_cols = [
-                "Accuracy (%)",
-                "Resolution",
-                "Classes",
-                "Num_Agri_Classes",
-            ]
-            for col in potential_cols:
-                if col in df_filtered.columns:
-                    radar_columns.append(col)
-
-            if len(radar_columns) >= 3:
-                fig_radar = create_radar_chart_detailed(df_filtered, radar_columns)
-                if fig_radar:
-                    if hasattr(fig_radar, "update_layout"):
-                        fig_radar.update_layout(title=None)
-                    st.plotly_chart(fig_radar, use_container_width=True)
-                    setup_download_form(fig_radar, "radar_chart", "radar_det")
-            else:
-                st.warning("Insufficient columns for radar chart")
-
-        except Exception as e:
-            st.error(f"Error generating radar chart: {e}")
+        render_radar_chart_tab(df_filtered)
 
     with tab3:
-        st.markdown("#### 🔥 Correlation Heatmap")
-        try:
-            fig_heatmap = create_heatmap_chart(df_filtered)
-            if fig_heatmap:
-                if hasattr(fig_heatmap, "update_layout"):
-                    fig_heatmap.update_layout(title=None)
-                st.plotly_chart(fig_heatmap, use_container_width=True)
-                setup_download_form(fig_heatmap, "correlation_heatmap", "heatmap_det")
-        except Exception as e:
-            st.error(f"Error generating heatmap: {e}")
+        render_heatmap_tab(df_filtered)
 
     with tab4:
-        st.markdown("#### 📈 Detailed Data Table")
-        st.dataframe(df_filtered, use_container_width=True)
-
-        # Download CSV
-        if not df_filtered.empty:
-            csv = df_filtered.to_csv(index=False).encode("utf-8")
-            st.download_button(
-                label="📥 Download Selected Data (CSV)",
-                data=csv,
-                file_name="selected_initiatives_detailed.csv",
-                mime="text/csv",
-                key="download-detailed-csv",
-            )
+        render_data_table_tab(df_filtered)
 
     with tab5:
-        st.markdown("#### 📅 Annual Coverage Analysis")
-        if metadata:
-            coverage_data = []
-            for name in selected_initiatives:
-                if name in metadata:
-                    details = metadata[name]
-                    if isinstance(details, dict) and "available_years" in details:
-                        years = details["available_years"]
-                        if isinstance(years, list):
-                            for year in years:
-                                coverage_data.append(
-                                    {"Initiative": name, "Year": year, "Available": 1}
-                                )
-
-            if coverage_data:
-                coverage_df = pd.DataFrame(coverage_data)
-                pivot_table = coverage_df.pivot(
-                    index="Initiative", columns="Year", values="Available"
-                ).fillna(0)
-
-                fig_coverage = px.imshow(
-                    pivot_table,
-                    title=None,
-                    color_continuous_scale="Blues",
-                    aspect="auto",
-                )
-                st.plotly_chart(fig_coverage, use_container_width=True)
-            else:
-                st.warning("Temporal coverage data not available")
+        render_annual_coverage_tab(df_filtered)
 
 
 def prepare_temporal_data(metadata: dict, df: pd.DataFrame) -> pd.DataFrame:
     """
-    Preparar dados temporais baseado no metadata e DataFrame.
+    Prepare temporal data based on metadata and DataFrame.
     """
     temporal_data = []
 
@@ -675,21 +404,21 @@ def prepare_temporal_data(metadata: dict, df: pd.DataFrame) -> pd.DataFrame:
         if "Name" in df.columns and "Acronym" in df.columns:
             acronym_map = dict(zip(df["Name"], df["Acronym"]))
 
-    for nome, details in metadata.items():
+    for name, details in metadata.items():
         if isinstance(details, dict) and "available_years" in details:
             years = details["available_years"]
             if isinstance(years, list) and years:
                 # Use acronym if available, else use the name
-                display_name = acronym_map.get(nome, nome)
+                display_name = acronym_map.get(name, name)
                 temporal_data.append(
                     {
-                        "Nome": nome,
+                        "Name": name,
                         "Display_Name": display_name,
-                        "Primeiro_Ano": min(years),
-                        "Ultimo_Ano": max(years),
-                        "Anos_Lista": years,
-                        "Cobertura_Anos": len(years),
-                        "Periodo_Total_Anos": max(years) - min(years) + 1,
+                        "First_Year": min(years),
+                        "Last_Year": max(years),
+                        "Years_List": years,
+                        "Coverage_Years": len(years),
+                        "Total_Period_Years": max(years) - min(years) + 1,
                     }
                 )
 
@@ -697,10 +426,10 @@ def prepare_temporal_data(metadata: dict, df: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame()
 
     temporal_df = pd.DataFrame(temporal_data)
-    temporal_df["Cobertura_Percentual"] = (
+    temporal_df["Coverage_Percentage"] = (
         (
-            temporal_df["Cobertura_Anos"]
-            / temporal_df["Periodo_Total_Anos"].replace(0, 1)
+            temporal_df["Coverage_Years"]
+            / temporal_df["Total_Period_Years"].replace(0, 1)
         )
         * 100
     ).round(1)
@@ -708,46 +437,9 @@ def prepare_temporal_data(metadata: dict, df: pd.DataFrame) -> pd.DataFrame:
     return temporal_df
 
 
-def create_radar_chart_detailed(df: pd.DataFrame, columns: list[str]) -> go.Figure:
-    """
-    Criar radar chart detalhado para múltiplas iniciativas.
-    """
-    fig = go.Figure()
-
-    # Normalizar dados para escala 0-1
-    df_norm = df[columns].copy()
-    for col in columns:
-        if df_norm[col].max() > 0:
-            df_norm[col] = df_norm[col] / df_norm[col].max()
-
-    colors = px.colors.qualitative.Set1
-
-    for i, (_, row) in enumerate(df.iterrows()):
-        values = [df_norm.iloc[i, df_norm.columns.get_loc(col)] for col in columns]
-        values.append(values[0])  # Fechar o radar
-
-        fig.add_trace(
-            go.Scatterpolar(
-                r=values,
-                theta=columns + [columns[0]],
-                fill="toself",
-                name=row["Display_Name"],
-                line_color=colors[i % len(colors)],
-            )
-        )
-
-    fig.update_layout(
-        polar={"radialaxis": {"visible": True, "range": [0, 1]}},
-        showlegend=True,
-        title="Radar Chart: Comparação Multidimensional",
-    )
-
-    return fig
-
-
-# Para compatibilidade com implementações legadas
+# For compatibility with legacy implementations
 def initiative_analysis(metadata=None, df_original=None):
-    """Função legada - redireciona para run()."""
+    """Legacy function - redirects to run()."""
     run(metadata, df_original)
 
 
