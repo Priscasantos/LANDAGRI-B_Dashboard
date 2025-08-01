@@ -40,7 +40,7 @@ repos:
 
 # Configuração geral
 default_stages: [pre-commit]
-fail_fast: false
+fail_fast: true  # Para no primeiro erro ao invés de mostrar todos
 
 # Excluir arquivos/diretórios específicos
 exclude: |
