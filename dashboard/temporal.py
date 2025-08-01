@@ -19,8 +19,6 @@ try:
     )
     from scripts.plotting.charts.temporal_charts import (
         plot_timeline_chart, 
-        plot_coverage_heatmap_chart, 
-        plot_gaps_bar_chart, 
         plot_evolution_line_chart, 
         plot_evolution_heatmap_chart
     )
@@ -64,24 +62,16 @@ def run(metadata=None, df_original=None):
         st.warning("No temporal data available for analysis. This might be due to missing metadata or issues in data preparation.")
         st.stop()
     
-    tab1, tab2, tab3, tab4 = st.tabs([
+    tab1, tab2 = st.tabs([
         "📊 Timeline Comparison", 
-        "⚠️ Temporal Gaps", 
-        "📈 Availability Evolution",
-        "🔥 Coverage Heatmap"
+        "📈 Availability Evolution"
     ])
     
     with tab1:
         show_timeline_chart(df_for_analysis, meta_geral)
 
     with tab2:
-        show_gaps_analysis(temporal_data)
-        
-    with tab3:
         show_evolution_analysis(temporal_data)
-        
-    with tab4:
-        show_coverage_heatmap(temporal_data)
 
 def prepare_temporal_data(meta_geral, df_original=None):
     """Prepare temporal data with standardized display names using chart_core"""
@@ -110,9 +100,6 @@ def prepare_temporal_data(meta_geral, df_original=None):
     temporal_df['Cobertura_Percentual'] = (
         (temporal_df['Cobertura_Anos'] / temporal_df['Periodo_Total_Anos'].replace(0, 1)) * 100 # Avoid division by zero
     ).round(1)
-    
-    temporal_df['Anos_Faltando'] = temporal_df['Periodo_Total_Anos'] - temporal_df['Cobertura_Anos']
-    temporal_df['Maior_Lacuna'] = temporal_df['Anos_Lista'].apply(calculate_largest_gap)
     
     return temporal_df
 
@@ -150,18 +137,6 @@ def create_temporal_data_fallback(meta_geral, df_original=None):
                 })
     
     return pd.DataFrame(temporal_data)
-
-def calculate_largest_gap(anos_list):
-    """Calculate the largest consecutive gap in a list of years"""
-    if not isinstance(anos_list, list) or len(anos_list) < 2:
-        return 0
-    anos_list = sorted(list(set(anos_list))) 
-    max_gap = 0
-    for i in range(len(anos_list) - 1):
-        gap = anos_list[i+1] - anos_list[i] - 1
-        if gap > max_gap:
-            max_gap = gap
-    return max_gap
 
 def show_timeline_chart(df_for_analysis, raw_initiatives_metadata):
     """Timeline chart showing discrete years for each initiative with proper gaps."""
@@ -271,306 +246,6 @@ def create_basic_timeline_chart(metadata, df_for_analysis):
         return fig
     except Exception as e:
         st.error(f"Error creating basic timeline chart: {e}")
-        return None
-
-def show_coverage_heatmap(temporal_data):
-    """Heatmap of initiative availability by type and year using display names"""
-    st.subheader("🔥 Initiative Availability Heatmap (by Type and Year)")
-    
-    # Create heatmap with consistent dimensions
-    fig_heatmap = None
-    if CHARTS_AVAILABLE and 'plot_coverage_heatmap_chart' in globals():
-        fig_heatmap = plot_coverage_heatmap_chart(temporal_data)
-    
-    if fig_heatmap is None:
-        # Enhanced fallback: create comprehensive coverage heatmap
-        fig_heatmap = create_comprehensive_coverage_heatmap(temporal_data)
-    
-    if fig_heatmap:
-        st.plotly_chart(fig_heatmap, use_container_width=True, key="coverage_heatmap_tab4_chart")
-        setup_download_form(fig_heatmap, default_filename="heatmap_type_year", key_prefix="heatmap_tab4")
-    else:
-        st.info("No data to display for the coverage heatmap.")
-        
-    # Add summary statistics
-    if not temporal_data.empty:
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            total_types = temporal_data['Tipo'].nunique() if 'Tipo' in temporal_data.columns else 0
-            st.metric("Initiative Types", total_types)
-        with col2:
-            if 'Anos_Lista' in temporal_data.columns:
-                all_years = []
-                for _, row in temporal_data.iterrows():
-                    if isinstance(row['Anos_Lista'], list):
-                        all_years.extend(row['Anos_Lista'])
-                year_span = f"{min(all_years)}-{max(all_years)}" if all_years else "N/A"
-                st.metric("Year Range", year_span)
-            else:
-                st.metric("Year Range", "N/A")
-        with col3:
-            total_data_points = sum(len(anos) for anos in temporal_data['Anos_Lista'] if isinstance(anos, list)) if 'Anos_Lista' in temporal_data.columns else 0
-            st.metric("Total Data Points", total_data_points)
-
-def create_basic_coverage_heatmap(temporal_data):
-    """Create basic coverage heatmap as fallback"""
-    try:
-        if temporal_data.empty or 'Anos_Lista' not in temporal_data.columns or 'Tipo' not in temporal_data.columns:
-            return None
-        
-        # Create heatmap data
-        heatmap_data = []
-        for _, row in temporal_data.iterrows():
-            if isinstance(row['Anos_Lista'], list):
-                for year in row['Anos_Lista']:
-                    heatmap_data.append({
-                        'Year': year,
-                        'Type': row['Tipo'],
-                        'Available': 1
-                    })
-        
-        if not heatmap_data:
-            return None
-        
-        heatmap_df = pd.DataFrame(heatmap_data)
-        pivot_df = heatmap_df.pivot_table(
-            values='Available',
-            index='Type',
-            columns='Year',
-            aggfunc='sum',
-            fill_value=0
-        )
-        
-        fig = go.Figure(data=go.Heatmap(
-            z=pivot_df.values,
-            x=pivot_df.columns,
-            y=pivot_df.index,
-            colorscale='Viridis',
-            hoverongaps=False,
-            hovertemplate='<b>Type: %{y}</b><br>Year: %{x}<br>Active Initiatives: %{z}<extra></extra>'
-        ))
-        
-        fig.update_layout(
-            title='Initiative Availability by Type and Year',
-            xaxis_title='Year',
-            yaxis_title='Initiative Type',
-            height=400
-        )
-        
-        return fig
-    except Exception as e:
-        st.error(f"Error creating coverage heatmap: {e}")
-        return None
-
-def create_comprehensive_coverage_heatmap(temporal_data):
-    """Create comprehensive coverage heatmap with standardized dimensions"""
-    try:
-        if temporal_data.empty or 'Anos_Lista' not in temporal_data.columns or 'Tipo' not in temporal_data.columns:
-            return None
-        
-        # Create heatmap data
-        heatmap_data = []
-        for _, row in temporal_data.iterrows():
-            if isinstance(row['Anos_Lista'], list):
-                initiative_type = row['Tipo'] if pd.notna(row['Tipo']) else "Uncategorized"
-                for year in row['Anos_Lista']:
-                    if isinstance(year, (int, float)):
-                        heatmap_data.append({
-                            'Type': initiative_type,
-                            'Year': int(year),
-                            'Available': 1
-                        })
-        
-        if not heatmap_data:
-            return None
-        
-        heatmap_df = pd.DataFrame(heatmap_data)
-        
-        # Create pivot table
-        pivot_df = heatmap_df.pivot_table(
-            values='Available',
-            index='Type',
-            columns='Year',
-            aggfunc='sum',
-            fill_value=0
-        )
-        
-        # Ensure reasonable year range (last 20 years)
-        current_year = 2024
-        start_year = max(pivot_df.columns.min(), current_year - 20) if len(pivot_df.columns) > 0 else current_year - 10
-        year_range = range(int(start_year), current_year + 1)
-        pivot_df = pivot_df.reindex(columns=year_range, fill_value=0)
-        
-        # Create heatmap
-        fig = go.Figure(data=go.Heatmap(
-            z=pivot_df.values,
-            x=pivot_df.columns,
-            y=pivot_df.index,
-            colorscale='Viridis',
-            hoverongaps=False,
-            hovertemplate='<b>Type: %{y}</b><br>Year: %{x}<br>Active Initiatives: %{z}<extra></extra>',
-            colorbar=dict(
-                title="Active<br>Initiatives",
-                titleside="right"
-            )
-        ))
-        
-        fig.update_layout(
-            title='Initiative Availability by Type and Year',
-            xaxis_title='Year',
-            yaxis_title='Initiative Type',
-            height=500,  # Standardized height
-            plot_bgcolor='rgba(0,0,0,0)',
-            xaxis=dict(
-                tickmode='linear',
-                tick0=start_year,
-                dtick=2,  # Show every 2 years
-                showgrid=True,
-                gridcolor='rgba(128,128,128,0.2)'
-            ),
-            yaxis=dict(
-                showgrid=True,
-                gridcolor='rgba(128,128,128,0.2)'
-            )
-        )
-        
-        return fig
-    except Exception as e:
-        st.error(f"Error creating comprehensive coverage heatmap: {e}")
-        return None
-
-def show_gaps_analysis(temporal_data):
-    """Temporal gaps analysis using display names"""
-    st.subheader("⚠️ Temporal Gaps Analysis")
-    
-    if temporal_data.empty or 'Anos_Faltando' not in temporal_data.columns:
-        st.warning("No temporal data available for gaps analysis.")
-        return
-    
-    gaps_data = temporal_data[temporal_data['Anos_Faltando'] > 0].copy()
-    if 'Tipo' not in gaps_data.columns:
-        gaps_data['Tipo'] = "Uncategorized"
-    else:
-        gaps_data['Tipo'] = gaps_data['Tipo'].fillna("Uncategorized")
-    
-    if gaps_data.empty:
-        st.success("✅ No temporal gaps found in the initiatives!")
-        return
-    
-    st.markdown("This section highlights initiatives with missing years in their time series.")
-    
-    # Create gaps chart with consistent dimensions
-    fig_gaps = None
-    if CHARTS_AVAILABLE and 'plot_gaps_bar_chart' in globals():
-        fig_gaps = plot_gaps_bar_chart(temporal_data)
-    
-    if fig_gaps is None:
-        # Enhanced fallback: create comprehensive gaps chart
-        fig_gaps = create_comprehensive_gaps_chart(gaps_data)
-    
-    if fig_gaps:
-        st.plotly_chart(fig_gaps, use_container_width=True, key="gaps_chart")
-        setup_download_form(fig_gaps, default_filename="temporal_gaps", key_prefix="gaps_tab2")
-    else:
-        st.info("Could not generate gaps analysis chart.")
-    
-    # Gap Statistics in columns
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        initiatives_with_gaps = len(gaps_data)
-        st.metric("Initiatives with Gaps", initiatives_with_gaps)
-    with col2:
-        avg_gap = gaps_data['Anos_Faltando'].mean()
-        st.metric("Average Missing Years", f"{avg_gap:.1f}")
-    with col3:
-        max_gap = gaps_data['Anos_Faltando'].max()
-        st.metric("Maximum Missing Years", f"{max_gap}")
-
-def create_basic_gaps_chart(gaps_data):
-    """Create basic gaps chart as fallback"""
-    try:
-        fig = go.Figure()
-        
-        fig.add_trace(go.Bar(
-            x=gaps_data['Display_Name'],
-            y=gaps_data['Anos_Faltando'],
-            name='Missing Years',
-            marker_color='rgba(255, 99, 71, 0.8)',
-            hovertemplate='<b>%{x}</b><br>Missing Years: %{y}<extra></extra>'
-        ))
-        
-        fig.update_layout(
-            title='Missing Years in Time Series by Initiative',
-            xaxis_title='Initiative',
-            yaxis_title='Number of Missing Years',
-            height=400,
-            showlegend=False
-        )
-        
-        return fig
-    except Exception as e:
-        st.error(f"Error creating gaps chart: {e}")
-        return None
-
-def create_comprehensive_gaps_chart(gaps_data):
-    """Create comprehensive gaps chart with standardized dimensions"""
-    try:
-        if gaps_data.empty or 'Display_Name' not in gaps_data.columns:
-            return None
-        
-        # Sort by missing years for better visualization
-        gaps_data_sorted = gaps_data.sort_values('Anos_Faltando', ascending=True)
-        
-        # Create figure with standardized height
-        fig = go.Figure()
-        
-        # Color scale based on severity
-        colors = []
-        for missing in gaps_data_sorted['Anos_Faltando']:
-            if missing <= 2:
-                colors.append('#4CAF50')  # Green for low gaps
-            elif missing <= 5:
-                colors.append('#FF9800')  # Orange for medium gaps
-            else:
-                colors.append('#F44336')  # Red for high gaps
-        
-        fig.add_trace(go.Bar(
-            x=gaps_data_sorted['Display_Name'],
-            y=gaps_data_sorted['Anos_Faltando'],
-            name='Missing Years',
-            marker_color=colors,
-            hovertemplate='<b>%{x}</b><br>Missing Years: %{y}<br>Severity: %{marker.color}<extra></extra>',
-            text=gaps_data_sorted['Anos_Faltando'],
-            textposition='auto'
-        ))
-        
-        # Add severity threshold lines
-        fig.add_hline(y=2, line_dash="dash", line_color="orange", 
-                     annotation_text="Medium Severity", annotation_position="top right")
-        fig.add_hline(y=5, line_dash="dash", line_color="red",
-                     annotation_text="High Severity", annotation_position="top right")
-        
-        fig.update_layout(
-            title='Temporal Gaps Analysis - Missing Years by Initiative',
-            xaxis_title='Initiative',
-            yaxis_title='Number of Missing Years',
-            height=500,  # Standardized height
-            showlegend=False,
-            plot_bgcolor='rgba(0,0,0,0)',
-            xaxis=dict(
-                tickangle=45,
-                showgrid=True, 
-                gridcolor='rgba(128,128,128,0.2)'
-            ),
-            yaxis=dict(
-                showgrid=True, 
-                gridcolor='rgba(128,128,128,0.2)'
-            )
-        )
-        
-        return fig
-    except Exception as e:
-        st.error(f"Error creating comprehensive gaps chart: {e}")
         return None
 
 def show_evolution_analysis(temporal_data):
@@ -927,27 +602,7 @@ def run_non_streamlit(metadata, df_data, output_dir="graphics/temporal"):
             if success:
                 print(f"✅ Timeline chart saved as {format_used} in: {saved_path}")
         
-        print("🔥 Generating coverage heatmap...")
-        fig_heatmap = plot_coverage_heatmap_chart(temporal_data)
-        if fig_heatmap:
-            success, saved_path, format_used = save_chart_robust(
-                fig_heatmap, output_dir, "coverage_heatmap",
-                width=1000, height=600, scale=2
-            )
-            if success:
-                print(f"✅ Coverage heatmap saved as {format_used} in: {saved_path}")
-        
-        print("⚠️ Generating gaps analysis...")
-        fig_gaps = plot_gaps_bar_chart(temporal_data)
-        if fig_gaps:
-            success, saved_path, format_used = save_chart_robust(
-                fig_gaps, output_dir, "temporal_gaps",
-                width=1000, height=600, scale=2
-            )
-            if success:
-                print(f"✅ Gaps analysis saved as {format_used} in: {saved_path}")
-        
-        print("📈 Generating evolution analysis...")
+        print(" Generating evolution analysis...")
         fig_evolution = plot_evolution_line_chart(temporal_data)
         if fig_evolution:
             success, saved_path, format_used = save_chart_robust(
