@@ -17,7 +17,7 @@ import plotly.graph_objects as go
 from typing import Dict, Any
 
 
-from scripts.plotting.chart_core import get_display_name, apply_standard_layout
+from scripts.plotting.chart_core import get_display_name, get_scope_colors
 from scripts.plotting.universal_cache import smart_cache_data
 
 
@@ -63,11 +63,8 @@ def plot_resolution_accuracy_scatter(filtered_df: pd.DataFrame) -> go.Figure:
         size='Classes' if 'Classes' in plot_df.columns else None,
         hover_name='Display_Name',
         hover_data=['Classes', 'Type'] if all(col in plot_df.columns for col in ['Classes', 'Type']) else None,
-        color_discrete_map={'Global': '#ff6b6b', 'Nacional': '#4dabf7', 'Regional': '#51cf66'}
+        color_discrete_map=get_scope_colors()
     )
-    
-    # Apply standardized layout
-    apply_standard_layout(fig, 'Resolution vs. Accuracy Comparison', 'Resolution (m)', 'Accuracy (%)')
     
     return fig
 
@@ -117,10 +114,9 @@ def plot_spatial_resolution_comparison(filtered_df: pd.DataFrame) -> go.Figure:
                 'Source' if 'Source' in plot_df.columns else False
             )
         },
-        color_discrete_map={'Global': '#ff6b6b', 'Nacional': '#4dabf7', 'Regional': '#51cf66'}
+        color_discrete_map=get_scope_colors()
     )
     
-    apply_standard_layout(fig, 'Spatial Resolution Comparison', 'Initiative', 'Resolution (m)')
     fig.update_layout(xaxis_tickangle=-45) # Angle initiative names for readability
     return fig
 
@@ -171,10 +167,9 @@ def plot_global_accuracy_comparison(filtered_df: pd.DataFrame) -> go.Figure:
                 'Source' if 'Source' in plot_df.columns else False
             )
         },
-        color_discrete_map={'Global': '#ff6b6b', 'Nacional': '#4dabf7', 'Regional': '#51cf66'}
+        color_discrete_map=get_scope_colors()
     )
     
-    apply_standard_layout(fig, 'Global Accuracy Comparison', 'Global Accuracy (%)', 'Initiative')
     fig.update_layout(
         yaxis=dict(autorange="reversed"), # Ensure highest accuracy is at the top
         height=max(400, len(plot_df) * 25) # Adjust height based on number of initiatives
@@ -266,7 +261,6 @@ def plot_temporal_evolution_frequency(filtered_df: pd.DataFrame) -> go.Figure:
         hover_template_parts.append("<extra></extra>")
         fig.update_traces(hovertemplate="<br>".join(hover_template_parts))
 
-    apply_standard_layout(fig, 'Temporal Coverage and Update Frequency', 'Year', 'Initiative')
     fig.update_layout(
         height=max(400, len(plot_df) * 30), # Adjust height
         xaxis_type='linear' # Ensure years are treated linearly
@@ -343,7 +337,6 @@ def plot_class_diversity_focus(filtered_df: pd.DataFrame) -> go.Figure:
         }
     )
 
-    apply_standard_layout(fig, 'Class Diversity and Agricultural Focus', 'Initiative', 'Number of Classes')
     fig.update_layout(
         xaxis_tickangle=-45,
         height=max(500, len(plot_df) * 35) # Adjust height
@@ -388,8 +381,7 @@ def plot_classification_methodology(filtered_df: pd.DataFrame, chart_type: str =
             hole=.3 # Donut-like pie chart
         )
         fig.update_traces(textposition='inside', textinfo='percent+label')
-        title = "Classification Methodology Distribution (Pie Chart)"
-        apply_standard_layout(fig, title, "", "") # Pass empty strings for axis titles for pie
+        # Pie charts don't need axis titles, layout is handled by px.pie
     elif chart_type == 'bar':
         # Sort by count for bar chart
         methodology_counts = methodology_counts.sort_values(by='Count', ascending=False)
@@ -401,8 +393,6 @@ def plot_classification_methodology(filtered_df: pd.DataFrame, chart_type: str =
             labels={methodology_col: 'Methodology', 'Count': 'Number of Initiatives'},
             hover_name=methodology_col
         )
-        title = "Classification Methodology Distribution (Bar Chart)"
-        apply_standard_layout(fig, title, "Methodology", "Number of Initiatives")
         fig.update_layout(xaxis_tickangle=-45)
     else:
         fig = go.Figure()
@@ -464,9 +454,6 @@ def plot_comparison_matrix(filtered_df: pd.DataFrame) -> go.Figure:
         showscale=True,
         colorbar=dict(title="Normalized Value")
     ))
-    
-    # Apply standardized layout
-    apply_standard_layout(fig, "Initiative Comparison Matrix", "Metrics", "Initiative")
     
     fig.update_layout(
         height=max(400, len(plot_df) * 25),
@@ -634,8 +621,6 @@ def plot_normalized_performance_heatmap(filtered_df: pd.DataFrame) -> go.Figure:
         zmax=1
     ))
     
-    apply_standard_layout(fig, "", "Metrics", "Initiative")
-    
     # Increase height based on number of initiatives
     num_initiatives = len(plot_df['Display_Name'].unique())
     chart_height = max(600, num_initiatives * 30)
@@ -742,16 +727,16 @@ def plot_initiative_ranking(filtered_df: pd.DataFrame, ranking_criteria: Dict[st
         y='Display_Name',
         color='Type' if 'Type' in plot_df.columns else None,
         orientation='h',
-        color_discrete_map={'Global': '#ff6b6b', 'Nacional': '#4dabf7', 'Regional': '#51cf66'},
+        color_discrete_map=get_scope_colors(),
         hover_data=[col for col in available_criteria.keys() if col in plot_df.columns]
     )
     
     # Apply standardized layout
-    apply_standard_layout(fig, "Initiative Ranking (Composite Score)", "Composite Score", "Initiative")
-    
     fig.update_layout(
         height=max(400, len(plot_df) * 25),
-        yaxis=dict(type='category')
+        yaxis=dict(type='category'),
+        xaxis=dict(title="Composite Score"),
+        yaxis_title="Initiative"
     )
     
     return fig
@@ -795,13 +780,11 @@ def plot_correlation_matrix(filtered_df: pd.DataFrame) -> go.Figure:
         colorbar=dict(title="Correlation")
     ))
     
-    # Apply standardized layout
-    apply_standard_layout(fig, "Variable Correlation Matrix", "Variables", "Variables")
-    
+    # Correlation matrix specific layout
     fig.update_layout(
         height=max(400, len(numeric_columns) * 40),
-        xaxis=dict(tickangle=45),
-        yaxis=dict(tickangle=0)
+        xaxis=dict(tickangle=45, title="Variables"),
+        yaxis=dict(tickangle=0, title="Variables")
     )
     
     return fig
@@ -859,12 +842,16 @@ def plot_radar_comparison(data1: Dict[str, Any], data2: Dict[str, Any], filtered
     # Create radar chart
     fig = go.Figure()
     
+    # Get scope colors for consistent theming
+    scope_colors = get_scope_colors()
+    available_colors = list(scope_colors.values())
+    
     fig.add_trace(go.Scatterpolar(
         r=values1 + [values1[0]],
         theta=available_categories + [available_categories[0]],
         fill='toself',
         name=display_name_1,
-        line_color='#ff6b6b'
+        line_color=available_colors[0]  # Use first color from scope palette
     ))
     
     fig.add_trace(go.Scatterpolar(
@@ -872,12 +859,10 @@ def plot_radar_comparison(data1: Dict[str, Any], data2: Dict[str, Any], filtered
         theta=available_categories + [available_categories[0]],
         fill='toself',
         name=display_name_2,
-        line_color='#4dabf7'
+        line_color=available_colors[1]  # Use second color from scope palette
     ))
     
-    # Apply standardized layout
-    apply_standard_layout(fig, "Initiative Comparison (Radar Chart)", "", "")
-    
+    # Radar chart specific layout
     fig.update_layout(
         polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
         showlegend=True,
@@ -922,16 +907,14 @@ def plot_classes_frequency_boxplot(filtered_df: pd.DataFrame) -> go.Figure:
         hover_name='Display_Name' if 'Display_Name' in plot_df.columns else None,
         points="all", # Show all data points
         notched=True, # Add notches for median comparison
-        color_discrete_map={'Global': '#ff6b6b', 'Nacional': '#4dabf7', 'Regional': '#51cf66'}
+        color_discrete_map=get_scope_colors()
     )
 
-    apply_standard_layout(
-        fig, 
-        "Number of Classes by Temporal Frequency", 
-        "Temporal Frequency", 
-        "Number of Classes"
+    fig.update_layout(
+        xaxis_title="Temporal Frequency",
+        yaxis_title="Number of Classes",
+        xaxis_categoryorder='category ascending' # Ensure consistent ordering
     )
-    fig.update_layout(xaxis_categoryorder='category ascending') # Ensure consistent ordering
     return fig
 
 
@@ -967,11 +950,9 @@ def plot_methodology_type_barchart(filtered_df: pd.DataFrame) -> go.Figure:
         hover_data={'Type': True, 'Count': True, 'Methodology': False} # Customize hover data
     )
 
-    apply_standard_layout(
-        fig, 
-        "Methodology Breakdown by Initiative Type", 
-        "Initiative Type", 
-        "Number of Initiatives"
+    fig.update_layout(
+        xaxis_title="Initiative Type",
+        yaxis_title="Number of Initiatives",
+        xaxis_categoryorder='category ascending'
     )
-    fig.update_layout(xaxis_categoryorder='category ascending')
     return fig

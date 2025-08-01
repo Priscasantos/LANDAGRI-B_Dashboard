@@ -16,7 +16,7 @@ import numpy as np
 from typing import Dict, List, Tuple, Optional
 from pathlib import Path
 
-from dashboard.components.shared.chart_core import apply_standard_layout
+# Import removed due to unused apply_standard_layout calls
 # Note: modern_themes modules have been consolidated into chart_core
 
 
@@ -72,7 +72,10 @@ def plot_crop_calendar_heatmap(calendar_data: Dict) -> go.Figure:
             xref="paper", yref="paper",
             x=0.5, y=0.5, showarrow=False
         )
-        apply_standard_layout(fig, "Month", "State")
+        fig.update_layout(
+            xaxis_title="Month",
+            yaxis_title="State"
+        )
         return fig
     
     # Prepare data for heatmap
@@ -151,8 +154,7 @@ def plot_crop_calendar_heatmap(calendar_data: Dict) -> go.Figure:
             )
     
     
-    # Apply modern styling
-    apply_standard_layout(fig, "", "", "")
+    # Remove unused apply_standard_layout call
     
     fig.update_layout(
         title={
@@ -177,7 +179,7 @@ def plot_regional_crop_coverage(detailed_data: Dict) -> go.Figure:
             xref="paper", yref="paper",
             x=0.5, y=0.5, showarrow=False
         )
-        apply_standard_layout(fig, "Region", "Number of Crops")
+        # apply_standard_layout(fig, "Region", "Number of Crops") - Commented for standardization
         return fig
     
     # Extract regional data
@@ -238,7 +240,7 @@ def plot_regional_crop_coverage(detailed_data: Dict) -> go.Figure:
     
     
     # Apply modern styling
-    apply_standard_layout(fig, "", "", "")
+    # apply_standard_layout(fig, "", "", "") - Commented for standardization
     
     fig.update_layout(
         title={
@@ -266,7 +268,7 @@ def plot_temporal_crop_trends(detailed_data: Dict) -> go.Figure:
             xref="paper", yref="paper",
             x=0.5, y=0.5, showarrow=False
         )
-        apply_standard_layout(fig, "Year", "Active Crops")
+        # apply_standard_layout(fig, "Year", "Active Crops") - Commented for standardization
         return fig
     
     initiative_data = detailed_data.get("CONAB Crop Monitoring Initiative", {})
@@ -280,7 +282,7 @@ def plot_temporal_crop_trends(detailed_data: Dict) -> go.Figure:
             xref="paper", yref="paper",
             x=0.5, y=0.5, showarrow=False
         )
-        apply_standard_layout(fig, "Year", "Active Crops")
+        # apply_standard_layout(fig, "Year", "Active Crops") - Commented for standardization
         return fig
     
     # Calculate crop activity by year
@@ -334,7 +336,7 @@ def plot_temporal_crop_trends(detailed_data: Dict) -> go.Figure:
     
     
     # Apply modern styling
-    apply_standard_layout(fig, "", "", "")
+    # apply_standard_layout(fig, "", "", "") - Commented for standardization
     
     fig.update_layout(
         title={
@@ -431,7 +433,7 @@ def plot_crop_diversity_by_region(detailed_data: Dict) -> go.Figure:
     
     
     # Apply modern styling
-    apply_standard_layout(fig, "", "", "")
+    # apply_standard_layout(fig, "", "", "") - Commented for standardization
     
     fig.update_layout(
         title={
@@ -553,7 +555,7 @@ def plot_agricultural_performance_metrics(detailed_data: Dict) -> go.Figure:
     
     
     # Apply modern styling
-    apply_standard_layout(fig, "", "", "")
+    # apply_standard_layout(fig, "", "", "") - Commented for standardization
     
     fig.update_layout(
         title={

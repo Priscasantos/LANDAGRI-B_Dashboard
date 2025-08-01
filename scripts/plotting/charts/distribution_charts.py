@@ -16,7 +16,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 from scripts.plotting.chart_core import (
     get_display_name, 
-    apply_standard_layout, 
     get_scope_colors
 )
 from scripts.plotting.universal_cache import smart_cache_data
@@ -55,8 +54,6 @@ def plot_distribuicao_classes(filtered_df):
         nbins=10,
         color_discrete_map=color_map
     )
-    # Apply standardized layout
-    apply_standard_layout(fig, "Number of Classes Distribution", "Classes", "Count")
     return fig
 
 
@@ -80,8 +77,6 @@ def plot_classes_por_iniciativa(filtered_df):
         orientation='h',
         color_discrete_map=get_scope_colors()
     )
-    # Apply standardized layout
-    apply_standard_layout(fig, "Number of Classes per Initiative", "Classes", "Initiative")
     fig.update_layout(
         height=max(400, len(plot_df) * 25), # Adjust height dynamically
         yaxis=dict(type='category') # Ensure y-axis is treated as categorical
@@ -102,9 +97,6 @@ def plot_distribuicao_metodologias(method_counts):
         names=method_counts.index
     )
     
-    # Apply standardized layout
-    apply_standard_layout(fig, "Distribution of Methodologies Used", "", "")
-    
     return fig
 
 
@@ -120,12 +112,9 @@ def plot_acuracia_por_metodologia(filtered_df):
         x='Methodology',
         y='Accuracy (%)',
         color='Type',
-        color_discrete_map={'Global': '#ff6b6b', 'Nacional': '#4dabf7', 'Regional': '#51cf66'}
+        color_discrete_map=get_scope_colors()
     )
     fig.update_xaxes(tickangle=45)
-    
-    # Apply standardized layout
-    apply_standard_layout(fig, "Accuracy by Methodology", "Methodology", "Accuracy (%)")
     
     return fig
 
@@ -154,10 +143,7 @@ def plot_resolution_accuracy(filtered_df: pd.DataFrame) -> go.Figure:
         color='Type', # Optional: color by Type or another category
         size='Classes', # Optional: size by number of Classes
         hover_name='Display_Name',
-        color_discrete_map={'Global': '#ff6b6b', 'Nacional': '#4dabf7', 'Regional': '#51cf66'}
+        color_discrete_map=get_scope_colors()
     )
-    
-    # Apply standardized layout
-    apply_standard_layout(fig, 'Resolution vs. Accuracy of LULC Initiatives', 'Resolution (m)', 'Accuracy (%)')
     
     return fig

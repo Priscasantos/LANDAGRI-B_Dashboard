@@ -16,7 +16,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from typing import Dict, Any, List
 from scripts.utilities.config import get_initiative_color_map
-from scripts.plotting.chart_core import get_display_name, apply_standard_layout
+from scripts.plotting.chart_core import get_display_name
 from scripts.plotting.universal_cache import smart_cache_data
 
 @smart_cache_data(ttl=300)
@@ -91,10 +91,15 @@ def plot_annual_coverage_multiselect(metadata: Dict[str, Any], filtered_df: pd.D
             gridcolor="#E2E8F0",
             tickformat='d',
         )
-    apply_standard_layout(fig, "Annual Coverage of Selected Initiatives", "Year", "Initiative")
     
     fig.update_layout(
-        yaxis=dict(type='category', categoryorder='array', categoryarray=unique_display_names_sorted),
+        xaxis=dict(title="Year"),
+        yaxis=dict(
+            title="Initiative",
+            type='category', 
+            categoryorder='array', 
+            categoryarray=unique_display_names_sorted
+        ),
         legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.01, title="Initiative"),
         margin=dict(l=150, r=50, t=60, b=50) # Adjusted left margin for potentially longer display names
     )
@@ -140,8 +145,10 @@ def plot_ano_overlap(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.
         color_continuous_scale='Blues'
     )
     
-    apply_standard_layout(fig, 'Number of Initiatives Available per Year', 'Year', 'Number of Initiatives')
-    fig.update_layout(xaxis=dict(tickformat='d')) # Ensure year is displayed as integer
+    fig.update_layout(
+        xaxis=dict(title="Year", tickformat='d'), # Ensure year is displayed as integer
+        yaxis=dict(title="Number of Initiatives")
+    )
     return fig
 
 
@@ -195,7 +202,10 @@ def plot_heatmap(metadata: Dict[str, Any], filtered_df: pd.DataFrame) -> go.Figu
         labels=dict(color='Coverage')
     )
     
-    apply_standard_layout(fig, 'Annual Coverage Heatmap by Initiative', 'Year', 'Initiative')
+    fig.update_layout(
+        xaxis=dict(title="Year"),
+        yaxis=dict(title="Initiative")
+    )
     fig.update_layout(
         height=max(400, 25 * len(pivot.index)),
         xaxis=dict(tickformat='d', dtick=2, range=[chart_min_year - 0.5, chart_max_year + 0.5]), # Ensure integer years, tick every 2 years

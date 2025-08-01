@@ -18,7 +18,6 @@ import streamlit as st
 import json
 from typing import Dict, Any
 from pathlib import Path
-from scripts.plotting.chart_core import apply_standard_layout
 from scripts.utilities.type_safety import safe_bool_conversion, validate_plotly_params
 
 # Brazilian states and their abbreviations
@@ -270,7 +269,7 @@ def plot_conab_spatial_temporal_distribution(conab_data: Dict[str, Any]) -> go.F
     
     # Update layout with type-safe parameters
     layout_params = validate_plotly_params(
-        title="<b>Distribuição Espacial e Temporal das Iniciativas de Mapeamento da CONAB</b>",
+        title="",
         xaxis_title="<b>Ano</b>",
         yaxis_title="<b>Região</b>",
         height=600,
@@ -382,15 +381,13 @@ def plot_conab_temporal_coverage(conab_data: Dict[str, Any]) -> go.Figure:
     
     # Update layout
     fig.update_layout(
-        title="Temporal Coverage of CONAB Mapping Initiatives",
+        title="",
         xaxis_title="Year",
         yaxis_title="Pct States",
         height=500,
         yaxis=dict(range=[0, 100]),
         showlegend=False
     )
-      # Apply standard layout
-    apply_standard_layout(fig, "Temporal Coverage of CONAB Mapping Initiatives", "Year", "Pct States")
     
     return fig
 
@@ -473,8 +470,6 @@ def plot_conab_spatial_coverage(conab_data: Dict[str, Any]) -> go.Figure:
         height=600,
         showlegend=False
     )
-      # Apply standard layout
-    apply_standard_layout(fig, "Spatial Coverage of CONAB Mapping Initiatives (2000-2023)", "Coverage (%)", "State/Area")
     
     return fig
 
@@ -555,7 +550,5 @@ def plot_conab_crop_diversity(conab_data: Dict[str, Any]) -> go.Figure:
         )
     )
     fig.update_layout(**layout_params)
-      # Apply standard layout
-    apply_standard_layout(fig, "Crop Type Diversity in CONAB Mapping by State (2000-2023)", "Crop Type Cnt", "State/Area")
     
     return fig

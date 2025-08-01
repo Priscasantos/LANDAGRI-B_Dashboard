@@ -174,14 +174,27 @@ def get_color_palette(category: str, count: int, theme: Optional[str] = None) ->
 
 
 def get_scope_colors(theme: Optional[str] = None) -> Dict[str, str]:
-    """Returns color mapping for scope categories."""
+    """
+    Returns color mapping for scope categories with highly divergent, accessible colors.
+    Uses carefully selected colors that work well in both light and dark themes.
+    """
     if theme is None:
         theme = detect_streamlit_theme()
     
     if theme == 'light':
-        return {"Global": "#DC2626", "Nacional": "#2563EB", "Regional": "#059669"}
+        return {
+            "Global": "#E53E3E",      # Strong red - máximo contraste
+            "Nacional": "#3182CE",     # Strong blue - bem divergente do vermelho
+            "Regional": "#38A169",     # Strong green - terceira cor divergente
+            "Continental": "#D69E2E"   # Strong amber - quarta opção divergente
+        }
     else:
-        return {"Global": "#F87171", "Nacional": "#60A5FA", "Regional": "#34D399"}
+        return {
+            "Global": "#FC8181",       # Light red - mais suave para tema escuro
+            "Nacional": "#63B3ED",     # Light blue - mantém divergência
+            "Regional": "#68D391",     # Light green - contraste mantido
+            "Continental": "#F6D55C"   # Light amber - quarta opção
+        }
 
 
 def get_resolution_colors(theme: Optional[str] = None) -> Dict[str, str]:

@@ -13,11 +13,7 @@ scripts_path = str(current_dir / "scripts")
 if scripts_path not in sys.path:
     sys.path.insert(0, scripts_path)
 
-# Import chart_core at module level
-try:
-    from scripts.plotting.chart_core import apply_standard_layout
-except ImportError:
-    apply_standard_layout = None  # Fallback if import fails
+# Chart core imports are handled in local functions below
 
 def run():
     st.header("🔍 Detailed Analysis - Custom Comparisons")
@@ -623,14 +619,11 @@ def create_dual_bars_chart(df_filtered_chart):
             marker_color='orange'
         ))
         
-        if apply_standard_layout:
-            apply_standard_layout(fig, "Comparison: Accuracy vs Resolution", "Value (%)", "Initiative")
-        else:
-            fig.update_layout(
-                title='Comparison: Accuracy vs Resolution',
-                xaxis_title='Value (%)', 
-                yaxis_title='Initiative'
-            )
+        fig.update_layout(
+            title='Comparison: Accuracy vs Resolution',
+            xaxis_title='Value (%)', 
+            yaxis_title='Initiative'
+        )
         
         fig.update_layout(
             barmode='group',
@@ -679,12 +672,8 @@ def create_radar_chart(df_filtered_chart):
                 line_width=2
             ))
         
-        if apply_standard_layout:
-            apply_standard_layout(fig_radar, "Multi-dimensional Comparison (Radar)", "", "")
-        else:
-            fig_radar.update_layout(title='Multi-dimensional Comparison (Radar)')
-        
         fig_radar.update_layout(
+            title='Multi-dimensional Comparison (Radar)',
             polar=dict(
                 radialaxis=dict(visible=True, range=[0, 1]),
                 angularaxis=dict(rotation=90, direction="counterclockwise")
@@ -731,12 +720,12 @@ def create_heatmap_chart(df_filtered_chart):
             labels=dict(x='Metric', y='Initiative', color='Normalized Value')
         )
         
-        if apply_standard_layout:
-            apply_standard_layout(fig_heatmap, "Performance Heatmap (Normalized Values)", "Metric", "Initiative")
-        else:
-            fig_heatmap.update_layout(title='Performance Heatmap (Normalized Values)')
-        
-        fig_heatmap.update_layout(height=max(400, len(df_filtered_chart) * 30 + 100)) # Adjusted height
+        fig_heatmap.update_layout(
+            title='Performance Heatmap (Normalized Values)',
+            xaxis_title='Metric',
+            yaxis_title='Initiative',
+            height=max(400, len(df_filtered_chart) * 30 + 100) # Adjusted height
+        )
         return fig_heatmap
     except Exception as e:
         print(f"Error creating heatmap: {e}") # Translated

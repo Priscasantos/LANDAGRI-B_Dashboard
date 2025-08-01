@@ -41,7 +41,7 @@ def load_cached_data():
 
 # Page configuration with performance optimizations
 st.set_page_config(
-    page_title="LULC Dashboard", 
+    page_title="LANDAGRI-B Dashboard", 
     layout="wide",
     page_icon="🌍",
     initial_sidebar_state="expanded",
@@ -186,7 +186,7 @@ st.markdown("""
 # --- Custom sidebar with new structure ---
 with st.sidebar:
     selected = option_menu(
-        menu_title="🛰️ LULC Dashboard", # Main title of the menu
+        menu_title="🛰️ LANDAGRI-B Dashboard", # Main title of the menu
         options=[
             "Overview", # Option 1
             "Comparative Analysis", # Option 2

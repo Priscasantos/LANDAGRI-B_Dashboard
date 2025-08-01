@@ -17,7 +17,6 @@ import streamlit as st
 from typing import Dict, Any, Optional
 from scripts.plotting.chart_core import (
     add_display_names_to_df, 
-    apply_standard_layout,
     get_initiative_color_map,
     get_font_config,
     get_resolution_colors
@@ -179,7 +178,6 @@ def plot_timeline_chart(metadata: Dict[str, Any], filtered_df: pd.DataFrame,
                     legendgroup=current_display_name,
                     hovertemplate=f"<b>{current_display_name}</b><br>Metodologia: {metodologia}<br>Anos: {seg_start}-{seg_end}<extra></extra>"
                 ))                
-    apply_standard_layout(fig_timeline, "", "Year", "Initiatives", "timeline")
     
     # Default margins
     default_margins = dict(l=220, r=30, t=60, b=40)
@@ -339,7 +337,6 @@ def timeline_with_controls(metadata: Dict[str, Any], filtered_df: pd.DataFrame):
 def plot_coverage_heatmap_chart(temporal_data: pd.DataFrame) -> go.Figure:
     """Generates the Plotly figure for the coverage heatmap."""
     fig = go.Figure()
-    apply_standard_layout(fig, "Coverage Heatmap (Not Implemented)", "Year", "Initiative Type")
     fig.add_annotation(text="plot_coverage_heatmap_chart - Not Implemented", showarrow=False)
     if temporal_data.empty: # Basic check to use the parameter and avoid unused warning
         pass
@@ -348,7 +345,7 @@ def plot_coverage_heatmap_chart(temporal_data: pd.DataFrame) -> go.Figure:
 def plot_gaps_bar_chart(gaps_data: pd.DataFrame) -> go.Figure:
     """Generates the Plotly bar chart for temporal gaps analysis."""
     fig = go.Figure()
-    apply_standard_layout(fig, "Temporal Gaps (Not Implemented)", "Missing Years", "Initiative")
+    fig.add_annotation(text="Temporal Gaps (Not Implemented)", showarrow=False)
     fig.add_annotation(text="plot_gaps_bar_chart - Not Implemented", showarrow=False)
     if gaps_data.empty: # Basic check
         pass
@@ -367,12 +364,15 @@ def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
     """
     if temporal_data.empty or 'Anos_Lista' not in temporal_data.columns:
         fig = go.Figure()
-        apply_standard_layout(fig, "Evolution of Data Availability Over Time", "Year", "Number of Active Initiatives")
         fig.add_annotation(
             text="No temporal data available for evolution analysis",
             xref="paper", yref="paper",
             x=0.5, y=0.5, showarrow=False,
             font=get_font_config('annotation')
+        )
+        fig.update_layout(
+            xaxis=dict(title="Year"),
+            yaxis=dict(title="Number of Active Initiatives")
         )
         return fig
     
@@ -384,12 +384,15 @@ def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
     
     if not all_years:
         fig = go.Figure()
-        apply_standard_layout(fig, "Evolution of Data Availability Over Time", "Year", "Number of Active Initiatives")
         fig.add_annotation(
             text="No year data available for evolution analysis",
             xref="paper", yref="paper",
             x=0.5, y=0.5, showarrow=False,
             font=get_font_config('annotation')
+        )
+        fig.update_layout(
+            xaxis=dict(title="Year"),
+            yaxis=dict(title="Number of Active Initiatives")
         )
         return fig
     
@@ -438,9 +441,6 @@ def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
         showlegend=True
     ))
     
-    # Apply standard layout with custom modifications
-    apply_standard_layout(fig, "Evolution of Data Availability Over Time", "Year", "Number of Active Initiatives")
-    
     # Enhanced layout specific to evolution chart
     fig.update_layout(
         height=450,
@@ -455,6 +455,7 @@ def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         xaxis=dict(
+            title="Year",
             showgrid=True, 
             gridcolor='rgba(128,128,128,0.2)',
             gridwidth=1,
@@ -463,6 +464,7 @@ def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
             tickangle=-45 if len(years_df) > 15 else 0  # Rotate labels if many years
         ),
         yaxis=dict(
+            title="Number of Active Initiatives",
             showgrid=True, 
             gridcolor='rgba(128,128,128,0.2)',
             gridwidth=1,
@@ -500,12 +502,15 @@ def plot_evolution_heatmap_chart(metadata: Dict[str, Any], filtered_df: pd.DataF
     """
     if not metadata or filtered_df is None or filtered_df.empty:
         fig = go.Figure()
-        apply_standard_layout(fig, "Evolution of Spatial Resolution in LULC (1985-2024)", "Year", "Initiatives")
         fig.add_annotation(
             text="No data available for resolution evolution analysis",
             xref="paper", yref="paper",
             x=0.5, y=0.5, showarrow=False,
             font=get_font_config('annotation')
+        )
+        fig.update_layout(
+            xaxis=dict(title="Year"),
+            yaxis=dict(title="Initiatives")
         )
         return fig
     
@@ -555,12 +560,15 @@ def plot_evolution_heatmap_chart(metadata: Dict[str, Any], filtered_df: pd.DataF
     
     if not resolution_data:
         fig = go.Figure()
-        apply_standard_layout(fig, "Evolution of Spatial Resolution in LULC (1985-2024)", "Year", "Initiatives")
         fig.add_annotation(
             text="No resolution data available for the selected initiatives",
             xref="paper", yref="paper",
             x=0.5, y=0.5, showarrow=False,
             font=get_font_config('annotation')
+        )
+        fig.update_layout(
+            xaxis=dict(title="Year"),
+            yaxis=dict(title="Initiatives")
         )
         return fig
     
@@ -621,8 +629,11 @@ def plot_evolution_heatmap_chart(metadata: Dict[str, Any], filtered_df: pd.DataF
                 annotation_font_color="rgba(139,69,19,0.8)"
             )
     
-    # Apply standard layout
-    apply_standard_layout(fig, "Evolution of Spatial Resolution in LULC (1985-2024)", "Year", "Initiatives")
+    # Chart specific layout
+    fig.update_layout(
+        xaxis=dict(title="Year"),
+        yaxis=dict(title="Initiatives")
+    )
     
     # Customize layout for area chart
     fig.update_layout(
