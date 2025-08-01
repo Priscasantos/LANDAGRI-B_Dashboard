@@ -4,7 +4,10 @@ Initiative Analysis Dashboard - Consolidated Version
 
 Complete dashboard consolidating all functionality from legacy files:
 - comparative_old.py: advanced filters, multiple charts
-- temporal_old.py: complete temporal analysis
+- temporal_old.py: complete temp    # Abas de análise temporal com componentes modulares
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["📊 Timeline", "📈 Evolution", "🗓️ Temporal Coverage", "⚠️ Gap Analysis"]
+    ) analysis
 - detailed_old.py:    # Temporal analysis tabs with modular components
     tab1, tab2, tab3, tab4 = st.tabs(
         ["📊 Timeline", "📈 Evolution", "🕒 Temporal Coverage", "⚠️ Gap Analysis"]
@@ -64,13 +67,6 @@ from dashboard.components.initiative_analysis.charts.detailed import (
 )
 CHARTS_AVAILABLE = True
 
-# Import para download de gráficos
-try:
-    from scripts.utilities.ui_elements import setup_download_form
-except ImportError:
-
-    def setup_download_form(fig, default_filename, key_prefix):
-        st.warning("Download não disponível")
 
 
 def run(metadata=None, df_original=None):
@@ -270,46 +266,10 @@ def render_temporal_analysis(df: pd.DataFrame, metadata: dict) -> None:
         st.warning("⚠️ Insufficient temporal data for analysis.")
         return
 
-    # Use only standardized modular components
-
-    # Global temporal controls
-    col1, col2 = st.columns(2)
-
-    with col1:
-        # Extract unique years from data
-        all_years = set()
-        for _, row in df.iterrows():
-            start_year = pd.to_numeric(row.get("Start_Year", 0), errors="coerce")
-            end_year = pd.to_numeric(row.get("End_Year", 0), errors="coerce")
-            if pd.notna(start_year) and start_year > 0:
-                all_years.add(int(start_year))
-            if pd.notna(end_year) and end_year > 0:
-                all_years.add(int(end_year))
-        if all_years:
-            min_year = min(all_years)
-            max_year = max(all_years)
-            st.slider(
-                "📅 Analysis period:",
-                min_value=min_year,
-                max_value=max_year,
-                value=(min_year, max_year),
-                help="Select the period for temporal analysis",
-                key="temporal_period_range"
-            )
-
-    with col2:
-        st.markdown("### 📊 Quick Stats")
-        col_a, col_b = st.columns(2)
-        with col_a:
-            st.metric("Active Initiatives", len(temporal_data))
-        with col_b:
-            if "Coverage_Percentage" in temporal_data.columns:
-                avg_coverage = temporal_data["Coverage_Percentage"].mean()
-                st.metric("Average Coverage", f"{avg_coverage:.1f}%")
 
     # Abas de análise temporal com componentes modulares
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["📊 Timeline", "📈 Evolution", "�️ Cobertura Temporal", "⚠️ Gap Analysis"]
+        ["📊 Timeline", "📈 Evolution", "⌚Temporal Coverage", "⚠️ Gap Analysis"]
     )
 
     with tab1:
@@ -364,12 +324,15 @@ def render_detailed_analysis(df: pd.DataFrame, metadata: dict) -> None:
         return
     # Filter data for selected initiatives
     df_filtered = df[df["Name"].isin(selected_initiatives)].copy()
+    # Merge available_years from metadata
+    if "available_years" not in df_filtered.columns:
+        df_filtered["available_years"] = df_filtered["Name"].map(lambda n: metadata.get(n, {}).get("available_years", []))
     st.markdown("---")
     st.markdown("### 📊 Detailed Analyses")
     # Detailed analysis tabs
     tab1, tab2, tab3, tab4, tab5 = st.tabs(
         [
-            "📊 Dual Bars",
+            "📊 Bar Chart",
             "🎯 Radar Chart",
             "🔥 Heatmap",
             "📈 Data Table",

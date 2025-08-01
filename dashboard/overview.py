@@ -110,30 +110,36 @@ def _render_selected_initiative(
         letter-spacing: 0.01em;
         display: flex;
         align-items: center;
+        justify-content: center;
     ">
         {data.get("Name", "Unknown Initiative")} ({data.get("Acronym", "N/A")})
     </div>
     """,
         unsafe_allow_html=True,
     )
-    # Two-column layout
-    left_col, right_col = st.columns([1, 1])
 
-    with right_col:
-        st.markdown("### 📊 Key Metrics")
-        _render_key_metrics_cards(data)
+    # Centralized KEY METRICS section
+    st.markdown("""
+    <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+        <h2 style="font-size: 2rem; font-weight: 700; color: #1e293b; margin: 0;">📊 KEY METRICS</h2>
+    </div>
+    """, unsafe_allow_html=True)
+    _render_key_metrics_cards(data)
 
+    # Lower section: two columns
+    col_left, col_right = st.columns([1, 1], gap="large")
+
+    with col_left:
+        st.markdown("### 🏷️ Classification")
+        class_legend = data.get("Class_Legend", "[]")
+        lulc_classes.render_lulc_classes_section(class_legend)
+
+    with col_right:
         st.markdown("### 🔧 Technical Details")
         _render_technical_details(data, metadata)
 
-    with left_col:
         st.markdown("### 🛰️ Sensor Information")
         _render_sensor_details(data, sensors_meta)
-
-        st.markdown("### 🏷️ Classification")
-        # Use LULC classes component
-        class_legend = data.get("Class_Legend", "[]")
-        lulc_classes.render_lulc_classes_section(class_legend)
 
 
 def _render_key_metrics_cards(data: pd.Series) -> None:
@@ -145,6 +151,15 @@ def _render_key_metrics_cards(data: pd.Series) -> None:
     classes = pd.to_numeric(
         data.get("Classes", data.get("Number_of_Classes", "")), errors="coerce"
     )
+    # Calculate temporal coverage (years)
+    available_years_str = data.get("Available_Years_List", "[]")
+    try:
+        available_years = (
+            json.loads(available_years_str) if available_years_str else []
+        )
+    except Exception:
+        available_years = []
+    years_coverage = len(available_years)
     frequency = str(data.get("Temporal_Frequency", "")).strip()
 
     # Custom CSS for colored cards
@@ -241,14 +256,12 @@ def _render_key_metrics_cards(data: pd.Series) -> None:
             """
         <div class='metric-card frequency'>
             <div class='metric-icon'>📅</div>
-            <div class='metric-label'>Frequency</div>
+            <div class='metric-label'>Temporal Coverage</div>
             <div class='metric-value'>{}</div>
-            <div class='metric-help'>Temporal frequency</div>
+            <div class='metric-help'>Years of data</div>
         </div>
         """.format(
-                frequency
-                if frequency and frequency.lower() not in ["n/a", "none", "-"]
-                else "-"
+                years_coverage if years_coverage > 0 else "-"
             ),
             unsafe_allow_html=True,
         )

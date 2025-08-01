@@ -57,14 +57,17 @@ def render_gaps_analysis(temporal_df: pd.DataFrame) -> None:
         min_gap_size = st.slider("Minimum gap size to show", 0, 10, 1, key="min_gap_slider")
     
     # Calcular maior gap para cada iniciativa
-    def get_largest_gap(anos_lista):
-        if isinstance(anos_lista, list) and len(anos_lista) > 1:
-            anos_sorted = sorted(set(anos_lista))
+    def get_largest_gap(years_list):
+        if isinstance(years_list, list) and len(years_list) > 1:
+            anos_sorted = sorted(set(years_list))
             return max([anos_sorted[i+1] - anos_sorted[i] - 1 for i in range(len(anos_sorted)-1)] + [0])
         return 0
 
     filtered_gaps_df = temporal_df.copy()
-    filtered_gaps_df['Maior_Gap'] = filtered_gaps_df['Anos_Lista'].apply(get_largest_gap)
+    # Compatibilidade: garantir coluna correta
+    if 'Anos_Lista' in filtered_gaps_df.columns and 'Years_List' not in filtered_gaps_df.columns:
+        filtered_gaps_df = filtered_gaps_df.rename(columns={'Anos_Lista': 'Years_List'})
+    filtered_gaps_df['Maior_Gap'] = filtered_gaps_df['Years_List'].apply(get_largest_gap)
 
     if show_only_gaps:
         filtered_gaps_df = filtered_gaps_df[filtered_gaps_df['Maior_Gap'] > 0]
@@ -100,10 +103,9 @@ def calculate_gaps_statistics(temporal_df: pd.DataFrame) -> Dict[str, Any]:
     # Calcular gaps para cada iniciativa
     gaps_data = []
     for _, row in temporal_df.iterrows():
-        anos_lista = row['Anos_Lista']
-        if isinstance(anos_lista, list) and len(anos_lista) > 1:
-            # Identificar todos os gaps
-            anos_sorted = sorted(set(anos_lista))
+        years_list = row['Years_List'] if 'Years_List' in row else row.get('Anos_Lista')
+        if isinstance(years_list, list) and len(years_list) > 1:
+            anos_sorted = sorted(set(years_list))
             gaps = []
             for i in range(len(anos_sorted) - 1):
                 gap_size = anos_sorted[i + 1] - anos_sorted[i] - 1
@@ -113,7 +115,6 @@ def calculate_gaps_statistics(temporal_df: pd.DataFrame) -> Dict[str, Any]:
                         'end_year': anos_sorted[i + 1],
                         'gap_size': gap_size
                     })
-            
             total_gap = sum(gap['gap_size'] for gap in gaps)
             gaps_data.append({
                 'initiative': row['Name'],
@@ -266,15 +267,12 @@ def display_gaps_table(temporal_df: pd.DataFrame) -> None:
     gaps_table_data = []
     
     for _, row in temporal_df.iterrows():
-        anos_lista = row['Anos_Lista']
-        if isinstance(anos_lista, list) and len(anos_lista) > 1:
-            anos_sorted = sorted(set(anos_lista))
-            
-            # Calcular span total
+        years_list = row['Years_List'] if 'Years_List' in row else row.get('Anos_Lista')
+        if isinstance(years_list, list) and len(years_list) > 1:
+            anos_sorted = sorted(set(years_list))
             total_span = anos_sorted[-1] - anos_sorted[0] + 1
             available_years = len(anos_sorted)
             coverage_percentage = (available_years / total_span) * 100
-            
             gaps_table_data.append({
                 'Initiative': row['Display_Name'],
                 'First Year': anos_sorted[0],
@@ -282,7 +280,7 @@ def display_gaps_table(temporal_df: pd.DataFrame) -> None:
                 'Total Span': total_span,
                 'Available Years': available_years,
                 'Coverage (%)': f"{coverage_percentage:.1f}%",
-                'Largest Gap': max([row['Anos_Lista'][i+1] - row['Anos_Lista'][i] - 1 for i in range(len(row['Anos_Lista'])-1)] + [0]) if isinstance(row['Anos_Lista'], list) and len(row['Anos_Lista']) > 1 else 0,
+                'Largest Gap': max([anos_sorted[i+1] - anos_sorted[i] - 1 for i in range(len(anos_sorted)-1)] + [0]) if len(anos_sorted) > 1 else 0,
                 'Years Range': f"{anos_sorted[0]}-{anos_sorted[-1]}"
             })
     

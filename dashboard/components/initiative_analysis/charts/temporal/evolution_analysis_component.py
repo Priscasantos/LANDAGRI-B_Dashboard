@@ -13,7 +13,7 @@ import streamlit as st
 
 def render_evolution_analysis(temporal_df: pd.DataFrame) -> None:
     """
-    Renders temporal evolution analysis with interactive controls.
+    Renders temporal evolution analysis with tab-based navigation.
     
     Args:
         temporal_df: DataFrame with temporal data of initiatives
@@ -24,59 +24,54 @@ def render_evolution_analysis(temporal_df: pd.DataFrame) -> None:
     if temporal_df.empty:
         st.warning("❌ No temporal data available for evolution analysis.")
         return
+        
+    # Ensure correct column names for compatibility
+    if 'Anos_Lista' in temporal_df.columns and 'Years_List' not in temporal_df.columns:
+        temporal_df = temporal_df.rename(columns={'Anos_Lista': 'Years_List'})
     
-    # Seletor de tipo de visualização
-    chart_type = st.selectbox(
-        "Select visualization type:",
-        ["Line Chart - Initiative Count", "Heatmap - Resolution Evolution"],
-        key="evolution_chart_type"
-    )
+    # Tab-based navigation instead of dropdown
+    tab1, tab2 = st.tabs(["📊 Initiative Timeline", "🔥 Resolution Evolution"])
     
-    if chart_type == "Line Chart - Initiative Count":
+    with tab1:
+        st.markdown("#### Initiative Count Over Time")
         fig = plot_evolution_line_chart(temporal_df)
         st.plotly_chart(fig, use_container_width=True)
         
-        # Estatísticas resumo
         with st.expander("📊 Evolution Statistics"):
             all_years = []
             for _, row in temporal_df.iterrows():
-                if isinstance(row['Anos_Lista'], list):
-                    all_years.extend(row['Anos_Lista'])
-            
+                if isinstance(row.get('Years_List'), list):
+                    all_years.extend(row['Years_List'])
             if all_years:
                 year_counts = pd.Series(all_years).value_counts().sort_index()
                 col1, col2, col3 = st.columns(3)
-                
                 with col1:
                     st.metric("Peak Year", year_counts.idxmax(), f"{year_counts.max()} initiatives")
-                
                 with col2:
                     st.metric("Average per Year", f"{year_counts.mean():.1f}", "initiatives")
-                
                 with col3:
                     st.metric("Total Years Covered", len(year_counts), "years")
     
-    else:  # Heatmap - Resolution Evolution
-        # Precisamos de metadados para o heatmap de resolução
+    with tab2:
+        st.markdown("#### Spatial Resolution Evolution")
         if 'metadata' not in st.session_state:
             st.warning("❌ Metadata not available for resolution evolution analysis.")
             return
-            
         fig = plot_evolution_heatmap_chart(st.session_state.metadata, temporal_df)
         st.plotly_chart(fig, use_container_width=True)
 
 
 def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
     """
-    Gera gráfico de linha mostrando como a disponibilidade de dados evolui no tempo.
+    Generate line chart showing how data availability evolves over time.
     
     Args:
-        temporal_data: DataFrame com dados temporais contendo 'Anos_Lista' e 'Tipo'
+        temporal_data: DataFrame with temporal data containing 'Years_List' column
         
     Returns:
-        go.Figure: Figura Plotly mostrando evolução da disponibilidade de dados
+        go.Figure: Plotly figure showing evolution of data availability
     """
-    if temporal_data.empty or 'Anos_Lista' not in temporal_data.columns:
+    if temporal_data.empty or 'Years_List' not in temporal_data.columns:
         fig = go.Figure()
         fig.add_annotation(
             text="No temporal data available for evolution analysis",
@@ -90,13 +85,11 @@ def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
             yaxis={"title": "Number of Active Initiatives"}
         )
         return fig
-    
     # Processar dados para contar iniciativas por ano
     all_years = []
     for _, row in temporal_data.iterrows():
-        if isinstance(row['Anos_Lista'], list):
-            all_years.extend(row['Anos_Lista'])
-    
+        if isinstance(row.get('Years_List'), list):
+            all_years.extend(row['Years_List'])
     if not all_years:
         fig = go.Figure()
         fig.add_annotation(
@@ -111,7 +104,6 @@ def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
             yaxis=dict(title="Number of Active Initiatives")
         )
         return fig
-    
     # Contar iniciativas por ano
     year_counts = pd.Series(all_years).value_counts().sort_index()
     years_df = pd.DataFrame({
