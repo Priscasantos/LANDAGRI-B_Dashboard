@@ -10,57 +10,55 @@ Author: Dashboard Iniciativas LULC
 Date: 2024
 """
 
-# Import modularized chart functions
-from scripts.plotting.charts.comparison_charts import plot_class_diversity_focus  # New
-from scripts.plotting.charts.comparison_charts import (
-    plot_classes_frequency_boxplot,  # Added missing import here
-)
-from scripts.plotting.charts.comparison_charts import (
-    plot_classification_methodology,  # New
-)
-from scripts.plotting.charts.comparison_charts import (
-    plot_global_accuracy_comparison,  # New
-)
-from scripts.plotting.charts.comparison_charts import (
-    plot_normalized_performance_heatmap,  # Added import for the new heatmap
-)
-from scripts.plotting.charts.comparison_charts import (
-    plot_resolution_accuracy_scatter,  # Corrected name
-)
-from scripts.plotting.charts.comparison_charts import (
-    plot_spatial_resolution_comparison,  # New
-)
-from scripts.plotting.charts.comparison_charts import (
-    plot_temporal_evolution_frequency,  # New
-)
-from scripts.plotting.charts.comparison_charts import (
+#!/usr/bin/env python3
+"""
+Generate Graphics Module - Import Hub
+=====================================
+
+Central import hub for all chart generation functions.
+Atualizado para usar nova estrutura de componentes em dashboard/components/charts.
+
+Author: Dashboard Iniciativas LULC
+Date: 2025-07-29
+"""
+
+# Import modularized chart functions from new structure
+from dashboard.components.charts.comparison_charts import (
+    plot_class_diversity_focus,
+    plot_classes_frequency_boxplot,
+    plot_classification_methodology,
     plot_comparison_matrix,
     plot_correlation_matrix,
+    plot_global_accuracy_comparison,
     plot_initiative_ranking,
+    plot_normalized_performance_heatmap,
     plot_radar_comparison,
+    plot_resolution_accuracy_scatter,
+    plot_spatial_resolution_comparison,
+    plot_temporal_evolution_frequency,
 )
-from scripts.plotting.charts.coverage_charts import (
+from dashboard.components.charts.coverage_charts import (
     plot_annual_coverage_multiselect,
     plot_ano_overlap,
     plot_heatmap,
 )
-from scripts.plotting.charts.distribution_charts import (
+from dashboard.components.charts.distribution_charts import (
     plot_acuracia_por_metodologia,
     plot_classes_por_iniciativa,
     plot_distribuicao_classes,
     plot_distribuicao_metodologias,
     plot_resolution_accuracy,
 )
-from scripts.plotting.charts.resolution_comparison_charts import (
+from dashboard.components.charts.resolution_comparison_charts import (
     plot_initiatives_by_resolution_category,
     plot_resolution_by_sensor_family,
     plot_resolution_coverage_heatmap,
     plot_resolution_slopegraph,
     plot_resolution_vs_launch_year,
 )
-from scripts.plotting.charts.temporal_charts import (
-    plot_timeline_chart,  # Updated to plot_timeline_chart
-)
+
+# Temporal charts using modular component structure
+from dashboard.components.temporal.charts import plot_timeline_chart
 
 # Re-export all functions for backward compatibility
 __all__ = [

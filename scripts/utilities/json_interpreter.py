@@ -436,6 +436,21 @@ def interpret_initiatives_metadata(file_path: str | Path | None = None) -> pd.Da
         # TODO: Add logic here if agricultural_capabilities_text could be a list of strings for num_agri_classes > 1
         # For now, it handles the case where number_of_agriculture_classes = 1 and agricultural_capabilities is its name.
 
+        # Process sensor information for overview compatibility
+        primary_sensor = _get_safe_value(details, "source")  # Direct from source field
+        sensor_info = ""
+        if sensors_referenced_list:
+            # Extract sensor keys from sensors_referenced for display
+            sensor_keys = []
+            for sensor in sensors_referenced_list:
+                if isinstance(sensor, dict) and "sensor_key" in sensor:
+                    sensor_keys.append(sensor["sensor_key"])
+                elif isinstance(sensor, str):
+                    sensor_keys.append(sensor)
+            sensor_info = ", ".join(sensor_keys) if sensor_keys else primary_sensor
+        else:
+            sensor_info = primary_sensor if primary_sensor else "-"
+
         initiative_dict = {
             "Name": initiative_name,
             "Acronym": acronym,
@@ -456,6 +471,12 @@ def interpret_initiatives_metadata(file_path: str | Path | None = None) -> pd.Da
             "Coverage": _get_safe_value(details, "coverage"),
             "Provider": _get_safe_value(details, "provider"),
             "Source": _get_safe_value(details, "source"),
+            "Primary_Sensor": sensor_info,  # New field for overview compatibility
+            "Data_Source": (
+                f"{_get_safe_value(details, 'source')} ({sensor_info})"
+                if sensor_info != "-"
+                else _get_safe_value(details, "source")
+            ),
             "Update_Frequency": _get_safe_value(details, "update_frequency"),
             "Temporal_Frequency": _get_safe_value(
                 details, "update_frequency"
@@ -481,6 +502,14 @@ def interpret_initiatives_metadata(file_path: str | Path | None = None) -> pd.Da
             "Capability": capability_text,  # Added new column
             "Algorithm": _get_safe_value(details, "algorithm"),
             "Classification_Method": _get_safe_value(details, "classification_method"),
+            "Spatial_Resolution": (
+                f"{resolution_data['value']} m"
+                if resolution_data["value"] is not None
+                else "-"
+            ),
+            "Reference_System": parse_reference_system(
+                _get_safe_value(details, "reference_system")
+            ),
             "Sensors_Referenced": json.dumps(sensors_referenced_list),
         }
         processed_initiatives.append(initiative_dict)
