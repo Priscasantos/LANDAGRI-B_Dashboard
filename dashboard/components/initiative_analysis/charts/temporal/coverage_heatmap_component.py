@@ -73,7 +73,7 @@ def plot_coverage_heatmap_chart(
     Gera heatmap da cobertura temporal das iniciativas.
 
     Args:
-        temporal_data: DataFrame com dados temporais
+            text="No temporal data available for coverage heatmap",
         start_year: Ano inicial para visualização
         end_year: Ano final para visualização
         sort_by: Critério de ordenação das iniciativas
@@ -81,7 +81,7 @@ def plot_coverage_heatmap_chart(
     Returns:
         go.Figure: Figura Plotly com heatmap de cobertura
     """
-    if temporal_data.empty or 'Anos_Lista' not in temporal_data.columns:
+    if temporal_data.empty or ('Years_List' not in temporal_data.columns and 'Anos_Lista' not in temporal_data.columns):
         fig = go.Figure()
         fig.add_annotation(
             text="No temporal data available for coverage heatmap",
@@ -99,21 +99,16 @@ def plot_coverage_heatmap_chart(
     # Criar matriz de cobertura
     years_range = list(range(start_year, end_year + 1))
     initiatives_data = []
-
     for _, row in temporal_data.iterrows():
-        anos_lista = row['Anos_Lista']
-        if isinstance(anos_lista, list):
-            # Criar array de cobertura para cada iniciativa
-            coverage_array = []
-            for year in years_range:
-                coverage_array.append(1 if year in anos_lista else 0)
-
+        years_list = row['Years_List'] if 'Years_List' in row else row.get('Anos_Lista')
+        if isinstance(years_list, list):
+            coverage_array = [1 if year in years_list else 0 for year in years_range]
             initiatives_data.append({
                 'initiative': row['Display_Name'],
                 'full_name': row['Name'],
                 'coverage': coverage_array,
-                'first_year': min(anos_lista) if anos_lista else start_year,
-                'last_year': max(anos_lista) if anos_lista else start_year,
+                'first_year': min(years_list) if years_list else start_year,
+                'last_year': max(years_list) if years_list else start_year,
                 'total_coverage': sum(coverage_array),
                 'coverage_percentage': (sum(coverage_array) / len(coverage_array)) * 100
             })
@@ -249,14 +244,11 @@ def display_coverage_statistics(
     year_coverage = dict.fromkeys(years_range, 0)
 
     for _, row in temporal_df.iterrows():
-        anos_lista = row['Anos_Lista']
-        if isinstance(anos_lista, list):
-            # Filtrar anos no período selecionado
-            anos_no_periodo = [ano for ano in anos_lista if start_year <= ano <= end_year]
-
+        years_list = row['Years_List'] if 'Years_List' in row else row.get('Anos_Lista')
+        if isinstance(years_list, list):
+            anos_no_periodo = [ano for ano in years_list if start_year <= ano <= end_year]
             coverage_count = len(anos_no_periodo)
             coverage_percentage = (coverage_count / total_years) * 100
-
             stats_data.append({
                 'Initiative': row['Display_Name'],
                 'Years Available': coverage_count,
@@ -265,8 +257,6 @@ def display_coverage_statistics(
                 'Last Year': max(anos_no_periodo) if anos_no_periodo else 'N/A',
                 'Years in Period': ', '.join(map(str, sorted(anos_no_periodo))) if anos_no_periodo else 'None'
             })
-
-            # Contar cobertura por ano
             for ano in anos_no_periodo:
                 year_coverage[ano] += 1
 

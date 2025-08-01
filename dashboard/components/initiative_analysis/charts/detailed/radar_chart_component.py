@@ -32,10 +32,11 @@ def render_radar_chart_tab(filtered_df: pd.DataFrame) -> None:
     if fig:
         st.plotly_chart(fig, use_container_width=True)
         st.download_button(
-            label="📥 Download Radar Chart",
+            label="📥 Baixar gráfico radar (HTML)",
             data=fig.to_html(),
             file_name="radar_chart.html",
-            mime="text/html"
+            mime="text/html",
+            key=f"download-radar-{hash(fig.to_html())}"
         )
     else:
         st.error("❌ Erro ao gerar radar chart.")
@@ -60,8 +61,14 @@ def create_radar_chart(filtered_df: pd.DataFrame) -> go.Figure:
             showarrow=False,
         )
         return fig
-    # Selecionar métricas
-    metrics = [col for col in ["Accuracy (%)", "Resolution"] if col in filtered_df.columns]
+    # Selecionar métricas relevantes e amigáveis
+    metric_map = {
+        "Accuracy (%)": "Acurácia (%)",
+        "Resolution": "Resolução",
+        "Num_Agri_Classes": "Nº Classes Agrícolas",
+        "Classes": "Classes"
+    }
+    metrics = [col for col in metric_map.keys() if col in filtered_df.columns]
     if not metrics:
         return go.Figure()
     # Normalizar dados
@@ -77,17 +84,35 @@ def create_radar_chart(filtered_df: pd.DataFrame) -> go.Figure:
     colors = get_chart_colors()
     for i, (_, row) in enumerate(df_norm.iterrows()):
         values = row.tolist() + [row.tolist()[0]]
-        categories = metrics + [metrics[0]]
+        categories = [metric_map[m] for m in metrics] + [metric_map[metrics[0]]]
         fig.add_trace(go.Scatterpolar(
             r=values,
             theta=categories,
             fill="toself",
             name=filtered_df.iloc[i].get("Display_Name", f"Iniciativa {i+1}"),
             line_color=colors[i % len(colors)],
+            opacity=0.85,
         ))
     fig.update_layout(
-        polar={"radialaxis": {"visible": True, "range": [0, 1]}},
+        polar={
+            "radialaxis": {
+                "visible": True,
+                "range": [0, 1],
+                "tickfont": dict(size=12, family="Inter, -apple-system, BlinkMacSystemFont, sans-serif", color="#374151"),
+                "gridcolor": "#e5e7eb",
+                "linecolor": "#d1d5db",
+                "linewidth": 2
+            }
+        },
         showlegend=True,
-        title="Radar Chart: Comparação Multidimensional",
+        title=dict(
+            text="<b>Radar Chart: Comparação Multidimensional</b><br><span style='font-size:14px;color:#6b7280'>Acurácia, Resolução, Classes Agrícolas</span>",
+            x=0.5,
+            font=dict(size=18, family="Inter, -apple-system, BlinkMacSystemFont, sans-serif", color="#1f2937")
+        ),
+        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, sans-serif", size=12, color="#374151"),
+        paper_bgcolor="white",
+        plot_bgcolor="white",
+        margin=dict(l=80, r=80, t=80, b=80)
     )
     return fig

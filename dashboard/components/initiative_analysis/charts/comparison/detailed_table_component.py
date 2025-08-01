@@ -2,29 +2,39 @@
 Detailed Table Component - Comparison Analysis
 =============================================
 
-Componente para renderizar a aba de tabela detalhada na análise comparativa.
+Component to render detailed table tab for comparative analysis.
 
-Author: Dashboard Iniciativas LULC
+Author: LULC Initiatives Dashboard
 Date: 2025-08-01
 """
 
+import hashlib
 import pandas as pd
 import streamlit as st
 
 def render_detailed_table_tab(filtered_df: pd.DataFrame) -> None:
     """
-    Renderizar aba de tabela detalhada para análise comparativa.
+    Render detailed table tab for comparative analysis.
+    
     Args:
-        filtered_df: DataFrame filtrado com dados das iniciativas
+        filtered_df: Filtered DataFrame with initiative data
     """
-    st.markdown("#### 📋 Tabela Detalhada das Iniciativas")
+    st.markdown("#### 📋 Detailed Initiative Table")
+    
     if filtered_df.empty:
-        st.warning("⚠️ Nenhum dado disponível para tabela detalhada.")
+        st.warning("⚠️ No data available for detailed table.")
         return
+    
     st.dataframe(filtered_df, use_container_width=True)
+    
+    # Generate unique key for download button
+    key_content = f"detailed_table_{filtered_df.shape[0]}_{filtered_df.columns.tolist()}"
+    key_hash = hashlib.md5(key_content.encode()).hexdigest()[:8]
+    
     st.download_button(
-        label="📥 Download Tabela",
+        label="📥 Download Detailed Table",
         data=filtered_df.to_csv(index=False).encode('utf-8'),
-        file_name="detailed_table.csv",
-        mime="text/csv"
+        file_name="detailed_initiative_table.csv",
+        mime="text/csv",
+        key=f"download_detailed_table_{key_hash}"
     )

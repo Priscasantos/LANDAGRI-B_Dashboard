@@ -88,10 +88,11 @@ def render_timeline_tab(temporal_data: pd.DataFrame, metadata: dict) -> None:
         
         # Download option
         st.download_button(
-            label="📥 Download Timeline Chart",
+            label="📥 Baixar gráfico de linha do tempo (HTML)",
             data=fig_timeline.to_html(),
-            file_name="timeline_chart_modern.html",
-            mime="text/html"
+            file_name="timeline_chart_moderno.html",
+            mime="text/html",
+            key=f"download-timeline-{hash(fig_timeline.to_html())}"
         )
     else:
         st.error("❌ Error generating timeline chart.")
