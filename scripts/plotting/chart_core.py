@@ -754,3 +754,68 @@ def _calculate_largest_gap(anos_list: list) -> int:
             gaps.append(gap)
     
     return max(gaps) if gaps else 0
+
+
+# ==================== LAYOUT UTILITIES ====================
+
+def get_dynamic_chart_height(item_count: int, chart_type: str = 'default', 
+                            min_height: int = 400, max_height: int = 1200) -> int:
+    """
+    Calculate dynamic chart height based on number of items and chart type.
+    
+    Args:
+        item_count (int): Number of items to display (rows, initiatives, etc.)
+        chart_type (str): Type of chart ('bar', 'heatmap', 'timeline', 'default')
+        min_height (int): Minimum chart height
+        max_height (int): Maximum chart height
+        
+    Returns:
+        int: Calculated height in pixels
+    """
+    # Heights per item based on chart type
+    height_per_item = {
+        'bar': 30,           # Horizontal bars need more space
+        'heatmap': 25,       # Dense heatmap cells
+        'timeline': 40,      # Timeline needs more vertical space
+        'scatter': 0,        # Scatter plots don't scale with items
+        'default': 20        # General charts
+    }
+    
+    base_height = 300  # Base height for chart elements (axes, legend, etc.)
+    per_item = height_per_item.get(chart_type, height_per_item['default'])
+    
+    # Calculate dynamic height
+    calculated_height = base_height + (item_count * per_item)
+    
+    # Apply min/max constraints
+    return max(min_height, min(calculated_height, max_height))
+
+
+def get_responsive_margin(chart_type: str = 'default', 
+                         has_long_labels: bool = False) -> Dict[str, int]:
+    """
+    Get responsive margin configuration based on chart type.
+    
+    Args:
+        chart_type (str): Type of chart ('heatmap', 'bar', 'timeline', 'default')
+        has_long_labels (bool): Whether the chart has long labels
+        
+    Returns:
+        Dict[str, int]: Margin configuration
+    """
+    base_margins = {
+        'default': {'l': 80, 'r': 50, 't': 100, 'b': 80},
+        'heatmap': {'l': 150, 'r': 100, 't': 100, 'b': 80},  # More left margin for labels
+        'bar': {'l': 120, 'r': 50, 't': 100, 'b': 80},       # Space for horizontal labels
+        'timeline': {'l': 100, 'r': 50, 't': 100, 'b': 100}, # Space for timeline
+        'scatter': {'l': 80, 'r': 50, 't': 100, 'b': 80}     # Standard margins
+    }
+    
+    margins = base_margins.get(chart_type, base_margins['default']).copy()
+    
+    # Adjust for long labels
+    if has_long_labels:
+        margins['l'] = int(margins['l'] * 1.3)  # Increase left margin by 30%
+        margins['b'] = int(margins['b'] * 1.2)  # Increase bottom margin by 20%
+    
+    return margins

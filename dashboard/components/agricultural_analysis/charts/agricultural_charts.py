@@ -4,7 +4,20 @@ Agricultural Charts Module - CONAB Data Analysis
 ==============================================
 
 Comprehensive charts for agricultural analysis based on CONAB data including
-crop calendars, regional coverage, temporal trends, and performance metrics.
+crop calendars, regional coverage, temporal     # Apply centralized theme
+    apply_theme_to_figure(fig)
+    
+    fig.update_layout(
+        title={
+            'text': "🏘️ CONAB Agricultural Monitoring by State",
+            'x': 0.5,
+            'xanchor': 'center'
+        },
+        xaxis_title="Brazilian States",
+        yaxis_title="Number of Monitored Crops",
+        height=get_dynamic_chart_height(len(states_data), 'bar'),
+        xaxis_tickangle=-45
+    )performance metrics.
 """
 
 import json
@@ -18,6 +31,11 @@ from pathlib import Path
 
 # Import removed due to unused apply_standard_layout calls
 # Note: modern_themes modules have been consolidated into chart_core
+from scripts.plotting.chart_core import (
+    apply_theme_to_figure,
+    get_dynamic_chart_height,
+    get_responsive_margin
+)
 
 
 def load_conab_data() -> Tuple[Dict, Dict]:
@@ -156,14 +174,16 @@ def plot_crop_calendar_heatmap(calendar_data: Dict) -> go.Figure:
     
     # Remove unused apply_standard_layout call
     
+    # Apply centralized theme
+    apply_theme_to_figure(fig)
+    
     fig.update_layout(
         title={
             'text': "🌾 Brazilian Crop Calendar - Planting and Harvest Periods",
             'x': 0.5,
-            'xanchor': 'center',
-            'font': {'size': 18, 'family': 'Inter, Arial, sans-serif'}
+            'xanchor': 'center'
         },
-        height=200 * len(available_crops) + 100,
+        height=get_dynamic_chart_height(len(available_crops), 'heatmap'),
         showlegend=False
     )
     

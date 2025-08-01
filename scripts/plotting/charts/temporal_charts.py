@@ -19,7 +19,10 @@ from scripts.plotting.chart_core import (
     add_display_names_to_df, 
     get_initiative_color_map,
     get_font_config,
-    get_resolution_colors
+    get_resolution_colors,
+    apply_theme_to_figure,
+    get_dynamic_chart_height,
+    get_responsive_margin
 )
 
 # Renamed from plot_timeline to plot_timeline_chart
@@ -441,9 +444,12 @@ def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
         showlegend=True
     ))
     
+    # Apply centralized theme
+    apply_theme_to_figure(fig)
+    
     # Enhanced layout specific to evolution chart
     fig.update_layout(
-        height=450,
+        height=get_dynamic_chart_height(len(years_df), 'timeline'),
         showlegend=True,
         legend=dict(
             orientation="h",
@@ -629,6 +635,9 @@ def plot_evolution_heatmap_chart(metadata: Dict[str, Any], filtered_df: pd.DataF
                 annotation_font_color="rgba(139,69,19,0.8)"
             )
     
+    # Apply centralized theme
+    apply_theme_to_figure(fig)
+    
     # Chart specific layout
     fig.update_layout(
         xaxis=dict(title="Year"),
@@ -637,7 +646,7 @@ def plot_evolution_heatmap_chart(metadata: Dict[str, Any], filtered_df: pd.DataF
     
     # Customize layout for area chart
     fig.update_layout(
-        height=500,
+        height=get_dynamic_chart_height(10, 'timeline'),  # Standard timeline height
         showlegend=True,
         legend=dict(
             orientation="h",

@@ -17,7 +17,13 @@ import plotly.graph_objects as go
 from typing import Dict, Any
 
 
-from scripts.plotting.chart_core import get_display_name, get_scope_colors
+from scripts.plotting.chart_core import (
+    get_display_name, 
+    get_scope_colors, 
+    apply_theme_to_figure,
+    get_dynamic_chart_height,
+    get_responsive_margin
+)
 from scripts.plotting.universal_cache import smart_cache_data
 
 
@@ -621,54 +627,26 @@ def plot_normalized_performance_heatmap(filtered_df: pd.DataFrame) -> go.Figure:
         zmax=1
     ))
     
-    # Increase height based on number of initiatives
+    # Calculate dynamic height and margins using centralized functions
     num_initiatives = len(plot_df['Display_Name'].unique())
-    chart_height = max(600, num_initiatives * 30)
-
+    chart_height = get_dynamic_chart_height(num_initiatives, 'heatmap')
+    margins = get_responsive_margin('heatmap', has_long_labels=True)
     
-    # Increase height: base height + per initiative, ensure a minimum reasonable height
-    num_initiatives = len(plot_df['Display_Name'].unique())
-    chart_height = max(600, num_initiatives * 30) # Increased base height and per-initiative height
-
-    fig.update_layout(
-        height=chart_height, 
-        xaxis=dict(tickangle=45), 
-        yaxis=dict(type='category', autorange='reversed'), # Reversed to match typical heatmap/table views
-        margin=dict(l=150) # Add left margin if initiative names are long
-    )
+    # Apply centralized theme (maintains RdYlGn colorscale for heatmap)
+    apply_theme_to_figure(fig)
     
+    # Heatmap-specific layout updates
     fig.update_layout(
-        height=chart_height, 
-        xaxis=dict(tickangle=0,
-                   color='black',
-                   title_font=dict(size=20),
-                   tickfont=dict(color='black', size=20),
-                   showline=False,
-                   tickcolor='white',
-        ), 
-        yaxis=dict(type='category', 
-                   autorange='reversed',
-                   color='black',
-                   title_font=dict(size=20),
-                   tickfont=dict(color='black', size=20),
-                   showline=False,
-                   tickcolor='white',
+        height=chart_height,
+        margin=margins,
+        xaxis=dict(
+            tickangle=45,
+            type='category'
         ),
-        margin=dict(l=150),
-        font=dict(size=16),  # Font size global para todo o gráfico
-    # Add annotation explaining the color scale
-        # annotations=[
-        #     dict(
-        #         text= "<b>Color Scale Legend<br>" +
-        #              "Resolution: Dark Red (Poor) → (Excellent)<br>" +
-        #              "Accuracy, Total Classes and & Agriculture Classes: Light Blue (Poor) → Dark Red (Excellent)</b><br>",
-        #         showarrow=False,
-        #         xref="paper", yref="paper",
-        #         x=0.5, y=-0.15,
-        #         xanchor='center', yanchor='top',
-        #         font=dict(size=10, color="gray")
-        #     )
-        # ]
+        yaxis=dict(
+            type='category',
+            autorange='reversed'  # Reversed to match typical heatmap views
+        )
     )
 
     return fig

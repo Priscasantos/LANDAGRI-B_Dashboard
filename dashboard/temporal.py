@@ -192,8 +192,10 @@ def show_timeline_chart(df_for_analysis, raw_initiatives_metadata):
             periodo_total = "N/A"
         st.metric("Total Period Covered", periodo_total)
     with col3:
-        if not temporal_df.empty:
-            total_anos_disponiveis = sum(len(anos) for anos in temporal_df['Anos_Lista'])
+        if not temporal_df.empty and 'Primeiro_Ano' in temporal_df.columns and 'Ultimo_Ano' in temporal_df.columns:
+            primeiro_ano_geral = temporal_df['Primeiro_Ano'].min()
+            ultimo_ano_geral = temporal_df['Ultimo_Ano'].max()
+            total_anos_disponiveis = ultimo_ano_geral - primeiro_ano_geral + 1
             st.metric("Total Years Available", total_anos_disponiveis)
         else:
             st.metric("Total Years Available", "N/A")
