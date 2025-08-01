@@ -1,10 +1,13 @@
-# 🌍 Dashboard Iniciativas LULC
+# 🌍 LANDAGRI-B Dashboard
 
 **Dashboard interativo para análise de iniciativas de monitoramento de uso e cobertura da terra (LULC) no Brasil**
 
-![Python](https://img.shields.io/badge/python-3.12-blue.svg)
-![Streamlit](https://img.shields.io/badge/streamlit-1.47.0-red.svg)
-![Status](https://img.shields.io/badge/status-production--ready-green.svg)
+[![Python](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/streamlit-1.47.0-red.svg)](https://streamlit.io/)
+[![Status](https://img.shields.io/badge/status-production--ready-green.svg)](https://github.com/Priscasantos/LANDAGRI-B_Dashboard)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+> 🔗 **Repositório**: [https://github.com/Priscasantos/LANDAGRI-B_Dashboard](https://github.com/Priscasantos/LANDAGRI-B_Dashboard)
 
 ---
 
