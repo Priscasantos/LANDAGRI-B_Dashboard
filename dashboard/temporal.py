@@ -5,8 +5,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 
-# Local application imports should come after third-party libraries
-from scripts.utilities.ui_elements import setup_download_form
+
 
 # Add scripts to path - This should be at the very top
 _project_root = Path(__file__).resolve().parent.parent
@@ -156,8 +155,7 @@ def show_timeline_chart(df_for_analysis, raw_initiatives_metadata):
         return
         
     st.plotly_chart(fig_timeline, use_container_width=True, key="main_timeline_chart")
-    if fig_timeline:
-        setup_download_form(fig_timeline, default_filename="timeline_iniciatives", key_prefix="timeline_tab1")
+
     
     # Create name to acronym mapping
     nome_to_sigla = {}
@@ -284,9 +282,7 @@ def show_evolution_analysis(temporal_data):
         # Fallback: create basic evolution chart
         fig_evolution = create_basic_evolution_chart(years_df)
     
-    if fig_evolution:
-        st.plotly_chart(fig_evolution, use_container_width=True, key="evolution_chart")
-        setup_download_form(fig_evolution, default_filename="availability_evolution", key_prefix="evolution_tab3")
+
     else:
         st.info("Could not generate evolution chart.")
     
@@ -300,7 +296,7 @@ def show_evolution_analysis(temporal_data):
             fig_evolution_heatmap = plot_evolution_heatmap_chart(metadata, filtered_df)
             if fig_evolution_heatmap:
                 st.plotly_chart(fig_evolution_heatmap, use_container_width=True, key="evolution_heatmap_chart")
-                setup_download_form(fig_evolution_heatmap, default_filename="spatial_resolution_evolution", key_prefix="evolution_heatmap_tab3")
+
             else:
                 # Show summary statistics instead
                 st.markdown("#### Evolution Statistics")
@@ -340,7 +336,7 @@ def show_evolution_analysis(temporal_data):
     fig_combined = create_combined_evolution_chart(metadata, filtered_df, years_df)
     if fig_combined:
         st.plotly_chart(fig_combined, use_container_width=True, key="combined_evolution_chart")
-        setup_download_form(fig_combined, default_filename="lulc_initiative_growth_resolution", key_prefix="combined_evolution_tab3")
+
     else:
         st.info("Could not generate combined evolution chart.")
 

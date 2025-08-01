@@ -5,8 +5,7 @@ import plotly.express as px
 import sys
 from pathlib import Path
 
-# Import the new setup_download_form function
-from scripts.utilities.ui_elements import setup_download_form
+
 
 # Add scripts to path for imports
 current_dir = Path(__file__).parent.parent.parent
@@ -110,9 +109,6 @@ def run():
             height=max(400, len(df_filtered) * 30 + 100) # Adjusted height for better readability
         )
         st.plotly_chart(fig, use_container_width=True)
-        # Use the new download form setup
-        if fig:
-            setup_download_form(fig, default_filename="dual_bars_detailed", key_prefix="dual_bars")
 
     with tab2:  
         st.subheader("Multi-dimensional Performance Radar") # Added subheader
@@ -174,9 +170,7 @@ def run():
             )
             st.plotly_chart(fig_radar, use_container_width=True)
             
-            # Use the new download form setup
-            if fig_radar:
-                setup_download_form(fig_radar, default_filename="radar_chart_detailed", key_prefix="radar_chart")
+
                 
         elif len(available_radar_cols) == 2:
             st.warning("⚠️ Only 2 dimensions available. Radar charts work best with 3 or more dimensions. Adding a third dimension for better visualization.")
@@ -236,8 +230,7 @@ def run():
             )
             st.plotly_chart(fig_radar, use_container_width=True)
             
-            if fig_radar:
-                setup_download_form(fig_radar, default_filename="radar_chart_detailed", key_prefix="radar_chart")
+
         else:
             st.warning("⚠️ Insufficient data for radar chart. At least 2 dimensions needed. Select more initiatives or ensure data includes accuracy, resolution, and class information.")
 
@@ -273,8 +266,7 @@ def run():
             fig_heatmap.update_layout(height=max(400, len(df_filtered) * 30 + 100))
             st.plotly_chart(fig_heatmap, use_container_width=True)
             # Use the new download form setup
-            if fig_heatmap:
-                setup_download_form(fig_heatmap, default_filename="heatmap_detailed", key_prefix="heatmap_detailed")
+
         else:
             st.warning("Insufficient data for heatmap. Select more metrics or initiatives.") # Translated
 
@@ -296,8 +288,7 @@ def run():
                 fig_annual = plot_annual_coverage_multiselect(meta, df_filtered, selected_initiatives)
                 st.plotly_chart(fig_annual, use_container_width=True)
                 # Use the new download form setup
-                if fig_annual:
-                    setup_download_form(fig_annual, default_filename="annual_coverage_detailed", key_prefix="annual_coverage")
+
 
             except ImportError:
                 st.error("Annual coverage function not available.") # Translated
@@ -372,7 +363,7 @@ def run():
             )
             
             st.plotly_chart(fig_gaps, use_container_width=True)
-            setup_download_form(fig_gaps, default_filename="temporal_gaps", key_prefix="temporal_gaps")
+
             
             # Show detailed gap information
             with st.expander("📋 Detailed Gap Information"):
@@ -435,7 +426,7 @@ def run():
             )
             
             st.plotly_chart(fig_evolution, use_container_width=True)
-            setup_download_form(fig_evolution, default_filename="availability_evolution", key_prefix="availability_evolution")
+
         
         # === INITIATIVE AVAILABILITY HEATMAP ===
         st.markdown("### 🔥 Initiative Availability Heatmap (by Type and Year)")
@@ -491,7 +482,6 @@ def run():
             )
             
             st.plotly_chart(fig_heatmap_temporal, use_container_width=True)
-            setup_download_form(fig_heatmap_temporal, default_filename="heatmap_type_year", key_prefix="heatmap_type_year")
             
             # Summary statistics
             st.markdown("#### 📊 Temporal Coverage Summary")

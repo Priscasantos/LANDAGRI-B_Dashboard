@@ -192,7 +192,7 @@ with st.sidebar:
             "Comparative Analysis", # Option 2
             "Temporal Analysis", # Option 3
             "Detailed Analysis", # Option 4
-            "CONAB Analysis" # Option 5 - New CONAB tab
+            "Agricultural Analysis" # Option 5 - New CONAB tab
         ],
         icons=["globe-americas", "bar-chart-steps", "clock-history", "layers", "seedling"], # Icons for each option
         menu_icon="satellite", # Icon for the menu title
@@ -273,9 +273,9 @@ elif selected == "Detailed Analysis":
     from dashboard import detailed 
     detailed.run()
 
-elif selected == "CONAB Analysis":
+elif selected == "Agricultural Analysis":
     st.markdown("---") # Visual separator
-    st.markdown("### 🌾 CONAB Analysis") # Page title
-    
+    st.markdown("### 🌾 Agricultural Analysis") # Page title
+
     from dashboard import conab
     conab.run()

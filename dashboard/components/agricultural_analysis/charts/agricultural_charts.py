@@ -17,15 +17,7 @@ from typing import Dict, List, Tuple, Optional
 from pathlib import Path
 
 from dashboard.components.shared.chart_core import apply_standard_layout
-from scripts.utilities.modern_themes import apply_modern_theme
-from scripts.utilities.modern_chart_theme import (
-    apply_modern_styling,
-    get_modern_layout_config,
-    get_modern_color_palette,
-    get_modern_bar_config,
-    get_modern_line_config,
-    get_modern_scatter_config
-)
+# Note: modern_themes modules have been consolidated into chart_core
 
 
 def load_conab_data() -> Tuple[Dict, Dict]:
@@ -160,7 +152,7 @@ def plot_crop_calendar_heatmap(calendar_data: Dict) -> go.Figure:
     
     
     # Apply modern styling
-    fig = apply_modern_styling(fig, **get_modern_layout_config())
+    apply_standard_layout(fig, "", "", "")
     
     fig.update_layout(
         title={
@@ -246,7 +238,7 @@ def plot_regional_crop_coverage(detailed_data: Dict) -> go.Figure:
     
     
     # Apply modern styling
-    fig = apply_modern_styling(fig, **get_modern_bar_config())
+    apply_standard_layout(fig, "", "", "")
     
     fig.update_layout(
         title={
@@ -261,7 +253,7 @@ def plot_regional_crop_coverage(detailed_data: Dict) -> go.Figure:
         xaxis_tickangle=-45
     )
     
-    apply_modern_theme(fig, "Regional Crop Coverage", chart_type="bar")
+    # Modern theme applied via chart_core
     return fig
 
 
@@ -342,7 +334,7 @@ def plot_temporal_crop_trends(detailed_data: Dict) -> go.Figure:
     
     
     # Apply modern styling
-    fig = apply_modern_styling(fig, **get_modern_line_config())
+    apply_standard_layout(fig, "", "", "")
     
     fig.update_layout(
         title={
@@ -439,7 +431,7 @@ def plot_crop_diversity_by_region(detailed_data: Dict) -> go.Figure:
     
     
     # Apply modern styling
-    fig = apply_modern_styling(fig, **get_modern_layout_config())
+    apply_standard_layout(fig, "", "", "")
     
     fig.update_layout(
         title={
@@ -561,7 +553,7 @@ def plot_agricultural_performance_metrics(detailed_data: Dict) -> go.Figure:
     
     
     # Apply modern styling
-    fig = apply_modern_styling(fig, **get_modern_layout_config())
+    apply_standard_layout(fig, "", "", "")
     
     fig.update_layout(
         title={

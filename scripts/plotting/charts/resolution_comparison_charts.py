@@ -2,12 +2,17 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 
-# Attempt to import common chart utilities, handle if not found for robustness
+# Import chart utilities
 try:
-    from scripts.plotting.chart_core import apply_standard_layout, smart_cache_data
+    from scripts.plotting.chart_core import (
+        apply_standard_layout, 
+        get_font_config,
+        add_no_data_annotation,
+        create_empty_figure
+    )
+    from scripts.plotting.universal_cache import smart_cache_data
 except ImportError:
     # Define dummy decorators/functions if chart_core is not available
-    # This allows the file to be imported and functions defined, even if core utilities are missing.
     def smart_cache_data(ttl=None):
         def decorator(func):
             def wrapper(*args, **kwargs):
@@ -17,7 +22,18 @@ except ImportError:
 
     def apply_standard_layout(fig, title="", xaxis_title="", yaxis_title=""):
         fig.update_layout(title_text=title, xaxis_title_text=xaxis_title, yaxis_title_text=yaxis_title)
-        # Add any other minimal layout defaults here if needed
+        return fig
+    
+    def get_font_config(element_type):
+        return {'size': 14, 'color': 'gray'}
+    
+    def add_no_data_annotation(fig, message):
+        fig.add_annotation(text=message, xref="paper", yref="paper", showarrow=False, font=get_font_config('annotation'))
+    
+    def create_empty_figure(title, message):
+        fig = go.Figure()
+        apply_standard_layout(fig, title)
+        add_no_data_annotation(fig, message)
         return fig
 
 @smart_cache_data(ttl=300)
@@ -31,17 +47,11 @@ def plot_resolution_vs_launch_year(filtered_df: pd.DataFrame) -> go.Figure:
     Highlight CGLS (PROBA-V, 100 m) for contrast.
     """
     if filtered_df.empty:
-        fig = go.Figure()
-        apply_standard_layout(fig, "Resolution vs. Launch Year", "Start Year", "Resolution (m)")
-        fig.add_annotation(text="No data available for the selected filters.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
-        return fig
+        return create_empty_figure("Resolution vs. Launch Year", "No data available for the selected filters.")
 
     # Ensure required columns are present and numeric where needed
     if 'Start_Year' not in filtered_df.columns or 'Resolution' not in filtered_df.columns:
-        fig = go.Figure()
-        apply_standard_layout(fig, "Resolution vs. Launch Year", "Start Year", "Resolution (m)")
-        fig.add_annotation(text="Missing 'Start_Year' or 'Resolution' data.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
-        return fig
+        return create_empty_figure("Resolution vs. Launch Year", "Missing 'Start_Year' or 'Resolution' data.")
 
     plot_df = filtered_df.copy()
     plot_df['Resolution'] = pd.to_numeric(plot_df['Resolution'], errors='coerce')
@@ -51,7 +61,7 @@ def plot_resolution_vs_launch_year(filtered_df: pd.DataFrame) -> go.Figure:
     if plot_df.empty:
         fig = go.Figure()
         apply_standard_layout(fig, "Resolution vs. Launch Year", "Start Year", "Resolution (m)")
-        fig.add_annotation(text="No valid numeric data for Resolution or Start Year.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
+        fig.add_annotation(text="No valid numeric data for Resolution or Start Year.", xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation"))
         return fig
 
     # Determine Display_Name (Acronym or fallback)
@@ -135,13 +145,13 @@ def plot_initiatives_by_resolution_category(filtered_df: pd.DataFrame) -> go.Fig
     if filtered_df.empty:
         fig = go.Figure()
         apply_standard_layout(fig, "Initiatives by Resolution Category", "Resolution Category", "Number of Initiatives")
-        fig.add_annotation(text="No data available for the selected filters.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
+        fig.add_annotation(text="No data available for the selected filters.", xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation"))
         return fig
 
     if 'Resolution' not in filtered_df.columns or 'Type' not in filtered_df.columns:
         fig = go.Figure()
         apply_standard_layout(fig, "Initiatives by Resolution Category", "Resolution Category", "Number of Initiatives")
-        fig.add_annotation(text="Missing 'Resolution' or 'Type' data.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
+        fig.add_annotation(text="Missing 'Resolution' or 'Type' data.", xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation"))
         return fig
 
     plot_df = filtered_df.copy()
@@ -151,7 +161,7 @@ def plot_initiatives_by_resolution_category(filtered_df: pd.DataFrame) -> go.Fig
     if plot_df.empty:
         fig = go.Figure()
         apply_standard_layout(fig, "Initiatives by Resolution Category", "Resolution Category", "Number of Initiatives")
-        fig.add_annotation(text="No valid numeric data for Resolution.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
+        fig.add_annotation(text="No valid numeric data for Resolution.", xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation"))
         return fig
 
     # Define resolution categories and labels
@@ -168,7 +178,7 @@ def plot_initiatives_by_resolution_category(filtered_df: pd.DataFrame) -> go.Fig
     if category_counts.empty:
         fig = go.Figure()
         apply_standard_layout(fig, "Initiatives by Resolution Category", "Resolution Category", "Number of Initiatives")
-        fig.add_annotation(text="No initiatives to categorize.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
+        fig.add_annotation(text="No initiatives to categorize.", xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation"))
         return fig
 
     fig = px.bar(
@@ -209,13 +219,13 @@ def plot_resolution_coverage_heatmap(filtered_df: pd.DataFrame) -> go.Figure:
     if filtered_df.empty:
         fig = go.Figure()
         apply_standard_layout(fig, "Resolution vs. Coverage Type Heatmap", "Coverage Type (Initiative Type)", "Resolution Category")
-        fig.add_annotation(text="No data available for the selected filters.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
+        fig.add_annotation(text="No data available for the selected filters.", xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation"))
         return fig
 
     if 'Resolution' not in filtered_df.columns or 'Type' not in filtered_df.columns:
         fig = go.Figure()
         apply_standard_layout(fig, "Resolution vs. Coverage Type Heatmap", "Coverage Type (Initiative Type)", "Resolution Category")
-        fig.add_annotation(text="Missing 'Resolution' or 'Type' data.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
+        fig.add_annotation(text="Missing 'Resolution' or 'Type' data.", xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation"))
         return fig
 
     plot_df = filtered_df.copy()
@@ -225,7 +235,7 @@ def plot_resolution_coverage_heatmap(filtered_df: pd.DataFrame) -> go.Figure:
     if plot_df.empty:
         fig = go.Figure()
         apply_standard_layout(fig, "Resolution vs. Coverage Type Heatmap", "Coverage Type (Initiative Type)", "Resolution Category")
-        fig.add_annotation(text="No valid numeric data for Resolution.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
+        fig.add_annotation(text="No valid numeric data for Resolution.", xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation"))
         return fig
 
     # Define resolution categories and labels (consistent with the bar chart)
@@ -249,7 +259,7 @@ def plot_resolution_coverage_heatmap(filtered_df: pd.DataFrame) -> go.Figure:
     if heatmap_data.empty:
         fig = go.Figure()
         apply_standard_layout(fig, "Resolution vs. Coverage Type Heatmap", "Coverage Type (Initiative Type)", "Resolution Category")
-        fig.add_annotation(text="No data to display in heatmap.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
+        fig.add_annotation(text="No data to display in heatmap.", xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation"))
         return fig
 
     fig = go.Figure(data=go.Heatmap(
@@ -292,19 +302,19 @@ def plot_resolution_by_sensor_family(filtered_df: pd.DataFrame, sensors_meta: di
     if filtered_df.empty:
         fig = go.Figure()
         apply_standard_layout(fig, "Resolution by Sensor Family", "Sensor Family", "Spatial Resolution (m)")
-        fig.add_annotation(text="No initiative data available.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
+        fig.add_annotation(text="No initiative data available.", xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation"))
         return fig
 
     if not sensors_meta:
         fig = go.Figure()
         apply_standard_layout(fig, "Resolution by Sensor Family", "Sensor Family", "Spatial Resolution (m)")
-        fig.add_annotation(text="Sensor metadata not available.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
+        fig.add_annotation(text="Sensor metadata not available.", xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation"))
         return fig
 
     if 'Resolution' not in filtered_df.columns or 'Sensors_Referenced' not in filtered_df.columns:
         fig = go.Figure()
         apply_standard_layout(fig, "Resolution by Sensor Family", "Sensor Family", "Spatial Resolution (m)")
-        fig.add_annotation(text="Missing 'Resolution' or 'Sensors_Referenced' data in initiatives.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
+        fig.add_annotation(text="Missing 'Resolution' or 'Sensors_Referenced' data in initiatives.", xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation"))
         return fig
 
     plot_data = []
@@ -381,7 +391,7 @@ def plot_resolution_by_sensor_family(filtered_df: pd.DataFrame, sensors_meta: di
     if not plot_data:
         fig = go.Figure()
         apply_standard_layout(fig, "Resolution by Sensor Family", "Sensor Family", "Spatial Resolution (m)")
-        fig.add_annotation(text="No data to display after processing sensors.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
+        fig.add_annotation(text="No data to display after processing sensors.", xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation"))
         return fig
 
     plot_df_final = pd.DataFrame(plot_data)
@@ -422,19 +432,19 @@ def plot_resolution_slopegraph(filtered_df: pd.DataFrame, sensors_meta: dict) ->
     if filtered_df.empty:
         fig = go.Figure()
         apply_standard_layout(fig, "Resolution Improvement Over Time", "Year", "Spatial Resolution (m)")
-        fig.add_annotation(text="No initiative data available.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
+        fig.add_annotation(text="No initiative data available.", xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation"))
         return fig
 
     if not sensors_meta:
         fig = go.Figure()
         apply_standard_layout(fig, "Resolution Improvement Over Time", "Year", "Spatial Resolution (m)")
-        fig.add_annotation(text="Sensor metadata not available.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
+        fig.add_annotation(text="Sensor metadata not available.", xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation"))
         return fig
 
     if 'Sensors_Referenced' not in filtered_df.columns:
         fig = go.Figure()
         apply_standard_layout(fig, "Resolution Improvement Over Time", "Year", "Spatial Resolution (m)")
-        fig.add_annotation(text="Missing 'Sensors_Referenced' data.", xref="paper", yref="paper", showarrow=False, font=dict(size=14))
+        fig.add_annotation(text="Missing 'Sensors_Referenced' data.", xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation"))
         return fig
 
     slope_graph_points = []
@@ -499,7 +509,7 @@ def plot_resolution_slopegraph(filtered_df: pd.DataFrame, sensors_meta: dict) ->
         fig = go.Figure()
         apply_standard_layout(fig, "Resolution Improvement Over Time", "Year", "Spatial Resolution (m)")
         fig.add_annotation(text="No initiatives found with documented resolution changes over time through sensor updates.", 
-                           xref="paper", yref="paper", showarrow=False, font=dict(size=12), align="center", width=500)
+                           xref="paper", yref="paper", showarrow=False, font=get_font_config("annotation_small"), align="center", width=500)
         return fig
 
     plot_df_final = pd.DataFrame(slope_graph_points)

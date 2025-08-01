@@ -11,12 +11,17 @@ Date: 2024
 """
 
 import pandas as pd
-import plotly.express as px # Ensure px is imported
-import plotly.graph_objects as go # Ensure go is imported
+import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 from typing import Dict, Any, Optional
-from scripts.utilities.config import get_initiative_color_map
-from scripts.plotting.chart_core import add_display_names_to_df, apply_standard_layout
+from scripts.plotting.chart_core import (
+    add_display_names_to_df, 
+    apply_standard_layout,
+    get_initiative_color_map,
+    get_font_config,
+    get_resolution_colors
+)
 
 # Renamed from plot_timeline to plot_timeline_chart
 def plot_timeline_chart(metadata: Dict[str, Any], filtered_df: pd.DataFrame, 
@@ -199,7 +204,7 @@ def plot_timeline_chart(metadata: Dict[str, Any], filtered_df: pd.DataFrame,
             type='category', 
             categoryorder='array', 
             categoryarray=display_names_unicos_sorted, 
-            tickfont=dict(size=11),
+            tickfont=get_font_config('tick_small'),
             showgrid=False,
             ticks="outside",
             ticklen=8,
@@ -216,7 +221,7 @@ def plot_timeline_chart(metadata: Dict[str, Any], filtered_df: pd.DataFrame,
             ticktext=[str(year) for year in range(chart_min_year, chart_max_year + 2)],
             tickformat='d',
             tickangle=-45,
-            tickfont=dict(size=12),
+            tickfont=get_font_config('tick'),
             ticks="outside",
             ticklen=8,
             tickwidth=tick_width_standard,
@@ -367,7 +372,7 @@ def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
             text="No temporal data available for evolution analysis",
             xref="paper", yref="paper",
             x=0.5, y=0.5, showarrow=False,
-            font=dict(size=16, color="gray")
+            font=get_font_config('annotation')
         )
         return fig
     
@@ -384,7 +389,7 @@ def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:
             text="No year data available for evolution analysis",
             xref="paper", yref="paper",
             x=0.5, y=0.5, showarrow=False,
-            font=dict(size=16, color="gray")
+            font=get_font_config('annotation')
         )
         return fig
     
@@ -500,7 +505,7 @@ def plot_evolution_heatmap_chart(metadata: Dict[str, Any], filtered_df: pd.DataF
             text="No data available for resolution evolution analysis",
             xref="paper", yref="paper",
             x=0.5, y=0.5, showarrow=False,
-            font=dict(size=16, color="gray")
+            font=get_font_config('annotation')
         )
         return fig
     
@@ -555,7 +560,7 @@ def plot_evolution_heatmap_chart(metadata: Dict[str, Any], filtered_df: pd.DataF
             text="No resolution data available for the selected initiatives",
             xref="paper", yref="paper",
             x=0.5, y=0.5, showarrow=False,
-            font=dict(size=16, color="gray")
+            font=get_font_config('annotation')
         )
         return fig
     
@@ -572,13 +577,9 @@ def plot_evolution_heatmap_chart(metadata: Dict[str, Any], filtered_df: pd.DataF
     all_years = list(range(1985, 2025))
     pivot_df = pivot_df.reindex(all_years, fill_value=0)
     
-    # Define category order and colors
+    # Define category order and colors using centralized theme
     category_order = ["High (<30m)", "Medium (30-99m)", "Coarse (≥100m)"]
-    colors = {
-        "High (<30m)": "#006d4e",      # Dark teal/green for high resolution
-        "Medium (30-99m)": "#f39800",   # Orange for medium resolution  
-        "Coarse (≥100m)": "#c62d42"    # Red for coarse resolution
-    }
+    colors = get_resolution_colors()
     
     # Ensure all categories exist in the DataFrame
     for category in category_order:
@@ -647,7 +648,7 @@ def plot_evolution_heatmap_chart(metadata: Dict[str, Any], filtered_df: pd.DataF
             tickformat='d',
             dtick=5,  # Show every 5 years
             tickangle=0,
-            tickfont=dict(size=12)
+            tickfont=get_font_config('tick')
         ),
         yaxis=dict(
             showgrid=True,
@@ -657,7 +658,7 @@ def plot_evolution_heatmap_chart(metadata: Dict[str, Any], filtered_df: pd.DataF
             zeroline=True,
             zerolinecolor='rgba(128,128,128,0.4)',
             zerolinewidth=1,
-            title_font=dict(size=14)
+            title_font=get_font_config('axis_title')
         ),
         hovermode='x unified'
     )
@@ -668,7 +669,7 @@ def plot_evolution_heatmap_chart(metadata: Dict[str, Any], filtered_df: pd.DataF
         xref="paper", yref="paper",
         x=0.5, y=-0.12,
         showarrow=False,
-        font=dict(size=12, color="gray"),
+        font=get_font_config('annotation_small'),
         align="center"
     )
     

@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 import sys
 from pathlib import Path
 import json # Ensure json is imported
-from scripts.utilities.ui_elements import setup_download_form 
+
 
 # Add scripts to path if necessary
 # Correct current_dir to point to the project root (dashboard-iniciativas)
@@ -981,12 +981,6 @@ def run():
             )
             st.plotly_chart(fig_density_line, use_container_width=True)
             
-            # Add download button using the new UI
-            # Ensure all old save logic is removed and only setup_download_form is used.
-            if fig_density_line: # Check if the figure exists
-                setup_download_form(fig_density_line, 
-                                    default_filename="temporal_density_overview", 
-                                    key_prefix="density_overview_final")
             
               # Enhanced temporal metrics - Modern cards
             st.markdown("#### 📈 Temporal Metrics")

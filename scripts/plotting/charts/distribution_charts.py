@@ -14,7 +14,11 @@ Date: 2024
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from scripts.plotting.chart_core import get_display_name, apply_standard_layout
+from scripts.plotting.chart_core import (
+    get_display_name, 
+    apply_standard_layout, 
+    get_scope_colors
+)
 from scripts.plotting.universal_cache import smart_cache_data
 
 
@@ -42,7 +46,7 @@ def plot_distribuicao_classes(filtered_df):
     
     # Determinar cor baseada na coluna Type se existir
     color_column = 'Type' if 'Type' in valid_data.columns else None
-    color_map = {'Global': '#ff6b6b', 'Nacional': '#4dabf7', 'Regional': '#51cf66'} if color_column else None
+    color_map = get_scope_colors() if color_column else None
     
     fig = px.histogram(
         valid_data,
@@ -74,7 +78,7 @@ def plot_classes_por_iniciativa(filtered_df):
         y='Display_Name', # Use the new Display_Name column
         color='Type',
         orientation='h',
-        color_discrete_map={'Global': '#ff6b6b', 'Nacional': '#4dabf7', 'Regional': '#51cf66'}
+        color_discrete_map=get_scope_colors()
     )
     # Apply standardized layout
     apply_standard_layout(fig, "Number of Classes per Initiative", "Classes", "Initiative")
