@@ -41,3 +41,4 @@ system_report.json
 # Large data files (>100MB)
 data/brazil-vector/
 # Documentation is tracked - docs/ folder should always be included
+dashboard/components/agricultural_analysis/charts/agricultural_charts.py

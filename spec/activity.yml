@@ -1,0 +1,20 @@
+activity:
+  - date: 2025-07-30T15:30:00Z
+    description: Fixed TypeError in plot_evolution_heatmap_chart function call
+    outcome: Function signature mismatch resolved - changed from 2 parameters to 1 parameter
+    details: |
+      - Error: plot_evolution_heatmap_chart() takes 1 positional argument but 2 were given
+      - Location: dashboard/components/temporal/evolution_analysis_component.py line 54
+      - Problem: Function was being called with (metadata, filtered_df) but only expects (temporal_data)
+      - Solution: Changed function call from plot_evolution_heatmap_chart(metadata, filtered_df) to plot_evolution_heatmap_chart(filtered_df)
+      - Root cause: Function signature mismatch during previous reorganization
+    edge_cases:
+      - Empty DataFrame handling (already implemented in function)
+      - Missing required columns (Tipo, Anos_Lista) validation
+    logs: All import tests and function call validation passed
+    issues: none
+    next_steps: Function now works correctly with single DataFrame parameter
+    validation:
+      - Function signature confirmed: plot_evolution_heatmap_chart(temporal_data: pd.DataFrame)
+      - Import tests passed for all related modules
+      - Mock function call test successful

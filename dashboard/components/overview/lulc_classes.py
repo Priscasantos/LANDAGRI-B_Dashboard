@@ -27,6 +27,8 @@ def render_lulc_classes_section(class_legend_str: str) -> None:
         class_legend_list = []
 
     if not class_legend_list:
+        # Render informative message when no classes are available
+        st.info("💡 No classification information available for this initiative.")
         return
 
     # CSS customizado para as bolhas coloridas
@@ -154,23 +156,21 @@ def render_lulc_classes_section(class_legend_str: str) -> None:
         "#3b82f6",  # Permanent Water Bodies - Azul
     ]
 
-    # Cabeçalho da seção
+    # Section header (translated to English)
     st.markdown(
         f"""
     <div class="lulc-classes-container">
         <div class="lulc-classes-title">
-            🏷️ Detalhes da Classificação
+            🏷️ Classification Details
             <span class="total-classes-badge">
-                📊 Total de Classes: {len(class_legend_list)}
+                📊 Total Classes: {len(class_legend_list)}
             </span>
         </div>
-
         <div style="margin-bottom: 16px;">
-            <strong style="color: #475569; font-size: 16px;">📋 Classes de Cobertura do Solo (Legenda)</strong>
+            <strong style="color: #475569; font-size: 16px;">📋 Land Cover Classes (Legend)</strong>
         </div>
-
         <div class="lulc-classes-grid">
-    """,
+        """,
         unsafe_allow_html=True,
     )
 
