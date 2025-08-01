@@ -6,6 +6,13 @@
       "description": "Desenvolvimento e refinamento do módulo de gráficos temporais para análise de iniciativas LULC. Este projeto inclui implementação de funções placeholder, otimização de performance, e melhoria da visualização de dados temporais incluindo timeline, heatmaps, gaps analysis e evolution charts.",
       "createdAt": "2025-06-28T17:26:09.735Z",
       "updatedAt": "2025-06-28T17:26:09.735Z"
+    },
+    {
+      "id": "c10f773d-0e60-4acc-9310-53e09b675161",
+      "name": "Initiative Analysis Charts Refactoring",
+      "description": "Refatoração da estrutura de gráficos da análise de iniciativas para eliminar duplicações e criar componentes modulares organizados por funcionalidade (temporal, comparison, detailed)",
+      "createdAt": "2025-08-01T17:21:58.559Z",
+      "updatedAt": "2025-08-01T17:21:58.559Z"
     }
   ],
   "tasks": [
@@ -218,6 +225,38 @@
       ],
       "estimatedHours": 2.5,
       "level": 1
+    },
+    {
+      "id": "7e1bc6ff-e43c-43a0-a79b-5ab68b51e76b",
+      "name": "Mapear gráficos existentes e duplicações",
+      "details": "Analisar arquivos comparison_charts.py, detailed_charts.py, temporal_charts.py para identificar gráficos duplicados e listar todos os componentes que precisam ser migrados",
+      "projectId": "c10f773d-0e60-4acc-9310-53e09b675161",
+      "completed": false,
+      "createdAt": "2025-08-01T17:22:04.753Z",
+      "updatedAt": "2025-08-01T17:25:27.710Z",
+      "dependsOn": [],
+      "priority": 10,
+      "complexity": 3,
+      "status": "done",
+      "tags": [],
+      "level": 0
+    },
+    {
+      "id": "2a040596-fe5c-4e80-a9f7-964784e1e4af",
+      "name": "Criar nova estrutura de diretórios",
+      "details": "Criar estrutura de diretórios dashboard/components/initiative_analysis/charts/temporal/, comparison/, detailed/ e arquivos __init__.py necessários",
+      "projectId": "c10f773d-0e60-4acc-9310-53e09b675161",
+      "completed": false,
+      "createdAt": "2025-08-01T17:22:09.742Z",
+      "updatedAt": "2025-08-01T17:25:33.726Z",
+      "dependsOn": [
+        "7e1bc6ff-e43c-43a0-a79b-5ab68b51e76b"
+      ],
+      "priority": 9,
+      "complexity": 4,
+      "status": "done",
+      "tags": [],
+      "level": 0
     }
   ],
   "subtasks": [],

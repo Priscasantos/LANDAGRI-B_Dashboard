@@ -180,10 +180,10 @@ def render_lulc_classes_section(class_legend_str: str) -> None:
 
         if isinstance(class_item, dict):
             class_name = class_item.get("class_name", f"Classe {i + 1}")
-            class_desc = class_item.get("description", "Sem descrição disponível")
+            class_desc = class_item.get("description", "No description available")
         else:
             class_name = str(class_item)
-            class_desc = "Sem descrição disponível"
+            class_desc = "No description available"
 
         st.markdown(
             f"""

@@ -119,14 +119,14 @@ def _render_selected_initiative(
     # Two-column layout
     left_col, right_col = st.columns([1, 1])
 
-    with left_col:
+    with right_col:
         st.markdown("### 📊 Key Metrics")
         _render_key_metrics_cards(data)
 
         st.markdown("### 🔧 Technical Details")
         _render_technical_details(data, metadata)
 
-    with right_col:
+    with left_col:
         st.markdown("### 🛰️ Sensor Information")
         _render_sensor_details(data, sensors_meta)
 
@@ -201,7 +201,7 @@ def _render_key_metrics_cards(data: pd.Series) -> None:
             <div class='metric-icon'>🎯</div>
             <div class='metric-label'>Accuracy</div>
             <div class='metric-value'>{}</div>
-            <div class='metric-help'>Overall accuracy (%)</div>
+            <div class='metric-help'>Overall accuracy</div>
         </div>
         """.format(
                 f"{accuracy:.1f}%" if pd.notna(accuracy) else "-"
