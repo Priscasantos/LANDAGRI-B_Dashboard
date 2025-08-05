@@ -2,7 +2,7 @@
 Boxplot Component - Detailed Analysis
 ====================================
 
-Componente para renderizar a aba de boxplot na análise detalhada.
+Component for rendering boxplot tab in detailed analysis.
 
 Author: Dashboard Iniciativas LULC
 Date: 2025-08-01
@@ -17,46 +17,39 @@ from dashboard.components.shared.chart_core import apply_standard_layout
 
 def render_boxplot_tab(filtered_df: pd.DataFrame) -> None:
     """
-    Renderizar aba de boxplot para análise detalhada.
+    Render boxplot tab for detailed analysis.
     Args:
-        filtered_df: DataFrame filtrado com dados das iniciativas
+        filtered_df: Filtered DataFrame with initiatives data
     """
-    st.markdown("#### 📦 Boxplot Detalhado das Iniciativas")
+    st.markdown("#### 📦 Detailed Initiative Boxplot")
     if filtered_df.empty:
-        st.warning("⚠️ Nenhum dado disponível para boxplot.")
+        st.warning("⚠️ No data available for boxplot.")
         return
     fig = create_boxplot_chart(filtered_df)
     if fig:
-        st.plotly_chart(fig, use_container_width=True)
-        st.download_button(
-            label="📥 Download Boxplot",
-            data=fig.to_html(),
-            file_name="detailed_boxplot.html",
-            mime="text/html"
-        )
+        st.plotly_chart(fig, use_container_width=True, key="detailed_boxplot_chart")
     else:
-        st.error("❌ Erro ao gerar boxplot.")
+        st.error("❌ Error generating boxplot.")
 
 @smart_cache_data(ttl=300)
 def create_boxplot_chart(filtered_df: pd.DataFrame) -> px.box:
     """
-    Criar boxplot detalhado para múltiplas iniciativas.
+    Create detailed boxplot for multiple initiatives.
     Args:
-        filtered_df: DataFrame filtrado
+        filtered_df: Filtered DataFrame
     Returns:
-        Figura Plotly Express com boxplot
+        Plotly Express figure with boxplot
     """
     if filtered_df.empty or "Display_Name" not in filtered_df.columns:
         return px.box()
-    # Exemplo: boxplot de acurácia por iniciativa
+    # Example: accuracy boxplot by initiative
     if "Accuracy (%)" in filtered_df.columns:
         fig = px.box(
             filtered_df,
             x="Display_Name",
             y="Accuracy (%)",
             color="Display_Name",
-            title="Distribuição Detalhada da Acurácia por Iniciativa",
         )
-        apply_standard_layout(fig, xaxis_title="Iniciativa", yaxis_title="Acurácia (%)")
+        apply_standard_layout(fig, xaxis_title="Initiative", yaxis_title="Accuracy (%)")
         return fig
     return px.box()

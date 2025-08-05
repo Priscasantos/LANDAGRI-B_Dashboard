@@ -27,13 +27,7 @@ def render_boxplot_tab(filtered_df: pd.DataFrame) -> None:
         return
     fig = create_boxplot_chart(filtered_df)
     if fig:
-        st.plotly_chart(fig, use_container_width=True)
-        st.download_button(
-            label="📥 Download Boxplot",
-            data=fig.to_html(),
-            file_name="comparison_boxplot.html",
-            mime="text/html"
-        )
+        st.plotly_chart(fig, use_container_width=True, key="comparison_boxplot_chart")
     else:
         st.error("❌ Erro ao gerar boxplot.")
 

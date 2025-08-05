@@ -57,7 +57,7 @@ def render_methodology_distribution(filtered_df: pd.DataFrame) -> None:
     
     fig_methodology = plot_methodology_comparison(filtered_df)
     if fig_methodology:
-        st.plotly_chart(fig_methodology, use_container_width=True)
+        st.plotly_chart(fig_methodology, use_container_width=True, key="methodology_distribution_chart")
     else:
         st.info("ℹ️ Dados insuficientes para análise de metodologias.")
 
@@ -68,7 +68,7 @@ def render_resolution_distribution(filtered_df: pd.DataFrame) -> None:
     
     fig_resolution = plot_spatial_resolution_comparison(filtered_df)
     if fig_resolution:
-        st.plotly_chart(fig_resolution, use_container_width=True)
+        st.plotly_chart(fig_resolution, use_container_width=True, key="resolution_distribution_chart")
     else:
         st.info("ℹ️ Dados insuficientes para análise de resolução.")
 
@@ -79,7 +79,7 @@ def render_temporal_coverage_distribution(filtered_df: pd.DataFrame) -> None:
     
     fig_temporal = plot_temporal_coverage_comparison(filtered_df)
     if fig_temporal:
-        st.plotly_chart(fig_temporal, use_container_width=True)
+        st.plotly_chart(fig_temporal, use_container_width=True, key="temporal_coverage_distribution_chart")
     else:
         st.info("ℹ️ Dados insuficientes para análise temporal.")
 

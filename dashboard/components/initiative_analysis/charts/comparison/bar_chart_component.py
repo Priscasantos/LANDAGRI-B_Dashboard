@@ -27,13 +27,7 @@ def render_bar_chart_tab(filtered_df: pd.DataFrame) -> None:
         return
     fig = create_bar_chart(filtered_df)
     if fig:
-        st.plotly_chart(fig, use_container_width=True)
-        st.download_button(
-            label="📥 Download Bar Chart",
-            data=fig.to_html(),
-            file_name="comparison_bar_chart.html",
-            mime="text/html"
-        )
+        st.plotly_chart(fig, use_container_width=True, key="comparison_bar_chart")
     else:
         st.error("❌ Erro ao gerar bar chart.")
 

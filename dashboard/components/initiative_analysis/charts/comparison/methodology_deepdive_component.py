@@ -82,7 +82,7 @@ def render_methodology_distribution(df: pd.DataFrame, methodology_col: str) -> N
             font=dict(family="Inter", size=12),
             title_font=dict(size=16, family="Inter", color="#1f2937"),
         )
-    st.plotly_chart(fig_pie, use_container_width=True, key=f"methodology_pie_{methodology_col}")
+    st.plotly_chart(fig_pie, use_container_width=True, key="methodology_pie_chart")
     
     with col2:
         # Bar chart
@@ -100,7 +100,7 @@ def render_methodology_distribution(df: pd.DataFrame, methodology_col: str) -> N
             title_font=dict(size=16, family="Inter", color="#1f2937"),
             yaxis=dict(categoryorder="total ascending")
         )
-        st.plotly_chart(fig_bar, use_container_width=True)
+        st.plotly_chart(fig_bar, use_container_width=True, key="methodology_bar_chart")
     
     # Summary metrics
     st.markdown("##### 📋 Summary Statistics")
@@ -144,7 +144,7 @@ def render_technique_comparison(df: pd.DataFrame, methodology_col: str) -> None:
         font=dict(family="Inter", size=12),
         title_font=dict(size=16, family="Inter", color="#1f2937")
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="methodology_accuracy_heatmap")
 
 
 def render_methodology_trends(df: pd.DataFrame, methodology_col: str) -> None:
@@ -177,7 +177,7 @@ def render_methodology_trends(df: pd.DataFrame, methodology_col: str) -> None:
         xaxis_title="<b>Year</b>",
         yaxis_title="<b>Number of Initiatives</b>"
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="methodology_trends_chart")
 
 
 def categorize_methodologies(methodologies: list[str]) -> dict[str, int]:

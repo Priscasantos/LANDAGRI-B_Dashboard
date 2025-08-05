@@ -27,13 +27,7 @@ def render_scatter_chart_tab(filtered_df: pd.DataFrame) -> None:
         return
     fig = create_scatter_chart(filtered_df)
     if fig:
-        st.plotly_chart(fig, use_container_width=True)
-        st.download_button(
-            label="📥 Download Scatter Chart",
-            data=fig.to_html(),
-            file_name="comparison_scatter_chart.html",
-            mime="text/html"
-        )
+        st.plotly_chart(fig, use_container_width=True, key="comparison_scatter_chart")
     else:
         st.error("❌ Erro ao gerar scatter chart.")
 

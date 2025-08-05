@@ -20,25 +20,18 @@ from dashboard.components.shared.chart_core import (
 
 def render_heatmap_tab(filtered_df: pd.DataFrame) -> None:
     """
-    Renderizar aba de heatmap para análise detalhada.
+    Render heatmap tab for detailed analysis.
     Args:
-        filtered_df: DataFrame filtrado com dados das iniciativas
+        filtered_df: Filtered DataFrame with initiative data
     """
-    st.markdown("#### 🔥 Heatmap Detalhado das Iniciativas")
     if filtered_df.empty:
-        st.warning("⚠️ Nenhum dado disponível para heatmap.")
+        st.warning("⚠️ No data available for heatmap.")
         return
     fig = create_heatmap_chart(filtered_df)
     if fig:
-        st.plotly_chart(fig, use_container_width=True)
-        st.download_button(
-            label="📥 Download Heatmap",
-            data=fig.to_html(),
-            file_name="detailed_heatmap.html",
-            mime="text/html"
-        )
+        st.plotly_chart(fig, use_container_width=True, key="detailed_heatmap_chart")
     else:
-        st.error("❌ Erro ao gerar heatmap.")
+        st.error("❌ Error generating heatmap.")
 
 @smart_cache_data(ttl=300)
 def create_heatmap_chart(filtered_df: pd.DataFrame) -> go.Figure:

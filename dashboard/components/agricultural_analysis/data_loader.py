@@ -24,12 +24,13 @@ def load_conab_detailed_data() -> Dict[str, Any]:
         Dict com dados da iniciativa CONAB ou dict vazio se erro
     """
     try:
-        # Determinar caminho do arquivo
-        current_dir = Path(__file__).resolve().parent.parent.parent.parent.parent
+        # Determinar caminho do arquivo (corrigido: apenas 4 levels up)
+        current_dir = Path(__file__).resolve().parent.parent.parent.parent
         conab_file = current_dir / "data" / "json" / "conab_detailed_initiative.jsonc"
         
         if not conab_file.exists():
             st.warning(f"⚠️ Arquivo CONAB não encontrado: {conab_file}")
+            st.info(f"📂 Diretório base: {current_dir}")
             return {}
         
         # Carregar e processar arquivo JSONC
@@ -65,8 +66,8 @@ def load_conab_crop_calendar() -> Dict[str, Any]:
         Dict com dados do calendário ou dict vazio se erro
     """
     try:
-        # Determinar caminho do arquivo
-        current_dir = Path(__file__).resolve().parent.parent.parent.parent.parent
+        # Determinar caminho do arquivo (corrigido: apenas 4 levels up)
+        current_dir = Path(__file__).resolve().parent.parent.parent.parent
         calendar_files = [
             current_dir / "data" / "json" / "conab_crop_calendar.jsonc",
             current_dir / "data" / "json" / "conab_crop_calendar_complete.jsonc"

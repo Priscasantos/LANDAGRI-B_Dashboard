@@ -35,7 +35,7 @@ def render_evolution_analysis(temporal_df: pd.DataFrame) -> None:
     with tab1:
         st.markdown("#### Initiative Count Over Time")
         fig = plot_evolution_line_chart(temporal_df)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="evolution_line_chart")
         
         with st.expander("📊 Evolution Statistics"):
             all_years = []
@@ -58,7 +58,7 @@ def render_evolution_analysis(temporal_df: pd.DataFrame) -> None:
             st.warning("❌ Metadata not available for resolution evolution analysis.")
             return
         fig = plot_evolution_heatmap_chart(st.session_state.metadata, temporal_df)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="evolution_heatmap_chart")
 
 
 def plot_evolution_line_chart(temporal_data: pd.DataFrame) -> go.Figure:

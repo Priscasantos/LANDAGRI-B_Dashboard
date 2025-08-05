@@ -27,13 +27,7 @@ def render_heatmap_tab(filtered_df: pd.DataFrame) -> None:
         return
     fig = create_heatmap_chart(filtered_df)
     if fig:
-        st.plotly_chart(fig, use_container_width=True)
-        st.download_button(
-            label="📥 Download Heatmap",
-            data=fig.to_html(),
-            file_name="comparison_heatmap.html",
-            mime="text/html"
-        )
+        st.plotly_chart(fig, use_container_width=True, key="comparison_heatmap_chart")
     else:
         st.error("❌ Erro ao gerar heatmap.")
 

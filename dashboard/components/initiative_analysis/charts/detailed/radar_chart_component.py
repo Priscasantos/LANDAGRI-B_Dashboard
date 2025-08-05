@@ -20,26 +20,18 @@ from dashboard.components.shared.chart_core import (
 
 def render_radar_chart_tab(filtered_df: pd.DataFrame) -> None:
     """
-    Renderizar aba de radar chart para análise detalhada.
+    Render radar chart tab for detailed analysis.
     Args:
-        filtered_df: DataFrame filtrado com dados das iniciativas
+        filtered_df: Filtered DataFrame with initiative data
     """
-    st.markdown("#### 🎯 Radar Chart - Comparação Multidimensional")
     if filtered_df.empty:
-        st.warning("⚠️ Nenhum dado disponível para radar chart.")
+        st.warning("⚠️ No data available for radar chart.")
         return
     fig = create_radar_chart(filtered_df)
     if fig:
-        st.plotly_chart(fig, use_container_width=True)
-        st.download_button(
-            label="📥 Baixar gráfico radar (HTML)",
-            data=fig.to_html(),
-            file_name="radar_chart.html",
-            mime="text/html",
-            key=f"download-radar-{hash(fig.to_html())}"
-        )
+        st.plotly_chart(fig, use_container_width=True, key="detailed_radar_chart")
     else:
-        st.error("❌ Erro ao gerar radar chart.")
+        st.error("❌ Error generating radar chart.")
 
 @smart_cache_data(ttl=300)
 def create_radar_chart(filtered_df: pd.DataFrame) -> go.Figure:
@@ -105,14 +97,9 @@ def create_radar_chart(filtered_df: pd.DataFrame) -> go.Figure:
             }
         },
         showlegend=True,
-        title=dict(
-            text="<b>Radar Chart: Comparação Multidimensional</b><br><span style='font-size:14px;color:#6b7280'>Acurácia, Resolução, Classes Agrícolas</span>",
-            x=0.5,
-            font=dict(size=18, family="Inter, -apple-system, BlinkMacSystemFont, sans-serif", color="#1f2937")
-        ),
-        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, sans-serif", size=12, color="#374151"),
+        font={"family": "Inter, -apple-system, BlinkMacSystemFont, sans-serif", "size": 12, "color": "#374151"},
         paper_bgcolor="white",
         plot_bgcolor="white",
-        margin=dict(l=80, r=80, t=80, b=80)
+        margin={"l": 80, "r": 80, "t": 40, "b": 80}
     )
     return fig

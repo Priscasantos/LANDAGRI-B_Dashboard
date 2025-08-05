@@ -62,7 +62,7 @@ def render_timeline_tab(temporal_data: pd.DataFrame, metadata: dict) -> None:
     fig_timeline = plot_timeline_chart(metadata, temporal_data, show_gaps, group_by_type, show_connections)
     
     if fig_timeline:
-        st.plotly_chart(fig_timeline, use_container_width=True)
+        st.plotly_chart(fig_timeline, use_container_width=True, key="temporal_timeline_chart")
         
         # Timeline statistics
         stats_col1, stats_col2, stats_col3 = st.columns(3)
@@ -86,14 +86,6 @@ def render_timeline_tab(temporal_data: pd.DataFrame, metadata: dict) -> None:
         with stats_col3:
             st.metric("Unique years", len(all_years))
         
-        # Download option
-        st.download_button(
-            label="📥 Baixar gráfico de linha do tempo (HTML)",
-            data=fig_timeline.to_html(),
-            file_name="timeline_chart_moderno.html",
-            mime="text/html",
-            key=f"download-timeline-{hash(fig_timeline.to_html())}"
-        )
     else:
         st.error("❌ Error generating timeline chart.")
 
