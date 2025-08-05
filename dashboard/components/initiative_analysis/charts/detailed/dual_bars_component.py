@@ -2,8 +2,8 @@
 Dual Bars Component - Detailed Analysis
 =======================================
 
-Componente para renderizar a aba de barras duplas na análise detalhada.
-Contém o gráfico create_dual_bars_chart migrado do detailed_charts.py.
+Component for rendering dual bars tab in detailed analysis.
+Contains the create_dual_bars_chart migrated from detailed_charts.py.
 
 Author: Dashboard Iniciativas LULC
 Date: 2025-08-01
@@ -18,23 +18,22 @@ from dashboard.components.shared.chart_core import (
     apply_standard_layout,
     get_chart_colors,
 )
+from dashboard.components.shared.nomenclature import clean_column_names
 
 
 def render_dual_bars_tab(filtered_df: pd.DataFrame) -> None:
     """
-    Renderizar aba de gráfico de barras para comparação detalhada.
+    Render dual bars chart tab for detailed comparison.
     
     Args:
-        filtered_df: DataFrame filtrado com dados das iniciativas selecionadas
+        filtered_df: Filtered DataFrame with selected initiative data
     """
-    st.markdown("#### 📊 Bar Chart Comparison")
-    
     if filtered_df.empty:
-        st.warning("⚠️ Nenhuma iniciativa selecionada para comparação.")
+        st.warning("⚠️ No initiatives selected for comparison.")
         return
     
     if len(filtered_df) < 2:
-        st.warning("⚠️ Selecione pelo menos 2 iniciativas para comparação.")
+        st.warning("⚠️ Select at least 2 initiatives for comparison.")
         return
 
     # Controls for 3 metrics
@@ -138,55 +137,53 @@ def render_dual_bars_tab(filtered_df: pd.DataFrame) -> None:
 
 def get_numeric_columns(df: pd.DataFrame) -> list[str]:
     """
-    Obter colunas numéricas do DataFrame para comparação com nomes melhorados.
+    Get numeric columns from DataFrame for comparison with improved names.
     
     Args:
-        df: DataFrame com dados das iniciativas
+        df: DataFrame with initiatives data
         
     Returns:
-        Lista de nomes de colunas numéricas com labels melhorados
+        List of numeric column names with improved labels
     """
     numeric_cols = []
-    # Mapeamento de nomes reais para nomes mais legíveis
-    column_mapping = {
-        "Accuracy (%)": "Accuracy (%)",
-        "Accuracy_max_val": "Accuracy Max Value", 
-        "Accuracy_min_val": "Accuracy Min Value",
-        "Resolution": "Resolution",
-        "Resolution_max_val": "Resolution Max Value",
-        "Resolution_min_val": "Resolution Min Value", 
-        "Num_Agri_Classes": "N° Agricultural Classes",
-        "Classes": "Total Classes",
-        "Temporal_Coverage": "Temporal Coverage",
-        "Spatial_Coverage": "Spatial Coverage", 
-        "Update_Frequency": "Update Frequency",
-        "Data_Volume": "Data Volume"
-    }
     
-    for real_col, display_name in column_mapping.items():
-        if real_col in df.columns:
-            # Verificar se a coluna tem valores numéricos válidos
-            values = pd.to_numeric(df[real_col], errors="coerce")
-            if not values.isna().all():  # Se não for tudo NaN
-                numeric_cols.append(display_name)
+    # Use our standardized nomenclature system
+    for col in df.columns:
+        if col in ["Display_Name", "Name", "Initiative", "ID"]:
+            continue
+            
+        # Check if column has valid numeric values
+        try:
+            values = pd.to_numeric(df[col], errors="coerce")
+            if not values.isna().all():  # If not all NaN
+                # Get friendly name using nomenclature system
+                friendly_name = clean_column_names([col])[0]
+                numeric_cols.append(friendly_name)
+        except Exception:
+            continue
     
     return numeric_cols if numeric_cols else ["Accuracy (%)"]  # Fallback
 
 
 def get_real_column_name(display_name: str) -> str:
-    """Converter nome de exibição de volta para nome real da coluna."""
-    reverse_mapping = {
+    """Convert display name back to real column name."""
+    from dashboard.components.shared.nomenclature import get_friendly_name
+    
+    # Try to find the original column name by reverse lookup
+    # Since we don't have a direct reverse mapping in nomenclature,
+    # we'll use a simplified approach for common columns
+    common_mappings = {
         "Accuracy (%)": "Accuracy (%)",
         "Accuracy Max Value": "Accuracy_max_val",
         "Accuracy Min Value": "Accuracy_min_val", 
-        "Resolution": "Resolution",
+        "Spatial Resolution (m)": "Resolution",
         "Resolution Max Value": "Resolution_max_val",
         "Resolution Min Value": "Resolution_min_val",
-        "N° Agricultural Classes": "Num_Agri_Classes",
+        "Agricultural Classes": "Num_Agri_Classes",
         "Total Classes": "Classes",
         "Temporal Coverage": "Temporal_Coverage",
         "Spatial Coverage": "Spatial_Coverage",
         "Update Frequency": "Update_Frequency", 
         "Data Volume": "Data_Volume"
     }
-    return reverse_mapping.get(display_name, display_name)
+    return common_mappings.get(display_name, display_name)

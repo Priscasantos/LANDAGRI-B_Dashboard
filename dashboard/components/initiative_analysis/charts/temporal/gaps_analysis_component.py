@@ -81,7 +81,7 @@ def render_gaps_analysis(temporal_df: pd.DataFrame) -> None:
 
     # Gerar e exibir o gráfico
     fig = plot_gaps_bar_chart(filtered_gaps_df)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="temporal_gaps_chart")
 
     # Detailed gaps information in tabular format
     with st.expander("📋 Detailed Gaps Information"):

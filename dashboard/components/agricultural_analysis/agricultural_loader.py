@@ -24,12 +24,30 @@ def load_conab_detailed_data() -> Dict[str, Any]:
         Dict com dados da iniciativa CONAB ou dict vazio se erro
     """
     try:
-        # Determinar caminho do arquivo
-        current_dir = Path(__file__).resolve().parent.parent.parent.parent.parent
-        conab_file = current_dir / "data" / "json" / "conab_detailed_initiative.jsonc"
+        # Determinar caminho do arquivo (corrigido: encontrar data folder)
+        current_dir = Path(__file__).resolve().parent
+        # Procurar pelo diretório data a partir do dashboard
+        data_dir = None
+        for parent in current_dir.parents:
+            potential_data = parent / "data" / "json"
+            if potential_data.exists():
+                data_dir = potential_data
+                break
+        
+        if data_dir is None:
+            st.warning(f"⚠️ Diretório data/json não encontrado")
+            st.info(f"📂 Procurando a partir de: {current_dir}")
+            return {}
+            
+        conab_file = data_dir / "conab_detailed_initiative.jsonc"
         
         if not conab_file.exists():
             st.warning(f"⚠️ Arquivo CONAB não encontrado: {conab_file}")
+            st.info(f"📂 Diretório data: {data_dir}")
+            # Listar arquivos disponíveis
+            if data_dir.exists():
+                files = list(data_dir.glob("*.json*"))
+                st.info(f"📋 Arquivos disponíveis: {[f.name for f in files]}")
             return {}
         
         # Carregar e processar arquivo JSONC
@@ -65,11 +83,23 @@ def load_conab_crop_calendar() -> Dict[str, Any]:
         Dict com dados do calendário ou dict vazio se erro
     """
     try:
-        # Determinar caminho do arquivo
-        current_dir = Path(__file__).resolve().parent.parent.parent.parent.parent
+        # Determinar caminho do arquivo (corrigido: encontrar data folder)
+        current_dir = Path(__file__).resolve().parent
+        # Procurar pelo diretório data a partir do dashboard
+        data_dir = None
+        for parent in current_dir.parents:
+            potential_data = parent / "data" / "json"
+            if potential_data.exists():
+                data_dir = potential_data
+                break
+        
+        if data_dir is None:
+            st.warning("⚠️ Diretório data/json não encontrado")
+            return {}
+            
         calendar_files = [
-            current_dir / "data" / "json" / "conab_crop_calendar.jsonc",
-            current_dir / "data" / "json" / "conab_crop_calendar_complete.jsonc"
+            data_dir / "conab_crop_calendar.jsonc",
+            data_dir / "conab_crop_calendar_complete.jsonc"
         ]
         
         calendar_data = {}

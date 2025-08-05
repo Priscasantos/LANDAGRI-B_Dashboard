@@ -2,7 +2,7 @@
 Annual Coverage Component - Detailed Analysis
 ============================================
 
-Componente para renderizar cobertura anual das iniciativas na análise detalhada.
+Component for rendering annual coverage of initiatives in detailed analysis.
 
 Author: Dashboard Iniciativas LULC
 Date: 2025-08-01
@@ -13,13 +13,13 @@ import streamlit as st
 
 def render_annual_coverage_tab(filtered_df: pd.DataFrame) -> None:
     """
-    Renderizar aba de cobertura anual das iniciativas.
+    Render annual coverage tab for initiatives.
     Args:
-        filtered_df: DataFrame filtrado com dados das iniciativas
+        filtered_df: Filtered DataFrame with initiatives data
     """
-    st.markdown("#### 📅 Cobertura Anual das Iniciativas")
+    st.markdown("#### 📅 Annual Initiative Coverage")
     if filtered_df.empty or "available_years" not in filtered_df.columns:
-        st.warning("⚠️ Nenhum dado de cobertura anual disponível.")
+        st.warning("⚠️ No annual coverage data available.")
         return
     # Prepare data for timeline chart
     import plotly.graph_objects as go
@@ -27,14 +27,14 @@ def render_annual_coverage_tab(filtered_df: pd.DataFrame) -> None:
     start_years = []
     end_years = []
     for idx, row in filtered_df.iterrows():
-        display_name = row.get('Display_Name', row.get('Name', 'Iniciativa'))
+        display_name = row.get('Display_Name', row.get('Name', 'Initiative'))
         years = row.get("available_years", [])
         if isinstance(years, list) and years:
             initiatives.append(display_name)
             start_years.append(min(years))
             end_years.append(max(years))
     if not initiatives:
-        st.info("Sem dados de anos disponíveis.")
+        st.info("No available years data.")
         return
     fig = go.Figure()
     for i, name in enumerate(initiatives):
@@ -47,12 +47,10 @@ def render_annual_coverage_tab(filtered_df: pd.DataFrame) -> None:
             hovertext=f"{name}: {start_years[i]} - {end_years[i]}"
         ))
     fig.update_layout(
-        title="<b>Annual Coverage Timeline</b>",
         xaxis_title="Year",
         yaxis_title="Initiative",
         font=dict(family="Inter", size=12),
-        title_font=dict(size=14, family="Inter", color="#1f2937"),
         bargap=0.3,
         showlegend=False
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="annual_coverage_chart")

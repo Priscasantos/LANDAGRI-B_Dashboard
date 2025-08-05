@@ -222,8 +222,8 @@ with st.sidebar:
         },
         "🌾 Agriculture Analysis": {
             "icon": "leaf",
-            "pages": ["Crop Calendar", "Agriculture Availability"],
-            "page_icons": ["calendar3", "graph-up-arrow"],
+            "pages": ["Agriculture Overview", "Crop Calendar", "Agriculture Availability"],
+            "page_icons": ["speedometer2", "calendar3", "graph-up-arrow"],
         },
     }
 

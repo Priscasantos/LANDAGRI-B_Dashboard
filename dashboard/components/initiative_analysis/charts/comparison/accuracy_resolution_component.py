@@ -80,15 +80,8 @@ def render_accuracy_resolution_tab(filtered_df: pd.DataFrame) -> None:
     )
     
     if fig_scatter:
-        st.plotly_chart(fig_scatter, use_container_width=True)
+        st.plotly_chart(fig_scatter, use_container_width=True, key="accuracy_resolution_scatter")
         
-        # Download option
-        st.download_button(
-            label="📥 Download Scatter Plot",
-            data=fig_scatter.to_html(),
-            file_name="accuracy_resolution_scatter.html",
-            mime="text/html"
-        )
     else:
         st.error("❌ Erro ao gerar gráfico de dispersão.")
 

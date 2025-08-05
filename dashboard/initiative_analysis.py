@@ -1,17 +1,12 @@
+
 """
 Initiative Analysis Dashboard - Consolidated Version
 ==================================================
 
 Complete dashboard consolidating all functionality from legacy files:
 - comparative_old.py: advanced filters, multiple charts
-- temporal_old.py: complete temp    # Abas de análise temporal com componentes modulares
-    tab1, tab2, tab3, tab4 = st.tabs(
-        ["📊 Timeline", "📈 Evolution", "🗓️ Temporal Coverage", "⚠️ Gap Analysis"]
-    ) analysis
-- detailed_old.py:    # Temporal analysis tabs with modular components
-    tab1, tab2, tab3, tab4 = st.tabs(
-        ["📊 Timeline", "📈 Evolution", "🕒 Temporal Coverage", "⚠️ Gap Analysis"]
-    )tiative selection, radar charts
+- temporal_old.py: complete temporal analysis
+- detailed_old.py: initiative selection, radar charts
 
 Features:
 - Functional sidebar menu with separate pages
@@ -29,9 +24,31 @@ import sys
 from pathlib import Path
 
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
 import streamlit as st
+
+from dashboard.components.initiative_analysis.charts.comparison import (
+    render_accuracy_resolution_tab,
+    render_class_details_tab,
+    render_detailed_table_tab,
+    render_distributions_tab,
+    render_methodology_deepdive_tab,
+    render_performance_heatmap_tab,
+)
+from dashboard.components.initiative_analysis.charts.comparison.distributions_component import render_methodology_distribution
+from dashboard.components.initiative_analysis.charts.comparison.bar_chart_component import render_bar_chart_tab
+from dashboard.components.initiative_analysis.charts.detailed import (
+    render_annual_coverage_tab,
+    render_data_table_tab,
+    render_dual_bars_tab,
+    render_heatmap_tab,
+    render_radar_chart_tab,
+)
+from dashboard.components.initiative_analysis.charts.temporal import (
+    render_coverage_matrix_heatmap,
+    render_evolution_analysis,
+    render_gaps_analysis,
+    render_timeline_tab,
+)
 
 # Adicionar project root ao path
 _project_root = Path(__file__).resolve().parent.parent
@@ -39,68 +56,37 @@ if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
 
-# Importar componentes modulares consolidados (sempre disponíveis no escopo global)
-# Componentes temporais
-from dashboard.components.initiative_analysis.charts.temporal import (
-    render_timeline_tab,
-    render_evolution_analysis,
-    render_coverage_matrix_heatmap,
-    render_gaps_analysis,
-)
-# Componentes de comparação
-from dashboard.components.initiative_analysis.charts.comparison import (
-    render_accuracy_resolution_tab,
-    render_distributions_tab,
-    render_performance_heatmap_tab,
-    render_detailed_table_tab,
-    render_class_details_tab,
-    render_methodology_deepdive_tab,
-)
-from dashboard.components.initiative_analysis.charts.comparison.bar_chart_component import render_bar_chart_tab
-# Componentes detalhados
-from dashboard.components.initiative_analysis.charts.detailed import (
-    render_dual_bars_tab,
-    render_radar_chart_tab,
-    render_heatmap_tab,
-    render_data_table_tab,
-    render_annual_coverage_tab,
-)
-CHARTS_AVAILABLE = True
-
-
-
 def run(metadata=None, df_original=None):
     """
-    Executar análise abrangente das iniciativas LULC com menu lateral funcional.
+    Execute comprehensive analysis of LULC initiatives with sidebar menu.
 
     Args:
-        metadata: Dicionário de metadados das iniciativas (opcional)
-        df_original: DataFrame original com dados das iniciativas (opcional)
+        metadata: Dictionary of initiative metadata (optional)
+        df_original: Original DataFrame with initiative data (optional)
     """
-
-    # Header visual padronizado
+    # Standard visual header
     st.markdown(
         """
-    <div style="
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-        padding: 2rem;
-        border-radius: 15px;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
-        border: 1px solid rgba(255,255,255,0.1);
-    ">
-        <h1 style="color: white; margin: 0; font-size: 2.5rem; font-weight: 700;">
-            🔬 Initiative Analysis
-        </h1>
-        <p style="color: #dbeafe; margin: 0.5rem 0 0 0; font-size: 1.2rem;">
-            Comprehensive analysis of LULC initiatives with full features
-        </p>
-    </div>
-    """,
+        <div style="
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+        ">
+            <h1 style="color: white; margin: 0; font-size: 2.5rem; font-weight: 700;">
+                🔬 Initiative Analysis
+            </h1>
+            <p style="color: #dbeafe; margin: 0.5rem 0 0 0; font-size: 1.2rem;">
+                Comprehensive analysis of LULC initiatives with full features
+            </p>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
-    # Obter dados da sessão ou parâmetros
+    # Get session data or parameters
     df_for_analysis = None
     meta_geral = None
 
@@ -116,24 +102,23 @@ def run(metadata=None, df_original=None):
         if not meta_geral:
             try:
                 from scripts.utilities.json_interpreter import _load_jsonc_file
-
                 metadata_file_path = (
                     _project_root / "data" / "initiatives_metadata.jsonc"
                 )
                 meta_geral = _load_jsonc_file(metadata_file_path)
             except Exception as e:
-                st.error(f"Erro carregando metadata: {e}")
+                st.error(f"Error loading metadata: {e}")
                 return
     else:
-        st.error("❌ Nenhum dado disponível para análise de iniciativas.")
+        st.error("❌ No data available for initiative analysis.")
         return
 
-    # Verificar se temos dados suficientes
+    # Check if we have enough data
     if df_for_analysis is None or df_for_analysis.empty:
-        st.warning("⚠️ Nenhum dado de iniciativas disponível para análise.")
+        st.warning("⚠️ No initiative data available for analysis.")
         return
 
-    # Adicionar Display_Name se não existir
+    # Add Display_Name if not present
     if "Display_Name" not in df_for_analysis.columns:
         df_for_analysis = df_for_analysis.copy()
         if "Acronym" in df_for_analysis.columns:
@@ -141,11 +126,10 @@ def run(metadata=None, df_original=None):
         else:
             df_for_analysis["Display_Name"] = df_for_analysis["Name"].str[:10]
 
-    # Usar o sistema de navegação existente do app.py
-    # A página atual é determinada pelo menu "Initiative Analysis" no sidebar principal
+    # Use navigation system from app.py
     current_page = st.session_state.get("current_page", "Temporal Analysis")
 
-    # Renderizar a página baseada na seleção do menu principal
+    # Render page based on main menu selection
     if current_page == "Temporal Analysis":
         render_temporal_analysis(df_for_analysis, meta_geral)
     elif current_page == "Comparative Analysis":
@@ -172,10 +156,10 @@ def render_comparative_analysis(df: pd.DataFrame, metadata: dict) -> None:
         box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
     ">
         <h2 style="color: white; margin: 0; font-size: 1.8rem; font-weight: 600;">
-            📊 Análise Comparativa Avançada
+            📊 Advanced Comparative Analysis
         </h2>
         <p style="color: #d1fae5; margin: 0.5rem 0 0 0; font-size: 1rem;">
-            Compare iniciativas LULC com filtros avançados e múltiplas visualizações
+            Compare LULC initiatives with advanced filters and multiple visualizations
         </p>
     </div>
     """,
@@ -187,16 +171,16 @@ def render_comparative_analysis(df: pd.DataFrame, metadata: dict) -> None:
     filtered_df = df.copy()
 
     st.markdown("---")
-    st.markdown("### 📊 Gráficos de Comparação")
+    st.markdown("### 📊 Comparison Charts")
 
     # Abas de análise comparativa usando todos os componentes
     tab_labels = [
-        "🎯 Precisão vs Resolução Espacial",
-        "📏 Resolução Espacial",
-        "⭐ Acurácia Global",
-        "� Distribuição de Metodologias",
-        "🏷️ Detalhes de Classes",
-        "🔬 Metodologia - Deep Dive",
+        "🎯 Accuracy vs Spatial Resolution",
+        "📏 Spatial Resolution",
+        "⭐ Global Accuracy",
+        "🧮 Methodology Distribution",
+        "🏷️ Class Details",
+        "🔬 Methodology - Deep Dive",
         "🔥 Normalized Performance",
         "📋 Detailed Table",
     ]
@@ -218,20 +202,32 @@ def render_comparative_analysis(df: pd.DataFrame, metadata: dict) -> None:
         render_distributions_tab(filtered_df)  # includes sub-tabs, can be adjusted
     with tab_acc:
         # Global accuracy (bar chart)
-        from dashboard.components.initiative_analysis.charts.comparison.bar_chart_component import render_bar_chart_tab
         render_bar_chart_tab(filtered_df)
     with tab_method_dist:
         # Methodology distribution
-        render_methodology_deepdive_tab(filtered_df)
+        render_methodology_distribution(filtered_df)
     with tab_class_details:
         render_class_details_tab(filtered_df)
+    # Check for required columns
+    methodology_cols = [col for col in filtered_df.columns if 'methodology' in col.lower() or 'method' in col.lower()]
+    performance_cols = [col for col in filtered_df.columns if filtered_df[col].dtype in ['float64', 'int64'] and col.lower() != 'initiative']
+    # For detailed table, just need any columns
+
     with tab_method_deep:
-        # Methodology deep dive (frequency table)
-        render_methodology_deepdive_tab(filtered_df)
+        if not methodology_cols:
+            st.warning("⚠️ No methodology column found in the data. Please check your input file.")
+        else:
+            render_methodology_deepdive_tab(filtered_df)
     with tab_perf_norm:
-        render_performance_heatmap_tab(filtered_df)
+        if not performance_cols:
+            st.warning("⚠️ No numerical performance columns found in the data. Please check your input file.")
+        else:
+            render_performance_heatmap_tab(filtered_df)
     with tab_table:
-        render_detailed_table_tab(filtered_df)
+        if filtered_df.empty:
+            st.warning("⚠️ No data available for detailed table.")
+        else:
+            render_detailed_table_tab(filtered_df)
 
 
 def render_temporal_analysis(df: pd.DataFrame, metadata: dict) -> None:
@@ -279,7 +275,6 @@ def render_temporal_analysis(df: pd.DataFrame, metadata: dict) -> None:
         render_evolution_analysis(temporal_data)
 
     with tab3:
-        from dashboard.components.initiative_analysis.charts.temporal import render_coverage_matrix_heatmap
         render_coverage_matrix_heatmap(temporal_data, metadata)
 
     with tab4:
@@ -363,9 +358,8 @@ def prepare_temporal_data(metadata: dict, df: pd.DataFrame) -> pd.DataFrame:
 
     # Build a mapping from initiative name to acronym if available
     acronym_map = {}
-    if df is not None and not df.empty:
-        if "Name" in df.columns and "Acronym" in df.columns:
-            acronym_map = dict(zip(df["Name"], df["Acronym"]))
+    if df is not None and not df.empty and "Name" in df.columns and "Acronym" in df.columns:
+        acronym_map = dict(zip(df["Name"], df["Acronym"]))
 
     for name, details in metadata.items():
         if isinstance(details, dict) and "available_years" in details:
