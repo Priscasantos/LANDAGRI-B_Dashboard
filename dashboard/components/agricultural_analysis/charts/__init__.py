@@ -1,24 +1,53 @@
 """
-Agricultural Charts Package
-==========================
+Agricultural Analysis Charts Module
+==================================
 
-Gráficos específicos para análise agrícola com subdiretórios organizados:
-- bar_charts/: Gráficos de barras e colunas
-- heatmap_charts/: Mapas de calor e visualizações de densidade
-- time_series/: Séries temporais e análises temporais
+Módulo de gráficos para análise agrícola.
+Centraliza todas as funções de visualização de dados agrícolas e CONAB.
 
-Author: Dashboard Iniciativas LULC
-Date: 2025-07-30
+Autor: Dashboard Iniciativas LULC
+Data: 2025-08-07
 """
 
-from .agricultural_charts import *
+# Importações dos módulos de gráficos principais
+from .agricultural_charts import (
+    plot_crop_calendar_heatmap,
+    plot_monthly_activity_calendar,
+    plot_crop_seasons_comparison
+)
+
+from .conab_charts import (
+    plot_conab_spatial_coverage,
+    plot_conab_temporal_coverage,
+    plot_conab_crop_diversity,
+    plot_conab_spatial_temporal_distribution,
+    plot_conab_quality_metrics,
+    plot_conab_seasonal_analysis,
+    plot_conab_methodology_overview,
+    plot_conab_crop_production_trends
+)
+
+# Importações do módulo de disponibilidade
+from .availability import (
+    render_crop_availability_tab
+)
 
 __all__ = [
-    "load_conab_data",
-    "plot_crop_calendar_heatmap",
-    "plot_regional_crop_coverage",
-    "plot_temporal_crop_trends",
-    "plot_crop_diversity_by_region",
-    "plot_agricultural_performance_metrics",
-    "create_agricultural_summary_stats",
+    # Agricultural charts
+    'plot_crop_calendar_heatmap',
+    'plot_monthly_activity_calendar',
+    'plot_crop_seasons_comparison',
+    
+    # CONAB charts
+    'plot_conab_spatial_coverage',
+    'plot_conab_temporal_coverage',
+    'plot_conab_crop_diversity',
+    'plot_conab_spatial_temporal_distribution',
+    'plot_conab_quality_metrics',
+    'plot_conab_seasonal_analysis',
+    'plot_conab_methodology_overview',
+    'plot_conab_crop_production_trends',
+    
+    # Availability module
+    'render_crop_availability_tab'
 ]
