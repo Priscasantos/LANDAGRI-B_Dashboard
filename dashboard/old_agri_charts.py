@@ -43,7 +43,7 @@ from components.agricultural_analysis.agricultural_loader import (
     get_conab_crop_stats,
     validate_conab_data_quality
 )
-from components.agricultural_analysis.overview.agricultural_overview import (
+from components.agricultural_analysis.agriculture_overview.agricultural_overview import (
     render_agricultural_overview
 )
 from components.agricultural_analysis.charts.agricultural_charts import (
@@ -58,6 +58,9 @@ from components.agricultural_analysis.charts.conab_charts import (
     plot_conab_quality_metrics,
     plot_conab_seasonal_analysis,
     plot_conab_methodology_overview
+)
+from components.agricultural_analysis.charts.availability import (
+    render_crop_availability_tab
 )
 
 
@@ -114,76 +117,6 @@ def _filter_calendar_data(calendar_data: dict, selected_states: List[str],
     
     return filtered_data
 
-
-def _create_conab_availability_matrix(conab_data: dict):
-    """Criar matriz de disponibilidade personalizada para dados CONAB."""
-    try:
-        initiative = conab_data.get('CONAB Crop Monitoring Initiative', {})
-        detailed_coverage = initiative.get('detailed_crop_coverage', {})
-        
-        if not detailed_coverage:
-            return None
-        
-        # Preparar dados para a matriz
-        matrix_data = []
-        
-        for crop, crop_data in detailed_coverage.items():
-            first_crop_years = crop_data.get('first_crop_years', {})
-            second_crop_years = crop_data.get('second_crop_years', {})
-            
-            # Combinar todas as regiões
-            all_regions = set(first_crop_years.keys()) | set(second_crop_years.keys())
-            
-            for region in all_regions:
-                first_years = first_crop_years.get(region, [])
-                second_years = second_crop_years.get(region, [])
-                
-                # Calcular disponibilidade
-                has_first = len(first_years) > 0
-                has_second = len(second_years) > 0
-                
-                availability_score = 0
-                if has_first and has_second:
-                    availability_score = 2  # Dupla safra
-                elif has_first:
-                    availability_score = 1  # Safra única
-                
-                matrix_data.append({
-                    'crop': crop,
-                    'region': region,
-                    'availability': availability_score,
-                    'years_coverage': len(set(first_years + second_years))
-                })
-        
-        if not matrix_data:
-            return None
-        
-        df_matrix = pd.DataFrame(matrix_data)
-        
-        # Criar pivot para heatmap
-        pivot_matrix = df_matrix.pivot(index='crop', columns='region', values='availability')
-        pivot_matrix = pivot_matrix.fillna(0)
-        
-        # Criar heatmap
-        fig = px.imshow(
-            pivot_matrix.values,
-            x=pivot_matrix.columns,
-            y=pivot_matrix.index,
-            color_continuous_scale=['white', 'lightblue', 'darkblue'],
-            title="Matriz de Disponibilidade CONAB (0=Sem dados, 1=Safra única, 2=Dupla safra)",
-            labels={'x': 'Região', 'y': 'Cultura', 'color': 'Disponibilidade'}
-        )
-        
-        fig.update_layout(
-            height=max(400, len(pivot_matrix.index) * 30),
-            xaxis_tickangle=45
-        )
-        
-        return fig
-        
-    except Exception as e:
-        st.error(f"Erro criando matriz de disponibilidade: {e}")
-        return None
 
 
 def run():
@@ -249,7 +182,7 @@ def run():
         _render_conab_analysis_tab(conab_data)
 
     with tab4:
-        _render_crop_availability_tab(calendar_data, conab_data)
+        render_crop_availability_tab(calendar_data, conab_data)
 
 
 def _load_agricultural_data():
@@ -433,187 +366,6 @@ def _render_conab_analysis_tab(conab_data: dict) -> None:
     except Exception as e:
         st.error(f"Error creating methodology overview chart: {e}")
 
-
-def _render_crop_availability_tab(calendar_data: dict, conab_data: dict) -> None:
-    st.markdown("### 🌾 Crop Availability by Region and Period")
-    st.markdown("*Detailed analysis of crop temporal and spatial availability*")
-    if not calendar_data and not conab_data:
-        st.warning("⚠️ No crop availability data available.")
-        return
-    data_source = st.radio(
-        "📊 Select data source:",
-        ["Agricultural Calendar", "CONAB Data", "Both"],
-        index=2,
-        horizontal=True
-    )
-    st.markdown("---")
-    if data_source in ["Agricultural Calendar", "Both"] and calendar_data:
-        st.markdown("#### 📅 Calendar Availability")
-        _render_calendar_availability_analysis(calendar_data)
-        st.markdown("---")
-        st.markdown("#### 📊 Monthly Activity Calendar")
-        fig_monthly = plot_monthly_activity_calendar(calendar_data)
-        if fig_monthly:
-            st.plotly_chart(fig_monthly, use_container_width=True)
-            st.caption("Monthly activity calendar summarizing crop activities across Brazil.")
-    if data_source in ["CONAB Data", "Both"] and conab_data:
-        st.markdown("---")
-        st.markdown("#### 🌾 CONAB Availability")
-        _render_conab_availability_analysis(conab_data)
-        st.markdown("---")
-        st.markdown("#### 🗺️ Spatial-Temporal Distribution")
-        try:
-            fig_integrated = plot_conab_spatial_temporal_distribution(conab_data)
-            if fig_integrated:
-                st.plotly_chart(fig_integrated, use_container_width=True)
-                st.caption("Spatial-temporal distribution of crop availability across regions and years.")
-        except Exception as e:
-            st.error(f"Error creating integrated analysis: {e}")
-
-
-def _render_calendar_availability_analysis(calendar_data: dict) -> None:
-    """Renderizar análise de disponibilidade do calendário."""
-    
-    try:
-        crop_calendar = calendar_data.get('crop_calendar', {})
-        states_info = calendar_data.get('states', {})
-        
-        if not crop_calendar:
-            st.info("📊 No calendar data available for availability analysis")
-            return
-
-        # Preparar dados de disponibilidade
-        availability_data = []
-        
-        for crop, crop_states in crop_calendar.items():
-            for state_entry in crop_states:
-                state_code = state_entry.get('state_code', '')
-                state_name = state_entry.get('state_name', state_code)
-                calendar_entry = state_entry.get('calendar', {})
-                
-                # Contar meses com atividade
-                active_months = sum(1 for activity in calendar_entry.values() if activity)
-                planting_months = sum(1 for activity in calendar_entry.values() if 'P' in activity)
-                harvest_months = sum(1 for activity in calendar_entry.values() if 'H' in activity)
-                
-                availability_data.append({
-                    'crop': crop,
-                    'state': state_name,
-                    'state_code': state_code,
-                    'active_months': active_months,
-                    'planting_months': planting_months,
-                    'harvest_months': harvest_months,
-                    'availability_score': active_months / 12.0  # Normalizar para 0-1
-                })
-
-        if availability_data:
-            df_availability = pd.DataFrame(availability_data)
-            
-            # Gráfico de disponibilidade por estado
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                # Disponibilidade média por estado
-                state_avg = df_availability.groupby('state')['availability_score'].mean().reset_index()
-                state_avg = state_avg.sort_values('availability_score', ascending=False)
-                
-                fig_state = px.bar(
-                    state_avg.head(15),
-                    x='availability_score',
-                    y='state',
-                    orientation='h',
-                    title="Score de Disponibilidade por Estado",
-                    labels={'availability_score': 'Score de Disponibilidade', 'state': 'Estado'}
-                )
-                st.plotly_chart(fig_state, use_container_width=True)
-            
-            with col2:
-                # Disponibilidade por cultura
-                crop_avg = df_availability.groupby('crop')['availability_score'].mean().reset_index()
-                crop_avg = crop_avg.sort_values('availability_score', ascending=False)
-                
-                fig_crop = px.bar(
-                    crop_avg,
-                    x='crop',
-                    y='availability_score',
-                    title="Score de Disponibilidade por Cultura",
-                    labels={'availability_score': 'Score de Disponibilidade', 'crop': 'Cultura'}
-                )
-                fig_crop.update_layout(xaxis_tickangle=45)
-                st.plotly_chart(fig_crop, use_container_width=True)
-
-            # Tabela de resumo
-            st.markdown("##### 📋 Resumo da Disponibilidade")
-            summary_stats = df_availability.groupby('crop').agg({
-                'state': 'count',
-                'active_months': 'mean',
-                'availability_score': 'mean'
-            }).round(2)
-            summary_stats.columns = ['Estados Cobertos', 'Meses Ativos (Média)', 'Score Disponibilidade']
-            st.dataframe(summary_stats, use_container_width=True)
-
-    except Exception as e:
-        st.error(f"Erro na análise de disponibilidade do calendário: {e}")
-
-
-def _render_conab_availability_analysis(conab_data: dict) -> None:
-    """Renderizar análise de disponibilidade CONAB."""
-    
-    try:
-        initiative = conab_data.get('CONAB Crop Monitoring Initiative', {})
-        detailed_coverage = initiative.get('detailed_crop_coverage', {})
-        
-        if not detailed_coverage:
-            st.info("📊 No CONAB data available for availability analysis")
-            return
-
-        # Análise de matriz de disponibilidade
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("##### 🗺️ Matriz de Disponibilidade")
-            try:
-                # Criar matriz de disponibilidade personalizada
-                fig_matrix = _create_conab_availability_matrix(conab_data)
-                if fig_matrix:
-                    st.plotly_chart(fig_matrix, use_container_width=True)
-            except Exception as e:
-                st.error(f"Error creating availability matrix: {e}")
-        
-        with col2:
-            st.markdown("##### 🔄 Análise de Dupla Safra")
-            
-            # Análise de dupla safra
-            double_crop_data = []
-            
-            for crop, crop_data in detailed_coverage.items():
-                first_crop_years = crop_data.get('first_crop_years', {})
-                second_crop_years = crop_data.get('second_crop_years', {})
-                
-                first_regions = len([r for r, years in first_crop_years.items() if years])
-                second_regions = len([r for r, years in second_crop_years.items() if years])
-                
-                double_crop_data.append({
-                    'crop': crop,
-                    'single_crop': first_regions - second_regions if first_regions > second_regions else 0,
-                    'double_crop': second_regions
-                })
-            
-            if double_crop_data:
-                df_double = pd.DataFrame(double_crop_data)
-                
-                fig_double = px.bar(
-                    df_double,
-                    x='crop',
-                    y=['single_crop', 'double_crop'],
-                    title="Regiões com Safra Única vs Dupla Safra",
-                    barmode='stack'
-                )
-                fig_double.update_layout(xaxis_tickangle=45)
-                st.plotly_chart(fig_double, use_container_width=True)
-
-    except Exception as e:
-        st.error(f"Erro na análise de disponibilidade CONAB: {e}")
 
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ Funcionalidades:
 
 Estrutura seguindo app.py:
 - Agriculture Overview: Métricas consolidadas e visualizações gerais
-- Crop Calendar: Calendário interativo por estado/cultivo  
+- Crop Calendar: Calendário interativo por estado/cultivo com abas consolidadas
 - Agriculture Availability: Qualidade e disponibilidade dos dados
 
 Autor: Dashboard Iniciativas LULC
@@ -23,6 +23,9 @@ Data: 2025-08-05
 
 import sys
 from pathlib import Path
+
+import pandas as pd
+import plotly.express as px
 import streamlit as st
 
 # Adicionar dashboard root ao path para importar components
@@ -42,7 +45,12 @@ from components.agricultural_analysis.agricultural_loader import (
     get_conab_crop_stats,
     validate_conab_data_quality
 )
-from components.agricultural_analysis.overview.agricultural_overview import render_agricultural_overview
+from components.agricultural_analysis.agriculture_overview.agricultural_overview import render_agricultural_overview
+from components.agricultural_analysis.charts.availability import (
+    render_calendar_availability_analysis,
+    render_conab_availability_analysis,
+    create_conab_availability_matrix
+)
 
 
 def run():
@@ -131,7 +139,7 @@ def _render_agriculture_overview_page(calendar_data: dict, conab_data: dict):
 
 
 def _render_crop_calendar_page(calendar_data: dict, conab_data: dict):
-    """Renderizar página Crop Calendar - calendário interativo."""
+    """Renderizar página Crop Calendar com abas dos gráficos consolidados."""
     
     # Header da página
     st.markdown("""
@@ -147,7 +155,7 @@ def _render_crop_calendar_page(calendar_data: dict, conab_data: dict):
             📅 Crop Calendar
         </h1>
         <p style="color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; font-size: 1.2rem;">
-            Calendário interativo de safras por estado e região
+            Calendário consolidado de safras - Gráficos do old_calendar integrados
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -156,24 +164,96 @@ def _render_crop_calendar_page(calendar_data: dict, conab_data: dict):
         st.warning("⚠️ Dados de calendário agrícola não disponíveis")
         return
     
-    # Filtros específicos para calendário
-    _render_calendar_filters(calendar_data)
+    # Prepara dados no formato esperado pelos componentes consolidados
+    filtered_data = {'crop_calendar': calendar_data}
     
+    # Criar abas para os diferentes tipos de análise
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+        "📊 Distribuição & Diversidade",
+        "📅 Atividades Mensais", 
+        "🗓️ Matriz Nacional",
+        "⏰ Timeline & Sazonalidade",
+        "🌍 Análise Regional",
+        "🔧 Calendário Interativo"
+    ])
+    
+    # Aba 1: Distribuição e Diversidade de Culturas
+    with tab1:
+        try:
+            from components.agricultural_analysis.charts.calendar import render_crop_distribution_charts
+            render_crop_distribution_charts(filtered_data)
+        except ImportError:
+            st.error("❌ Módulo de distribuição de culturas não disponível")
+        except Exception as e:
+            st.error(f"❌ Erro ao renderizar distribuição de culturas: {e}")
+    
+    # Aba 2: Atividades Mensais
+    with tab2:
+        try:
+            from components.agricultural_analysis.charts.calendar import render_monthly_activity_charts
+            render_monthly_activity_charts(filtered_data)
+        except ImportError:
+            st.error("❌ Módulo de atividades mensais não disponível")
+        except Exception as e:
+            st.error(f"❌ Erro ao renderizar atividades mensais: {e}")
+    
+    # Aba 3: Matriz Nacional
+    with tab3:
+        try:
+            from components.agricultural_analysis.charts.calendar import render_national_calendar_matrix_charts
+            render_national_calendar_matrix_charts(filtered_data)
+        except ImportError:
+            st.error("❌ Módulo de matriz nacional não disponível")
+        except Exception as e:
+            st.error(f"❌ Erro ao renderizar matriz nacional: {e}")
+    
+    # Aba 4: Timeline e Sazonalidade
+    with tab4:
+        try:
+            from components.agricultural_analysis.charts.calendar import render_timeline_charts
+            render_timeline_charts(filtered_data)
+        except ImportError:
+            st.error("❌ Módulo de timeline não disponível")
+        except Exception as e:
+            st.error(f"❌ Erro ao renderizar timeline: {e}")
+    
+    # Aba 5: Análise Regional
+    with tab5:
+        try:
+            from components.agricultural_analysis.charts.calendar import render_all_regional_analysis
+            render_all_regional_analysis(filtered_data)
+        except ImportError:
+            st.error("❌ Módulo de análise regional não disponível")
+        except Exception as e:
+            st.error(f"❌ Erro ao renderizar análise regional: {e}")
+    
+    # Aba 6: Calendário Interativo (componente original)
+    with tab6:
+        st.markdown("### 🔧 Calendário Interativo Original")
+        st.markdown("*Componente de calendário interativo tradicional*")
+        
+        try:
+            from components.agricultural_analysis.agricultural_calendar import run as run_calendar
+            run_calendar()
+        except ImportError:
+            st.warning("⚠️ Componente de calendário interativo não disponível")
+            _render_basic_calendar_view(calendar_data)
+        except Exception as e:
+            st.error(f"❌ Erro ao renderizar calendário interativo: {e}")
+    
+    # Rodapé com informações
     st.markdown("---")
-    
-    # Usar o componente de calendário existente
-    try:
-        from components.agricultural_analysis.agricultural_calendar import run as run_calendar
-        run_calendar()
-    except ImportError:
-        st.warning("⚠️ Componente de calendário não disponível")
-        _render_basic_calendar_view(calendar_data)
-    except Exception as e:
-        st.error(f"❌ Erro ao renderizar calendário: {e}")
+    st.markdown("""
+    <div style="text-align: center; color: #666; padding: 1rem;">
+        <strong>📅 Gráficos Consolidados do old_calendar</strong><br>
+        Migração completa dos gráficos estáticos para componentes interativos modulares<br>
+        34 gráficos originais → 20 funções organizadas em 5 módulos temáticos
+    </div>
+    """, unsafe_allow_html=True)
 
 
 def _render_agriculture_availability_page(calendar_data: dict, conab_data: dict):
-    """Renderizar página Agriculture Availability - disponibilidade e qualidade."""
+    """Renderizar página Agriculture Availability com estrutura de abas consolidada."""
     
     # Header da página
     st.markdown("""
@@ -189,30 +269,77 @@ def _render_agriculture_availability_page(calendar_data: dict, conab_data: dict)
             📋 Agriculture Availability
         </h1>
         <p style="color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; font-size: 1.2rem;">
-            Análise de disponibilidade e qualidade dos dados agrícolas
+            Análise consolidada de disponibilidade e qualidade dos dados agrícolas
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Análise de disponibilidade de dados
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("### 📊 Fontes de Dados")
-        _render_data_sources_info(calendar_data, conab_data)
-    
-    with col2:
-        st.markdown("### 🎯 Métricas de Qualidade")
-        _render_data_quality_metrics(calendar_data, conab_data)
+    if not calendar_data and not conab_data:
+        st.warning("⚠️ Nenhum dado de disponibilidade de culturas disponível.")
+        return
     
     st.markdown("---")
+    st.markdown("### 📊 Análises de Disponibilidade")
     
-    # Análise temporal de disponibilidade
-    st.markdown("### 📈 Disponibilidade Temporal")
-    _render_temporal_availability(conab_data)
+    # Estrutura de abas consolidada
+    tab_labels = [
+        "📅 Disponibilidade do Calendário",
+        "🌾 Disponibilidade CONAB", 
+        "🗺️ Matriz de Disponibilidade",
+        "📊 Fontes de Dados",
+        "🎯 Métricas de Qualidade",
+        "📈 Disponibilidade Temporal",
+        "🗺️ Cobertura Geográfica"
+    ]
     
-    # Análise geográfica de cobertura
-    st.markdown("### 🗺️ Cobertura Geográfica")
+    (
+        tab_calendar,
+        tab_conab,
+        tab_matrix,
+        tab_sources,
+        tab_quality,
+        tab_temporal,
+        tab_geographic
+    ) = st.tabs(tab_labels)
+    
+    with tab_calendar:
+        if calendar_data:
+            render_calendar_availability_analysis(calendar_data)
+        else:
+            st.warning("⚠️ Dados de calendário agrícola não disponíveis")
+    
+    with tab_conab:
+        if conab_data:
+            render_conab_availability_analysis(conab_data)
+        else:
+            st.warning("⚠️ Dados CONAB não disponíveis")
+    
+    with tab_matrix:
+        if conab_data:
+            st.markdown("#### �️ Matriz de Disponibilidade CONAB")
+            try:
+                fig_matrix = create_conab_availability_matrix(conab_data)
+                if fig_matrix:
+                    st.plotly_chart(fig_matrix, use_container_width=True)
+                    st.caption("Matriz visual da disponibilidade de culturas por região (0=Sem dados, 1=Safra única, 2=Dupla safra)")
+                else:
+                    st.info("📊 Matriz de disponibilidade não pôde ser gerada")
+            except Exception as e:
+                st.error(f"❌ Erro ao gerar matriz de disponibilidade: {e}")
+        else:
+            st.warning("⚠️ Dados CONAB não disponíveis para matriz")
+    
+    with tab_sources:
+        _render_data_sources_info(calendar_data, conab_data)
+    
+    with tab_quality:
+        _render_data_quality_metrics(calendar_data, conab_data)
+    
+    with tab_temporal:
+        _render_temporal_availability(conab_data)
+    
+    with tab_geographic:
+        _render_geographic_coverage(calendar_data, conab_data)
     _render_geographic_coverage(calendar_data, conab_data)
 
 
@@ -264,9 +391,6 @@ def _render_regional_distribution_chart(conab_data: dict):
     """Renderizar gráfico de distribuição regional."""
     
     try:
-        import plotly.express as px
-        import pandas as pd
-        
         if not conab_data:
             st.warning("⚠️ Dados CONAB não disponíveis")
             return
@@ -311,9 +435,6 @@ def _render_crop_diversity_chart(conab_data: dict, calendar_data: dict):
     """Renderizar gráfico de diversidade de culturas."""
     
     try:
-        import plotly.express as px
-        import pandas as pd
-        
         crops_data = []
         
         # Dados do calendário
@@ -360,57 +481,10 @@ def _render_crop_diversity_chart(conab_data: dict, calendar_data: dict):
         st.error(f"❌ Erro ao criar gráfico de diversidade: {e}")
 
 
-def _render_calendar_filters(calendar_data: dict):
-    """Renderizar filtros específicos para calendário."""
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        # Filtro de estados
-        states = calendar_data.get('states', {})
-        state_options = [f"{code} - {info.get('name', code)}" for code, info in states.items()]
-        selected_states = st.multiselect(
-            "🏛️ Estados",
-            options=state_options,
-            default=state_options[:5] if len(state_options) > 5 else state_options,
-            help="Selecione os estados para análise"
-        )
-    
-    with col2:
-        # Filtro de regiões
-        regions = set()
-        for state_info in states.values():
-            region = state_info.get('region', '')
-            if region:
-                regions.add(region)
-        
-        selected_regions = st.multiselect(
-            "🗺️ Regiões",
-            options=sorted(list(regions)),
-            default=sorted(list(regions))[:3] if len(regions) > 3 else sorted(list(regions)),
-            help="Selecione as regiões para análise"
-        )
-    
-    with col3:
-        # Filtro de culturas
-        crop_calendar = calendar_data.get('crop_calendar', {})
-        crop_options = list(crop_calendar.keys())
-        selected_crops = st.multiselect(
-            "🌾 Culturas",
-            options=crop_options,
-            default=crop_options[:5] if len(crop_options) > 5 else crop_options,
-            help="Selecione as culturas para análise"
-        )
-    
-    return selected_states, selected_regions, selected_crops
-
-
 def _render_basic_calendar_view(calendar_data: dict):
     """Renderizar visão básica do calendário quando o componente avançado não estiver disponível."""
     
     try:
-        import pandas as pd
-        
         crop_calendar = calendar_data.get('crop_calendar', {})
         
         if not crop_calendar:
@@ -441,8 +515,6 @@ def _render_data_sources_info(calendar_data: dict, conab_data: dict):
     """Renderizar informações das fontes de dados."""
     
     try:
-        import pandas as pd
-        
         sources_data = []
         
         if calendar_data:
@@ -533,9 +605,6 @@ def _render_temporal_availability(conab_data: dict):
     """Renderizar disponibilidade temporal."""
     
     try:
-        import plotly.express as px
-        import pandas as pd
-        
         if not conab_data:
             st.warning("⚠️ Dados CONAB não disponíveis")
             return
@@ -569,8 +638,6 @@ def _render_geographic_coverage(calendar_data: dict, conab_data: dict):
     """Renderizar cobertura geográfica."""
     
     try:
-        import pandas as pd
-        
         coverage_data = []
         
         if calendar_data:

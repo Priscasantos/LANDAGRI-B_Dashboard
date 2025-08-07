@@ -13,7 +13,7 @@ import os
 # Adicionar o caminho do dashboard
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from dashboard.components.agricultural_analysis.overview.agricultural_overview import render_agricultural_overview
+from dashboard.components.agricultural_analysis.agriculture_overview.agricultural_overview import render_agricultural_overview
 
 def main():
     """Função principal para testar o overview."""
