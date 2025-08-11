@@ -16,6 +16,44 @@ from typing import Dict, List, Optional
 # Import das funções seguras
 from ...agricultural_loader import safe_get_data, validate_data_structure
 
+# Modern color palette for consistency
+MODERN_COLORS = {
+    'primary': '#2E86C1',      # Professional blue
+    'secondary': '#28B463',     # Fresh green
+    'accent': '#F39C12',        # Warm orange
+    'danger': '#E74C3C',        # Alert red
+    'north': '#27AE60',         # North region
+    'northeast': '#E67E22',     # Northeast region  
+    'central_west': '#F39C12',  # Central-West region
+    'southeast': '#2E86C1',     # Southeast region
+    'south': '#8E44AD'          # South region
+}
+
+def get_state_acronym(state_name: str) -> str:
+    """Convert full state name to acronym"""
+    state_mapping = {
+        'Acre': 'AC', 'Alagoas': 'AL', 'Amapá': 'AP', 'Amazonas': 'AM',
+        'Bahia': 'BA', 'Ceará': 'CE', 'Distrito Federal': 'DF', 'Espírito Santo': 'ES',
+        'Goiás': 'GO', 'Maranhão': 'MA', 'Mato Grosso': 'MT', 'Mato Grosso do Sul': 'MS',
+        'Minas Gerais': 'MG', 'Pará': 'PA', 'Paraíba': 'PB', 'Paraná': 'PR',
+        'Pernambuco': 'PE', 'Piauí': 'PI', 'Rio de Janeiro': 'RJ', 'Rio Grande do Norte': 'RN',
+        'Rio Grande do Sul': 'RS', 'Rondônia': 'RO', 'Roraima': 'RR', 'Santa Catarina': 'SC',
+        'São Paulo': 'SP', 'Sergipe': 'SE', 'Tocantins': 'TO'
+    }
+    return state_mapping.get(state_name, state_name)
+
+def get_brazilian_region(state_acronym: str) -> str:
+    """Map state acronym to Brazilian region (in English)"""
+    region_mapping = {
+        'AC': 'North', 'AP': 'North', 'AM': 'North', 'PA': 'North', 'RO': 'North', 'RR': 'North', 'TO': 'North',
+        'AL': 'Northeast', 'BA': 'Northeast', 'CE': 'Northeast', 'MA': 'Northeast', 'PB': 'Northeast', 
+        'PE': 'Northeast', 'PI': 'Northeast', 'RN': 'Northeast', 'SE': 'Northeast',
+        'DF': 'Central-West', 'GO': 'Central-West', 'MT': 'Central-West', 'MS': 'Central-West',
+        'ES': 'Southeast', 'MG': 'Southeast', 'RJ': 'Southeast', 'SP': 'Southeast',
+        'PR': 'South', 'RS': 'South', 'SC': 'South'
+    }
+    return region_mapping.get(state_acronym, 'Unknown')
+
 
 def create_crop_type_distribution_chart(filtered_data: dict) -> Optional[go.Figure]:
     """
@@ -56,7 +94,9 @@ def create_crop_type_distribution_chart(filtered_data: dict) -> Optional[go.Figu
                 metrics['states_count'] = len(states_data)
                 
                 for state, activities in states_data.items():
-                    metrics['states_list'].append(state)
+                    # Convert state name to acronym
+                    state_acronym = get_state_acronym(state)
+                    metrics['states_list'].append(state_acronym)
                     
                     if isinstance(activities, dict):
                         # Count planting and harvesting months
@@ -84,7 +124,9 @@ def create_crop_type_distribution_chart(filtered_data: dict) -> Optional[go.Figu
                         calendar = state_entry.get('calendar', {})
                         
                         if state_name:
-                            metrics['states_list'].append(state_name)
+                            # Convert state name to acronym
+                            state_acronym = get_state_acronym(state_name)
+                            metrics['states_list'].append(state_acronym)
                         
                         # Count calendar activities
                         active_months = sum(1 for activity in calendar.values() if activity and activity.strip())
@@ -275,20 +317,6 @@ def create_crop_diversity_by_region_chart(filtered_data: dict) -> Optional[go.Fi
             st.info("📊 No calendar data available for regional diversity")
             return None
 
-        # Mapeia estados para regiões brasileiras
-        state_to_region = {
-            'Acre': 'Norte', 'Amapá': 'Norte', 'Amazonas': 'Norte', 'Pará': 'Norte',
-            'Rondônia': 'Norte', 'Roraima': 'Norte', 'Tocantins': 'Norte',
-            'Alagoas': 'Nordeste', 'Bahia': 'Nordeste', 'Ceará': 'Nordeste', 
-            'Maranhão': 'Nordeste', 'Paraíba': 'Nordeste', 'Pernambuco': 'Nordeste',
-            'Piauí': 'Nordeste', 'Rio Grande do Norte': 'Nordeste', 'Sergipe': 'Nordeste',
-            'Distrito Federal': 'Centro-Oeste', 'Goiás': 'Centro-Oeste', 
-            'Mato Grosso': 'Centro-Oeste', 'Mato Grosso do Sul': 'Centro-Oeste',
-            'Espírito Santo': 'Sudeste', 'Minas Gerais': 'Sudeste', 
-            'Rio de Janeiro': 'Sudeste', 'São Paulo': 'Sudeste',
-            'Paraná': 'Sul', 'Rio Grande do Sul': 'Sul', 'Santa Catarina': 'Sul'
-        }
-
         # Enhanced regional analysis with detailed metrics
         region_metrics = {}
         
@@ -299,7 +327,9 @@ def create_crop_diversity_by_region_chart(filtered_data: dict) -> Optional[go.Fi
                 for state_entry in states_data:
                     if isinstance(state_entry, dict):
                         state_name = state_entry.get('state_name', '')
-                        region = state_entry.get('region', 'Unknown')
+                        # Convert state name to acronym and then to region
+                        state_acronym = get_state_acronym(state_name)
+                        region = get_brazilian_region(state_acronym)
                         calendar = state_entry.get('calendar', {})
                         
                         # Verificar se há atividade neste estado
@@ -316,13 +346,15 @@ def create_crop_diversity_by_region_chart(filtered_data: dict) -> Optional[go.Fi
                             
                             region_metrics[region]['crop_diversity'].add(crop)
                             region_metrics[region]['total_activities'] += active_months
-                            region_metrics[region]['states_count'].add(state_name)
-                            region_metrics[region]['crop_details'].append(f"{crop} ({state_name})")
+                            region_metrics[region]['states_count'].add(state_acronym)
+                            region_metrics[region]['crop_details'].append(f"{crop} ({state_acronym})")
                             
             elif isinstance(states_data, dict):
                 # Estrutura IBGE: dict de estados
                 for state, activities in states_data.items():
-                    region = state_to_region.get(state, 'Indefinido')
+                    # Convert state name to acronym and then to region
+                    state_acronym = get_state_acronym(state)
+                    region = get_brazilian_region(state_acronym)
                     
                     if region not in region_metrics:
                         region_metrics[region] = {
@@ -333,8 +365,8 @@ def create_crop_diversity_by_region_chart(filtered_data: dict) -> Optional[go.Fi
                         }
                     
                     region_metrics[region]['crop_diversity'].add(crop)
-                    region_metrics[region]['states_count'].add(state)
-                    region_metrics[region]['crop_details'].append(f"{crop} ({state})")
+                    region_metrics[region]['states_count'].add(state_acronym)
+                    region_metrics[region]['crop_details'].append(f"{crop} ({state_acronym})")
                     
                     # Count activities if detailed structure available
                     if isinstance(activities, dict):
@@ -495,26 +527,15 @@ def create_number_of_crops_per_region_chart(filtered_data: dict) -> Optional[go.
             st.info("📊 No calendar data available for regional count")
             return None
 
-        # Mapeia estados para regiões brasileiras
-        state_to_region = {
-            'Acre': 'Norte', 'Amapá': 'Norte', 'Amazonas': 'Norte', 'Pará': 'Norte',
-            'Rondônia': 'Norte', 'Roraima': 'Norte', 'Tocantins': 'Norte',
-            'Alagoas': 'Nordeste', 'Bahia': 'Nordeste', 'Ceará': 'Nordeste', 
-            'Maranhão': 'Nordeste', 'Paraíba': 'Nordeste', 'Pernambuco': 'Nordeste',
-            'Piauí': 'Nordeste', 'Rio Grande do Norte': 'Nordeste', 'Sergipe': 'Nordeste',
-            'Distrito Federal': 'Centro-Oeste', 'Goiás': 'Centro-Oeste', 
-            'Mato Grosso': 'Centro-Oeste', 'Mato Grosso do Sul': 'Centro-Oeste',
-            'Espírito Santo': 'Sudeste', 'Minas Gerais': 'Sudeste', 
-            'Rio de Janeiro': 'Sudeste', 'São Paulo': 'Sudeste',
-            'Paraná': 'Sul', 'Rio Grande do Sul': 'Sul', 'Santa Catarina': 'Sul'
-        }
-
         # Conta total de atividades por região usando acesso seguro
         region_activities = {}
         for crop, states_data in crop_calendar.items():
             if isinstance(states_data, dict):
                 for state, activities in states_data.items():
-                    region = state_to_region.get(state, 'Indefinido')
+                    # Convert state name to acronym and then to region
+                    state_acronym = get_state_acronym(state)
+                    region = get_brazilian_region(state_acronym)
+                    
                     if region not in region_activities:
                         region_activities[region] = 0
                     
@@ -530,6 +551,21 @@ def create_number_of_crops_per_region_chart(filtered_data: dict) -> Optional[go.
                     else:
                         # Fallback para estruturas simples
                         region_activities[region] += 1
+            elif isinstance(states_data, list):
+                # Handle CONAB format
+                for state_entry in states_data:
+                    if isinstance(state_entry, dict):
+                        state_name = state_entry.get('state_name', '')
+                        if state_name:
+                            state_acronym = get_state_acronym(state_name)
+                            region = get_brazilian_region(state_acronym)
+                            
+                            if region not in region_activities:
+                                region_activities[region] = 0
+                            
+                            calendar = state_entry.get('calendar', {})
+                            active_months = sum(1 for activity in calendar.values() if activity and activity.strip())
+                            region_activities[region] += active_months
 
         if not region_activities:
             st.info("📊 No regional activity found in data")

@@ -16,22 +16,9 @@ from .agricultural_charts import (
     plot_crop_seasons_comparison
 )
 
-from .conab_charts import (
-    plot_conab_spatial_coverage,
-    plot_conab_temporal_coverage,
-    plot_conab_crop_diversity,
-    plot_conab_spatial_temporal_distribution,
-    validate_conab_data,
-    get_conab_summary_stats,
-    # Timeline functions (consolidated from timeline_charts.py)
-    create_timeline_activities_chart,
-    create_monthly_activities_timeline_chart,
-    create_main_crops_seasonality_chart
-)
-
-# Importações do módulo de disponibilidade
-from .availability import (
-    render_crop_availability_tab
+# Importações do módulo de calendário
+from .calendar import (
+    create_monthly_activities_stacked_bar_chart
 )
 
 __all__ = [
@@ -40,19 +27,7 @@ __all__ = [
     'plot_monthly_activity_calendar',
     'plot_crop_seasons_comparison',
     
-    # CONAB charts
-    'plot_conab_spatial_coverage',
-    'plot_conab_temporal_coverage',
-    'plot_conab_crop_diversity',
-    'plot_conab_spatial_temporal_distribution',
-    'validate_conab_data',
-    'get_conab_summary_stats',
+    # Calendar charts
+    'create_monthly_activities_stacked_bar_chart',
     
-    # Timeline charts (consolidated)
-    'create_timeline_activities_chart',
-    'create_monthly_activities_timeline_chart',
-    'create_main_crops_seasonality_chart',
-    
-    # Availability
-    'render_crop_availability_tab'
 ]

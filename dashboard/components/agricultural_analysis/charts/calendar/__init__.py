@@ -38,6 +38,7 @@ from .monthly_activity_charts import (
     create_total_activities_per_month_chart,
     create_planting_vs_harvesting_per_month_chart,
     create_simultaneous_planting_harvesting_chart,
+    create_monthly_activities_stacked_bar_chart,
     create_planting_harvesting_periods_chart,
     render_monthly_activity_charts
 )
@@ -159,6 +160,7 @@ __all__ = [
     'create_total_activities_per_month_chart',
     'create_planting_vs_harvesting_per_month_chart',
     'create_simultaneous_planting_harvesting_chart',
+    'create_monthly_activities_stacked_bar_chart',
     'create_planting_harvesting_periods_chart',
     
     # Funções individuais de matriz nacional

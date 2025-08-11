@@ -323,6 +323,124 @@ def create_simultaneous_planting_harvesting_chart(filtered_data: dict) -> Option
         return None
 
 
+def create_monthly_activities_stacked_bar_chart(filtered_data: dict) -> Optional[go.Figure]:
+    """
+    Creates a stacked bar chart showing monthly activities distribution (P, H, PH).
+    
+    Args:
+        filtered_data: Filtered agricultural calendar data
+        
+    Returns:
+        go.Figure: Plotly figure or None if no data
+    """
+    try:
+        # Acesso seguro aos calendar data
+        crop_calendar = safe_get_data(filtered_data, 'crop_calendar') or {}
+        
+        if not crop_calendar:
+            st.info("📊 No calendar data available for monthly activities")
+            return None
+
+        # Inicializa contadores mensais
+        month_mapping = {
+            'January': 'Jan', 'February': 'Feb', 'March': 'Mar', 'April': 'Apr',
+            'May': 'May', 'June': 'Jun', 'July': 'Jul', 'August': 'Aug',
+            'September': 'Sep', 'October': 'Oct', 'November': 'Nov', 'December': 'Dec'
+        }
+        months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        
+        # Inicializa contadores para cada tipo de atividade
+        seasonal_data = {}
+        for month in months:
+            seasonal_data[month] = {'P': 0, 'H': 0, 'PH': 0}
+
+        # Conta atividades por mês usando a estrutura real do JSON
+        for crop_name, states_list in crop_calendar.items():
+            if isinstance(states_list, list):
+                for state_data in states_list:
+                    if isinstance(state_data, dict):
+                        calendar = safe_get_data(state_data, 'calendar') or {}
+                        
+                        # Conta atividades por tipo
+                        for month_full_name, activity in calendar.items():
+                            if activity and activity.strip():  # Se tem alguma atividade
+                                month_abbr = month_mapping.get(month_full_name)
+                                if month_abbr and month_abbr in seasonal_data:
+                                    # Classifica a atividade
+                                    if 'PH' in activity:
+                                        seasonal_data[month_abbr]['PH'] += 1
+                                    elif 'P' in activity:
+                                        seasonal_data[month_abbr]['P'] += 1
+                                    elif 'H' in activity:
+                                        seasonal_data[month_abbr]['H'] += 1
+
+        # Verifica se há dados
+        has_data = any(
+            seasonal_data[month]['P'] > 0 or 
+            seasonal_data[month]['H'] > 0 or 
+            seasonal_data[month]['PH'] > 0 
+            for month in months
+        )
+        
+        if not has_data:
+            st.info("📊 No monthly activity found in the data")
+            return None
+
+        # Cria DataFrame no formato adequado para o gráfico empilhado
+        df_seasonal = pd.DataFrame(seasonal_data).T.fillna(0)
+        df_seasonal = df_seasonal.reset_index()
+        df_seasonal.rename(columns={'index': 'Mês'}, inplace=True)
+        
+        # Cria gráfico de barras empilhadas
+        fig = px.bar(
+            df_seasonal,
+            x='Mês',
+            y=['P', 'H', 'PH'],
+            title="📊 Distribuição Mensal de Atividades",
+            labels={
+                'value': 'Número de Atividades', 
+                'variable': 'Tipo',
+                'Mês': 'Mês'
+            },
+            color_discrete_map={
+                'P': '#2E8B57',   # Verde para Plantio
+                'H': '#FF6B35',   # Laranja para Colheita  
+                'PH': '#4682B4'   # Azul para Plantio e Colheita
+            }
+        )
+        
+        # Personaliza layout
+        fig.update_layout(
+            height=400,
+            xaxis_title="Mês",
+            yaxis_title="Número de Atividades",
+            xaxis_tickangle=45,
+            legend=dict(
+                title="Tipo de Atividade",
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            )
+        )
+        
+        # Adiciona hover personalizado
+        fig.update_traces(
+            hovertemplate="<b>%{fullData.name}</b><br>" +
+                         "Mês: %{x}<br>" +
+                         "Atividades: %{y}<br>" +
+                         "<extra></extra>"
+        )
+
+        return fig
+
+    except Exception as e:
+        st.error(f"❌ Error creating monthly activities stacked bar chart: {e}")
+        return None
+
+
 def create_planting_harvesting_periods_chart(filtered_data: dict) -> Optional[go.Figure]:
     """
     Creates planting and harvesting periods chart.
