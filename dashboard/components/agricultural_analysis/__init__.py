@@ -15,14 +15,15 @@ from .charts.agricultural_charts import (
     plot_crop_seasons_comparison
 )
 
-from .charts.conab_charts import (
-    plot_conab_spatial_coverage,
-    plot_conab_temporal_coverage,
-    plot_conab_crop_diversity,
-    plot_conab_spatial_temporal_distribution,
-    validate_conab_data,
-    get_conab_summary_stats
-)
+# Commented out non-existent module
+# from .charts.conab_charts import (
+#     plot_conab_spatial_coverage,
+#     plot_conab_temporal_coverage,
+#     plot_conab_crop_diversity,
+#     plot_conab_spatial_temporal_distribution,
+#     validate_conab_data,
+#     get_conab_summary_stats
+# )
 
 # Overview components
 from .agriculture_overview.agricultural_overview import render_agricultural_overview
@@ -36,8 +37,7 @@ from .agriculture_overview.overview_data import (
 from .charts.availability import (
     render_calendar_availability_analysis,
     render_conab_availability_analysis,
-    create_conab_availability_matrix,
-    render_crop_availability_tab
+    create_conab_availability_matrix
 )
 
 # Calendar components
@@ -48,12 +48,6 @@ __all__ = [
     "plot_crop_calendar_heatmap",
     "plot_monthly_activity_calendar",
     "plot_crop_seasons_comparison",
-    "plot_conab_spatial_coverage",
-    "plot_conab_temporal_coverage",
-    "plot_conab_crop_diversity",
-    "plot_conab_spatial_temporal_distribution",
-    "validate_conab_data",
-    "get_conab_summary_stats",
     
     # Overview functions
     "render_agricultural_overview",
@@ -65,7 +59,6 @@ __all__ = [
     "render_calendar_availability_analysis",
     "render_conab_availability_analysis",
     "create_conab_availability_matrix",
-    "render_crop_availability_tab",
     
     # Calendar functions
     "render_complete_calendar_analysis"
