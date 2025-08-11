@@ -220,10 +220,10 @@ with st.sidebar:
             "pages": ["Temporal Analysis", "Comparative Analysis", "Detailed Analysis"],
             "page_icons": ["calendar-event", "bar-chart", "zoom-in"],
         },
-        "🌾 Agriculture Analysis": {
+        "🌾 Agricultural Analysis": {
             "icon": "leaf",
             "pages": ["Agriculture Overview", "Crop Calendar", "Agriculture Availability"],
-            "page_icons": ["speedometer2", "calendar3", "graph-up-arrow"],
+            "page_icons": ["speedometer2", "calendar3", "graph-up-arrow", "bar-chart-line"],
         },
     }
 
@@ -398,8 +398,8 @@ elif selected_category == "🔍 Initiative Analysis":
 
         initiative_analysis.run()
 
-elif selected_category == "🌾 Agriculture Analysis":
-    # Usar o novo orchestrator consolidado para análise agrícola
+elif selected_category == "🌾 Agricultural Analysis":
+    # Use the new consolidated orchestrator for agricultural analysis
     from dashboard import agricultural_analysis
 
     agricultural_analysis.run()
@@ -413,6 +413,6 @@ if not selected_page:
 
     - 📊 **Overview**: Visão geral do dashboard
     - 🔍 **Initiative Analysis**: Análises detalhadas das iniciativas (Temporal, Comparativa, Detalhada)
-    - 🌾 **Agriculture Analysis**: Análises agrícolas (Calendário de Culturas, Disponibilidade Agrícola)
+    - 🌾 **Agricultural Analysis**: Agricultural analyses (Crop Calendar, Agricultural Availability)
     """
     )

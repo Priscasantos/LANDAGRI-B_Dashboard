@@ -205,7 +205,7 @@ def example_export_capabilities(filtered_data: Dict) -> None:
                     )
                     
             except ImportError:
-                st.info("💡 Funções de export não disponíveis")
+                st.info("💡 Funções de export não available")
     
     # Gráfico de heatmap
     st.markdown("#### 🔥 Heatmap Nacional")
@@ -281,14 +281,14 @@ def run_calendar_examples() -> None:
     """
     # Verifica se há dados na sessão
     if "agricultural_data" not in st.session_state:
-        st.error("❌ Dados agrícolas não encontrados. Por favor, carregue os dados primeiro.")
+        st.error("❌ Dados agrícolas não found. Por favor, carregue os dados primeiro.")
         st.info("💡 Vá para a página Agricultural Analysis para carregar os dados.")
         return
     
     filtered_data = st.session_state.get("agricultural_data", {})
     
     if not filtered_data:
-        st.warning("⚠️ Dados filtrados não disponíveis.")
+        st.warning("⚠️ Dados filtrados não available.")
         return
     
     # Executa seletor de exemplos

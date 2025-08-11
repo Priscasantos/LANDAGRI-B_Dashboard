@@ -1,0 +1,87 @@
+tasks:
+  - id: task-001
+    description: Traduzir agricultural_loader.py - mensagens de interface e docstrings
+    dependencies:
+      - Translation dictionary
+    status: done
+    outcome: Arquivo agricultural_loader.py completamente traduzido
+    edge_cases:
+      - F-string variables
+      - Error messages
+    priority: high
+  
+  - id: task-002
+    description: Identificar e catalogar todos os arquivos Python com textos em português
+    dependencies:
+      - Grep search results
+    status: done
+    outcome: Lista completa de arquivos que precisam tradução
+    edge_cases:
+      - Arquivos em subdiretórios
+      - Arquivos old_ ou test_
+    priority: high
+  
+  - id: task-003
+    description: Traduzir old_agri_charts.py - títulos e mensagens principais
+    dependencies:
+      - Translation dictionary
+      - task-001 completed
+    status: done
+    outcome: Dashboard principal com interface em inglês
+    edge_cases:
+      - Markdown formatting
+      - Chart titles
+    priority: high
+  
+  - id: task-004
+    description: Traduzir test_overview.py e outros arquivos de teste
+    dependencies:
+      - Translation dictionary
+    status: to_do
+    outcome: Arquivos de teste com mensagens em inglês
+    edge_cases:
+      - Test strings vs functional code
+    priority: medium
+  
+  - id: task-005
+    description: Traduzir scripts/utilities - funções de utilidade
+    dependencies:
+      - Translation dictionary
+    status: to_do
+    outcome: Utilitários com interface em inglês
+    edge_cases:
+      - Shared functions
+      - Chart configurations
+    priority: medium
+  
+  - id: task-006
+    description: Testar funcionalidade após tradução de cada arquivo
+    dependencies:
+      - Translated files
+    status: in_progress
+    outcome: Verificação de que tudo funciona como antes
+    edge_cases:
+      - Missing imports
+      - Broken f-strings
+    priority: high
+  
+  - id: task-007
+    description: Criar exemplos antes/depois para documentação
+    dependencies:
+      - Completed translations
+    status: done
+    outcome: Documentação com exemplos de tradução
+    edge_cases:
+      - Representative examples
+    priority: low
+  
+  - id: task-008
+    description: Validação final e testes de integração
+    dependencies:
+      - All translations complete
+    status: to_do
+    outcome: Sistema funcionando 100% em inglês
+    edge_cases:
+      - End-to-end workflow
+      - Error handling
+    priority: high

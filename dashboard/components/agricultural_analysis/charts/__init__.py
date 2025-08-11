@@ -21,10 +21,12 @@ from .conab_charts import (
     plot_conab_temporal_coverage,
     plot_conab_crop_diversity,
     plot_conab_spatial_temporal_distribution,
-    plot_conab_quality_metrics,
-    plot_conab_seasonal_analysis,
-    plot_conab_methodology_overview,
-    plot_conab_crop_production_trends
+    validate_conab_data,
+    get_conab_summary_stats,
+    # Timeline functions (consolidated from timeline_charts.py)
+    create_timeline_activities_chart,
+    create_monthly_activities_timeline_chart,
+    create_main_crops_seasonality_chart
 )
 
 # Importações do módulo de disponibilidade
@@ -43,11 +45,14 @@ __all__ = [
     'plot_conab_temporal_coverage',
     'plot_conab_crop_diversity',
     'plot_conab_spatial_temporal_distribution',
-    'plot_conab_quality_metrics',
-    'plot_conab_seasonal_analysis',
-    'plot_conab_methodology_overview',
-    'plot_conab_crop_production_trends',
+    'validate_conab_data',
+    'get_conab_summary_stats',
     
-    # Availability module
+    # Timeline charts (consolidated)
+    'create_timeline_activities_chart',
+    'create_monthly_activities_timeline_chart',
+    'create_main_crops_seasonality_chart',
+    
+    # Availability
     'render_crop_availability_tab'
 ]

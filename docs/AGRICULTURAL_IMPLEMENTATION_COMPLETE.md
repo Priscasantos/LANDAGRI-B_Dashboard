@@ -118,7 +118,7 @@ The comprehensive agricultural analysis dashboard has been successfully implemen
 
 ### Access Agricultural Analysis
 1. Run the dashboard: `python -m streamlit run app.py`
-2. Navigate to "🌾 Agriculture Analysis" in sidebar
+2. Navigate to "🌾 Agricultural Analysis" in sidebar
 3. Choose between:
    - **Crop Calendar**: Seasonal planting/harvest view
    - **Agriculture Availability**: Full dashboard with all charts

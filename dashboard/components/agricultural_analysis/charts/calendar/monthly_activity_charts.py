@@ -2,74 +2,107 @@
 Monthly Activity Charts
 ======================
 
-Módulo de gráficos de atividades mensais consolidados do old_calendar.
-Implementa visualizações para análise temporal de atividades agrícolas.
+Module for consolidated monthly activity charts from old_calendar.
+Implements visualizations for temporal analysis of agricultural activities.
 
-Autor: Dashboard Iniciativas LULC
-Data: 2025-08-07
+Author: LULC Initiatives Dashboard
+Date: 2025-08-07
 """
 
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import streamlit as st
-from typing import Dict, List, Optional
+from typing import Optional
+
+# Import das funções seguras
+from ...agricultural_loader import safe_get_data, validate_data_structure
+
+
+def _get_month_abbreviation(month_name: str) -> str:
+    """Convert month name to abbreviation."""
+    month_mapping = {
+        'January': 'Jan', 'February': 'Feb', 'March': 'Mar', 'April': 'Apr',
+        'May': 'May', 'June': 'Jun', 'July': 'Jul', 'August': 'Aug',
+        'September': 'Sep', 'October': 'Oct', 'November': 'Nov', 'December': 'Dec'
+    }
+    return month_mapping.get(month_name, month_name[:3])
+
+
+def _get_full_month_name(month_abbr: str) -> str:
+    """Convert month abbreviation to full name."""
+    abbr_mapping = {
+        'Jan': 'January', 'Feb': 'February', 'Mar': 'March', 'Apr': 'April',
+        'May': 'May', 'Jun': 'June', 'Jul': 'July', 'Aug': 'August',
+        'Sep': 'September', 'Oct': 'October', 'Nov': 'November', 'Dec': 'December'
+    }
+    return abbr_mapping.get(month_abbr, month_abbr)
 
 
 def create_total_activities_per_month_chart(filtered_data: dict) -> Optional[go.Figure]:
     """
-    Cria gráfico de total de atividades por mês.
+    Creates total activities per month chart.
     
-    Equivalente ao: total_activities_per_month.png do old_calendar/national/
+    Equivalent to: total_activities_per_month.png from old_calendar/national/
     
     Args:
-        filtered_data: Dados filtrados do calendário agrícola
+        filtered_data: Filtered agricultural calendar data
         
     Returns:
-        go.Figure: Figura do Plotly ou None se não há dados
+        go.Figure: Plotly figure or None if no data
     """
     try:
-        crop_calendar = filtered_data.get('crop_calendar', {})
+        # Acesso seguro aos calendar data
+        crop_calendar = safe_get_data(filtered_data, 'crop_calendar') or {}
         
         if not crop_calendar:
-            st.info("📊 Sem dados de calendário disponíveis para atividades mensais")
+            st.info("📊 No calendar data available for monthly activities")
             return None
 
-        # Inicializa contadores mensais
+        # Inicializa contadores mensais (mapeando nomes completos para abreviações)
+        month_mapping = {
+            'January': 'Jan', 'February': 'Feb', 'March': 'Mar', 'April': 'Apr',
+            'May': 'May', 'June': 'Jun', 'July': 'Jul', 'August': 'Aug',
+            'September': 'Sep', 'October': 'Oct', 'November': 'Nov', 'December': 'Dec'
+        }
         months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         monthly_activities = {month: 0 for month in months}
 
-        # Conta atividades por mês
-        for crop, states_data in crop_calendar.items():
-            for state, activities in states_data.items():
-                # Conta plantio
-                for month in activities.get('planting_months', []):
-                    if month in monthly_activities:
-                        monthly_activities[month] += 1
-                
-                # Conta colheita
-                for month in activities.get('harvesting_months', []):
-                    if month in monthly_activities:
-                        monthly_activities[month] += 1
+        # Conta atividades por mês usando a estrutura real do JSON
+        for crop_name, states_list in crop_calendar.items():
+            if isinstance(states_list, list):
+                for state_data in states_list:
+                    if isinstance(state_data, dict):
+                        calendar = safe_get_data(state_data, 'calendar') or {}
+                        
+                        # Conta atividades (P=Planting, H=Harvest, PH=Both)
+                        for month_full_name, activity in calendar.items():
+                            if activity and activity.strip():  # Se tem alguma atividade
+                                month_abbr = month_mapping.get(month_full_name)
+                                if month_abbr and month_abbr in monthly_activities:
+                                    # Conta cada atividade: P=1, H=1, PH=2
+                                    if 'PH' in activity:
+                                        monthly_activities[month_abbr] += 2  # Plantio + Colheita
+                                    elif 'P' in activity or 'H' in activity:
+                                        monthly_activities[month_abbr] += 1
 
         if not any(monthly_activities.values()):
-            st.info("📊 Nenhuma atividade mensal encontrada nos dados")
+            st.info("📊 No monthly activity found in the data")
             return None
 
         # Cria DataFrame
-        df = pd.DataFrame(list(monthly_activities.items()), columns=['Mês', 'Total_Atividades'])
+        df = pd.DataFrame(list(monthly_activities.items()), columns=['Month', 'Total_Activities'])
 
-        # Cria gráfico de linhas
+        # Creates line chart
         fig = px.line(
             df,
-            x='Mês',
-            y='Total_Atividades',
-            title="📅 Total de Atividades Agrícolas por Mês",
+            x='Month',
+            y='Total_Activities',
+            title="📅 Total Agricultural Activities per Month",
             labels={
-                'Total_Atividades': 'Número Total de Atividades',
-                'Mês': 'Mês do Ano'
+                'Total_Activities': 'Total Number of Activities',
+                'Month': 'Month of Year'
             },
             markers=True
         )
@@ -77,96 +110,108 @@ def create_total_activities_per_month_chart(filtered_data: dict) -> Optional[go.
         # Personaliza layout
         fig.update_layout(
             height=400,
-            xaxis_title="Mês do Ano",
-            yaxis_title="Número Total de Atividades",
+            xaxis_title="Month of Year",
+            yaxis_title="Total Number of Activities",
             showlegend=False
         )
 
         # Adiciona valores nos pontos
         fig.update_traces(
             mode='lines+markers+text',
-            text=df['Total_Atividades'],
+            text=df['Total_Activities'],
             textposition='top center'
         )
 
         return fig
 
     except Exception as e:
-        st.error(f"❌ Erro ao criar gráfico de atividades mensais: {e}")
+        st.error(f"❌ Error creating gráfico de atividades mensais: {e}")
         return None
 
 
 def create_planting_vs_harvesting_per_month_chart(filtered_data: dict) -> Optional[go.Figure]:
     """
-    Cria gráfico comparativo de plantio vs colheita por mês.
+    Creates comparative planting vs harvesting chart per month.
     
-    Equivalente ao: planting_vs_harvesting_per_month.png do old_calendar/national/
+    Equivalent to: planting_vs_harvesting_per_month.png from old_calendar/national/
     
     Args:
-        filtered_data: Dados filtrados do calendário agrícola
+        filtered_data: Filtered agricultural calendar data
         
     Returns:
-        go.Figure: Figura do Plotly ou None se não há dados
+        go.Figure: Plotly figure or None if no data
     """
     try:
-        crop_calendar = filtered_data.get('crop_calendar', {})
+        # Acesso seguro aos calendar data
+        crop_calendar = safe_get_data(filtered_data, 'crop_calendar') or {}
         
         if not crop_calendar:
-            st.info("📊 Sem dados de calendário disponíveis para comparação plantio vs colheita")
+            st.info("📊 No calendar data available for planting vs harvesting comparison")
             return None
 
-        # Inicializa contadores mensais
+        # Inicializa contadores mensais (mapeando nomes completos para abreviações)
+        month_mapping = {
+            'January': 'Jan', 'February': 'Feb', 'March': 'Mar', 'April': 'Apr',
+            'May': 'May', 'June': 'Jun', 'July': 'Jul', 'August': 'Aug',
+            'September': 'Sep', 'October': 'Oct', 'November': 'Nov', 'December': 'Dec'
+        }
         months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-        planting_counts = {month: 0 for month in months}
-        harvesting_counts = {month: 0 for month in months}
+        planting_counts = dict.fromkeys(months, 0)
+        harvesting_counts = dict.fromkeys(months, 0)
 
-        # Conta atividades por mês
-        for crop, states_data in crop_calendar.items():
-            for state, activities in states_data.items():
-                # Conta plantio
-                for month in activities.get('planting_months', []):
-                    if month in planting_counts:
-                        planting_counts[month] += 1
-                
-                # Conta colheita
-                for month in activities.get('harvesting_months', []):
-                    if month in harvesting_counts:
-                        harvesting_counts[month] += 1
+        # Conta atividades por mês usando a estrutura real do JSON
+        for _crop_name, states_list in crop_calendar.items():
+            if isinstance(states_list, list):
+                for state_data in states_list:
+                    if isinstance(state_data, dict):
+                        calendar = safe_get_data(state_data, 'calendar') or {}
+                        
+                        # Conta atividades (P=Planting, H=Harvest, PH=Both)
+                        for month_full_name, activity in calendar.items():
+                            if activity and activity.strip():  # Se tem alguma atividade
+                                month_abbr = month_mapping.get(month_full_name)
+                                if month_abbr and month_abbr in planting_counts:
+                                    # Conta plantio
+                                    if 'P' in activity:
+                                        planting_counts[month_abbr] += 1
+                                    # Conta colheita
+                                    if 'H' in activity:
+                                        harvesting_counts[month_abbr] += 1
 
         # Cria DataFrame
         df = pd.DataFrame({
-            'Mês': months,
-            'Plantio': [planting_counts[month] for month in months],
-            'Colheita': [harvesting_counts[month] for month in months]
+            'Month': months,
+            'Planting': [planting_counts[month] for month in months],
+            'Harvesting': [harvesting_counts[month] for month in months]
         })
 
-        # Cria gráfico de barras agrupadas
+        # Creates grouped bar chart
         fig = go.Figure()
 
         fig.add_trace(go.Bar(
-            name='🌱 Plantio',
-            x=df['Mês'],
-            y=df['Plantio'],
+            name='🌱 Planting',
+            x=df['Month'],
+            y=df['Planting'],
             marker_color='lightgreen',
-            text=df['Plantio'],
+            text=df['Planting'],
             textposition='outside'
         ))
 
         fig.add_trace(go.Bar(
-            name='🌾 Colheita',
-            x=df['Mês'],
-            y=df['Colheita'],
+            name='🌾 Harvesting',
+            x=df['Month'],
+            y=df['Harvesting'],
             marker_color='orange',
-            text=df['Colheita'],
+            text=df['Harvesting'],
             textposition='outside'
         ))
 
         # Personaliza layout
         fig.update_layout(
-            title="🌱📅 Comparação Plantio vs Colheita por Mês",
-            xaxis_title="Mês do Ano",
-            yaxis_title="Número de Atividades",
+            title="🌱📅 Planting vs Harvesting Comparison by Month",
+            xaxis_title="Month of Year",
+            yaxis_title="Number of Activities",
             barmode='group',
             height=500,
             legend=dict(
@@ -181,7 +226,7 @@ def create_planting_vs_harvesting_per_month_chart(filtered_data: dict) -> Option
         return fig
 
     except Exception as e:
-        st.error(f"❌ Erro ao criar gráfico plantio vs colheita: {e}")
+        st.error(f"❌ Error creating gráfico plantio vs colheita: {e}")
         return None
 
 
@@ -195,13 +240,13 @@ def create_simultaneous_planting_harvesting_chart(filtered_data: dict) -> Option
         filtered_data: Dados filtrados do calendário agrícola
         
     Returns:
-        go.Figure: Figura do Plotly ou None se não há dados
+        go.Figure: Plotly figure ou None if no data
     """
     try:
         crop_calendar = filtered_data.get('crop_calendar', {})
         
         if not crop_calendar:
-            st.info("📊 Sem dados de calendário disponíveis para atividades simultâneas")
+            st.info("📊 No calendar data available for simultaneous activities")
             return None
 
         # Inicializa contadores mensais
@@ -211,43 +256,56 @@ def create_simultaneous_planting_harvesting_chart(filtered_data: dict) -> Option
 
         # Identifica atividades simultâneas por mês
         for crop, states_data in crop_calendar.items():
-            for state, activities in states_data.items():
-                planting_months = set(activities.get('planting_months', []))
-                harvesting_months = set(activities.get('harvesting_months', []))
-                
-                # Encontra meses com atividades simultâneas
-                simultaneous_months = planting_months.intersection(harvesting_months)
-                
-                for month in simultaneous_months:
-                    if month in simultaneous_activities:
-                        simultaneous_activities[month] += 1
+            # Handle case where states_data is a list, not a dict
+            if isinstance(states_data, list):
+                for state_info in states_data:
+                    if not isinstance(state_info, dict):
+                        continue
+                    calendar = state_info.get('calendar', {})
+                    for month, activity in calendar.items():
+                        if activity and ('P' in str(activity) and 'H' in str(activity)):
+                            month_abbr = _get_month_abbreviation(month)
+                            if month_abbr in simultaneous_activities:
+                                simultaneous_activities[month_abbr] += 1
+            else:
+                # Original logic for dict format
+                for state, activities in states_data.items():
+                    planting_months = set(activities.get('planting_months', []))
+                    harvesting_months = set(activities.get('harvesting_months', []))
+                    
+                    # Encontra meses com atividades simultâneas
+                    simultaneous_months = planting_months.intersection(harvesting_months)
+                    
+                    for month in simultaneous_months:
+                        if month in simultaneous_activities:
+                            simultaneous_activities[month] += 1
 
         if not any(simultaneous_activities.values()):
-            st.info("📊 Nenhuma atividade simultânea encontrada nos dados")
+            st.info("📊 No simultaneous activity found in the data")
             return None
 
         # Cria DataFrame
-        df = pd.DataFrame(list(simultaneous_activities.items()), columns=['Mês', 'Atividades_Simultâneas'])
+        df = pd.DataFrame(list(simultaneous_activities.items()), columns=['Month', 'Simultaneous_Activities'])
 
-        # Cria gráfico de barras
+        # Creates bar chart
         fig = px.bar(
             df,
-            x='Mês',
-            y='Atividades_Simultâneas',
-            title="🔄 Atividades Simultâneas de Plantio e Colheita por Mês",
+            x='Month',
+            y='Simultaneous_Activities',
+            title="🔄 Simultaneous Planting and Harvesting Activities by Month",
             labels={
-                'Atividades_Simultâneas': 'Número de Atividades Simultâneas',
-                'Mês': 'Mês do Ano'
+                'Simultaneous_Activities': 'Number of Simultaneous Activities',
+                'Month': 'Month of Year'
             },
-            color='Atividades_Simultâneas',
+            color='Simultaneous_Activities',
             color_continuous_scale='Reds'
         )
 
         # Personaliza layout
         fig.update_layout(
             height=400,
-            xaxis_title="Mês do Ano",
-            yaxis_title="Número de Atividades Simultâneas",
+            xaxis_title="Month of Year",
+            yaxis_title="Number of Simultaneous Activities",
             showlegend=False,
             coloraxis_showscale=False
         )
@@ -261,30 +319,30 @@ def create_simultaneous_planting_harvesting_chart(filtered_data: dict) -> Option
         return fig
 
     except Exception as e:
-        st.error(f"❌ Erro ao criar gráfico de atividades simultâneas: {e}")
+        st.error(f"❌ Error creating simultaneous activities chart: {e}")
         return None
 
 
 def create_planting_harvesting_periods_chart(filtered_data: dict) -> Optional[go.Figure]:
     """
-    Cria gráfico de períodos de plantio e colheita.
+    Creates planting and harvesting periods chart.
     
-    Equivalente ao: planting_harvesting_periods.png do old_calendar/national/
+    Equivalent to: planting_harvesting_periods.png from old_calendar/national/
     
     Args:
-        filtered_data: Dados filtrados do calendário agrícola
+        filtered_data: Filtered agricultural calendar data
         
     Returns:
-        go.Figure: Figura do Plotly ou None se não há dados
+        go.Figure: Plotly figure or None if no data
     """
     try:
         crop_calendar = filtered_data.get('crop_calendar', {})
         
         if not crop_calendar:
-            st.info("📊 Sem dados de calendário disponíveis para períodos de plantio e colheita")
+            st.info("📊 No calendar data available for planting and harvesting periods")
             return None
 
-        # Prepara dados para heatmap de períodos
+        # Prepares data for periods heatmap
         months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         
@@ -295,44 +353,59 @@ def create_planting_harvesting_periods_chart(filtered_data: dict) -> Optional[go
             crop_row_harvesting = []
             
             for month in months:
-                # Conta estados com plantio neste mês
+                # Count states with planting this month
                 planting_count = 0
                 harvesting_count = 0
                 
-                for state, activities in states_data.items():
-                    if month in activities.get('planting_months', []):
-                        planting_count += 1
-                    if month in activities.get('harvesting_months', []):
-                        harvesting_count += 1
+                # Handle case where states_data is a list, not a dict
+                if isinstance(states_data, list):
+                    for state_info in states_data:
+                        if not isinstance(state_info, dict):
+                            continue
+                        calendar = state_info.get('calendar', {})
+                        month_full_name = _get_full_month_name(month)
+                        activity = calendar.get(month_full_name, '')
+                        if activity:
+                            if 'P' in str(activity):
+                                planting_count += 1
+                            if 'H' in str(activity):
+                                harvesting_count += 1
+                else:
+                    # Original logic for dict format
+                    for state, activities in states_data.items():
+                        if month in activities.get('planting_months', []):
+                            planting_count += 1
+                        if month in activities.get('harvesting_months', []):
+                            harvesting_count += 1
                 
                 crop_row_planting.append(planting_count)
                 crop_row_harvesting.append(harvesting_count)
             
-            # Adiciona dados ao heatmap
+            # Adds data to heatmap
             heatmap_data.append({
-                'Cultura': f"{crop} (Plantio)",
-                'Tipo': 'Plantio',
+                'Crop': f"{crop} (Planting)",
+                'Type': 'Planting',
                 **{months[i]: crop_row_planting[i] for i in range(len(months))}
             })
             
             heatmap_data.append({
-                'Cultura': f"{crop} (Colheita)",
-                'Tipo': 'Colheita',
+                'Crop': f"{crop} (Harvesting)",
+                'Type': 'Harvesting',
                 **{months[i]: crop_row_harvesting[i] for i in range(len(months))}
             })
 
         if not heatmap_data:
-            st.info("📊 Nenhum período encontrado nos dados")
+            st.info("📊 No periods found in the data")
             return None
 
         # Cria DataFrame
         df = pd.DataFrame(heatmap_data)
         
-        # Prepara matriz para heatmap
+        # Prepares matrix for heatmap
         z_data = df[months].values
-        y_labels = df['Cultura'].tolist()
+        y_labels = df['Crop'].tolist()
 
-        # Cria heatmap
+        # Creates heatmap
         fig = go.Figure(data=go.Heatmap(
             z=z_data,
             x=months,
@@ -346,29 +419,29 @@ def create_planting_harvesting_periods_chart(filtered_data: dict) -> Optional[go
 
         # Personaliza layout
         fig.update_layout(
-            title="🗓️ Períodos de Plantio e Colheita por Cultura",
-            xaxis_title="Mês do Ano",
-            yaxis_title="Cultura (Tipo de Atividade)",
+            title="🗓️ Planting and Harvesting Periods by Crop",
+            xaxis_title="Month of Year",
+            yaxis_title="Crop (Activity Type)",
             height=400 + (len(y_labels) * 15)
         )
 
         return fig
 
     except Exception as e:
-        st.error(f"❌ Erro ao criar gráfico de períodos de plantio e colheita: {e}")
+        st.error(f"❌ Error creating planting and harvesting periods chart: {e}")
         return None
 
 
 def render_monthly_activity_charts(filtered_data: dict) -> None:
     """
-    Renderiza todos os gráficos de atividades mensais.
+    Renders all monthly activity charts.
     
     Args:
-        filtered_data: Dados filtrados do calendário agrícola
+        filtered_data: Filtered agricultural calendar data
     """
-    st.markdown("### 📅 Análise de Atividades Mensais")
+    st.markdown("### 📅 Monthly Activities Analysis")
     
-    # Primeira linha: atividades totais e comparação plantio vs colheita
+    # First row: total activities and planting vs harvesting comparison
     col1, col2 = st.columns(2)
     
     with col1:
@@ -381,7 +454,7 @@ def render_monthly_activity_charts(filtered_data: dict) -> None:
         if fig2:
             st.plotly_chart(fig2, use_container_width=True)
     
-    # Segunda linha: atividades simultâneas
+    # Second row: simultaneous activities
     col3, col4 = st.columns(2)
     
     with col3:
@@ -390,10 +463,10 @@ def render_monthly_activity_charts(filtered_data: dict) -> None:
             st.plotly_chart(fig3, use_container_width=True)
     
     with col4:
-        st.info("📊 Espaço reservado para métricas adicionais")
+        st.info("📊 Space reserved for additional metrics")
     
-    # Terceira linha: períodos completos (largura total)
-    st.markdown("#### 🗓️ Períodos Detalhados de Plantio e Colheita")
+    # Third row: complete periods (full width)
+    st.markdown("#### 🗓️ Detailed Planting and Harvesting Periods")
     fig4 = create_planting_harvesting_periods_chart(filtered_data)
     if fig4:
         st.plotly_chart(fig4, use_container_width=True)
