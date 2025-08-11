@@ -17,6 +17,7 @@ import pandas as pd
 import streamlit as st
 
 from dashboard.components.overview import lulc_classes, summary_cards
+from dashboard.components import agricultural_data
 
 # Add scripts to path if necessary
 current_dir = Path(__file__).parent.parent  # dashboard-iniciativas/
@@ -464,6 +465,10 @@ def run() -> None:
     # Render main overview sections using components
     render_overview_metrics(df, meta)
     render_initiative_details(df, meta, sensors_meta)
+    
+    # Add Brazilian agricultural data section
+    st.markdown("---")
+    agricultural_data.render()
 
 
 if __name__ == "__main__":

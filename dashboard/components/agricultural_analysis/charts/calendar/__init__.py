@@ -2,31 +2,31 @@
 Calendar Charts Module - Consolidated from old_calendar
 ======================================================
 
-Módulos consolidados de gráficos de calendário agrícola do old_calendar.
-Cada tipo de análise é implementado em seu próprio módulo para melhor organização.
+Consolidated chart modules from old_calendar agricultural calendar.
+Each type of analysis is implemented in its own module for better organization.
 
-Módulos Disponíveis:
+Available Modules:
 -------------------
-- crop_distribution_charts: Distribuição e diversidade de culturas
-- monthly_activity_charts: Atividades mensais e comparações temporais  
-- national_calendar_matrix: Matrizes e heatmaps nacionais
-- timeline_charts: Timelines e sazonalidade
-- regional_calendar_charts: Análises regionais detalhadas
-- enhanced_calendar_heatmap: Heatmap aprimorado (existente)
-- activity_intensity: Análise de intensidade (existente)
-- temporal_analysis: Análise temporal (existente)
-- seasonality_analysis: Análise de sazonalidade (existente)
-- regional_analysis: Análise regional básica (existente)
-- polar_activity_chart: Gráfico polar de atividades (existente)
-- interactive_timeline: Timeline interativo (existente)
-- enhanced_statistics: Estatísticas aprimoradas (existente)
-- additional_analysis: Análises adicionais (existente)
+- crop_distribution_charts: Crop distribution and diversity
+- monthly_activity_charts: Monthly activities and temporal comparisons  
+- national_calendar_matrix: National matrices and heatmaps
+- timeline_charts: Timelines and seasonality
+- regional_calendar_charts: Detailed regional analyses
+- enhanced_calendar_heatmap: Enhanced heatmap (existing)
+- activity_intensity: Intensity analysis (existing)
+- temporal_analysis: Temporal analysis (existing)
+- seasonality_analysis: Seasonality analysis (existing)
+- regional_analysis: Basic regional analysis (existing)
+- polar_activity_chart: Polar activity chart (existing)
+- interactive_timeline: Interactive timeline (existing)
+- enhanced_statistics: Enhanced statistics (existing)
+- additional_analysis: Additional analyses (existing)
 
-Autor: Dashboard Iniciativas LULC
-Data: 2025-08-07
+Author: LULC Initiatives Dashboard
+Date: 2025-08-07
 """
 
-# Importações dos módulos consolidados do old_calendar
+# Imports from consolidated modules from old_calendar
 from .crop_distribution_charts import (
     create_crop_type_distribution_chart,
     create_crop_diversity_by_region_chart,
@@ -49,11 +49,15 @@ from .national_calendar_matrix import (
     render_national_calendar_matrix_charts
 )
 
+from .crop_gantt_chart import (
+    render_crop_gantt_chart,
+    create_gantt_chart_with_filters
+)
+
 from .timeline_charts import (
     create_timeline_activities_chart,
     create_monthly_activities_timeline_chart,
-    create_main_crops_seasonality_chart,
-    render_timeline_charts
+    create_main_crops_seasonality_chart
 )
 
 from .regional_calendar_charts import (
@@ -81,34 +85,51 @@ from .additional_analysis import *
 
 def render_complete_calendar_analysis(filtered_data: dict) -> None:
     """
-    Renderiza análise completa consolidada do calendário agrícola.
+    Renders complete consolidated agricultural calendar analysis.
     
-    Inclui todos os gráficos consolidados do old_calendar organizados
-    em seções lógicas para análise abrangente.
+    Includes all consolidated old_calendar charts organized
+    in logical sections for comprehensive analysis.
     
     Args:
-        filtered_data: Dados filtrados do calendário agrícola
+        filtered_data: Filtered agricultural calendar data
     """
     import streamlit as st
     
-    st.markdown("## 📅 Análise Completa do Calendário Agrícola")
-    st.markdown("*Gráficos consolidados do old_calendar organizados modularmente*")
+    st.markdown("## 📅 Complete Agricultural Calendar Analysis")
+    st.markdown("*Consolidated old_calendar charts organized modularly*")
     
-    # Seção 1: Distribuição e Diversidade
-    with st.expander("🌾 Distribuição e Diversidade de Culturas", expanded=True):
+    # Section 1: Distribution and Diversity
+    with st.expander("🌾 Crop Distribution and Diversity", expanded=True):
         render_crop_distribution_charts(filtered_data)
     
-    # Seção 2: Atividades Mensais
-    with st.expander("📅 Análise de Atividades Mensais", expanded=False):
+    # Section 2: Monthly Activities
+    with st.expander("📅 Monthly Activities Analysis", expanded=False):
         render_monthly_activity_charts(filtered_data)
-    
-    # Seção 3: Matriz Nacional
-    with st.expander("🗓️ Matriz Nacional do Calendário", expanded=False):
-        render_national_calendar_matrix_charts(filtered_data)
-    
-    # Seção 4: Timeline e Sazonalidade
-    with st.expander("⏰ Timeline e Sazonalidade", expanded=False):
-        render_timeline_charts(filtered_data)
+
+    # Section 3: National Matrix
+    with st.expander("🗓️ National Calendar Matrix", expanded=False):
+        render_national_calendar_matrix_charts(filtered_data)    # Section 4: Timeline and Seasonality
+    with st.expander("⏰ Timeline and Seasonality", expanded=False):
+        # Timeline activities chart
+        timeline_fig = create_timeline_activities_chart(filtered_data)
+        if timeline_fig:
+            st.plotly_chart(timeline_fig, use_container_width=True)
+        else:
+            st.info("📊 Timeline chart: Insufficient data for visualization")
+            
+        # Monthly activities timeline
+        monthly_timeline_fig = create_monthly_activities_timeline_chart(filtered_data)
+        if monthly_timeline_fig:
+            st.plotly_chart(monthly_timeline_fig, use_container_width=True)
+        else:
+            st.info("📊 Monthly timeline: Insufficient data for visualization")
+            
+        # Main crops seasonality
+        seasonality_fig = create_main_crops_seasonality_chart(filtered_data)
+        if seasonality_fig:
+            st.plotly_chart(seasonality_fig, use_container_width=True)
+        else:
+            st.info("📊 Seasonality chart: Insufficient data for visualization")
     
     # Seção 5: Análise Regional Detalhada
     with st.expander("🌍 Análise Regional Detalhada", expanded=False):
@@ -126,11 +147,10 @@ __all__ = [
     'render_crop_distribution_charts',
     'render_monthly_activity_charts', 
     'render_national_calendar_matrix_charts',
-    'render_timeline_charts',
     'render_all_regional_analysis',
     'render_regional_analysis_for_region',
     
-    # Funções individuais de distribuição
+    # Individual distribution functions
     'create_crop_type_distribution_chart',
     'create_crop_diversity_by_region_chart',
     'create_number_of_crops_per_region_chart',

@@ -124,7 +124,7 @@ def render_temporal_comparison(calendar_data: dict) -> None:
             st.caption("Evolução da atividade por cultura ao longo dos anos.")
             
         else:
-            st.info("📊 Dados temporais não disponíveis")
+            st.info("📊 Dados temporais não available")
         
     except Exception as e:
         st.error(f"Erro na comparação temporal: {e}")
@@ -187,7 +187,7 @@ def render_regional_distribution(calendar_data: dict) -> None:
             st.caption("Mapa de calor da intensidade de atividades agrícolas por estado e cultura.")
             
         else:
-            st.info("📊 Dados regionais não disponíveis")
+            st.info("📊 Dados regionais não available")
         
     except Exception as e:
         st.error(f"Erro na distribuição regional: {e}")

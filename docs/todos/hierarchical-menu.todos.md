@@ -5,7 +5,7 @@
 - [x] **Estrutura do Menu Definida**
   - [x] Categoria Overview com Dashboard Overview
   - [x] Categoria Initiative Analysis com 3 sub-páginas
-  - [x] Categoria Agriculture Analysis com 2 sub-páginas
+  - [x] Categoria Agricultural Analysis com 2 sub-páginas
   - [x] Mapeamento de ícones Bootstrap para cada item
 
 - [x] **Implementação Base**

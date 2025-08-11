@@ -2,12 +2,12 @@
 Agricultural Overview Component
 ==============================
 
-Componente responsável por renderizar o overview consolidado de dados agrícolas.
-APENAS dados de visão geral - sem abas, menu único.
-Integrado com informações atualizadas do CONAB e Embrapa (2025).
+Component responsible for rendering the consolidated agricultural data overview.
+ONLY overview data - no tabs, single menu.
+Integrated with updated agricultural monitoring information (2025).
 
-Autor: Dashboard Iniciativas LULC
-Data: 2025-08-05
+Author: Agricultural Dashboard
+Date: 2025-08-08
 """
 
 from typing import Any
@@ -20,301 +20,301 @@ import streamlit as st
 from .overview_data import (
     get_agricultural_overview_stats,
     get_crops_overview_data,
-    get_states_summary
+    get_states_summary,
 )
 
 
-def render_agricultural_overview(calendar_data: dict = None, conab_data: dict = None) -> None:
+def render_agricultural_overview(calendar_data: dict = None, agricultural_data: dict = None) -> None:
     """
-    Renderizar overview agrícola consolidado.
-    Página única sem abas - apenas visão geral.
-    Inclui informações atualizadas do CONAB 2025.
+    Render consolidated agricultural overview.
+    Single page without tabs - overview only.
+    Includes updated agricultural monitoring information for 2025.
     
     Args:
-        calendar_data: Dados do calendário agrícola (opcional)
-        conab_data: Dados CONAB detalhados (opcional)
+        calendar_data: Agricultural calendar data (optional)
+        agricultural_data: Detailed agricultural data (optional)
     """
     
-    # Header aprimorado do overview
-    st.markdown("# 🌾 Overview Agrícola Brasileiro")
-    st.markdown("*Monitoramento abrangente da agricultura brasileira - CONAB & Embrapa 2025*")
+    # Enhanced overview header
+    st.markdown("# 🌾 Brazilian Agricultural Overview")
+    st.markdown("*Comprehensive monitoring of Brazilian agriculture - Agricultural Data & Research 2025*")
     
-    # Info box com contexto atualizado
+    # Info box with updated context
     with st.container():
         st.info("""
-        📊 **Sistema Nacional de Monitoramento Agrícola** | 🇧🇷 **Brasil**
+        📊 **National Agricultural Monitoring System** | 🇧🇷 **Brazil**
         
-        **Fontes:** CONAB (Companhia Nacional de Abastecimento) | Embrapa | IBGE  
-        **Cobertura:** Safra 2024/25 - Previsão de 339,6 milhões de toneladas de grãos  
-        **Culturas Principais:** Soja, Milho, Café, Cana-de-açúcar, Algodão, Arroz, Feijão  
-        **Atualização:** Agosto 2025 - Dados espectrais e monitoramento em tempo real
+        **Sources:** Agricultural Data (CONAB, Embrapa, IBGE)
+        **Coverage:** 2024/25 Harvest - Forecast of 339.6 million tons of grains
+        **Main Crops:** Soybean, Corn, Coffee, Sugarcane, Cotton, Rice, Beans
+        **Update:** August 2025 - Spectral data and real-time monitoring
         """)
     
-    # Carregar dados específicos do overview
+    # Load specific overview data
     overview_stats = get_agricultural_overview_stats()
     crops_data = get_crops_overview_data()
     states_data = get_states_summary()
     
-    # Métricas principais expandidas
+    # Expanded main metrics
     _render_overview_metrics(overview_stats)
     
     st.markdown("---")
     
-    # Dashboard de indicadores em tempo real
+    # Real-time indicators dashboard
     _render_real_time_indicators()
     
     st.markdown("---")
     
-    # Status do sistema expandido
+    # Expanded system status
     _render_system_status(overview_stats)
     
     st.markdown("---")
     
-    # Análises em layout aprimorado
+    # Analysis in enhanced layout
     col1, col2 = st.columns([1.2, 0.8])
     
     with col1:
-        st.markdown("#### 🌱 Culturas Monitoradas")
+        st.markdown("#### 🌱 Monitored Crops")
         _render_crops_overview(crops_data)
         
     with col2:
-        st.markdown("#### 🗺️ Distribuição por Estados")
+        st.markdown("#### 🗺️ Distribution by States")
         _render_states_overview(states_data)
     
     st.markdown("---")
     
-    # Nova seção: Tendências e insights
+    # New section: Trends and insights
     _render_agricultural_insights()
     
     st.markdown("---")
     
-    # Resumo técnico expandido
+    # Expanded technical summary
     _render_technical_summary(overview_stats)
 
 
 def _render_real_time_indicators() -> None:
     """
-    Renderizar indicadores em tempo real da agricultura brasileira.
+    Render real-time indicators of Brazilian agriculture.
     """
-    st.markdown("#### ⚡ Indicadores em Tempo Real")
+    st.markdown("#### ⚡ Real-Time Indicators")
     
-    # Simulação de dados em tempo real baseados nas informações do CONAB
+    # Real-time data simulation based on agricultural information
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         st.metric(
-            "📈 Produção 2024/25",
-            "339,6 Mi ton",
+            "📈 Production 2024/25",
+            "339.6 M tons",
             delta="2.4% vs 2023/24",
-            help="Estimativa CONAB para safra de grãos 2024/25"
+            help="Agricultural estimate for 2024/25 grain harvest"
         )
     
     with col2:
         st.metric(
-            "🌡️ Condições Climáticas",
-            "Favoráveis",
-            delta="Milho 2ª safra",
-            help="Dados espectrais indicam condições adequadas"
+            "🌡️ Weather Conditions",
+            "Favorable",
+            delta="Second corn crop",
+            help="Spectral data indicates adequate conditions"
         )
     
     with col3:
         st.metric(
-            "🚜 Área Plantada",
-            "78,8 Mi ha",
-            delta="1.8% expansão",
-            help="Área total estimada para safra atual"
+            "🚜 Planted Area",
+            "78.8 M ha",
+            delta="1.8% expansion",
+            help="Total estimated area for current harvest"
         )
     
     with col4:
         st.metric(
-            "💰 Valor Bruto",
-            "R$ 756 Bi",
-            delta="12% vs anterior",
-            help="Valor estimado da produção agrícola"
+            "💰 Gross Value",
+            "R$ 756 B",
+            delta="12% vs previous",
+            help="Estimated value of agricultural production"
         )
 
 
 def _render_agricultural_insights() -> None:
     """
-    Renderizar insights e tendências da agricultura brasileira.
+    Render insights and trends of Brazilian agriculture.
     """
-    st.markdown("#### 📈 Tendências e Insights Agrícolas")
+    st.markdown("#### 📈 Agricultural Trends and Insights")
     
-    # Criar abas para diferentes tipos de insights
-    tab1, tab2, tab3 = st.tabs(["🎯 Destaques", "🌍 Sustentabilidade", "🔬 Inovações"])
+    # Create tabs for different types of insights
+    tab1, tab2, tab3 = st.tabs(["🎯 Highlights", "🌍 Sustainability", "🔬 Innovations"])
     
     with tab1:
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("**🥇 Principais Conquistas 2025:**")
-            st.success("• Brasil mantém posição de maior produtor mundial de soja")
-            st.success("• Expansão de 2,4% na produção de grãos")
-            st.success("• Novas tecnologias de monitoramento espectral")
-            st.success("• Redução no uso de defensivos através de IA")
+            st.markdown("**🥇 Main Achievements 2025:**")
+            st.success("• Brazil maintains position as world's largest soybean producer")
+            st.success("• 2.4% expansion in grain production")
+            st.success("• New spectral monitoring technologies")
+            st.success("• Reduction in pesticide use through AI")
         
         with col2:
-            st.markdown("**⚠️ Desafios Atuais:**")
-            st.warning("• Mudanças climáticas e eventos extremos")
-            st.warning("• Necessidade de aumento da produtividade")
-            st.warning("• Pressão por sustentabilidade ambiental")
-            st.info("• Demanda por rastreabilidade digital")
+            st.markdown("**⚠️ Current Challenges:**")
+            st.warning("• Climate change and extreme events")
+            st.warning("• Need for increased productivity")
+            st.warning("• Pressure for environmental sustainability")
+            st.info("• Demand for digital traceability")
     
     with tab2:
-        st.markdown("**🌱 Iniciativas de Sustentabilidade:**")
+        st.markdown("**🌱 Sustainability Initiatives:**")
         
-        # Gráfico de progresso das metas sustentáveis
+        # Progress chart for sustainable goals
         progress_data = {
-            'Indicador': ['Carbono Neutro', 'Redução Agrotóxicos', 'Áreas Preservadas', 'Energia Renovável'],
-            'Meta 2030': [100, 50, 30, 80],
-            'Progresso 2025': [35, 28, 22, 45]
+            'Indicator': ['Carbon Neutral', 'Pesticide Reduction', 'Preserved Areas', 'Renewable Energy'],
+            'Target 2030': [100, 50, 30, 80],
+            'Progress 2025': [35, 28, 22, 45]
         }
         
         fig = go.Figure()
         fig.add_trace(go.Bar(
-            name='Meta 2030',
-            x=progress_data['Indicador'],
-            y=progress_data['Meta 2030'],
+            name='Target 2030',
+            x=progress_data['Indicator'],
+            y=progress_data['Target 2030'],
             marker_color='lightblue',
             opacity=0.7
         ))
         fig.add_trace(go.Bar(
-            name='Progresso 2025',
-            x=progress_data['Indicador'],
-            y=progress_data['Progresso 2025'],
+            name='Progress 2025',
+            x=progress_data['Indicator'],
+            y=progress_data['Progress 2025'],
             marker_color='green'
         ))
         
         fig.update_layout(
-            title="Progresso das Metas de Sustentabilidade (%)",
-            xaxis_title="Indicadores",
-            yaxis_title="Percentual",
+            title="Sustainability Goals Progress (%)",
+            xaxis_title="Indicators",
+            yaxis_title="Percentage",
             barmode='group',
             height=400
         )
         st.plotly_chart(fig, use_container_width=True)
     
     with tab3:
-        st.markdown("**🚀 Inovações Tecnológicas em Destaque:**")
+        st.markdown("**🚀 Featured Technological Innovations:**")
         
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("**Monitoramento Digital:**")
-            st.info("📱 **Monitora Oeste** - App reduz uso de defensivos")
-            st.info("🛰️ **Imagens Satelitais** - Monitoramento em tempo real")
-            st.info("🤖 **IA Agrícola** - Previsão de pragas e doenças")
+            st.markdown("**Digital Monitoring:**")
+            st.info("📱 **Agricultural Monitoring** - App reduces pesticide use")
+            st.info("🛰️ **Satellite Images** - Real-time monitoring")
+            st.info("🤖 **Agricultural AI** - Pest and disease prediction")
         
         with col2:
-            st.markdown("**Biotecnologia:**")
-            st.info("🧬 **Biofungicidas** - 80% eficiência contra fungos")
-            st.info("🌾 **Sementes Melhoradas** - Maior resistência")
-            st.info("♻️ **Agricultura Circular** - Aproveitamento integral")
+            st.markdown("**Biotechnology:**")
+            st.info("🧬 **Biofungicides** - 80% efficiency against fungi")
+            st.info("🌾 **Improved Seeds** - Greater resistance")
+            st.info("♻️ **Circular Agriculture** - Full utilization")
 
 
 def _render_overview_metrics(overview_stats: dict[str, Any]) -> None:
     """
-    Renderizar métricas principais do overview.
+    Render main overview metrics.
     """
     if not overview_stats:
-        st.warning("⚠️ Dados de estatísticas não disponíveis")
+        st.warning("⚠️ Statistics data not available")
         return
     
-    # Layout de 5 colunas para métricas
+    # 5-column layout for metrics
     col1, col2, col3, col4, col5 = st.columns(5)
     
     with col1:
         st.metric(
-            "🗺️ Estados", 
+            "🗺️ States",
             overview_stats.get('states_covered', 'N/A'),
-            help="Estados brasileiros cobertos pelo monitoramento"
+            help="Brazilian states covered by monitoring"
         )
     
     with col2:
         st.metric(
-            "🌱 Culturas",
+            "🌱 Crops",
             overview_stats.get('total_crops', 'N/A'),
-            help="Culturas agrícolas monitoradas"
+            help="Agricultural crops monitored"
         )
     
     with col3:
         resolution = overview_stats.get('resolution', 'N/A')
         st.metric(
-            "🔍 Resolução",
+            "🔍 Resolution",
             resolution,
-            help="Resolução espacial dos dados"
+            help="Spatial resolution of data"
         )
     
     with col4:
         accuracy = overview_stats.get('accuracy', 0)
         accuracy_str = f"{accuracy:.1f}%" if accuracy > 0 else "N/A"
         st.metric(
-            "🎯 Precisão",
+            "🎯 Accuracy",
             accuracy_str,
-            help="Precisão geral do monitoramento"
+            help="Overall monitoring accuracy"
         )
     
     with col5:
         area = overview_stats.get('total_area_monitored', 'N/A')
         st.metric(
-            "📏 Cobertura",
+            "📏 Coverage",
             area,
-            help="Área total monitorada"
+            help="Total monitored area"
         )
 
 
 def _render_system_status(overview_stats: dict[str, Any]) -> None:
     """
-    Renderizar status do sistema de monitoramento.
+    Render monitoring system status.
     """
-    st.markdown("#### ⚡ Status do Sistema")
+    st.markdown("#### ⚡ System Status")
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
         provider = overview_stats.get('provider', 'N/A')
-        st.info(f"**Provedor:** {provider}")
+        st.info(f"**Provider:** {provider}")
     
     with col2:
         methodology = overview_stats.get('methodology', 'N/A')
-        st.info(f"**Metodologia:** {methodology}")
+        st.info(f"**Methodology:** {methodology}")
     
     with col3:
-        # Calcular status baseado na disponibilidade de dados
+        # Calculate status based on data availability
         total_crops = overview_stats.get('total_crops', 0)
         states_covered = overview_stats.get('states_covered', 0)
         
         if total_crops > 5 and states_covered > 10:
-            st.success("🟢 **Sistema Operacional**")
+            st.success("🟢 **System Operational**")
         elif total_crops > 2 and states_covered > 5:
-            st.warning("🟡 **Funcionamento Parcial**")
+            st.warning("🟡 **Partial Operation**")
         else:
-            st.error("🔴 **Dados Limitados**")
+            st.error("🔴 **Limited Data**")
 
 
 def _render_crops_overview(crops_data: pd.DataFrame) -> None:
     """
-    Renderizar overview aprimorado das culturas.
+    Render enhanced crops overview.
     """
     if crops_data.empty:
-        st.info("📊 Dados de culturas não disponíveis")
+        st.info("📊 Crops data not available")
         return
     
-    # Estatísticas rápidas
+    # Quick statistics
     total_crops = len(crops_data)
-    total_states = crops_data['Estados'].sum() if 'Estados' in crops_data.columns else 0
+    total_states = crops_data['States'].sum() if 'States' in crops_data.columns else 0
     
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Total de Culturas", total_crops)
+        st.metric("Total Crops", total_crops)
     with col2:
-        st.metric("Cobertura Estadual", f"{total_states} registros")
+        st.metric("State Coverage", f"{total_states} records")
     
-    # Mostrar tabela das culturas com melhor formatação
-    st.markdown("**📋 Principais Culturas Monitoradas:**")
+    # Show crop table with better formatting
+    st.markdown("**📋 Main Monitored Crops:**")
     if len(crops_data) > 0:
-        # Redimensionar para melhor legibilidade
-        display_data = crops_data.head(8)  # Mostrar apenas top 8 para legibilidade
+        # Resize for better readability
+        display_data = crops_data.head(8)  # Show only top 8 for readability
         st.dataframe(
             display_data,
             use_container_width=True,
@@ -322,50 +322,50 @@ def _render_crops_overview(crops_data: pd.DataFrame) -> None:
             height=300
         )
     
-    # Gráfico de barras das culturas por estados - mais compacto
-    if 'Estados' in crops_data.columns and len(crops_data) > 0:
-        top_cultures = crops_data.head(6)  # Top 6 para legibilidade
+    # Bar chart of crops by states - more compact
+    if 'States' in crops_data.columns and len(crops_data) > 0:
+        top_cultures = crops_data.head(6)  # Top 6 for readability
         
         fig = px.bar(
             top_cultures,
-            x='Estados',
-            y='Cultura',
+            x='States',
+            y='Crop',
             orientation='h',
-            color='Dupla Safra',
-            title="Top 6 Culturas por Número de Estados",
-            labels={'Estados': 'Número de Estados', 'Cultura': 'Cultura'},
-            height=350,  # Altura reduzida para compactação
+            color='Double Crop',
+            title="Top 6 Crops by Number of States",
+            labels={'States': 'Number of States', 'Crop': 'Crop'},
+            height=350,  # Reduced height for compaction
             color_discrete_sequence=['#2E8B57', '#FF6B6B']
         )
         fig.update_layout(
-            xaxis_title="Número de Estados",
+            xaxis_title="Number of States",
             yaxis_title="",
             showlegend=True,
-            margin=dict(l=10, r=10, t=40, b=10)
+            margin={"l": 10, "r": 10, "t": 40, "b": 10}
         )
         st.plotly_chart(fig, use_container_width=True)
 
 
 def _render_states_overview(states_data: pd.DataFrame) -> None:
     """
-    Renderizar overview por estados aprimorado.
+    Render enhanced overview by states.
     """
     if states_data.empty:
-        st.info("📊 Dados por estados não disponíveis")
+        st.info("📊 State data not available")
         return
     
-    # Estatísticas rápidas
+    # Quick statistics
     total_states = len(states_data)
-    total_cultures = states_data['Culturas'].sum() if 'Culturas' in states_data.columns else 0
+    total_cultures = states_data['Crops'].sum() if 'Crops' in states_data.columns else 0
     
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Estados", total_states)
+        st.metric("States", total_states)
     with col2:
-        st.metric("Total Culturas", total_cultures)
+        st.metric("Total Crops", total_cultures)
     
-    # Mostrar tabela por estados compacta
-    st.markdown("**🗺️ Distribuição por Estado:**")
+    # Show compact state table
+    st.markdown("**🗺️ Distribution by State:**")
     if len(states_data) > 0:
         st.dataframe(
             states_data,
@@ -374,118 +374,118 @@ def _render_states_overview(states_data: pd.DataFrame) -> None:
             height=250
         )
     
-    # Gráfico de pizza dos estados - mais compacto
-    if 'Culturas' in states_data.columns and len(states_data) > 0:
+    # Pie chart of states - more compact
+    if 'Crops' in states_data.columns and len(states_data) > 0:
         fig = px.pie(
             states_data,
-            values='Culturas',
-            names='Estado',
-            title="Distribuição de Culturas por Estado",
-            height=300,  # Altura reduzida
+            values='Crops',
+            names='State',
+            title="Crop Distribution by State",
+            height=300,  # Reduced height
             color_discrete_sequence=px.colors.qualitative.Set3
         )
         fig.update_traces(textposition='inside', textinfo='percent+label')
         fig.update_layout(
-            margin=dict(l=10, r=10, t=40, b=10),
-            showlegend=False  # Remover legenda para economizar espaço
+            margin={"l": 10, "r": 10, "t": 40, "b": 10},
+            showlegend=False  # Remove legend to save space
         )
         st.plotly_chart(fig, use_container_width=True)
 
 
 def _render_technical_summary(overview_stats: dict[str, Any]) -> None:
     """
-    Renderizar resumo técnico expandido do sistema.
+    Render expanded technical summary of the system.
     """
-    st.markdown("#### 🔧 Resumo Técnico & Especificações")
+    st.markdown("#### 🔧 Technical Summary & Specifications")
     
-    # Layout em colunas para melhor organização
+    # Column layout for better organization
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("**📊 Dados do Sistema:**")
+        st.markdown("**📊 System Data:**")
         with st.container():
             st.code(f"""
 Provider: {overview_stats.get('provider', 'N/A')}
-Metodologia: {overview_stats.get('methodology', 'N/A')}
-Resolução: {overview_stats.get('resolution', 'N/A')}
-Precisão: {overview_stats.get('accuracy', 0):.1f}%
+Methodology: {overview_stats.get('methodology', 'N/A')}
+Resolution: {overview_stats.get('resolution', 'N/A')}
+Accuracy: {overview_stats.get('accuracy', 0):.1f}%
             """, language='text')
     
     with col2:
-        st.markdown("**🌍 Cobertura Geográfica:**")
+        st.markdown("**🌍 Geographic Coverage:**")
         with st.container():
             st.code(f"""
-Estados: {overview_stats.get('states_covered', 'N/A')}
-Culturas: {overview_stats.get('total_crops', 'N/A')}
-Área Total: {overview_stats.get('total_area_monitored', 'N/A')}
-Densidade: {overview_stats.get('total_crops', 0) / max(overview_stats.get('states_covered', 1), 1):.1f} cult/estado
+States: {overview_stats.get('states_covered', 'N/A')}
+Crops: {overview_stats.get('total_crops', 'N/A')}
+Total Area: {overview_stats.get('total_area_monitored', 'N/A')}
+Density: {overview_stats.get('total_crops', 0) / max(overview_stats.get('states_covered', 1), 1):.1f} crops/state
             """, language='text')
     
     with col3:
         st.markdown("**⚡ Performance:**")
-        # Calcular métricas de performance
+        # Calculate performance metrics
         total_crops = overview_stats.get('total_crops', 0)
         states_covered = overview_stats.get('states_covered', 0)
         
         if total_crops > 0 and states_covered > 0:
             efficiency = min(100, (total_crops * states_covered) / 100)
-            coverage_score = min(100, (states_covered / 27) * 100)  # 27 estados BR
+            coverage_score = min(100, (states_covered / 27) * 100)  # 27 Brazilian states
             
             st.code(f"""
-Eficiência: {efficiency:.1f}%
-Cobertura Nacional: {coverage_score:.1f}%
-Status: {'Ótimo' if efficiency > 80 else 'Bom' if efficiency > 60 else 'Regular'}
-Última Sync: Ago 2025
+Efficiency: {efficiency:.1f}%
+National Coverage: {coverage_score:.1f}%
+Status: {'Excellent' if efficiency > 80 else 'Good' if efficiency > 60 else 'Regular'}
+Last Sync: Aug 2025
             """, language='text')
         else:
-            st.code("Métricas não disponíveis", language='text')
+            st.code("Metrics not available", language='text')
     
-    # Informações técnicas expandidas em seção expansível
-    with st.expander("🔍 Detalhes Técnicos Avançados"):
+    # Expanded technical information in expandable section
+    with st.expander("🔍 Advanced Technical Details"):
         
-        # Duas colunas para informações detalhadas
+        # Two columns for detailed information
         detail_col1, detail_col2 = st.columns(2)
         
         with detail_col1:
-            st.markdown("**🛰️ Tecnologias de Monitoramento:**")
+            st.markdown("**🛰️ Monitoring Technologies:**")
             st.markdown("""
-            • **Sensoriamento Remoto**: Imagens multiespectrais de alta resolução
-            • **IA e Machine Learning**: Algoritmos de detecção automatizada
-            • **IoT Agrícola**: Sensores de campo em tempo real
-            • **Análise Espectral**: Identificação de condições das culturas
-            • **Georreferenciamento**: Coordenadas precisas via GPS/GNSS
+            • **Remote Sensing**: High-resolution multispectral images
+            • **AI and Machine Learning**: Automated detection algorithms
+            • **Agricultural IoT**: Real-time field sensors
+            • **Spectral Analysis**: Crop condition identification
+            • **Georeferencing**: Precise GPS/GNSS coordinates
             """)
             
-            st.markdown("**📈 Métricas de Qualidade:**")
+            st.markdown("**📈 Quality Metrics:**")
             accuracy = overview_stats.get('accuracy', 0)
             if accuracy > 0:
                 progress_bar_value = accuracy / 100
-                st.progress(progress_bar_value, f"Precisão Geral: {accuracy:.1f}%")
+                st.progress(progress_bar_value, f"Overall Accuracy: {accuracy:.1f}%")
             
-            # Simular outras métricas
-            st.progress(0.92, "Disponibilidade do Sistema: 92%")
-            st.progress(0.88, "Taxa de Atualização: 88%")
+            # Simulate other metrics
+            st.progress(0.92, "System Availability: 92%")
+            st.progress(0.88, "Update Rate: 88%")
         
         with detail_col2:
-            st.markdown("**🌐 Integração e Fontes:**")
+            st.markdown("**🌐 Integration and Sources:**")
             st.markdown("""
-            • **CONAB**: Base de dados principal de safras
-            • **Embrapa**: Pesquisa e desenvolvimento tecnológico
-            • **IBGE**: Estatísticas oficiais complementares
-            • **INPE**: Dados satelitais e meteorológicos
-            • **Produtores**: Informações de campo diretas
+            • **Agricultural Database**: Main harvest database
+            • **Research Institutions**: Research and technological development
+            • **Official Statistics**: Complementary government statistics
+            • **Satellite Data**: Satellite and meteorological data
+            • **Field Producers**: Direct field information
             """)
             
-            st.markdown("**📋 Padrões e Certificações:**")
+            st.markdown("**📋 Standards and Certifications:**")
             st.markdown("""
-            • **ISO 19115**: Metadados geográficos
-            • **OGC Standards**: Interoperabilidade geoespacial
-            • **FAIR Principles**: Dados encontráveis e acessíveis
-            • **LGPD**: Conformidade com proteção de dados
-            • **Governo Digital**: Padrões federais brasileiros
+            • **ISO 19115**: Geographic metadata
+            • **OGC Standards**: Geospatial interoperability
+            • **FAIR Principles**: Findable and accessible data
+            • **LGPD**: Data protection compliance
+            • **Digital Government**: Brazilian federal standards
             """)
     
-    # Métricas finais de densidade em formato resumido
+    # Final density metrics in summary format
     if overview_stats:
         total_crops = overview_stats.get('total_crops', 0)
         states_covered = overview_stats.get('states_covered', 0)
@@ -493,27 +493,27 @@ Status: {'Ótimo' if efficiency > 80 else 'Bom' if efficiency > 60 else 'Regular
         if total_crops > 0 and states_covered > 0:
             coverage_ratio = total_crops / states_covered
             
-            # Usar uma métrica final compacta
+            # Use a compact final metric
             col_final1, col_final2, col_final3 = st.columns(3)
             
             with col_final1:
                 st.metric(
-                    "📈 Densidade Monitoramento",
+                    "📈 Monitoring Density",
                     f"{coverage_ratio:.1f}",
-                    help="Média de culturas por estado monitorado"
+                    help="Average crops per monitored state"
                 )
             
             with col_final2:
                 quality_score = min(100, (total_crops + states_covered) / 2)
                 st.metric(
-                    "⭐ Score de Qualidade",
+                    "⭐ Quality Score",
                     f"{quality_score:.0f}/100",
-                    help="Pontuação baseada em cobertura e diversidade"
+                    help="Score based on coverage and diversity"
                 )
             
             with col_final3:
                 st.metric(
-                    "🎯 Status Sistema",
-                    "🟢 Operacional" if coverage_ratio > 2 else "🟡 Parcial",
-                    help="Status baseado na densidade de monitoramento"
+                    "🎯 System Status",
+                    "🟢 Operational" if coverage_ratio > 2 else "🟡 Partial",
+                    help="Status based on monitoring density"
                 )

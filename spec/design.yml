@@ -1,0 +1,101 @@
+system_architecture:
+  translation_strategy:
+    approach: Systematic file-by-file translation maintaining original structure
+    scope: User-facing interface strings only, preserving functional code
+    validation: Test functionality after each file translation
+  
+  translation_dictionary:
+    agricultural_terms:
+      "análise agrícola": "agricultural analysis"
+      "calendário agrícola": "agricultural calendar"
+      "dados CONAB": "CONAB data"
+      "culturas": "crops"
+      "safra": "harvest season"
+      "primeira safra": "first crop"
+      "segunda safra": "second crop"
+      "região": "region"
+      "estado": "state"
+      "cobertura regional": "regional coverage"
+      "distribuição": "distribution"
+      "disponibilidade": "availability"
+      "produção": "production"
+      "plantio": "planting"
+      "colheita": "harvest"
+      "monitoramento": "monitoring"
+    
+    interface_terms:
+      "carregar": "load"
+      "processar": "process"
+      "arquivo": "file"
+      "diretório": "directory"
+      "dados": "data"
+      "erro": "error"
+      "aviso": "warning"
+      "informação": "information"
+      "sucesso": "success"
+      "encontrado": "found"
+      "não encontrado": "not found"
+      "disponível": "available"
+      "procurando": "searching"
+      "a partir de": "from"
+    
+    error_messages:
+      "Erro ao processar": "Error processing"
+      "Erro ao carregar": "Error loading"
+      "não encontrado": "not found"
+      "Diretório não encontrado": "Directory not found"
+      "Arquivo não encontrado": "File not found"
+
+functions:
+  - name: translate_streamlit_messages
+    inputs:
+      - name: file_path
+        type: string
+    outputs:
+      - name: success
+        type: boolean
+      - name: translations_made
+        type: integer
+    logic_flow:
+      - step: Read file content
+      - step: Identify st.warning, st.error, st.info, st.success calls
+      - step: Apply translation dictionary to Portuguese strings
+      - step: Preserve f-string formatting and variables
+      - step: Write updated content
+    dependencies:
+      - Translation dictionary
+    edge_cases:
+      - id: edge-001
+        description: F-string variables
+        risk_score: 20
+        mitigation: Preserve variable placeholders
+        test: Verify f-strings still work after translation
+  
+  - name: translate_docstrings
+    inputs:
+      - name: file_path
+        type: string
+    outputs:
+      - name: success
+        type: boolean
+      - name: docstrings_translated
+        type: integer
+    logic_flow:
+      - step: Identify docstring blocks
+      - step: Translate description text
+      - step: Maintain parameter documentation format
+      - step: Preserve type hints and structure
+    dependencies:
+      - Python docstring standards
+    edge_cases:
+      - id: edge-003
+        description: Mixed code and documentation
+        risk_score: 12
+        mitigation: Parse docstring boundaries carefully
+        test: Verify function signatures unchanged
+
+quality_metrics:
+  translation_completeness: 100%
+  functionality_preservation: 100%
+  consistency_score: 95%
+  user_experience_improvement: High

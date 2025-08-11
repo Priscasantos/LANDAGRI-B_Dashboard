@@ -122,9 +122,9 @@ elif selected_category == "🔍 Initiative Analysis":
         initiative_analysis.run()
 ```
 
-### app.py - Seção Agriculture Analysis
+### app.py - Seção Agricultural Analysis
 ```python
-elif selected_category == "🌾 Agriculture Analysis":
+elif selected_category == "🌾 Agricultural Analysis":
     # Usar o novo orchestrator consolidado
     from dashboard import agricultural_analysis
     agricultural_analysis.run()

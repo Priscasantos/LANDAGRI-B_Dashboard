@@ -1,0 +1,65 @@
+functional_requirements:
+  - id: req-001
+    description: Traduzir todas as mensagens de interface do Streamlit (st.warning, st.error, st.info, st.success) do português para inglês
+    priority: high
+    status: to_do
+  
+  - id: req-002
+    description: Traduzir todos os títulos e cabeçalhos de seções (st.markdown, st.title, st.header, st.subheader) do português para inglês
+    priority: high
+    status: to_do
+  
+  - id: req-003
+    description: Traduzir todas as docstrings e comentários de função do português para inglês
+    priority: medium
+    status: to_do
+  
+  - id: req-004
+    description: Traduzir labels de gráficos, eixos e legendas do português para inglês
+    priority: high
+    status: to_do
+  
+  - id: req-005
+    description: Traduzir tooltips e textos explicativos do português para inglês
+    priority: medium
+    status: to_do
+  
+  - id: req-006
+    description: Manter funcionalidade intacta durante todo o processo de tradução
+    priority: high
+    status: to_do
+  
+  - id: req-007
+    description: Criar dicionário padronizado de traduções para termos técnicos agrícolas
+    priority: medium
+    status: to_do
+  
+  - id: req-008
+    description: Fornecer exemplos antes/depois das traduções principais
+    priority: low
+    status: to_do
+
+acceptance_criteria:
+  - id: ac-001
+    requirement_id: req-001
+    description: Todas as mensagens st.warning, st.error, st.info, st.success devem estar em inglês
+  
+  - id: ac-002
+    requirement_id: req-002
+    description: Todos os títulos e cabeçalhos de seções devem estar em inglês
+  
+  - id: ac-003
+    requirement_id: req-003
+    description: Todas as docstrings devem seguir padrões em inglês
+  
+  - id: ac-004
+    requirement_id: req-004
+    description: Gráficos devem ter labels, eixos e legendas em inglês
+  
+  - id: ac-005
+    requirement_id: req-006
+    description: Sistema deve funcionar identicamente após tradução
+  
+  - id: ac-006
+    requirement_id: req-007
+    description: Termos técnicos devem ter tradução consistente em todo o sistema

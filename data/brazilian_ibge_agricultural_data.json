@@ -1,0 +1,270 @@
+{
+  "metadata": {
+    "source": "IBGE - Instituto Brasileiro de Geografia e Estatística",
+    "source_url": "https://servicodados.ibge.gov.br/api/v3/agregados",
+    "survey": "Produção Agrícola Municipal",
+    "survey_code": "1612",
+    "territory_level": "Nacional (Brasil)",
+    "periodicity": "Anual",
+    "period_range": "2018-2023",
+    "last_updated": "2025-01-28",
+    "description": "Dados de produção agrícola nacional brasileira incluindo área plantada, área colhida, quantidade produzida e valor da produção das principais culturas temporárias",
+    "variables": {
+      "214": "Quantidade produzida (Toneladas)",
+      "216": "Área colhida (Hectares)",
+      "109": "Área plantada (Hectares)",
+      "112": "Rendimento médio da produção (Quilogramas por Hectare)",
+      "215": "Valor da produção (Mil Reais)"
+    }
+  },
+  "data": {
+    "producao_agricola": {
+      "amendoim": {
+        "nome": "Amendoim (em casca)",
+        "codigo": "2691",
+        "quantidade_produzida_toneladas": {
+          "2018": 563344,
+          "2019": 580573,
+          "2020": 651126,
+          "2021": 794666,
+          "2022": 848385,
+          "2023": 875205
+        },
+        "area_colhida_hectares": {
+          "2018": 151832,
+          "2019": 171569,
+          "2020": 178777,
+          "2021": 203962,
+          "2022": 220461,
+          "2023": 235687
+        }
+      },
+      "arroz": {
+        "nome": "Arroz (em casca)",
+        "codigo": "2692",
+        "quantidade_produzida_toneladas": {
+          "2018": 11808412,
+          "2019": 10368639,
+          "2020": 11091011,
+          "2021": 11660605,
+          "2022": 10773990,
+          "2023": 10285663
+        },
+        "area_colhida_hectares": {
+          "2018": 1872155,
+          "2019": 1710063,
+          "2020": 1677705,
+          "2021": 1689190,
+          "2022": 1622990,
+          "2023": 1482748
+        }
+      },
+      "aveia": {
+        "nome": "Aveia (em grão)",
+        "codigo": "2693",
+        "quantidade_produzida_toneladas": {
+          "2018": 899244,
+          "2019": 930281,
+          "2020": 898405,
+          "2021": 1092473,
+          "2022": 1295622,
+          "2023": 907046
+        },
+        "area_colhida_hectares": {
+          "2018": 437822,
+          "2019": 449772,
+          "2020": 475897,
+          "2021": 501629,
+          "2022": 552628,
+          "2023": 528649
+        }
+      },
+      "batata_doce": {
+        "nome": "Batata-doce",
+        "codigo": "2694",
+        "quantidade_produzida_toneladas": {
+          "2018": 741000,
+          "2019": 803626,
+          "2020": 849397,
+          "2021": 848281,
+          "2022": 848688,
+          "2023": 925618
+        },
+        "area_colhida_hectares": {
+          "2018": 52928,
+          "2019": 57340,
+          "2020": 59548,
+          "2021": 57800,
+          "2022": 58303,
+          "2023": 60984
+        }
+      },
+      "batata_inglesa": {
+        "nome": "Batata-inglesa",
+        "codigo": "2695",
+        "quantidade_produzida_toneladas": {
+          "2018": 3728953,
+          "2019": 3711744,
+          "2020": 3752999,
+          "2021": 3853464,
+          "2022": 3926076,
+          "2023": 4188704
+        },
+        "area_colhida_hectares": {
+          "2018": 119609,
+          "2019": 116846,
+          "2020": 117253,
+          "2021": 116422,
+          "2022": 118713,
+          "2023": 123455
+        }
+      },
+      "cana_de_acucar": {
+        "nome": "Cana-de-açúcar",
+        "codigo": "2696",
+        "quantidade_produzida_toneladas": {
+          "2018": 747556774,
+          "2019": 754470465,
+          "2020": 756070576,
+          "2021": 715679276,
+          "2022": 726052712,
+          "2023": 782585836
+        },
+        "area_colhida_hectares": {
+          "2018": 10024104,
+          "2019": 10092430,
+          "2020": 9996134,
+          "2021": 9971370,
+          "2022": 9886621,
+          "2023": 10065599
+        }
+      },
+      "mandioca": {
+        "nome": "Mandioca",
+        "codigo": "2708",
+        "quantidade_produzida_toneladas": {
+          "2018": 17877163,
+          "2019": 17553186,
+          "2020": 18197572,
+          "2021": 18220656,
+          "2022": 17825792,
+          "2023": 18514317
+        },
+        "area_colhida_hectares": {
+          "2018": 1215988,
+          "2019": 1199902,
+          "2020": 1213839,
+          "2021": 1215781,
+          "2022": 1186291,
+          "2023": 1201440
+        }
+      },
+      "milho": {
+        "nome": "Milho (em grão)",
+        "codigo": "2711",
+        "quantidade_produzida_toneladas": {
+          "2018": 82366531,
+          "2019": 101126409,
+          "2020": 103990935,
+          "2021": 88272116,
+          "2022": 109738941,
+          "2023": 131950246
+        },
+        "area_colhida_hectares": {
+          "2018": 16126368,
+          "2019": 17515926,
+          "2020": 18258981,
+          "2021": 18984300,
+          "2022": 21066201,
+          "2023": 22316340
+        }
+      },
+      "soja": {
+        "nome": "Soja (em grão)",
+        "codigo": "2713",
+        "quantidade_produzida_toneladas": {
+          "2018": 117912450,
+          "2019": 114316829,
+          "2020": 121820949,
+          "2021": 134799179,
+          "2022": 121290103,
+          "2023": 152144238
+        },
+        "area_colhida_hectares": {
+          "2018": 34777936,
+          "2019": 35895205,
+          "2020": 37191638,
+          "2021": 39126269,
+          "2022": 41050906,
+          "2023": 44447552
+        }
+      },
+      "trigo": {
+        "nome": "Trigo (em grão)",
+        "codigo": "2716",
+        "quantidade_produzida_toneladas": {
+          "2018": 5469236,
+          "2019": 5590815,
+          "2020": 6344079,
+          "2021": 7878413,
+          "2022": 10342986,
+          "2023": 7730188
+        },
+        "area_colhida_hectares": {
+          "2018": 2080204,
+          "2019": 2103578,
+          "2020": 2432603,
+          "2021": 2752664,
+          "2022": 3167098,
+          "2023": 3330303
+        }
+      },
+      "algodao": {
+        "nome": "Algodão herbáceo (em caroço)",
+        "codigo": "2689",
+        "quantidade_produzida_toneladas": {
+          "2018": 5956125,
+          "2019": 6893340,
+          "2020": 7070136,
+          "2021": 5711692,
+          "2022": 6334394,
+          "2023": 7496603
+        },
+        "area_colhida_hectares": {
+          "2018": 1150014,
+          "2019": 1627163,
+          "2020": 1633091,
+          "2021": 1369430,
+          "2022": 1649532,
+          "2023": 1709425
+        }
+      }
+    },
+    "resumo_anual": {
+      "2018": {
+        "total_area_colhida_hectares": 67676970,
+        "principais_culturas": ["cana_de_acucar", "soja", "milho", "mandioca", "arroz"]
+      },
+      "2019": {
+        "total_area_colhida_hectares": 69138794,
+        "principais_culturas": ["cana_de_acucar", "soja", "milho", "mandioca", "arroz"]
+      },
+      "2020": {
+        "total_area_colhida_hectares": 70455727,
+        "principais_culturas": ["cana_de_acucar", "soja", "milho", "mandioca", "arroz"]
+      },
+      "2021": {
+        "total_area_colhida_hectares": 72616817,
+        "principais_culturas": ["cana_de_acucar", "soja", "milho", "mandioca", "arroz"]
+      },
+      "2022": {
+        "total_area_colhida_hectares": 77598781,
+        "principais_culturas": ["cana_de_acucar", "soja", "milho", "mandioca", "arroz"]
+      },
+      "2023": {
+        "total_area_colhida_hectares": 84002182,
+        "principais_culturas": ["cana_de_acucar", "soja", "milho", "mandioca", "arroz"]
+      }
+    }
+  }
+}

@@ -1,0 +1,49 @@
+edge_cases:
+  - id: edge-001
+    description: Strings que contêm formatação f-string com variáveis podem quebrar se traduzidas incorretamente
+    likelihood: 4
+    impact: 5
+    risk_score: 20
+    mitigation: Manter estrutura de f-strings intacta, traduzir apenas texto literal
+  
+  - id: edge-002
+    description: Comentários de código misturados com código funcional podem causar problemas se alterados
+    likelihood: 3
+    impact: 4
+    risk_score: 12
+    mitigation: Identificar claramente diferença entre comentários e código funcional
+  
+  - id: edge-003
+    description: Chaves de dicionários em português que são usadas como identificadores
+    likelihood: 3
+    impact: 5
+    risk_score: 15
+    mitigation: Não traduzir chaves de dicionários, apenas valores de interface
+  
+  - id: edge-004
+    description: Nomes de arquivos ou paths que contenham termos em português
+    likelihood: 2
+    impact: 4
+    risk_score: 8
+    mitigation: Não alterar paths ou nomes de arquivos, apenas interface do usuário
+  
+  - id: edge-005
+    description: Textos que referenciam dados específicos do Brasil podem não fazer sentido em inglês
+    likelihood: 4
+    impact: 3
+    risk_score: 12
+    mitigation: Adaptar contexto mantendo significado, usar termos como "Brazilian" quando apropriado
+  
+  - id: edge-006
+    description: Emojis e ícones podem ter significado cultural específico
+    likelihood: 2
+    impact: 2
+    risk_score: 4
+    mitigation: Manter emojis universais, verificar se fazem sentido no contexto internacional
+  
+  - id: edge-007
+    description: Acentos e caracteres especiais em strings podem causar problemas de encoding
+    likelihood: 3
+    impact: 3
+    risk_score: 9
+    mitigation: Testar encoding UTF-8 após tradução, garantir compatibilidade

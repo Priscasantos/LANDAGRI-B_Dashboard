@@ -1,12 +1,12 @@
 """
-CONAB Data Loader Component
-==========================
+Agricultural Data Loader Component
+=================================
 
-Componente responsável por carregar e processar dados detalhados da iniciativa CONAB,
-incluindo dados de culturas, calendários e cobertura regional.
+Component responsible for loading and processing detailed agricultural data,
+including crop data, calendars and regional coverage.
 
-Autor: Dashboard Iniciativas LULC
-Data: 2025-08-01
+Author: Agricultural Dashboard
+Date: 2025-08-07
 """
 
 import json
@@ -16,17 +16,17 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 
 
-def load_conab_detailed_data() -> Dict[str, Any]:
+def load_agricultural_data() -> dict[str, Any]:
     """
-    Carregar dados detalhados da iniciativa CONAB do arquivo JSON.
+    Load detailed agricultural data from JSON file.
     
     Returns:
-        Dict com dados da iniciativa CONAB ou dict vazio se erro
+        Dict with agricultural data or empty dict if error
     """
     try:
-        # Determinar caminho do arquivo (corrigido: encontrar data folder)
+        # Determine file path (fixed: find data folder)
         current_dir = Path(__file__).resolve().parent
-        # Procurar pelo diretório data a partir do dashboard
+        # Search for data directory starting from dashboard
         data_dir = None
         for parent in current_dir.parents:
             potential_data = parent / "data" / "json"
@@ -35,110 +35,66 @@ def load_conab_detailed_data() -> Dict[str, Any]:
                 break
         
         if data_dir is None:
-            st.warning(f"⚠️ Diretório data/json não encontrado")
-            st.info(f"📂 Procurando a partir de: {current_dir}")
+            st.warning("⚠️ Data/json directory not found")
+            st.info(f"📂 Searching from: {current_dir}")
             return {}
             
-        conab_file = data_dir / "conab_detailed_initiative.jsonc"
+        agricultural_file = data_dir / "agricultural_conab_mapping_data_complete.jsonc"
         
-        if not conab_file.exists():
-            st.warning(f"⚠️ Arquivo CONAB não encontrado: {conab_file}")
-            st.info(f"📂 Diretório data: {data_dir}")
-            # Listar arquivos disponíveis
+        if not agricultural_file.exists():
+            st.warning(f"⚠️ Agricultural data file not found: {agricultural_file}")
+            st.info(f"📂 Data directory: {data_dir}")
+            # List available files
             if data_dir.exists():
                 files = list(data_dir.glob("*.json*"))
-                st.info(f"📋 Arquivos disponíveis: {[f.name for f in files]}")
+                st.info(f"📋 Available files: {[f.name for f in files]}")
             return {}
         
-        # Carregar e processar arquivo JSONC
-        with open(conab_file, 'r', encoding='utf-8') as f:
+        # Load and process JSONC file
+        with open(agricultural_file, encoding='utf-8') as f:
             content = f.read()
             
-        # Remover comentários de linha simples
+        # Remove single-line comments
         lines = []
         for line in content.splitlines():
             stripped = line.strip()
             if not stripped.startswith('//'):
                 lines.append(line)
         
-        # Processar JSON
+        # Process JSON
         clean_content = '\n'.join(lines)
         data = json.loads(clean_content)
         
         return data
         
     except json.JSONDecodeError as e:
-        st.error(f"❌ Erro ao processar JSON do CONAB: {e}")
+        st.error(f"❌ Error processing agricultural JSON: {e}")
         return {}
     except Exception as e:
-        st.error(f"❌ Erro ao carregar dados CONAB: {e}")
+        st.error(f"❌ Error loading agricultural data: {e}")
         return {}
 
 
-def load_conab_crop_calendar() -> Dict[str, Any]:
+def load_agricultural_crop_calendar() -> dict[str, Any]:
     """
-    Carregar dados do calendário agrícola CONAB.
+    Load agricultural calendar data.
     
     Returns:
-        Dict com dados do calendário ou dict vazio se erro
+        Dict with calendar data or empty dict if error
     """
-    try:
-        # Determinar caminho do arquivo (corrigido: encontrar data folder)
-        current_dir = Path(__file__).resolve().parent
-        # Procurar pelo diretório data a partir do dashboard
-        data_dir = None
-        for parent in current_dir.parents:
-            potential_data = parent / "data" / "json"
-            if potential_data.exists():
-                data_dir = potential_data
-                break
-        
-        if data_dir is None:
-            st.warning("⚠️ Diretório data/json não encontrado")
-            return {}
-            
-        calendar_files = [
-            data_dir / "conab_crop_calendar.jsonc",
-            data_dir / "conab_crop_calendar_complete.jsonc"
-        ]
-        
-        calendar_data = {}
-        
-        for calendar_file in calendar_files:
-            if calendar_file.exists():
-                with open(calendar_file, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                
-                # Remover comentários
-                lines = []
-                for line in content.splitlines():
-                    stripped = line.strip()
-                    if not stripped.startswith('//'):
-                        lines.append(line)
-                
-                # Processar JSON
-                clean_content = '\n'.join(lines)
-                data = json.loads(clean_content)
-                
-                # Merge data
-                calendar_data.update(data)
-        
-        return calendar_data
-        
-    except Exception as e:
-        st.error(f"❌ Erro ao carregar calendário CONAB: {e}")
-        return {}
+    # Use the same data as the main agricultural data
+    return load_agricultural_data()
 
 
 def get_conab_crop_stats(conab_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Extrair estatísticas principais dos dados CONAB.
+    Extract main statistics from CONAB data.
     
     Args:
-        conab_data: Dados brutos do CONAB
+        conab_data: Raw CONAB data
         
     Returns:
-        Dict com estatísticas processadas
+        Dict with processed statistics
     """
     stats = {
         'total_crops': 0,
@@ -156,55 +112,55 @@ def get_conab_crop_stats(conab_data: Dict[str, Any]) -> Dict[str, Any]:
         if not initiative:
             return stats
         
-        # Contar culturas detalhadas
+        # Count detailed crops
         detailed_coverage = initiative.get('detailed_crop_coverage', {})
         stats['total_crops'] = len(detailed_coverage)
         
-        # Contar estados únicos cobertos
+        # Count unique covered states
         all_states = set()
         for crop_data in detailed_coverage.values():
             regions = crop_data.get('regions', [])
             all_states.update(regions)
         stats['states_covered'] = len(all_states)
         
-        # Cobertura regional
+        # Regional coverage
         regional_coverage = initiative.get('regional_coverage', [])
         stats['regions_covered'] = len(regional_coverage)
         
-        # Span temporal
+        # Temporal span
         years = initiative.get('available_years', [])
         if years:
             stats['temporal_span'] = max(years) - min(years) + 1
         
-        # Resolução espacial
+        # Spatial resolution
         resolution = initiative.get('spatial_resolution')
         if resolution:
             stats['resolution'] = f"{resolution}m"
         
-        # Precisão geral
+        # Overall accuracy
         accuracy = initiative.get('overall_accuracy')
         if accuracy:
             stats['accuracy'] = accuracy
         
-        # Área de cobertura
+        # Coverage area
         coverage = initiative.get('coverage', 'N/A')
         stats['coverage_area'] = coverage
         
     except Exception as e:
-        st.error(f"❌ Erro ao processar estatísticas CONAB: {e}")
+        st.error(f"❌ Error processing CONAB statistics: {e}")
     
     return stats
 
 
 def get_crop_regional_distribution(conab_data: Dict[str, Any]) -> pd.DataFrame:
     """
-    Extrair distribuição regional das culturas dos dados CONAB.
+    Extract regional distribution of crops from CONAB data.
     
     Args:
-        conab_data: Dados brutos do CONAB
+        conab_data: Raw CONAB data
         
     Returns:
-        DataFrame com distribuição regional
+        DataFrame with regional distribution
     """
     try:
         initiative = conab_data.get('CONAB Crop Monitoring Initiative', {})
@@ -218,7 +174,7 @@ def get_crop_regional_distribution(conab_data: Dict[str, Any]) -> pd.DataFrame:
             second_crop_years = crop_data.get('second_crop_years', {})
             
             for region in regions:
-                # Contar anos de dados disponíveis
+                # Count years of available data
                 first_years = len(first_crop_years.get(region, []))
                 second_years = len(second_crop_years.get(region, []))
                 total_years = first_years + second_years
@@ -235,26 +191,26 @@ def get_crop_regional_distribution(conab_data: Dict[str, Any]) -> pd.DataFrame:
         return pd.DataFrame(distribution_data)
         
     except Exception as e:
-        st.error(f"❌ Erro ao processar distribuição regional: {e}")
+        st.error(f"❌ Error processing regional distribution: {e}")
         return pd.DataFrame()
 
 
 def get_temporal_coverage_evolution(conab_data: Dict[str, Any]) -> pd.DataFrame:
     """
-    Extrair evolução da cobertura temporal das culturas.
+    Extract temporal coverage evolution of crops.
     
     Args:
-        conab_data: Dados brutos do CONAB
+        conab_data: Raw CONAB data
         
     Returns:
-        DataFrame com evolução temporal
+        DataFrame with temporal evolution
     """
     try:
         initiative = conab_data.get('CONAB Crop Monitoring Initiative', {})
         detailed_coverage = initiative.get('detailed_crop_coverage', {})
         available_years = initiative.get('available_years', [])
         
-        # Criar matriz de cobertura por ano e cultura
+        # Create coverage matrix by year and crop
         evolution_data = []
         
         for year in available_years:
@@ -265,7 +221,7 @@ def get_temporal_coverage_evolution(conab_data: Dict[str, Any]) -> pd.DataFrame:
                 first_crop_years = crop_data.get('first_crop_years', {})
                 second_crop_years = crop_data.get('second_crop_years', {})
                 
-                # Verificar se a cultura tem dados neste ano
+                # Check if crop has data for this year
                 has_data = False
                 for region, years_list in first_crop_years.items():
                     if any(str(year) in year_str for year_str in years_list):
@@ -292,19 +248,19 @@ def get_temporal_coverage_evolution(conab_data: Dict[str, Any]) -> pd.DataFrame:
         return pd.DataFrame(evolution_data)
         
     except Exception as e:
-        st.error(f"❌ Erro ao processar evolução temporal: {e}")
+        st.error(f"❌ Error processing temporal evolution: {e}")
         return pd.DataFrame()
 
 
 def get_crop_seasons_analysis(conab_data: Dict[str, Any]) -> pd.DataFrame:
     """
-    Analisar padrões de safras das culturas (primeira e segunda safra).
+    Analyze crop season patterns (first and second harvest).
     
     Args:
-        conab_data: Dados brutos do CONAB
+        conab_data: Raw CONAB data
         
     Returns:
-        DataFrame com análise de safras
+        DataFrame with season analysis
     """
     try:
         initiative = conab_data.get('CONAB Crop Monitoring Initiative', {})
@@ -316,13 +272,13 @@ def get_crop_seasons_analysis(conab_data: Dict[str, Any]) -> pd.DataFrame:
             first_crop_years = crop_data.get('first_crop_years', {})
             second_crop_years = crop_data.get('second_crop_years', {})
             
-            # Contar regiões com primeira safra
+            # Count regions with first harvest
             first_regions = len([r for r, years in first_crop_years.items() if years])
             
-            # Contar regiões com segunda safra
+            # Count regions with second harvest
             second_regions = len([r for r, years in second_crop_years.items() if years])
             
-            # Total de regiões
+            # Total regions
             all_regions = set(first_crop_years.keys()) | set(second_crop_years.keys())
             total_regions = len(all_regions)
             
@@ -338,19 +294,19 @@ def get_crop_seasons_analysis(conab_data: Dict[str, Any]) -> pd.DataFrame:
         return pd.DataFrame(seasons_data)
         
     except Exception as e:
-        st.error(f"❌ Erro ao processar análise de safras: {e}")
+        st.error(f"❌ Error processing season analysis: {e}")
         return pd.DataFrame()
 
 
 def get_conab_data_products(conab_data: Dict[str, Any]) -> pd.DataFrame:
     """
-    Extrair informações sobre produtos de dados do CONAB.
+    Extract information about CONAB data products.
     
     Args:
-        conab_data: Dados brutos do CONAB
+        conab_data: Raw CONAB data
         
     Returns:
-        DataFrame com produtos de dados
+        DataFrame with data products
     """
     try:
         initiative = conab_data.get('CONAB Crop Monitoring Initiative', {})
@@ -371,19 +327,19 @@ def get_conab_data_products(conab_data: Dict[str, Any]) -> pd.DataFrame:
         return pd.DataFrame(products_data)
         
     except Exception as e:
-        st.error(f"❌ Erro ao processar produtos de dados: {e}")
+        st.error(f"❌ Error processing data products: {e}")
         return pd.DataFrame()
 
 
 def validate_conab_data_quality(conab_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Validar qualidade e completude dos dados CONAB.
+    Validate CONAB data quality and completeness.
     
     Args:
-        conab_data: Dados brutos do CONAB
+        conab_data: Raw CONAB data
         
     Returns:
-        Dict com métricas de qualidade
+        Dict with quality metrics
     """
     quality_metrics = {
         'completeness_score': 0.0,
@@ -400,13 +356,13 @@ def validate_conab_data_quality(conab_data: Dict[str, Any]) -> Dict[str, Any]:
             quality_metrics['validation_errors'].append("No CONAB initiative data found")
             return quality_metrics
         
-        # Campos obrigatórios
+        # Required fields
         required_fields = [
             'coverage', 'provider', 'spatial_resolution', 'available_years',
             'methodology', 'overall_accuracy', 'detailed_crop_coverage'
         ]
         
-        # Verificar completude
+        # Check completeness
         present_fields = 0
         for field in required_fields:
             if field in initiative and initiative[field]:
@@ -416,11 +372,11 @@ def validate_conab_data_quality(conab_data: Dict[str, Any]) -> Dict[str, Any]:
         
         quality_metrics['completeness_score'] = present_fields / len(required_fields)
         
-        # Verificar atualidade dos dados
+        # Check data freshness
         years = initiative.get('available_years', [])
         if years:
             latest_year = max(years)
-            current_year = 2025  # Ano atual
+            current_year = 2025  # Current year
             if latest_year >= current_year - 1:
                 quality_metrics['data_freshness'] = 'Current'
             elif latest_year >= current_year - 3:
@@ -428,7 +384,7 @@ def validate_conab_data_quality(conab_data: Dict[str, Any]) -> Dict[str, Any]:
             else:
                 quality_metrics['data_freshness'] = 'Outdated'
         
-        # Verificar cobertura de dados
+        # Check data coverage
         detailed_coverage = initiative.get('detailed_crop_coverage', {})
         if len(detailed_coverage) >= 5:
             quality_metrics['data_coverage'] = 'Comprehensive'
@@ -441,3 +397,56 @@ def validate_conab_data_quality(conab_data: Dict[str, Any]) -> Dict[str, Any]:
         quality_metrics['validation_errors'].append(f"Error validating data: {e}")
     
     return quality_metrics
+
+
+def safe_get_data(data: Dict[str, Any], key: str, default: Any = None) -> Any:
+    """
+    Safely get data from dictionary with nested key support.
+    
+    Args:
+        data: Dictionary to search
+        key: Key to search for (supports dot notation)
+        default: Default value if key not found
+        
+    Returns:
+        Retrieved value or default
+    """
+    try:
+        if '.' in key:
+            keys = key.split('.')
+            current = data
+            for k in keys:
+                if isinstance(current, dict) and k in current:
+                    current = current[k]
+                else:
+                    return default
+            return current
+        else:
+            return data.get(key, default) if isinstance(data, dict) else default
+    except Exception:
+        return default
+
+
+def validate_data_structure(data: Any, expected_type: type = dict) -> bool:
+    """
+    Validate if data has expected structure.
+    
+    Args:
+        data: Data to validate
+        expected_type: Expected type
+        
+    Returns:
+        True if valid, False otherwise
+    """
+    try:
+        if not isinstance(data, expected_type):
+            return False
+        
+        if expected_type == dict:
+            return len(data) > 0
+        elif expected_type == list:
+            return len(data) > 0
+        
+        return True
+    except Exception:
+        return False

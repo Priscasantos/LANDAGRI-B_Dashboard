@@ -19,7 +19,7 @@ Implementação de um sistema de navegação hierárquico moderno para o Dashboa
 - **Comparative Analysis**: Comparação entre diferentes iniciativas
 - **Detailed Analysis**: Análise detalhada individual
 
-### 🌾 Agriculture Analysis
+### 🌾 Agricultural Analysis
 - **Crop Calendar**: Calendário de culturas (dados CONAB)
 - **Agriculture Availability**: Disponibilidade agrícola (dados CONAB)
 
@@ -73,7 +73,7 @@ menu_structure = {
         "pages": ["Temporal Analysis", "Comparative Analysis", "Detailed Analysis"],
         "page_icons": ["calendar-event", "bar-chart", "zoom-in"]
     },
-    "🌾 Agriculture Analysis": {
+    "🌾 Agricultural Analysis": {
         "icon": "leaf",
         "pages": ["Crop Calendar", "Agriculture Availability"], 
         "page_icons": ["calendar3", "graph-up-arrow"]
@@ -88,7 +88,7 @@ menu_structure = {
 - `temporal.py` → **🔍 Initiative Analysis** → Temporal Analysis
 - `comparison_new.py` → **🔍 Initiative Analysis** → Comparative Analysis
 - `detailed.py` → **🔍 Initiative Analysis** → Detailed Analysis
-- `conab.py` → **🌾 Agriculture Analysis** → Crop Calendar / Agriculture Availability
+- `conab.py` → **🌾 Agricultural Analysis** → Crop Calendar / Agriculture Availability
 
 ### Session State Management
 - `current_category`: Categoria atualmente selecionada
