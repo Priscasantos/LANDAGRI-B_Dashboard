@@ -5,7 +5,7 @@ Mapping Overview Component - Clean Version
 Componente para exibir overview básico dos dados CONAB
 Apenas métricas gerais, gráficos detalhados em Crop Calendar e Availability
 
-Author: Agricultural Dashboard
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-08
 """
 
@@ -19,9 +19,9 @@ from pathlib import Path
 
 
 def load_mapping_data():
-    """Carrega dados de mapeamento da CONAB"""
+    """Loads CONAB mapping data"""
     try:
-        # Primeiro tenta o arquivo completo
+        # First, try the complete file
         data_path = Path("data/json/agricultural_conab_mapping_data_complete.jsonc")
         if data_path.exists():
             with open(data_path, encoding='utf-8') as f:
@@ -31,34 +31,34 @@ def load_mapping_data():
                 content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
                 return json.loads(content)
         
-        # Fallback para o arquivo antigo
+        # Fallback to the legacy file
         data_path = Path("data/conab_mapping_data.json")
         with open(data_path, encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
-        st.error("⚠️ Arquivo de dados de mapeamento da CONAB não encontrado!")
+        st.error("⚠️ CONAB mapping data file not found!")
         return None
     except Exception as e:
-        st.error(f"❌ Erro ao carregar dados de mapeamento: {e}")
+        st.error(f"❌ Error loading mapping data: {e}")
         return None
 
 
 def calculate_conab_metrics(data):
-    """Calcula métricas específicas dos dados de calendário da CONAB"""
+    """Calculates specific metrics from the CONAB calendar data"""
     if not data or 'crop_calendar' not in data:
         return {}
     
-    # Contar culturas únicas
+    # Count unique crops
     total_crops = len(data['crop_calendar'])
     
-    # Contar estados únicos
+    # Count unique states
     all_states = set()
     for crop_data in data['crop_calendar'].values():
         for state_info in crop_data:
             all_states.add(state_info['state_code'])
     total_states = len(all_states)
     
-    # Contar regiões
+    # Count regions
     all_regions = set()
     for crop_data in data['crop_calendar'].values():
         for state_info in crop_data:
@@ -96,7 +96,7 @@ def calculate_conab_metrics(data):
 
 
 def create_overview_summary_chart(data):
-    """Cria gráfico simples de resumo das culturas"""
+    """Creates a simple summary chart of crops"""
     if not data or 'crop_calendar' not in data:
         return None
     
@@ -111,23 +111,35 @@ def create_overview_summary_chart(data):
             calendar = state_info.get('calendar', {})
             total_activities += sum(1 for v in calendar.values() if v and v.strip())
         
+        # Use concise string operations and avoid repeated replace calls for performance
+        crop_label = crop_name
+        crop_label = crop_label.replace(' (1st harvest)', ' 1st')
+        crop_label = crop_label.replace(' (2nd harvest)', ' 2nd')
+        crop_label = crop_label.replace(' (3th harvest)', ' 3rd')
+
         crop_data.append({
-            'Cultura': crop_name.replace(' (1st harvest)', ' 1ª').replace(' (2nd harvest)', ' 2ª').replace(' (3th harvest)', ' 3ª'),
-            'Estados': states_count,
-            'Atividades': total_activities
+            'Crop': crop_label,
+            'States': states_count,
+            'Activities': total_activities
         })
     
     df = pd.DataFrame(crop_data)
     
+    # Optimize DataFrame usage and Plotly rendering for performance
+    # Use categorical ordering for crops to avoid unnecessary sorting
+    df['Crop'] = pd.Categorical(df['Crop'], categories=df['Crop'], ordered=True)
+
     fig = px.bar(
         df,
-        x='Cultura',
-        y='Estados',
-        title='📊 Cobertura por Cultura - Estados Monitorados',
-        labels={'Estados': 'Número de Estados', 'Cultura': 'Cultura'},
-        color='Atividades',
+        x='Crop',
+        y='States',
+        title='📊 Coverage: Crop versus Monitored States',
+        labels={'States': 'Number of States', 'Crop': 'Crop'},
+        color='Activities',
         color_continuous_scale='viridis'
     )
+    # Reduce chart rendering overhead
+    fig.update_traces(marker_line_width=0.5)
     
     fig.update_layout(
         height=400,
@@ -139,35 +151,35 @@ def create_overview_summary_chart(data):
 
 
 def render_conab_mapping_metrics(data):
-    """Renderiza métricas principais do calendário CONAB"""
+    """Renders main metrics of the CONAB calendar"""
     if not data:
         return
     
     metrics = calculate_conab_metrics(data)
     
-    st.markdown("### 📊 Resumo Geral - Calendário Agrícola CONAB")
+    st.markdown("### 📊 General Summary")
     
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         st.metric(
-            "🌾 Culturas",
+            "🌾 Crops",
             f"{metrics.get('total_crops', 0)}",
-            help="Total de culturas no calendário"
+            help="Total number of crops in the calendar"
         )
     
     with col2:
         st.metric(
-            "🏛️ Estados", 
+            "🏛️ States", 
             f"{metrics.get('total_states', 0)}",
-            help="Estados brasileiros cobertos"
+            help="Covered Brazilian States"
         )
     
     with col3:
         st.metric(
-            "🗺️ Regiões",
+            "🗺️ Regions",
             f"{metrics.get('total_regions', 0)}",
-            help="Regiões brasileiras"
+            help="Brazilian Regions"
         )
     
     with col4:
@@ -175,7 +187,7 @@ def render_conab_mapping_metrics(data):
         st.metric(
             "✅ Completeness",
             f"{completeness:.1f}%",
-            help="Porcentagem de dados preenchidos"
+            help="Percentage of filled data"
         )
     
     st.divider()
@@ -185,72 +197,72 @@ def render_conab_mapping_metrics(data):
     
     with col1:
         st.metric(
-            "📅 Período",
+            "📅 Period",
             metrics.get('coverage_years', 'N/A'),
-            help="Período de cobertura dos dados"
+            help="Data coverage period"
         )
     
     with col2:
         area = metrics.get('estimated_area', 0)
         st.metric(
-            "📏 Área Estimada",
+            "📏 Estimated Area",
             f"{area:.1f} M ha",
-            help="Área total estimada de monitoramento"
+            help="Total estimated monitored area"
         )
     
     with col3:
         entries = metrics.get('filled_entries', 0)
         st.metric(
-            "📋 Dados Válidos",
+            "📋 Valid Entries",
             f"{entries:,}",
-            help="Entradas de calendário preenchidas"
+            help="Filled calendar entries"
         )
 
 
 def render_mapping_overview():
-    """Função principal para renderizar o overview básico de mapeamento CONAB"""
+    """Main function to render the basic CONAB mapping overview"""
     # Carregar dados
     data = load_mapping_data()
     
     if not data:
-        st.warning("⚠️ Dados de calendário CONAB não disponíveis")
+        st.warning("⚠️ CONAB calendar data not available")
         return
     
-    # Renderizar métricas principais do CONAB
+    # Render main CONAB metrics
     render_conab_mapping_metrics(data)
     
-    # Gráfico simples de overview
-    st.markdown("### 📈 Distribuição por Cultura")
+    # Simple overview chart
+    st.markdown("### 📈 Distribution by Crop")
     fig_overview = create_overview_summary_chart(data)
     if fig_overview:
         st.plotly_chart(fig_overview, use_container_width=True)
     
-    # Informações básicas sobre fonte
-    st.markdown("### ℹ️ Sobre os Dados")
+    # Basic information about data source
+    st.markdown("### ℹ️ About the Data")
     
     col1, col2 = st.columns(2)
     
     with col1:
         st.info("""
-        **📋 Fonte dos Dados:**
-        - CONAB (Companhia Nacional de Abastecimento)
-        - Calendário Agrícola Nacional
-        - Períodos de Plantio e Colheita
+        **📋 Data Source:**
+        - CONAB (National Supply Company)
+        - National Agricultural Calendar
+        - Planting and Harvesting Periods
         """)
     
     with col2:
         st.info("""
-        **🎯 Análises Detalhadas:**
-        - **Crop Calendar**: Gráficos temporais e heatmaps
-        - **Availability**: Análises de disponibilidade
-        - Filtros por região e cultura disponíveis
+        **🎯 Detailed Analyses:**
+        - **Crop Calendar**: Temporal charts and heatmaps
+        - **Availability**: Availability analyses
+        - Filters available by region and crop
         """)
     
     # Rodapé informativo
     st.markdown("---")
     st.markdown("""
-    💡 **Dica**: Para análises detalhadas, acesse as abas **Crop Calendar** e **Availability** 
-    onde você encontrará gráficos interativos, filtros por região e análises temporais completas.
+    💡 **Tip**: For detailed analyses, go to the **Crop Calendar** and **Availability** tabs,
+    where you will find interactive charts, region filters, and comprehensive temporal analyses.
     """)
 
 

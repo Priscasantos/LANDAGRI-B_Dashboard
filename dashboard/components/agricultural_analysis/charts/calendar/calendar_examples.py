@@ -5,7 +5,7 @@ Exemplo de Uso - Gráficos Consolidados do Calendar
 Demonstra como usar os componentes consolidados do old_calendar
 em diferentes contextos dentro do dashboard.
 
-Autor: Dashboard Iniciativas LULC
+Autor: LANDAGRI-B Project Team 
 Data: 2025-08-07
 """
 

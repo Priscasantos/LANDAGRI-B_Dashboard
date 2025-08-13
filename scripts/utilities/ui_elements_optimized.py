@@ -5,7 +5,7 @@ Optimized Streamlit UI Elements
 Modern, simplified UI components with clean interface and minimal customization.
 Focused on user-friendly experience without excessive options.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025
 """
 

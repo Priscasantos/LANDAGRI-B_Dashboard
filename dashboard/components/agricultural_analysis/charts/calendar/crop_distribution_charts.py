@@ -166,7 +166,7 @@ def create_crop_type_distribution_chart(filtered_data: dict) -> Optional[go.Figu
         # Create modern subplot with multiple metrics
         fig = make_subplots(
             rows=1, cols=2,
-            subplot_titles=("📍 Geographic Coverage", "🌾 Activity Intensity"),
+            subplot_titles=("📍 Geographic Coverage", "🎚️ Activity Intensity"),
             specs=[[{"secondary_y": False}, {"secondary_y": True}]],
             column_widths=[0.6, 0.4]
         )
@@ -568,7 +568,7 @@ def create_number_of_crops_per_region_chart(filtered_data: dict) -> Optional[go.
                             region_activities[region] += active_months
 
         if not region_activities:
-            st.info("📊 No regional activity found in data")
+            st.info("🗺 No regional activity found in data")
             return None
 
         # Cria DataFrame

@@ -4,7 +4,7 @@ Universal Cache Utilities
 
 Cache utilities for data processing and optimization.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-07-30
 """
 

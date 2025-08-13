@@ -4,7 +4,7 @@ Boxplot Component - Detailed Analysis
 
 Component for rendering boxplot tab in detailed analysis.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-01
 """
 

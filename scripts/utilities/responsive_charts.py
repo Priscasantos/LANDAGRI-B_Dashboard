@@ -5,7 +5,7 @@ Responsive Chart Utilities
 Utilities for creating responsive and modern charts across all dashboard modules.
 Provides consistent styling, responsive sizing, and modern design patterns.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025
 """
 

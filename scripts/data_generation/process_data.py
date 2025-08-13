@@ -18,7 +18,7 @@ Features:
 - English standardization
 - Visualization-ready outputs
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025
 """
 

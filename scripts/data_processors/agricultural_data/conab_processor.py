@@ -13,7 +13,7 @@ Características:
 - Suporte a múltiplas culturas e regiões
 - Validação específica de dados CONAB
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025
 """
 

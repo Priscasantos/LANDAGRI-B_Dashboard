@@ -6,7 +6,7 @@ Component responsible for rendering the consolidated agricultural data overview.
 ONLY overview data - no tabs, single menu.
 Integrated with updated agricultural monitoring information (2025).
 
-Author: Agricultural Dashboard
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-08
 """
 

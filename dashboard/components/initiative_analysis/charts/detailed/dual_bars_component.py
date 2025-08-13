@@ -5,7 +5,7 @@ Dual Bars Component - Detailed Analysis
 Component for rendering dual bars tab in detailed analysis.
 Contains the create_dual_bars_chart migrated from detailed_charts.py.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-01
 """
 

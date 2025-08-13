@@ -4,7 +4,7 @@ Sensor Charts Component
 
 Componente para gráficos de sensores utilizados nas iniciativas.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-07-23
 """
 

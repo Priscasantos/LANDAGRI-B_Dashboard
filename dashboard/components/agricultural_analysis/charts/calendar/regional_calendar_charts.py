@@ -5,7 +5,7 @@ Regional Calendar Charts
 Módulo de gráficos regionais consolidados do old_calendar/regional/.
 Implementa visualizações específicas por região brasileira.
 
-Autor: Dashboard Iniciativas LULC
+Autor: LANDAGRI-B Project Team 
 Data: 2025-08-07
 """
 

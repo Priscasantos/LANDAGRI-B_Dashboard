@@ -4,7 +4,7 @@ Chart Core Utilities
 
 Core utilities for chart processing and data transformation.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-07-30
 """
 

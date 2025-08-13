@@ -5,7 +5,7 @@ Table Chart Utilities
 
 Generates beautiful tables as Plotly figures for various data displays.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2024
 """
 

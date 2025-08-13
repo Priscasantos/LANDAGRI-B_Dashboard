@@ -5,7 +5,7 @@ CONAB Charts for Availability Module
 CONAB-specific charts integrated into the availability analysis module.
 Specialized visualizations for CONAB data quality and coverage analysis.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-07
 """
 

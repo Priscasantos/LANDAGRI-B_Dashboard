@@ -5,7 +5,7 @@ Spatial Temporal Distribution Charts
 Módulo para criação de gráficos de distribuição espacial e temporal dos dados CONAB.
 Mostra a cobertura de estados/áreas ao longo do tempo em formato de timeline.
 
-Autor: Dashboard Iniciativas LULC
+Autor: LANDAGRI-B Project Team 
 Data: 2025-08-11
 """
 
@@ -177,8 +177,8 @@ def plot_conab_spatial_temporal_distribution(conab_data: Dict[str, Any]) -> go.F
     # Update layout with type-safe parameters
     layout_params = validate_plotly_params(
         title="",
-        xaxis_title="<b>Ano</b>",
-        yaxis_title="<b>Região</b>",
+        xaxis_title="<b>Year</b>",
+        yaxis_title="<b>Region</b>",
         height=600,
         showlegend=True,
         legend=dict(

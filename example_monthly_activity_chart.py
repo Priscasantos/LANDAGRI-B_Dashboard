@@ -5,7 +5,7 @@ Example usage of the new Monthly Activities Stacked Bar Chart
 This example demonstrates how to use the create_monthly_activities_stacked_bar_chart function
 from the charts module.
 
-Author: LULC Initiatives Dashboard
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-11
 """
 

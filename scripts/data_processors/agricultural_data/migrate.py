@@ -12,7 +12,7 @@ Características:
 - Backup automático de dados existentes
 - Validação de integridade durante migração
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025
 """
 

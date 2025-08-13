@@ -5,7 +5,7 @@ Class Details Component - Comparison Analysis
 Advanced component for detailed class information visualization with comparative charts.
 Features class distribution analysis, agricultural capabilities comparison, and interactive visualizations.
 
-Author: LULC Initiatives Dashboard
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-01
 """
 

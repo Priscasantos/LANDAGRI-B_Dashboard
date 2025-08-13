@@ -5,7 +5,7 @@ Summary of Coverage Calculation and Color Palette Improvements
 This file documents the improvements made to fix percentage inconsistencies
 and implement regional color coding in the agricultural analysis dashboard.
 
-Author: Agricultural Dashboard Team
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-11
 """
 

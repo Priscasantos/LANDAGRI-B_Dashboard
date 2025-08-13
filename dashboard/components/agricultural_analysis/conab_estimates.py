@@ -1,6 +1,6 @@
 """
-Componente de Dashboard para Dados Agrícolas da CONAB
-Exibe dados de produção agrícola brasileira da Companhia Nacional de Abastecimento (CONAB)
+CONAB Agricultural Data Dashboard Component
+Displays Brazilian agricultural production data from the National Supply Company (CONAB)
 """
 
 import streamlit as st
@@ -11,69 +11,69 @@ import json
 import os
 
 def load_conab_data():
-    """Carrega dados agrícolas da CONAB do arquivo JSON"""
+    """Loads CONAB agricultural data from JSON file"""
     try:
         data_path = os.path.join('data', 'conab_agricultural_data.json')
-        with open(data_path, 'r', encoding='utf-8') as f:
+        with open(data_path, encoding='utf-8') as f:
             data = json.load(f)
         return data
     except FileNotFoundError:
-        st.error("Arquivo de dados da CONAB não encontrado!")
+        st.error("CONAB data file not found!")
         return None
     except Exception as e:
-        st.error(f"Erro ao carregar dados da CONAB: {e}")
+        st.error(f"Error loading CONAB data: {e}")
         return None
 
 def create_conab_production_chart(data):
-    """Cria gráfico de produção total por safra"""
-    # Preparar dados para o gráfico
+    """Creates total production chart by harvest season"""
+    # Prepare data for chart
     years = []
     productions = []
     
-    for crop_key, crop_data in data['crops'].items():
+    for _crop_key, crop_data in data['crops'].items():
         for year, values in crop_data['production_data'].items():
             years.append(year)
             productions.append(values['production'])
     
-    # Criar DataFrame agregado por ano
-    df = pd.DataFrame({'Safra': years, 'Producao': productions})
-    df_grouped = df.groupby('Safra')['Producao'].sum().reset_index()
-    df_grouped['Producao_MT'] = df_grouped['Producao'] / 1000  # Converter para milhões de toneladas
+    # Create DataFrame aggregated by year
+    df = pd.DataFrame({'Season': years, 'Production': productions})
+    df_grouped = df.groupby('Season')['Production'].sum().reset_index()
+    df_grouped['Production_MT'] = df_grouped['Production'] / 1000  # Convert to millions of tons
     
-    # Criar gráfico
-    fig = px.line(df_grouped, x='Safra', y='Producao_MT',
-                  title='Evolução da Produção Total de Grãos - CONAB',
-                  labels={'Producao_MT': 'Produção (Milhões de Toneladas)', 'Safra': 'Safra'},
+    # Create chart
+    fig = px.line(df_grouped, x='Season', y='Production_MT',
+                  title='Evolution of Total Grain Production - CONAB',
+                  labels={'Production_MT': 'Production (Million Tons)', 'Season': 'Season'},
                   markers=True)
     
     fig.update_layout(
-        xaxis_title="Safra",
-        yaxis_title="Produção (Milhões de Toneladas)",
+        xaxis_title="Season",
+        yaxis_title="Production (Million Tons)",
         hovermode='x unified'
     )
     
     return fig
 
 def create_conab_crop_comparison_chart(data):
-    """Cria gráfico de comparação entre culturas"""
-    # Preparar dados da safra mais recente
+    """Creates comparison chart between crops"""
+    # Prepare data from most recent harvest
     crop_names = []
     productions = []
     areas = []
     
-    for crop_key, crop_data in data['crops'].items():
-        # Pegar dados da safra 2023/24 (mais recente)
+    for _crop_key, crop_data in data['crops'].items():
+        # Get data from 2023/24 season (most recent)
         if '2023/24' in crop_data['production_data']:
             latest_data = crop_data['production_data']['2023/24']
             crop_names.append(crop_data['name'])
-            productions.append(latest_data['production'] / 1000)  # Converter para milhões
-            areas.append(latest_data['area'] / 1000)  # Converter para milhões
+            productions.append(latest_data['production'] / 1000)  # Convert to millions
+            areas.append(latest_data['area'] / 1000)  # Convert to millions
     
-    # Criar gráfico de barras
+    # Create bar chart
     fig = go.Figure()
     
     fig.add_trace(go.Bar(
-        name='Produção (Milhões de t)',
+        name='Production (Million t)',
         x=crop_names,
         y=productions,
         yaxis='y',
@@ -82,7 +82,7 @@ def create_conab_crop_comparison_chart(data):
     ))
     
     fig.add_trace(go.Bar(
-        name='Área (Milhões de ha)',
+        name='Area (Million ha)',
         x=crop_names,
         y=areas,
         yaxis='y2',
@@ -91,62 +91,62 @@ def create_conab_crop_comparison_chart(data):
     ))
     
     fig.update_layout(
-        title='Produção e Área por Cultura - Safra 2023/24 (CONAB)',
-        xaxis_title="Culturas",
-        yaxis=dict(
-            title="Produção (Milhões de toneladas)",
-            side="left"
-        ),
-        yaxis2=dict(
-            title="Área (Milhões de hectares)",
-            side="right",
-            overlaying="y"
-        ),
+        title='Production and Area by Crop - Season 2023/24 (CONAB)',
+        xaxis_title="Crops",
+        yaxis={
+            "title": "Production (Million tons)",
+            "side": "left"
+        },
+        yaxis2={
+            "title": "Area (Million hectares)",
+            "side": "right",
+            "overlaying": "y"
+        },
         barmode='group'
     )
     
     return fig
 
 def create_conab_productivity_chart(data):
-    """Cria gráfico de evolução da produtividade"""
+    """Creates productivity evolution chart"""
     productivity_data = []
     
-    # Focar em soja e milho (principais culturas)
-    main_crops = ['soja', 'milho_total']
-    crop_names = {'soja': 'Soja', 'milho_total': 'Milho'}
-    
+    # Focus on soybean and corn (main crops)
+    main_crops = ['soybean', 'corn']
+    crop_names = {'soybean': 'Soybean', 'corn': 'Corn'}
+
     for crop_key in main_crops:
         if crop_key in data['crops']:
             crop_data = data['crops'][crop_key]
             for year, values in crop_data['production_data'].items():
                 productivity_data.append({
-                    'Safra': year,
-                    'Cultura': crop_names[crop_key],
-                    'Produtividade': values['productivity']
+                    'Season': year,
+                    'Crop': crop_names[crop_key],
+                    'Productivity': values['productivity']
                 })
     
     df = pd.DataFrame(productivity_data)
     
-    fig = px.line(df, x='Safra', y='Produtividade', color='Cultura',
-                  title='Evolução da Produtividade - CONAB',
-                  labels={'Produtividade': 'Produtividade (kg/ha)', 'Safra': 'Safra'},
+    fig = px.line(df, x='Season', y='Productivity', color='Crop',
+                  title='Productivity Evolution - CONAB',
+                  labels={'Productivity': 'Productivity (kg/ha)', 'Season': 'Season'},
                   markers=True)
     
     fig.update_layout(
-        xaxis_title="Safra",
-        yaxis_title="Produtividade (kg/ha)",
+        xaxis_title="Season",
+        yaxis_title="Productivity (kg/ha)",
         hovermode='x unified'
     )
     
     return fig
 
 def create_conab_area_chart(data):
-    """Cria gráfico de pizza da distribuição de área"""
-    # Dados da safra 2023/24
+    """Creates pie chart of area distribution"""
+    # Data from 2023/24 season
     crop_names = []
     areas = []
     
-    for crop_key, crop_data in data['crops'].items():
+    for _crop_key, crop_data in data['crops'].items():
         if '2023/24' in crop_data['production_data']:
             latest_data = crop_data['production_data']['2023/24']
             crop_names.append(crop_data['name'])
@@ -155,7 +155,7 @@ def create_conab_area_chart(data):
     fig = px.pie(
         values=areas,
         names=crop_names,
-        title='Distribuição de Área Plantada por Cultura - Safra 2023/24 (CONAB)'
+        title='Planted Area Distribution by Crop - Season 2023/24 (CONAB)'
     )
     
     fig.update_traces(
@@ -166,29 +166,29 @@ def create_conab_area_chart(data):
     return fig
 
 def create_conab_all_crops_chart(data):
-    """Cria gráfico de barras com todas as culturas CONAB"""
-    # Dados da safra 2023/24
+    """Creates bar chart with all CONAB crops"""
+    # Data from 2023/24 season
     crop_names = []
     productions = []
     
-    for crop_key, crop_data in data['crops'].items():
+    for _crop_key, crop_data in data['crops'].items():
         if '2023/24' in crop_data['production_data']:
             latest_data = crop_data['production_data']['2023/24']
             crop_names.append(crop_data['name'])
             productions.append(latest_data['production'])
     
-    # Criar DataFrame e ordenar por produção
-    df = pd.DataFrame({'Cultura': crop_names, 'Produção': productions})
-    df = df.sort_values('Produção', ascending=True)
+    # Create DataFrame and sort by production
+    df = pd.DataFrame({'Crop': crop_names, 'Production': productions})
+    df = df.sort_values('Production', ascending=True)
     
     fig = px.bar(
         df,
-        x='Produção',
-        y='Cultura',
+        x='Production',
+        y='Crop',
         orientation='h',
-        title='Produção por Cultura - Safra 2023/24 (CONAB)',
-        labels={'Produção': 'Produção (mil toneladas)', 'Cultura': 'Cultura'},
-        color='Produção',
+        title='Production by Crop for the Current Season',
+        labels={'Production': 'Production (thousand tons)', 'Crop': 'Crop'},
+        color='Production',
         color_continuous_scale='Viridis'
     )
     
@@ -197,24 +197,24 @@ def create_conab_all_crops_chart(data):
     return fig
 
 def create_conab_regional_chart(data):
-    """Cria gráfico de produção regional CONAB"""
+    """Creates CONAB regional production chart"""
     if 'regional_production' not in data:
         return None
     
     regional_data = data['regional_production']
     chart_data = []
     
-    for region_key, region_info in regional_data.items():
+    for _region_key, region_info in regional_data.items():
         region_name = region_info['name']
         production_data = region_info.get('production_2023_24', {})
         
         for crop, production in production_data.items():
-            # Converter nomes das culturas
+            # Convert crop names
             crop_display = crop.replace('_', ' ').replace('total', '').title()
             chart_data.append({
-                'Região': region_name,
-                'Cultura': crop_display,
-                'Produção': production
+                'Region': region_name,
+                'Crop': crop_display,
+                'Production': production
             })
     
     if not chart_data:
@@ -224,11 +224,11 @@ def create_conab_regional_chart(data):
     
     fig = px.bar(
         df,
-        x='Região',
-        y='Produção',
-        color='Cultura',
-        title='Produção Regional por Cultura - Safra 2023/24 (CONAB)',
-        labels={'Produção': 'Produção (mil toneladas)', 'Região': 'Região'},
+        x='Region',
+        y='Production',
+        color='Crop',
+        title='Regional Production by Crop for the Current Season',
+        labels={'Production': 'Production (thousand tons)', 'Region': 'Region'},
         barmode='group'
     )
     
@@ -237,29 +237,29 @@ def create_conab_regional_chart(data):
     return fig
 
 def create_conab_crops_evolution_chart(data):
-    """Cria gráfico de evolução de todas as culturas CONAB"""
+    """Creates evolution chart of all CONAB crops"""
     crops_data = []
     
-    # Incluir todas as culturas
-    for crop_key, crop_data in data['crops'].items():
+    # Include all crops
+    for _crop_key, crop_data in data['crops'].items():
         crop_name = crop_data['name']
         
         for year, values in crop_data['production_data'].items():
             crops_data.append({
-                'Safra': year,
-                'Cultura': crop_name,
-                'Produção': values['production']
+                'Season': year,
+                'Crop': crop_name,
+                'Production': values['production']
             })
     
     df = pd.DataFrame(crops_data)
     
     fig = px.line(
         df,
-        x='Safra',
-        y='Produção',
-        color='Cultura',
-        title='Evolução da Produção por Cultura - CONAB (2018/19 - 2023/24)',
-        labels={'Produção': 'Produção (mil toneladas)', 'Safra': 'Safra'},
+        x='Season',
+        y='Production',
+        color='Crop',
+        title='Production Evolution by Crop - CONAB (2018/19 - 2023/24)',
+        labels={'Production': 'Production (thousand tons)', 'Season': 'Season'},
         markers=True
     )
     
@@ -271,10 +271,10 @@ def create_conab_crops_evolution_chart(data):
     return fig
 
 def render_conab_production_overview(data):
-    """Renderiza visão geral da produção CONAB"""
-    st.subheader("📊 Visão Geral da Produção - CONAB")
+    """Renders CONAB production overview"""
+    st.subheader("📊 Production Overview - CONAB")
     
-    # Métricas principais da safra 2023/24
+    # Main metrics from 2023/24 season
     latest_year = '2023/24'
     total_production = 0
     total_area = 0
@@ -290,31 +290,31 @@ def render_conab_production_overview(data):
     
     with col1:
         st.metric(
-            "Produção Total 2023/24",
-            f"{total_production/1000:.1f} milhões t",
-            delta=f"{main_crops_count} culturas principais"
+            "Total Production 2023/24",
+            f"{total_production/1000:.1f} million t",
+            delta=f"{main_crops_count} main crops"
         )
     
     with col2:
         st.metric(
-            "Área Total Plantada",
-            f"{total_area/1000:.1f} milhões ha",
-            delta="Safra 2023/24"
+            "Total Planted Area",
+            f"{total_area/1000:.1f} million ha",
+            delta="Season 2023/24"
         )
     
     with col3:
         avg_productivity = (total_production / total_area) if total_area > 0 else 0
         st.metric(
-            "Produtividade Média",
+            "Average Productivity",
             f"{avg_productivity:.0f} kg/ha",
-            delta="Média ponderada"
+            delta="Weighted average"
         )
 
 def render_conab_charts(data):
-    """Renderiza gráficos dos dados CONAB"""
-    st.subheader("📈 Análises Detalhadas - CONAB")
+    """Renders CONAB data charts"""
+    st.subheader("📈 Detailed Analysis - CONAB")
     
-    # Primeira linha: Produção total e distribuição de área
+    # First row: Total production and area distribution
     col1, col2 = st.columns(2)
     
     with col1:
@@ -325,92 +325,92 @@ def render_conab_charts(data):
         fig_area = create_conab_area_chart(data)
         st.plotly_chart(fig_area, use_container_width=True)
     
-    # Segunda linha: Comparação entre culturas
+    # Second row: Comparison between crops
     fig_comparison = create_conab_crop_comparison_chart(data)
     st.plotly_chart(fig_comparison, use_container_width=True)
     
-    # Terceira linha: Todas as culturas (barras horizontais)
+    # Third row: All crops (horizontal bars)
     fig_all_crops = create_conab_all_crops_chart(data)
     st.plotly_chart(fig_all_crops, use_container_width=True)
     
-    # Quarta linha: Evolução temporal de todas as culturas
+    # Fourth row: Temporal evolution of all crops
     fig_evolution = create_conab_crops_evolution_chart(data)
     st.plotly_chart(fig_evolution, use_container_width=True)
     
-    # Quinta linha: Dados regionais (se disponível)
+    # Fifth row: Regional data (if available)
     fig_regional = create_conab_regional_chart(data)
     if fig_regional:
         st.plotly_chart(fig_regional, use_container_width=True)
     
-    # Sexta linha: Produtividade
+    # Sixth row: Productivity
     fig_productivity = create_conab_productivity_chart(data)
     st.plotly_chart(fig_productivity, use_container_width=True)
 
 def render_conab_data_table(data):
-    """Renderiza tabela com dados detalhados da CONAB"""
-    st.subheader("📋 Dados Detalhados por Cultura - CONAB")
+    """Renders table with detailed CONAB data"""
+    st.subheader("📋 Detailed Data by Crop - CONAB")
     
-    # Informações sobre Portal 360° (se disponível)
+    # Information about Portal 360° (if available)
     if 'portal_360_info' in data:
         portal_info = data['portal_360_info']
         st.info(f"ℹ️ **{portal_info['description']}**")
         
-        # Exibir características do portal em colunas
+        # Display portal features in columns
         col1, col2 = st.columns(2)
         with col1:
-            st.markdown("**Funcionalidades disponíveis:**")
+            st.markdown("**Available features:**")
             for feature in portal_info.get('features', []):
                 st.markdown(f"• {feature}")
         
         with col2:
             if 'products_covered' in portal_info:
-                st.markdown("**Produtos cobertos:**")
+                st.markdown("**Products covered:**")
                 products_text = ", ".join(portal_info['products_covered'])
                 st.markdown(products_text)
     
-    # Preparar dados para a tabela
+    # Prepare data for table
     table_data = []
     
-    for crop_key, crop_data in data['crops'].items():
+    for _crop_key, crop_data in data['crops'].items():
         if '2023/24' in crop_data['production_data']:
             latest_data = crop_data['production_data']['2023/24']
             table_data.append({
-                'Cultura': crop_data['name'],
-                'Nome Científico': crop_data.get('scientific_name', 'N/A'),
-                'Produção (mil t)': f"{latest_data['production']:,}",
-                'Área (mil ha)': f"{latest_data['area']:,}",
-                'Produtividade (kg/ha)': f"{latest_data['productivity']:,}"
+                'Crop': crop_data['name'],
+                'Scientific Name': crop_data.get('scientific_name', 'N/A'),
+                'Production (thousand t)': f"{latest_data['production']:,}",
+                'Area (thousand ha)': f"{latest_data['area']:,}",
+                'Productivity (kg/ha)': f"{latest_data['productivity']:,}"
             })
     
     df = pd.DataFrame(table_data)
     st.dataframe(df, use_container_width=True)
     
-    # Adicionar informações regionais se disponível
+    # Add regional information if available
     if 'regional_production' in data:
-        st.subheader("🗺️ Informações Regionais - CONAB")
+        st.subheader("🗺️ Regional Information - CONAB")
         regional_data = data['regional_production']
         
-        for region_key, region_info in regional_data.items():
+        for _region_key, region_info in regional_data.items():
             with st.expander(f"📍 {region_info['name']}"):
-                st.markdown(f"**Estados:** {', '.join(region_info['states'])}")
-                st.markdown(f"**Características:** {region_info['characteristics']}")
+                st.markdown(f"**States:** {', '.join(region_info['states'])}")
+                st.markdown(f"**Characteristics:** {region_info['characteristics']}")
                 
                 if 'production_2023_24' in region_info:
-                    st.markdown("**Principais produções (safra 2023/24):**")
+                    st.markdown("**Main productions (season 2023/24):**")
                     prod_data = region_info['production_2023_24']
                     for crop, production in prod_data.items():
                         crop_name = crop.replace('_', ' ').title()
-                        st.markdown(f"• {crop_name}: {production:,} mil toneladas")
+                        st.markdown(f"• {crop_name}: {production:,} thousand tons")
 
 def render():
-    """Função principal para renderizar o componente CONAB"""
-    # Carregar dados
+    """Main function to render the CONAB component"""
+    # Load data
     data = load_conab_data()
     
     if data is None:
         return
     
-    # Renderizar componentes
+    # Render components
     render_conab_production_overview(data)
     st.divider()
     
@@ -419,34 +419,34 @@ def render():
     
     render_conab_data_table(data)
     
-    # Rodapé com fonte dos dados
+    # Footer with data source
     st.markdown("---")
-    st.markdown("### 📋 Sobre os Dados CONAB")
+    st.markdown("### 📋 About CONAB Data")
     
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown(
-            "**🏢 CONAB - Companhia Nacional de Abastecimento**  \n"
-            "Empresa pública vinculada ao Ministério da Agricultura,  \n"
-            "responsável pela gestão das políticas agrícolas brasileiras.  \n\n"
-            "**🌐 Website Oficial:** https://www.gov.br/conab/pt-br  \n"
-            "**📊 Portal de Informações:** [Produtos 360°](https://portaldeinformacoes.conab.gov.br/produtos-360.html)  \n"
-            "**📈 Boletins da Safra:** Levantamentos mensais de grãos"
+            "**🏢 CONAB - National Supply Company**  \n"
+            "Public company linked to the Ministry of Agriculture,  \n"
+            "responsible for managing Brazilian agricultural policies.  \n\n"
+            "**🌐 Official Website:** https://www.gov.br/conab/pt-br  \n"
+            "**📊 Information Portal:** [Products 360°](https://portaldeinformacoes.conab.gov.br/produtos-360.html)  \n"
+            "**📈 Harvest Bulletins:** Monthly grain surveys"
         )
     
     with col2:
         st.markdown(
-            f"**📅 Período dos Dados:** Safras 2018/19 a 2023/24  \n"
-            f"**🌾 Total de Culturas:** {len(data['crops'])} culturas principais  \n"
-            f"**🗺️ Cobertura:** Todo território nacional brasileiro  \n"
-            f"**📊 Dados Regionais:** {len(data.get('regional_production', {}))} regiões  \n\n"
-            "**🔗 Portal 360°:** Informações detalhadas por produto,  \n"
-            "séries históricas, custos de produção e análises regionais."
+            f"**📅 Data Period:** Seasons 2018/19 to 2023/24  \n"
+            f"**🌾 Total Crops:** {len(data['crops'])} main crops  \n"
+            f"**🗺️ Coverage:** Entire Brazilian national territory  \n"
+            f"**📊 Regional Data:** {len(data.get('regional_production', {}))} regions  \n\n"
+            "**🔗 Portal 360°:** Detailed information by product,  \n"
+            "historical series, production costs and regional analysis."
         )
 
-# Função para testes
+# Function for testing
 if __name__ == "__main__":
-    st.set_page_config(page_title="Dados CONAB", layout="wide")
-    st.title("🌾 Dados Agrícolas CONAB")
+    st.set_page_config(page_title="CONAB Data", layout="wide")
+    st.title("🌾 CONAB Agricultural Data")
     render()

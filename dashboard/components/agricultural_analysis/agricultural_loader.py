@@ -5,7 +5,7 @@ Agricultural Data Loader Component
 Component responsible for loading and processing detailed agricultural data,
 including crop data, calendars and regional coverage.
 
-Author: Agricultural Dashboard
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-07
 """
 

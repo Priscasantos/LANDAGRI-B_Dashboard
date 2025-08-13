@@ -6,7 +6,7 @@ Processador de Dados das Iniciativas LULC
 Módulo responsável por processar e traduzir os metadados JSON das iniciativas
 para formatos consistentes usados nos gráficos.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-07-29
 """
 

@@ -13,7 +13,7 @@ Características:
 - Compatibilidade com sistema existente do dashboard
 - Suporte a filtros e agregações
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025
 """
 

@@ -55,7 +55,7 @@ for crop, states_data in crop_calendar.items():
 # Modern dual-panel visualization
 fig = make_subplots(
     rows=1, cols=2,
-    subplot_titles=("📍 Geographic Coverage", "🌾 Activity Intensity")
+    subplot_titles=("📍 Geographic Coverage", "🎚️ Activity Intensity")
 )
 ```
 

@@ -4,7 +4,7 @@ Scatter Chart Component - Comparison Analysis
 
 Componente para renderizar a aba de scatter chart na análise comparativa.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-01
 """
 

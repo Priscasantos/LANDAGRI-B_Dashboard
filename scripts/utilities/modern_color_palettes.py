@@ -5,7 +5,7 @@ Modern Dashboard Color Palettes
 Paletas de cores modernas para dashboards baseadas nas melhores práticas de 2025.
 Inclui suporte para modo escuro e light, com acessibilidade WCAG 2.1.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-07-28
 """
 

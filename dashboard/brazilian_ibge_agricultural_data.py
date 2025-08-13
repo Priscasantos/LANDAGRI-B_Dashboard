@@ -17,7 +17,7 @@ Structure following app.py:
 - Crop Calendar: Interactive calendar by state/crop with consolidated tabs
 - Agriculture Availability: Data quality and availability
 
-Author: Agricultural Dashboard
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-07
 """
 
@@ -166,16 +166,16 @@ def _render_main_metrics_new(df_calendar: pd.DataFrame, agricultural_data: dict)
     
     with col1:
         st.metric(
-            label="🌾 Culturas",
+            label="🌾 Crops",
             value=validation.get('total_crops', 0),
             help="Total crops in agricultural calendar"
         )
     
     with col2:
         st.metric(
-            label="🏛️ Estados",
+            label="🏛️ States",
             value=validation.get('total_states', 0),
-            help="Estados cobertos pelos dados"
+            help="States covered by the data"
         )
     
     with col3:
@@ -278,7 +278,7 @@ def _render_crop_calendar_page(calendar_data: dict, agricultural_data: dict):
             if fig_monthly:
                 st.plotly_chart(fig_monthly, use_container_width=True)
             else:
-                st.warning("⚠️ Nenhuma atividade mensal encontrada nos dados")
+                st.warning("⚠️ No monthly activities found in data")
         except Exception as e:
             st.error(f"❌ Error creating monthly activities chart: {e}")
         
@@ -290,8 +290,8 @@ def _render_crop_calendar_page(calendar_data: dict, agricultural_data: dict):
                 regional_summary,
                 use_container_width=True,
                 column_config={
-                    'region': 'Região',
-                    'activity_type': 'Tipo de Atividade',
+                    'region': 'Region',
+                    'activity_type': 'Activity Type',
                     'crops_count': 'Crops',
                     'states_count': 'States'
                 }
@@ -304,7 +304,7 @@ def _render_crop_calendar_page(calendar_data: dict, agricultural_data: dict):
         st.markdown("### 🗓️ National Agricultural Calendar Matrix")
         
         # Consolidated matrix
-        st.markdown("#### 📋 Matriz Consolidada")
+        st.markdown("#### 📋 Consolidated Matrix")
         try:
             fig_heatmap = create_crop_calendar_heatmap(df_calendar)
             if fig_heatmap:
@@ -421,12 +421,12 @@ def _render_crop_calendar_page(calendar_data: dict, agricultural_data: dict):
         
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("Culturas", validation.get('total_crops', 0))
+            st.metric("Crops", validation.get('total_crops', 0))
         with col2:
-            st.metric("Estados", validation.get('total_states', 0))
+            st.metric("States", validation.get('total_states', 0))
         with col3:
             completeness = validation.get('data_completeness', 0)
-            st.metric("Completude", f"{completeness:.1f}%")
+            st.metric("Completeness", f"{completeness:.1f}%")
         
         # Display issues if any
         issues = validation.get('issues', [])
@@ -490,7 +490,7 @@ def _render_agriculture_availability_page(calendar_data: dict, agricultural_data
     
     with col1:
         total_crops = validation.get('total_crops', 0)
-        st.metric("🌾 Culturas", total_crops, help="Total de culturas no calendário")
+        st.metric("🌾 Crops", total_crops, help="Total crops in calendar")
     
     with col2:
         total_states = validation.get('total_states', 0)
@@ -580,10 +580,10 @@ def _render_agriculture_availability_page(calendar_data: dict, agricultural_data
                 activities = len(region_data)
                 
                 coverage_data.append({
-                    'Região': region,
-                    'Culturas': crops,
-                    'Estados': states,
-                    'Atividades': activities
+                    'Region': region,
+                    'Crops': crops,
+                    'States': states,
+                    'Activities': activities
                 })
             
             if coverage_data:
@@ -600,7 +600,7 @@ def _render_agriculture_availability_page(calendar_data: dict, agricultural_data
             issues = validation.get('issues', [])
             
             if issues:
-                st.markdown("#### ⚠️ Problemas Encontrados")
+                st.markdown("#### ⚠️ Problems Found")
                 for issue in issues:
                     st.warning(f"• {issue}")
             else:
@@ -718,7 +718,7 @@ def _render_main_metrics(calendar_data: dict, agricultural_data: dict):
             total_calendar_crops = len(crop_calendar)
         else:
             total_calendar_crops = 0
-        st.metric("🌾 Culturas (Calendário)", total_calendar_crops)
+        st.metric("🌾 Crops (Calendar)", total_calendar_crops)
     
     with col2:
         # Number of agricultural crops from main data
@@ -726,7 +726,7 @@ def _render_main_metrics(calendar_data: dict, agricultural_data: dict):
             total_ag_crops = len(agricultural_data.get('crops', {}))
         else:
             total_ag_crops = 0
-        st.metric("📊 Culturas (Dados)", total_ag_crops)
+        st.metric("📊 Crops (Data)", total_ag_crops)
     
     with col3:
         # Number of states/regions
@@ -739,7 +739,7 @@ def _render_main_metrics(calendar_data: dict, agricultural_data: dict):
             total_states = df_calendar['state_code'].nunique() if not df_calendar.empty else 0
         else:
             total_states = 0
-        st.metric("🗺️ Estados", total_states)
+        st.metric("🗺️ States", total_states)
     
     with col4:
         # Data completeness or quality indicator
@@ -763,7 +763,7 @@ def _render_regional_distribution_chart(agricultural_data: dict):
         df_calendar = extract_crop_calendar_data(agricultural_data)
         
         if df_calendar.empty:
-            st.warning("⚠️ Dados do calendário não encontrados")
+            st.warning("⚠️ Calendar data not found")
             return
         
         # Use the helper function to create regional distribution chart
@@ -813,7 +813,7 @@ def _render_crop_diversity_chart(agricultural_data: dict, calendar_data: dict):
                 x='Crop',
                 y='Available',
                 color='Source',
-                title="Diversidade de Culturas por Fonte",
+                title="Crop Diversity by Source",
                 color_discrete_map={
                     'Agricultural Calendar': '#2E8B57',
                     'Dados Agrícolas': '#FF8C00'
@@ -869,7 +869,7 @@ def _render_data_sources_info(calendar_data: dict, agricultural_data: dict):
             sources_data.append({
                 "Source": "Agricultural Calendar",
                 "Status": "✅ Ativo",
-                "Culturas": len(crop_calendar),
+                "Crops": len(crop_calendar),
                 "Tipo": "Calendário de Cultivo"
             })
         
@@ -879,7 +879,7 @@ def _render_data_sources_info(calendar_data: dict, agricultural_data: dict):
             sources_data.append({
                 "Source": "Agricultural Data",
                 "Status": "✅ Ativo",
-                "Culturas": unique_crops,
+                "Crops": unique_crops,
                 "Tipo": "Monitoramento Agrícola"
             })
         
@@ -999,8 +999,8 @@ def _render_geographic_coverage(calendar_data: dict, agricultural_data: dict):
             
             for region, count in regions.items():
                 coverage_data.append({
-                    'Região': region,
-                    'Estados': count,
+                    'Region': region,
+                    'States': count,
                     'Source': 'Agricultural Calendar'
                 })
         
@@ -1010,9 +1010,9 @@ def _render_geographic_coverage(calendar_data: dict, agricultural_data: dict):
                 regional_coverage = df_calendar['region'].value_counts()
                 for region, count in regional_coverage.items():
                     coverage_data.append({
-                        'Região': region,
-                        'Estados': f"{count} atividades",
-                        'Fonte': 'Dados Agrícolas'
+                        'Region': region,
+                        'States': f"{count} activities",
+                        'Source': 'Agricultural Data'
                     })
         
         if coverage_data:

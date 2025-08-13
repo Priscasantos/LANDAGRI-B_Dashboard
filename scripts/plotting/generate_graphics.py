@@ -6,7 +6,7 @@ Generate Graphics Module - Import Hub
 Central import hub for all chart generation functions.
 All chart functions have been modularized into separate files for better organization.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2024
 """
 
@@ -18,7 +18,7 @@ Generate Graphics Module - Import Hub
 Central import hub for all chart generation functions.
 Atualizado para usar nova estrutura de componentes em dashboard/components/charts.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-07-29
 """
 

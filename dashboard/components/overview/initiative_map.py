@@ -4,7 +4,7 @@ Initiative Map Component
 
 Componente para visualização de mapa das iniciativas.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-07-23
 """
 

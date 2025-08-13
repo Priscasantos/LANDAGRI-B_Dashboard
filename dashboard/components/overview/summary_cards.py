@@ -5,7 +5,7 @@ Summary Cards Component
 Componente para cards de resumo da página de visão geral.
 Mostra métricas principais das iniciativas LULC com Performance Metrics.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-07-30
 """
 

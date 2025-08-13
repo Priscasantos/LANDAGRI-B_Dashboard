@@ -5,7 +5,7 @@ Agricultural Calendar Helpers
 Module with helper functions for processing and visualizing agricultural calendars.
 Processes data from agricultural_data_complete.jsonc and generates correct visualizations.
 
-Author: Agricultural Dashboard
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-07
 """
 

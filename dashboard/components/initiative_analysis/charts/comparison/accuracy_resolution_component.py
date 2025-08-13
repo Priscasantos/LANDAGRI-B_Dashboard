@@ -5,7 +5,7 @@ Accuracy Resolution Component - Comparison Analysis
 Componente para renderizar a aba de comparação precisão vs resolução.
 Contém o gráfico plot_accuracy_resolution_scatter migrado do comparison_charts.py.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-01
 """
 

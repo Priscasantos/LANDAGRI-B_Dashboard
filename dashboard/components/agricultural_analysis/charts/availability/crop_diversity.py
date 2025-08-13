@@ -102,9 +102,9 @@ def plot_conab_crop_diversity_by_state(conab_data: Dict[str, Any]) -> go.Figure:
     # Update layout with modern styling
     fig.update_layout(
         title={
-            'text': "Crop Type Diversity by State",
-            'x': 0.5,
-            'font': {'size': 20, 'color': '#2C3E50', 'family': 'Arial, sans-serif'}
+            'text': "Crop Diversity Analysis by State",
+            'x': 0,
+            'font': {'size': 15, 'color': '#2C3E50', 'family': 'Arial, sans-serif'}
         },
         xaxis_title="Number of Crop Types",
         yaxis_title="State",
@@ -266,10 +266,10 @@ def plot_conab_crop_diversity_by_region(conab_data: Dict[str, Any]) -> go.Figure
     # Update layout with modern styling and English labels
     fig.update_layout(
         title={
-            'text': "Crop Type Diversity by Brazilian Region",
-            'x': 0.5,
+            'text': "Crop Diversity Analysis by Region",
+            'x': 0.065,
             'xanchor': 'center',
-            'font': {'size': 20, 'color': '#2C3E50', 'family': 'Arial Black'}
+            'font': {'size': 15, 'color': '#2C3E50', 'family': 'Arial, sans-serif'}
         },
         xaxis_title="<b>Crop Diversity Index</b>",
         yaxis_title="<b>Brazilian Region</b>",
@@ -294,17 +294,17 @@ def plot_conab_crop_diversity_by_region(conab_data: Dict[str, Any]) -> go.Figure
             showline=True,
             linewidth=2,
             linecolor='#2C3E50',
-            title_font=dict(size=14, color='#2C3E50', family='Arial Black')
+            title_font=dict(size=14, color='#2C3E50', family='Arial, sans-serif')
         ),
         yaxis=dict(
             showgrid=False,
             showline=True,
             linewidth=2,
             linecolor='#2C3E50',
-            title_font=dict(size=14, color='#2C3E50', family='Arial Black'),
-            tickfont=dict(size=12, color='#2C3E50', family='Arial')
+            title_font=dict(size=14, color='#2C3E50', family='Arial, sans-serif'),
+            tickfont=dict(size=12, color='#2C3E50', family='Arial, sans-serif')
         ),
-        font=dict(family='Arial', size=12, color='#2C3E50'),
+        font=dict(family='Arial, sans-serif', size=12, color='#2C3E50'),
         margin=dict(l=60, r=120, t=80, b=60)
     )
     
