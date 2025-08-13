@@ -43,16 +43,16 @@ All main availability tabs now include two subtabs:
 ├── 🌱 Crop Diversity
 │   ├── 📍 By State
 │   └── 🌍 By Region
-├── 📅 Seasonal Patterns
+├── 🌀 Seasonal Patterns
 │   ├── 📍 By State (with 3 sub-visualizations)
 │   └── 🌍 By Region (planned)
-├── 🌍 Regional Activity
+├── 🗺 Regional Activity
 │   ├── 📍 By State (with 4 sub-visualizations)
 │   └── 🌍 By Region (planned)
-├── ⚡ Activity Intensity
+├── 🎚️ Activity Intensity
 │   ├── 📍 By State (with 4 sub-visualizations)
 │   └── 🌍 By Region (planned)
-└── 📊 Overview
+└── 🔎 Overview
 ```
 
 ## 🎨 Modern Design Features

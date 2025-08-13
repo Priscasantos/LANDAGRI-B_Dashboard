@@ -33,14 +33,14 @@ def create_seasonality_index_chart(filtered_data: dict, chart_key: str = "season
         crop_calendar = safe_get_data(filtered_data, 'crop_calendar', {})
         
         if not crop_calendar:
-            st.warning("⚠️ Dados insuficientes para análise de sazonalidade")
+            st.warning("⚠️ Insufficient data for seasonality analysis")
             return
             
         # Mapeamento de meses inglês -> português e inglês -> índice
-        month_names_pt = {
-            1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
-            5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
-            9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
+        month_names_en = {
+            1: 'January', 2: 'February', 3: 'March', 4: 'April',
+            5: 'May', 6: 'June', 7: 'July', 8: 'August',
+            9: 'September', 10: 'October', 11: 'November', 12: 'December'
         }
         
         month_en_to_index = {
@@ -83,7 +83,7 @@ def create_seasonality_index_chart(filtered_data: dict, chart_key: str = "season
         # Criar gráfico de sazonalidade
         fig = go.Figure()
         
-        months = list(month_names_pt.values())
+        months = list(month_names_en.values())
         
         for crop, activity in seasonal_data.items():
             fig.add_trace(go.Scatter(
@@ -95,9 +95,9 @@ def create_seasonality_index_chart(filtered_data: dict, chart_key: str = "season
             ))
         
         fig.update_layout(
-            title="📈 Análise de Sazonalidade por Cultura",
-            xaxis_title="Meses",
-            yaxis_title="Intensidade de Atividade",
+            title="📈 Seasonality Analysis by Crop",
+            xaxis_title="Months",
+            yaxis_title="Activities Intensity",
             height=500,
             showlegend=True,
             hovermode='x unified'
@@ -268,14 +268,14 @@ def create_polar_seasonality_analysis(filtered_data: dict, chart_key: str = "pol
             return
         
         # Meses em português
-        months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-                  'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+        months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         
         fig_polar = go.Figure()
         
         # Configuração de cores e nomes para atividades
         colors = {'P': '#2E8B57', 'H': '#FF6B35', 'PH': '#4682B4'}
-        names = {'P': 'Plantio', 'H': 'Colheita', 'PH': 'Plantio/Colheita'}
+        names = {'P': 'Planting', 'H': 'Harvest', 'PH': 'Planting/Harvest'}
         
         # Adicionar trace para cada tipo de atividade
         for activity_type in ['P', 'H', 'PH']:
@@ -329,16 +329,16 @@ def create_polar_seasonality_analysis(filtered_data: dict, chart_key: str = "pol
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            total_plantio = sum(seasonal_data.get(month, {}).get('P', 0) for month in months)
-            st.metric("🌱 Total Plantios", total_plantio)
-            
+            total_planting = sum(seasonal_data.get(month, {}).get('P', 0) for month in months)
+            st.metric("🌱 Total Planting", total_planting)
+
         with col2:
-            total_colheita = sum(seasonal_data.get(month, {}).get('H', 0) for month in months)
-            st.metric("🌾 Total Colheitas", total_colheita)
+            total_harvest = sum(seasonal_data.get(month, {}).get('H', 0) for month in months)
+            st.metric("🌾 Total Harvests", total_harvest)
             
         with col3:
-            total_ambos = sum(seasonal_data.get(month, {}).get('PH', 0) for month in months)
-            st.metric("🔄 Plantio/Colheita", total_ambos)
+            total_both = sum(seasonal_data.get(month, {}).get('PH', 0) for month in months)
+            st.metric("🔄 Planting/Harvest", total_both)
         
     except Exception as e:
         st.error(f"❌ Erro na análise polar de sazonalidade: {str(e)}")

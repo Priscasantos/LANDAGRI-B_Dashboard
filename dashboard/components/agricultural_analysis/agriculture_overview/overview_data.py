@@ -5,7 +5,7 @@ Agricultural Overview Data Loader
 Specific functions for loading Agricultural Overview data.
 Only overview data and main statistics.
 
-Author: LULC Initiatives Dashboard
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-05
 """
 

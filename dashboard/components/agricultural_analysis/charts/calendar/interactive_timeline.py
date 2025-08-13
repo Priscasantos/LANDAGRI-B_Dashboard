@@ -104,7 +104,7 @@ def create_interactive_timeline(filtered_data: dict) -> None:
             # Create enhanced visualization with subplots
             fig = make_subplots(
                 rows=1, cols=1,
-                subplot_titles=["Interactive Agricultural Activity Timeline"],
+                subplot_titles=[""],
                 specs=[[{"secondary_y": False}]]
             )
             

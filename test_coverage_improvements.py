@@ -5,7 +5,7 @@ Test Improved Coverage Calculations and Regional Colors
 Tests the corrected percentage calculations and regional color application
 in spatial coverage and crop diversity charts.
 
-Author: Agricultural Dashboard Team
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-11
 """
 

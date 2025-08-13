@@ -5,7 +5,7 @@ National Calendar Matrix Charts
 National calendar matrix charts module consolidated from old_calendar.
 Implements heatmap and consolidated matrix visualizations for national analysis.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-07
 """
 

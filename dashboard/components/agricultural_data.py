@@ -4,7 +4,7 @@ Brazilian Agricultural Data Component
 
 Component for displaying Brazilian agricultural production data from IBGE.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-01-28
 """
 

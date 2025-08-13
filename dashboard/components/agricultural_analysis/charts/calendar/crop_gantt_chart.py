@@ -5,7 +5,7 @@ Crop Gantt Chart Module
 Módulo para renderização de diagramas de Gantt para visualização de períodos de cultivo.
 Extraído do módulo de análise de disponibilidade CONAB para uso independente.
 
-Autor: Dashboard Iniciativas LULC
+Autor: LANDAGRI-B Project Team 
 Data: 2025-08-11
 """
 
@@ -42,7 +42,7 @@ def render_crop_gantt_chart(filtered_data: Dict[str, Any], region: str = "Brasil
     colors = ['#2E8B57', '#FF6B35', '#4682B4', '#9370DB', '#20B2AA', '#FF69B4', '#FFA500']
 
     for crop_index, (crop_name, crop_data) in enumerate(list(filtered_data.items())[:10]):
-        # Encontrar períodos de plantio e colheita
+        # Find planting and harvest periods
         planting_months = set()
         harvest_months = set()
 
@@ -56,32 +56,32 @@ def render_crop_gantt_chart(filtered_data: Dict[str, Any], region: str = "Brasil
                     if activity in ['H', 'PH']:
                         harvest_months.add(month)
 
-        # Criar barras para plantio
+        # Create bars for planting
         if planting_months:
             month_indices = [month_mapping[m] for m in planting_months]
             start_month = min(month_indices)
             end_month = max(month_indices)
 
             gantt_data.append({
-                'Task': f"{crop_name[:30]} - 🌱 Plantio",
+                'Task': f"{crop_name[:30]} - 🌱 Planting",
                 'Start': start_month,
                 'Finish': end_month + 1,
-                'Resource': 'Plantio',
+                'Resource': 'Planting',
                 'Color': colors[crop_index % len(colors)],
                 'Opacity': 0.8
             })
 
-        # Criar barras para colheita
+        # Create bars for harvest
         if harvest_months:
             month_indices = [month_mapping[m] for m in harvest_months]
             start_month = min(month_indices)
             end_month = max(month_indices)
 
             gantt_data.append({
-                'Task': f"{crop_name[:30]} - 🌾 Colheita",
+                'Task': f"{crop_name[:30]} - 🌾 Harvest",
                 'Start': start_month,
                 'Finish': end_month + 1,
-                'Resource': 'Colheita',
+                'Resource': 'Harvest',
                 'Color': colors[crop_index % len(colors)],
                 'Opacity': 0.5
             })
@@ -115,20 +115,25 @@ def render_crop_gantt_chart(filtered_data: Dict[str, Any], region: str = "Brasil
                          f"Tipo: {row['Resource']}<extra></extra>"
         ))
 
+    # Optimize layout for clarity and performance
     fig_gantt.update_layout(
-        title=f"Períodos de Cultivo - {region}",
-        xaxis_title="Meses do Ano",
-        yaxis_title="Culturas e Atividades",
+        title=f"Crop Periods - {region}",
+        xaxis_title="Months of the Year",
+        yaxis_title="Crops and Activities",
         xaxis={
             'tickmode': 'array',
             'tickvals': list(range(12)),
             'ticktext': month_names,
             'range': [-0.5, 11.5]
         },
-        height=max(400, len(gantt_data) * 40),
+        height=max(400, len(gantt_data) * 36),
         barmode='overlay',
-        showlegend=False
+        showlegend=False,
+        margin=dict(l=80, r=30, t=60, b=40),
+        plot_bgcolor='white'
     )
+    fig_gantt.update_yaxes(automargin=True)
+    fig_gantt.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#e5e5e5')
 
     st.plotly_chart(fig_gantt, use_container_width=True, key="crop_gantt_chart")
 
@@ -136,11 +141,11 @@ def render_crop_gantt_chart(filtered_data: Dict[str, Any], region: str = "Brasil
     st.markdown("**📊 Resumo do Diagrama:**")
     col1, col2 = st.columns(2)
     with col1:
-        plantio_count = len([g for g in gantt_data if 'Plantio' in g['Task']])
-        st.metric("🌱 Períodos de Plantio", plantio_count)
+        plantio_count = len([g for g in gantt_data if 'Planting' in g['Task']])
+        st.metric("🌱 Planting Periods", plantio_count)
     with col2:
-        colheita_count = len([g for g in gantt_data if 'Colheita' in g['Task']])
-        st.metric("🌾 Períodos de Colheita", colheita_count)
+        harvest_count = len([g for g in gantt_data if 'Harvest' in g['Task']])
+        st.metric("🌾 Harvest Periods", harvest_count)
 
 
 def create_gantt_chart_with_filters(crop_calendar: Dict[str, Any], states_info: Dict[str, Any]) -> None:
@@ -181,7 +186,7 @@ def create_gantt_chart_with_filters(crop_calendar: Dict[str, Any], states_info: 
     
     with filter_col3:
         # Filtro por tipo de atividade
-        activity_types = ["Todas as Atividades", "Apenas Plantio", "Apenas Colheita", "Plantio e Colheita"]
+        activity_types = ["All Activities", "Only Planting", "Only Harvest", "Planting and Harvest"]
         selected_activity = st.selectbox(
             "⚡ Tipo de Atividade:",
             activity_types,
@@ -258,10 +263,10 @@ def _filter_gantt_data(crop_calendar: Dict[str, Any], states_info: Dict[str, Any
             
             for _month, activity in calendar_data.items():
                 if (activity and 
-                    (activity_type == "Todas as Atividades" or
-                     (activity_type == "Apenas Plantio" and activity == 'P') or
-                     (activity_type == "Apenas Colheita" and activity == 'H') or
-                     (activity_type == "Plantio e Colheita" and activity == 'PH'))):
+                    (activity_type == "All Activities" or
+                     (activity_type == "Only Planting" and activity == 'P') or
+                     (activity_type == "Only Harvest" and activity == 'H') or
+                     (activity_type == "Planting and Harvest" and activity == 'PH'))):
                     has_matching_activity = True
                     break
             

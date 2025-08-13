@@ -14,13 +14,13 @@
 - **Descrição:** Diversidade de tipos de culturas por estado
 - **Visualização:** Gráfico de barras empilhadas mostrando variedade de culturas
 
-#### 📅 **Seasonal Patterns** (`seasonal_patterns.py`)
+#### 🌀 **Seasonal Patterns** (`seasonal_patterns.py`)
 - **Funções:**
   - `plot_seasonal_patterns()` - Padrões sazonais por região
   - `plot_crop_seasonal_distribution()` - Heatmap de distribuição sazonal
   - `plot_monthly_activity_intensity()` - Intensidade mensal de atividades
 
-#### 🏞️ **Regional Activity** (`regional_activity.py`)
+#### 🗺 **Regional Activity** (`regional_activity.py`)
 - **Funções:**
   - `plot_regional_activity_comparison()` - Comparação de atividades por região
   - `plot_state_activity_heatmap()` - Heatmap de intensidade por estado
@@ -40,9 +40,9 @@ A página **Agriculture Availability** agora possui 6 abas organizadas:
 
 1. **🗺️ Spatial Coverage** - Uma aba para cobertura espacial
 2. **🌱 Crop Diversity** - Uma aba para diversidade de culturas  
-3. **📅 Seasonal Patterns** - Sub-abas para padrões sazonais
-4. **🏞️ Regional Activity** - Sub-abas para análises regionais
-5. **📈 Activity Intensity** - Sub-abas para intensidade de atividades
+3. **🌀 Seasonal Patterns** - Sub-abas para padrões sazonais
+4. **🗺 Regional Activity** - Sub-abas para análises regionais
+5. **🎚️ Activity Intensity** - Sub-abas para intensidade de atividades
 6. **📊 Overview** - Visão geral e estatísticas
 
 ### 3. Funcionalidades Implementadas

@@ -406,13 +406,13 @@ elif selected_category == "🌾 Agricultural Analysis":
 
 # Fallback para caso nenhuma página seja selecionada
 if not selected_page:
-    st.markdown("### 🏠 Bem-vindo ao LANDAGRI-B Dashboard")
+    st.markdown("### 🏠 Welcome to the LANDAGRI-B Dashboard")
     st.markdown(
         """
-    **Selecione uma categoria no menu lateral para começar:**
+    **Select a category from the sidebar menu to get started:**
 
-    - 📊 **Overview**: Visão geral do dashboard
-    - 🔍 **Initiative Analysis**: Análises detalhadas das iniciativas (Temporal, Comparativa, Detalhada)
+    - 📊 **Overview**: Dashboard overview
+    - 🔍 **Initiative Analysis**: Detailed analyses of initiatives (Temporal, Comparative, Detailed)
     - 🌾 **Agricultural Analysis**: Agricultural analyses (Crop Calendar, Agricultural Availability)
     """
     )

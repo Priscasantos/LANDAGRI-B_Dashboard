@@ -5,7 +5,7 @@ Distributions Component - Comparison Analysis
 Componente para renderizar análise de distribuições de métricas.
 Combina gráficos de metodologia, resolução espacial e cobertura temporal.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-01
 """
 

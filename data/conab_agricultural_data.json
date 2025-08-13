@@ -1,420 +1,172 @@
 {
   "metadata": {
-    "source": "CONAB - Companhia Nacional de Abastecimento",
+    "source": "CONAB - National Supply Company",
     "source_url": "https://www.gov.br/conab/pt-br",
-    "description": "Dados de produção agrícola brasileira da CONAB",
+    "description": "Brazilian agricultural production data from CONAB",
     "extracted_date": "2025-08-08T14:44:40.857982",
-    "data_type": "safras_graos",
-    "unit_production": "mil toneladas",
-    "unit_area": "mil hectares",
-    "note": "Dados baseados nos boletins oficiais da CONAB",
+    "data_type": "grain_harvests",
+    "unit_production": "thousand tons",
+    "unit_area": "thousand hectares",
+    "note": "Data based on official CONAB bulletins",
     "portal_360_url": "https://portaldeinformacoes.conab.gov.br/produtos-360.html",
     "last_update": "2025-08-08T14:49:39.703923",
     "total_crops": 9,
-    "data_enrichment": "Dados enriquecidos com Portal 360° CONAB"
+    "data_enrichment": "Data enriched with Portal 360° CONAB"
   },
   "crops": {
-    "soja": {
-      "name": "Soja",
+    "soybean": {
+      "name": "Soybean",
       "scientific_name": "Glycine max",
       "production_data": {
-        "2018/19": {
-          "production": 114843,
-          "area": 35822,
-          "productivity": 3206
-        },
-        "2019/20": {
-          "production": 124845,
-          "area": 36948,
-          "productivity": 3379
-        },
-        "2020/21": {
-          "production": 135407,
-          "area": 38504,
-          "productivity": 3517
-        },
-        "2021/22": {
-          "production": 125031,
-          "area": 40869,
-          "productivity": 3059
-        },
-        "2022/23": {
-          "production": 154607,
-          "area": 43046,
-          "productivity": 3592
-        },
-        "2023/24": {
-          "production": 147380,
-          "area": 43694,
-          "productivity": 3372
-        }
+        "2018/19": { "production": 114843, "area": 35822, "productivity": 3206 },
+        "2019/20": { "production": 124845, "area": 36948, "productivity": 3379 },
+        "2020/21": { "production": 135407, "area": 38504, "productivity": 3517 },
+        "2021/22": { "production": 125031, "area": 40869, "productivity": 3059 },
+        "2022/23": { "production": 154607, "area": 43046, "productivity": 3592 },
+        "2023/24": { "production": 147380, "area": 43694, "productivity": 3372 }
       }
     },
-    "milho_total": {
-      "name": "Milho Total (1ª + 2ª safra)",
+    "corn_total": {
+      "name": "Corn (1st + 2nd harvest)",
       "scientific_name": "Zea mays",
       "production_data": {
-        "2018/19": {
-          "production": 100043,
-          "area": 17346,
-          "productivity": 5768
-        },
-        "2019/20": {
-          "production": 102589,
-          "area": 18202,
-          "productivity": 5638
-        },
-        "2020/21": {
-          "production": 87735,
-          "area": 19690,
-          "productivity": 4456
-        },
-        "2021/22": {
-          "production": 113226,
-          "area": 20744,
-          "productivity": 5459
-        },
-        "2022/23": {
-          "production": 131388,
-          "area": 21665,
-          "productivity": 6065
-        },
-        "2023/24": {
-          "production": 118651,
-          "area": 21421,
-          "productivity": 5538
-        }
+        "2018/19": { "production": 100043, "area": 17346, "productivity": 5768 },
+        "2019/20": { "production": 102589, "area": 18202, "productivity": 5638 },
+        "2020/21": { "production": 87735, "area": 19690, "productivity": 4456 },
+        "2021/22": { "production": 113226, "area": 20744, "productivity": 5459 },
+        "2022/23": { "production": 131388, "area": 21665, "productivity": 6065 },
+        "2023/24": { "production": 118651, "area": 21421, "productivity": 5538 }
       }
     },
-    "algodao": {
-      "name": "Algodão",
+    "cotton": {
+      "name": "Cotton",
       "scientific_name": "Gossypium hirsutum",
       "production_data": {
-        "2018/19": {
-          "production": 2779,
-          "area": 1686,
-          "productivity": 1648
-        },
-        "2019/20": {
-          "production": 2982,
-          "area": 1742,
-          "productivity": 1712
-        },
-        "2020/21": {
-          "production": 2414,
-          "area": 1560,
-          "productivity": 1547
-        },
-        "2021/22": {
-          "production": 2806,
-          "area": 1604,
-          "productivity": 1749
-        },
-        "2022/23": {
-          "production": 3193,
-          "area": 1657,
-          "productivity": 1927
-        },
-        "2023/24": {
-          "production": 3180,
-          "area": 1639,
-          "productivity": 1940
-        }
+        "2018/19": { "production": 2779, "area": 1686, "productivity": 1648 },
+        "2019/20": { "production": 2982, "area": 1742, "productivity": 1712 },
+        "2020/21": { "production": 2414, "area": 1560, "productivity": 1547 },
+        "2021/22": { "production": 2806, "area": 1604, "productivity": 1749 },
+        "2022/23": { "production": 3193, "area": 1657, "productivity": 1927 },
+        "2023/24": { "production": 3180, "area": 1639, "productivity": 1940 }
       }
     },
-    "arroz": {
-      "name": "Arroz",
+    "rice": {
+      "name": "Rice",
       "scientific_name": "Oryza sativa",
       "production_data": {
-        "2018/19": {
-          "production": 10495,
-          "area": 1693,
-          "productivity": 6199
-        },
-        "2019/20": {
-          "production": 11751,
-          "area": 1751,
-          "productivity": 6713
-        },
-        "2020/21": {
-          "production": 11538,
-          "area": 1680,
-          "productivity": 6869
-        },
-        "2021/22": {
-          "production": 10681,
-          "area": 1657,
-          "productivity": 6444
-        },
-        "2022/23": {
-          "production": 10702,
-          "area": 1615,
-          "productivity": 6627
-        },
-        "2023/24": {
-          "production": 10773,
-          "area": 1634,
-          "productivity": 6595
-        }
+        "2018/19": { "production": 10495, "area": 1693, "productivity": 6199 },
+        "2019/20": { "production": 11751, "area": 1751, "productivity": 6713 },
+        "2020/21": { "production": 11538, "area": 1680, "productivity": 6869 },
+        "2021/22": { "production": 10681, "area": 1657, "productivity": 6444 },
+        "2022/23": { "production": 10702, "area": 1615, "productivity": 6627 },
+        "2023/24": { "production": 10773, "area": 1634, "productivity": 6595 }
       }
     },
-    "feijao_total": {
-      "name": "Feijão Total (1ª + 2ª + 3ª safra)",
+    "beans_total": {
+      "name": "Beans (1st + 2nd + 3rd harvest)",
       "scientific_name": "Phaseolus vulgaris",
       "production_data": {
-        "2018/19": {
-          "production": 3009,
-          "area": 2940,
-          "productivity": 1023
-        },
-        "2019/20": {
-          "production": 3166,
-          "area": 2978,
-          "productivity": 1063
-        },
-        "2020/21": {
-          "production": 3035,
-          "area": 2894,
-          "productivity": 1049
-        },
-        "2021/22": {
-          "production": 2814,
-          "area": 2742,
-          "productivity": 1026
-        },
-        "2022/23": {
-          "production": 2968,
-          "area": 2865,
-          "productivity": 1036
-        },
-        "2023/24": {
-          "production": 3013,
-          "area": 2877,
-          "productivity": 1047
-        }
+        "2018/19": { "production": 3009, "area": 2940, "productivity": 1023 },
+        "2019/20": { "production": 3166, "area": 2978, "productivity": 1063 },
+        "2020/21": { "production": 3035, "area": 2894, "productivity": 1049 },
+        "2021/22": { "production": 2814, "area": 2742, "productivity": 1026 },
+        "2022/23": { "production": 2968, "area": 2865, "productivity": 1036 },
+        "2023/24": { "production": 3013, "area": 2877, "productivity": 1047 }
       }
     },
-    "trigo": {
-      "name": "Trigo",
+    "wheat": {
+      "name": "Wheat",
       "scientific_name": "Triticum aestivum",
       "production_data": {
-        "2018/19": {
-          "production": 5185,
-          "area": 1954,
-          "productivity": 2654
-        },
-        "2019/20": {
-          "production": 6283,
-          "area": 2037,
-          "productivity": 3084
-        },
-        "2020/21": {
-          "production": 7848,
-          "area": 2427,
-          "productivity": 3234
-        },
-        "2021/22": {
-          "production": 8124,
-          "area": 2737,
-          "productivity": 2968
-        },
-        "2022/23": {
-          "production": 9265,
-          "area": 3029,
-          "productivity": 3058
-        },
-        "2023/24": {
-          "production": 7948,
-          "area": 2827,
-          "productivity": 2811
-        }
+        "2018/19": { "production": 5185, "area": 1954, "productivity": 2654 },
+        "2019/20": { "production": 6283, "area": 2037, "productivity": 3084 },
+        "2020/21": { "production": 7848, "area": 2427, "productivity": 3234 },
+        "2021/22": { "production": 8124, "area": 2737, "productivity": 2968 },
+        "2022/23": { "production": 9265, "area": 3029, "productivity": 3058 },
+        "2023/24": { "production": 7948, "area": 2827, "productivity": 2811 }
       }
     },
-    "sorgo": {
-      "name": "Sorgo",
+    "sorghum": {
+      "name": "Sorghum",
       "scientific_name": "Sorghum bicolor",
       "production_data": {
-        "2018/19": {
-          "production": 2491,
-          "area": 844,
-          "productivity": 2951
-        },
-        "2019/20": {
-          "production": 2649,
-          "area": 855,
-          "productivity": 3098
-        },
-        "2020/21": {
-          "production": 2968,
-          "area": 880,
-          "productivity": 3373
-        },
-        "2021/22": {
-          "production": 3127,
-          "area": 891,
-          "productivity": 3510
-        },
-        "2022/23": {
-          "production": 3284,
-          "area": 905,
-          "productivity": 3628
-        },
-        "2023/24": {
-          "production": 3156,
-          "area": 897,
-          "productivity": 3520
-        }
+        "2018/19": { "production": 2491, "area": 844, "productivity": 2951 },
+        "2019/20": { "production": 2649, "area": 855, "productivity": 3098 },
+        "2020/21": { "production": 2968, "area": 880, "productivity": 3373 },
+        "2021/22": { "production": 3127, "area": 891, "productivity": 3510 },
+        "2022/23": { "production": 3284, "area": 905, "productivity": 3628 },
+        "2023/24": { "production": 3156, "area": 897, "productivity": 3520 }
       }
     },
-    "girassol": {
-      "name": "Girassol",
+    "sunflower": {
+      "name": "Sunflower",
       "scientific_name": "Helianthus annuus",
       "production_data": {
-        "2018/19": {
-          "production": 108,
-          "area": 68,
-          "productivity": 1588
-        },
-        "2019/20": {
-          "production": 115,
-          "area": 71,
-          "productivity": 1620
-        },
-        "2020/21": {
-          "production": 94,
-          "area": 61,
-          "productivity": 1541
-        },
-        "2021/22": {
-          "production": 101,
-          "area": 64,
-          "productivity": 1578
-        },
-        "2022/23": {
-          "production": 119,
-          "area": 72,
-          "productivity": 1653
-        },
-        "2023/24": {
-          "production": 112,
-          "area": 69,
-          "productivity": 1623
-        }
+        "2018/19": { "production": 108, "area": 68, "productivity": 1588 },
+        "2019/20": { "production": 115, "area": 71, "productivity": 1620 },
+        "2020/21": { "production": 94, "area": 61, "productivity": 1541 },
+        "2021/22": { "production": 101, "area": 64, "productivity": 1578 },
+        "2022/23": { "production": 119, "area": 72, "productivity": 1653 },
+        "2023/24": { "production": 112, "area": 69, "productivity": 1623 }
       }
     },
-    "amendoim": {
-      "name": "Amendoim (1ª safra)",
+    "peanut": {
+      "name": "Peanut (1st harvest)",
       "scientific_name": "Arachis hypogaea",
       "production_data": {
-        "2018/19": {
-          "production": 508,
-          "area": 138,
-          "productivity": 3681
-        },
-        "2019/20": {
-          "production": 556,
-          "area": 147,
-          "productivity": 3782
-        },
-        "2020/21": {
-          "production": 594,
-          "area": 154,
-          "productivity": 3857
-        },
-        "2021/22": {
-          "production": 629,
-          "area": 161,
-          "productivity": 3907
-        },
-        "2022/23": {
-          "production": 682,
-          "area": 169,
-          "productivity": 4036
-        },
-        "2023/24": {
-          "production": 715,
-          "area": 174,
-          "productivity": 4109
-        }
+        "2018/19": { "production": 508, "area": 138, "productivity": 3681 },
+        "2019/20": { "production": 556, "area": 147, "productivity": 3782 },
+        "2020/21": { "production": 594, "area": 154, "productivity": 3857 },
+        "2021/22": { "production": 629, "area": 161, "productivity": 3907 },
+        "2022/23": { "production": 682, "area": 169, "productivity": 4036 },
+        "2023/24": { "production": 715, "area": 174, "productivity": 4109 }
       }
     }
   },
   "regional_production": {
-    "centro_oeste": {
-      "name": "Centro-Oeste",
-      "states": [
-        "MT",
-        "MS",
-        "GO",
-        "DF"
-      ],
-      "main_crops": [
-        "soja",
-        "milho_total",
-        "algodao"
-      ],
+    "central_west": {
+      "name": "Central-West",
+      "states": ["MT", "MS", "GO", "DF"],
+      "main_crops": ["soybean", "corn_total", "cotton"],
       "production_2023_24": {
-        "soja": 72588,
-        "milho_total": 54356,
-        "algodao": 3042
+        "soybean": 72588,
+        "corn_total": 54356,
+        "cotton": 3042
       },
-      "characteristics": "Principal região produtora de soja e algodão do Brasil"
+      "characteristics": "Main producing region of soybean and cotton in Brazil"
     },
-    "sul": {
-      "name": "Sul",
-      "states": [
-        "RS",
-        "SC",
-        "PR"
-      ],
-      "main_crops": [
-        "soja",
-        "milho_total",
-        "arroz",
-        "trigo"
-      ],
+    "south": {
+      "name": "South",
+      "states": ["RS", "SC", "PR"],
+      "main_crops": ["soybean", "corn_total", "rice", "wheat"],
       "production_2023_24": {
-        "soja": 50282,
-        "milho_total": 24048,
-        "arroz": 8748,
-        "trigo": 6358
+        "soybean": 50282,
+        "corn_total": 24048,
+        "rice": 8748,
+        "wheat": 6358
       },
-      "characteristics": "Região tradicional na produção de grãos"
+      "characteristics": "Traditional grain-producing region"
     },
-    "nordeste": {
-      "name": "Nordeste",
-      "states": [
-        "BA",
-        "PE",
-        "CE",
-        "MA",
-        "PI",
-        "PB",
-        "RN",
-        "AL",
-        "SE"
-      ],
-      "main_crops": [
-        "soja",
-        "milho_total",
-        "feijao_total"
-      ],
+    "northeast": {
+      "name": "Northeast",
+      "states": ["BA", "PE", "CE", "MA", "PI", "PB", "RN", "AL", "SE"],
+      "main_crops": ["soybean", "corn_total", "beans_total"],
       "production_2023_24": {
-        "soja": 15912,
-        "milho_total": 14358,
-        "feijao_total": 747
+        "soybean": 15912,
+        "corn_total": 14358,
+        "beans_total": 747
       },
-      "characteristics": "Crescimento da soja no MATOPIBA"
+      "characteristics": "Soybean growth in the MATOPIBA region"
     }
   },
   "portal_360_info": {
-    "description": "Portal de Informações Agropecuárias - Produtos 360°",
+    "description": "Agricultural Information Portal - Products 360°",
     "url": "https://portaldeinformacoes.conab.gov.br/produtos-360.html",
     "features": [
-      "Informações detalhadas por produto",
-      "Séries históricas de produção",
-      "Dados de área plantada e produtividade",
-      "Análises regionais"
+      "Detailed information by product",
+      "Historical production series",
+      "Planted area and productivity data",
+      "Regional analyses"
     ]
   }
 }

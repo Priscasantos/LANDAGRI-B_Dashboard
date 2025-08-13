@@ -5,7 +5,7 @@ Universal Cache Utilities
 Utilitários de cache para processamento de dados e otimização.
 Reorganizado para estrutura modular do dashboard.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-07-30
 """
 

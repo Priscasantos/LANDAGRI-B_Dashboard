@@ -5,7 +5,7 @@ Agricultural Analysis Charts Module
 Módulo de gráficos para análise agrícola.
 Centraliza todas as funções de visualização de dados agrícolas e CONAB.
 
-Autor: Dashboard Iniciativas LULC
+Autor: LANDAGRI-B Project Team 
 Data: 2025-08-07
 """
 

@@ -17,9 +17,9 @@ The Agricultural Data Availability dashboard has been enhanced with a comprehens
 ├── 🌱 Crop Diversity
 │   ├── 📍 By State (MG, SC, SP, PR, RS, etc.)
 │   └── 🌍 By Region (North, Northeast, Central-West, Southeast, South)
-├── 📅 Seasonal Patterns (ready for subtabs expansion)
-├── 🌍 Regional Activity (ready for subtabs expansion)
-├── ⚡ Activity Intensity (ready for subtabs expansion)
+├── 🌀 Seasonal Patterns (ready for subtabs expansion)
+├── 🗺 Regional Activity (ready for subtabs expansion)
+├── 🎚️ Activity Intensity (ready for subtabs expansion)
 └── 📊 Overview
 ```
 

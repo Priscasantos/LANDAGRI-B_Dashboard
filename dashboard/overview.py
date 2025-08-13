@@ -5,7 +5,7 @@ Overview Dashboard - Modern Implementation
 Clean, component-based overview dashboard using only modular components.
 This replaces all legacy overview implementations.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-07-30
 """
 

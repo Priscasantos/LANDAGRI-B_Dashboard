@@ -4,7 +4,7 @@ Color Palettes for Agricultural Analysis Dashboard
 
 Consistent color palettes for Brazilian states and regions in agricultural visualizations.
 
-Author: Agricultural Dashboard Team
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-11
 """
 

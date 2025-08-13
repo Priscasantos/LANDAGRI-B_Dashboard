@@ -13,7 +13,7 @@ Características principais:
 - Formatação padronizada para o dashboard
 - Suporte a dados temporais e geoespaciais
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025
 """
 

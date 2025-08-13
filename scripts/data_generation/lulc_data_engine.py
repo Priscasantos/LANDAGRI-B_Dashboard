@@ -14,7 +14,7 @@ Key features:
 - English standardization throughout
 - Visualization-ready data structures
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025
 """
 

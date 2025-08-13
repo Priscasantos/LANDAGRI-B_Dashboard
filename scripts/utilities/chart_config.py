@@ -5,7 +5,7 @@ Chart Configuration and Standards
 Standard configurations for responsive charts with modern design.
 Provides consistent styling across all dashboard visualizations.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025
 """
 

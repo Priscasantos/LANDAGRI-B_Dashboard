@@ -16,7 +16,7 @@ Features:
 - Complete timeline with gap analysis
 - Temporal analysis with evolution and coverage
 
-Author: LULC Initiatives Dashboard
+Author: LANDAGRI-B Project Team 
 Date: 2025-07-30
 """
 

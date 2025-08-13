@@ -5,7 +5,7 @@ Dashboard Base Components
 Shared base components and utilities for all dashboard modules.
 Provides consistent functionality across the modular dashboard system.
 
-Author: Dashboard Iniciativas LULC  
+Author: LANDAGRI-B Project Team   
 Date: 2025-07-28
 Version: 1.0
 """

@@ -14,7 +14,7 @@ Key Features:
 - Error handling and validation
 - Caching for performance
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025
 """
 

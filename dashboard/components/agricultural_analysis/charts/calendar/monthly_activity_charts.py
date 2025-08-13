@@ -5,7 +5,7 @@ Monthly Activity Charts
 Module for consolidated monthly activity charts from old_calendar.
 Implements visualizations for temporal analysis of agricultural activities.
 
-Author: LULC Initiatives Dashboard
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-07
 """
 

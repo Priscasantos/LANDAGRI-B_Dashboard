@@ -5,7 +5,7 @@ Gráfico Timeline Moderno com Pontos e Linhas
 
 Versão modernizada do timeline com pontos de início/fim e sombreamento.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-07-29
 """
 

@@ -5,7 +5,7 @@ Streamlit UI Elements for Chart Customization
 Provides a reusable function to create Streamlit input widgets
 for customizing chart saving parameters.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025
 """
 

@@ -1,4 +1,4 @@
-# Reorganização Modular Completa - Dashboard Iniciativas LULC
+# Reorganização Modular Completa - LANDAGRI-B Dashboard
 
 ## Estrutura Final Implementada
 

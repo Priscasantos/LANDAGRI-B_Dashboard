@@ -4,7 +4,7 @@ Detail Tables Component
 
 Componente para tabelas detalhadas das iniciativas.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-07-23
 """
 

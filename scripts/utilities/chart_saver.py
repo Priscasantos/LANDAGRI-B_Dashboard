@@ -6,7 +6,7 @@ Robust Chart Saver Utility
 Utility for saving Plotly charts with fallback mechanisms.
 Handles different kaleido versions and provides HTML fallback.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025
 """
 

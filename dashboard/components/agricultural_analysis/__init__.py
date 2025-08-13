@@ -5,7 +5,7 @@ Agricultural Analysis Module
 Module for agricultural data analysis and crop calendar.
 Modular structure following PEP8.
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-05
 """
 

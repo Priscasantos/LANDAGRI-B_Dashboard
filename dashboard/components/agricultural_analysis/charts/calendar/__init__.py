@@ -22,7 +22,7 @@ Available Modules:
 - enhanced_statistics: Enhanced statistics (existing)
 - additional_analysis: Additional analyses (existing)
 
-Author: LULC Initiatives Dashboard
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-07
 """
 

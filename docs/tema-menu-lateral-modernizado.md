@@ -1,27 +1,27 @@
 # 🎨 Modernização do Tema do Menu Lateral - LANDAGRI-B Dashboard
 
-## 📋 Objetivo Executado
-Aplicar estilo de cores moderno no menu lateral com fontes escuras e melhor contraste visual para melhorar a legibilidade e experiência do usuário.
+## 📋 Objective Achieved
+Apply a modern color style to the sidebar menu with dark fonts and improved visual contrast to enhance readability and user experience.
 
-## 🔧 Mudanças Implementadas
+## 🔧 Changes Implemented
 
-### 🎨 **Tema Principal Atualizado**
+### 🎨 **Main Theme Updated**
 
-#### **ANTES (Tema Escuro)**
-- Fundo escuro: `linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)`
-- Texto claro: `color: #e2e8f0`
-- Ícones azuis claros: `#60a5fa`
-- Título rosa/magenta: `#C50C87`
+#### **BEFORE (Dark Theme)**
+- Dark background: `linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)`
+- Light text: `color: #e2e8f0`
+- Light blue icons: `#60a5fa`
+- Pink/magenta title: `#C50C87`
 
-#### **DEPOIS (Tema Claro Moderno)**
-- Fundo claro: `linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)`
-- Texto escuro: `color: #1e293b`
-- Ícones cinza escuro: `#475569`
-- Título preto: `#1e293b`
+#### **AFTER (Modern Light Theme)**
+- Light background: `linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)`
+- Dark text: `color: #1e293b`
+- Dark gray icons: `#475569`
+- Black title: `#1e293b`
 
-### 🔗 **Componentes Modernizados**
+### 🔗 **Modernized Components**
 
-#### **1. Container Principal**
+#### **1. Main Container**
 ```css
 background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
 border-radius: 16px;
@@ -29,15 +29,15 @@ box-shadow: 0 10px 40px rgba(15, 23, 42, 0.15);
 border: 1px solid rgba(148, 163, 184, 0.2);
 ```
 
-#### **2. Links de Navegação**
+#### **2. Navigation Links**
 ```css
-/* Estado normal */
+/* Normal state */
 background: rgba(255, 255, 255, 0.7);
 color: #1e293b;
 font-weight: 500;
 box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
 
-/* Estado selecionado */
+/* Selected state */
 background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
 color: #ffffff;
 font-weight: 600;
@@ -57,7 +57,7 @@ color: #475569;
 font-weight: 500;
 ```
 
-### 📱 **Sidebar Global CSS**
+### 📱 **Global Sidebar CSS**
 ```css
 .stSidebar {
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
@@ -66,43 +66,43 @@ font-weight: 500;
 }
 
 .stSidebar * {
-    color: #1e293b !important; /* Texto escuro para melhor legibilidade */
+    color: #1e293b !important; /* Dark text for better readability */
 }
 ```
 
-## 🎯 **Benefícios Alcançados**
+## 🎯 **Benefits Achieved**
 
-### ✅ **Melhoria na Legibilidade**
-- **Contraste aprimorado**: Texto escuro (#1e293b) em fundo claro
-- **Hierarquia visual clara**: Diferenciação entre estados normal, hover e selecionado
-- **Tipografia moderna**: Mantida a fonte Inter com pesos adequados
+### ✅ **Improved Readability**
+- **Enhanced contrast**: Dark text (#1e293b) on a light background
+- **Clear visual hierarchy**: Differentiation between normal, hover, and selected states
+- **Modern typography**: Inter font with appropriate weights
 
-### ✅ **Design Moderno e Profissional**
-- **Gradientes sutis**: Uso de gradientes claros e elegantes
-- **Sombras modernas**: Box-shadows com baixa opacidade para profundidade sutil
-- **Bordas arredondadas**: Border-radius aumentado para visual mais moderno
-- **Animações suaves**: Transições e transformações mantidas
+### ✅ **Modern and Professional Design**
+- **Subtle gradients**: Use of light, elegant gradients
+- **Modern shadows**: Low-opacity box-shadows for subtle depth
+- **Rounded borders**: Increased border-radius for a modern look
+- **Smooth animations**: Maintained transitions and transformations
 
-### ✅ **Consistência Visual**
-- **Paleta unificada**: Uso consistente de tons de azul (#3b82f6) como cor primária
-- **Espaçamento harmonioso**: Padding e margins balanceados
-- **Estados interativos**: Feedback visual claro para hover e seleção
+### ✅ **Visual Consistency**
+- **Unified palette**: Consistent use of blue tones (#3b82f6) as the primary color
+- **Harmonious spacing**: Balanced padding and margins
+- **Interactive states**: Clear visual feedback for hover and selection
 
-### ✅ **Acessibilidade**
-- **Alto contraste**: Atende diretrizes WCAG para legibilidade
-- **Cores distinguíveis**: Diferenciação clara entre elementos ativos e inativos
-- **Navegação intuitiva**: Breadcrumb com hierarquia visual clara
+### ✅ **Accessibility**
+- **High contrast**: Meets WCAG guidelines for readability
+- **Distinguishable colors**: Clear differentiation between active and inactive elements
+- **Intuitive navigation**: Breadcrumb with clear visual hierarchy
 
-## 🔍 **Detalhes Técnicos**
+## 🔍 **Technical Details**
 
-### **Paleta de Cores Aplicada**
+### **Applied Color Palette**
 ```css
-/* Cores primárias */
+/* Primary colors */
 --primary-blue: #3b82f6;
 --primary-blue-dark: #1d4ed8;
 --primary-blue-light: #60a5fa;
 
-/* Tons neutros */
+/* Neutral tones */
 --slate-50: #f8fafc;
 --slate-100: #f1f5f9;
 --slate-200: #e2e8f0;
@@ -110,44 +110,44 @@ font-weight: 500;
 --slate-700: #334155;
 --slate-800: #1e293b;
 
-/* Transparências */
+/* Transparencies */
 --blue-alpha-5: rgba(59, 130, 246, 0.05);
 --blue-alpha-10: rgba(59, 130, 246, 0.1);
 --blue-alpha-15: rgba(59, 130, 246, 0.15);
 ```
 
-### **Hierarquia de Informação**
-1. **Título Principal**: #1e293b, font-weight: 700, 24px
-2. **Categorias**: #1e293b, font-weight: 500, 16px
-3. **Sub-páginas**: #334155, font-weight: 500, 14px
+### **Information Hierarchy**
+1. **Main Title**: #1e293b, font-weight: 700, 24px
+2. **Categories**: #1e293b, font-weight: 500, 16px
+3. **Sub-pages**: #334155, font-weight: 500, 14px
 4. **Breadcrumb**: #475569, font-weight: 500, 13px
 
-## 📊 **Compatibilidade**
+## 📊 **Compatibility**
 
-### ✅ **Navegadores Suportados**
-- Chrome/Chromium (todas as versões recentes)
-- Firefox (todas as versões recentes)
-- Safari (todas as versões recentes)
-- Edge (todas as versões recentes)
+### ✅ **Supported Browsers**
+- Chrome/Chromium (all recent versions)
+- Firefox (all recent versions)
+- Safari (all recent versions)
+- Edge (all recent versions)
 
-### ✅ **Responsividade**
-- **Desktop**: Layout otimizado para telas grandes
-- **Tablet**: Ajustes automáticos de fonte e espaçamento
-- **Mobile**: Sidebar colapsível mantém funcionalidade
+### ✅ **Responsiveness**
+- **Desktop**: Layout optimized for large screens
+- **Tablet**: Automatic font and spacing adjustments
+- **Mobile**: Collapsible sidebar maintains functionality
 
-## 🚀 **Próximos Passos Sugeridos**
+## 🚀 **Next Suggested Steps**
 
-1. **Tema Escuro Opcional**: Implementar toggle para alternar entre tema claro e escuro
-2. **Personalização de Cores**: Permitir customização da cor primária
-3. **Animações Avançadas**: Adicionar micro-interações mais sofisticadas
-4. **Temas Específicos**: Criar variações para diferentes seções (agricultura, análise, etc.)
+1. **Optional Dark Theme**: Implement a toggle to switch between light and dark themes
+2. **Color Customization**: Allow customization of the primary color
+3. **Advanced Animations**: Add more sophisticated micro-interactions
+4. **Specific Themes**: Create variations for different sections (agriculture, analysis, etc.)
 
-## 📝 **Conclusão**
+## 📝 **Conclusion**
 
-A modernização do tema do menu lateral foi concluída com sucesso, resultando em:
-- **Melhoria significativa na legibilidade** com texto escuro em fundo claro
-- **Visual moderno e profissional** alinhado com tendências de design 2024-2025
-- **Experiência de usuário aprimorada** com navegação mais intuitiva
-- **Consistência visual** em todos os componentes do menu lateral
+The sidebar menu theme modernization has been successfully completed, resulting in:
+- **Significant improvement in readability** with dark text on a light background
+- **Modern and professional look** aligned with 2024-2025 design trends
+- **Enhanced user experience** with more intuitive navigation
+- **Visual consistency** across all sidebar menu components
 
-O dashboard LANDAGRI-B agora apresenta um menu lateral mais acessível, moderno e profissional, mantendo todas as funcionalidades existentes enquanto melhora significativamente a experiência visual do usuário.
+The LANDAGRI-B dashboard now features a more accessible, modern, and professional sidebar menu, maintaining all existing functionalities while significantly improving the user's visual experience.

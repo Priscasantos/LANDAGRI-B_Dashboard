@@ -5,7 +5,7 @@ Análise de Disponibilidade CONAB
 Módulo para análise de disponibilidade baseado exclusivamente em dados CONAB.
 Implementa visualizações modernas por região e estado usando Plotly.
 
-Autor: Dashboard Iniciativas LULC
+Autor: LANDAGRI-B Project Team 
 Data: 2025-08-07
 """
 
@@ -135,7 +135,7 @@ def _render_seasonality_analysis(crop_calendar: dict, states_info: dict) -> None
 
         # Adicionar trace para cada tipo de atividade
         colors = {'P': '#2E8B57', 'H': '#FF6B35', 'PH': '#4682B4'}
-        names = {'P': 'Plantio', 'H': 'Colheita', 'PH': 'Plantio/Colheita'}
+        names = {'P': 'Planting', 'H': 'Harvesting', 'PH': 'Planting/Harvesting'}
 
         for activity_type in ['P', 'H', 'PH']:
             monthly_counts = [seasonal_data.get(month, {}).get(activity_type, 0) for month in months]
@@ -218,7 +218,7 @@ def _render_timeline_analysis(crop_calendar: dict, states_info: dict) -> None:
     
     with filter_col3:
         # Filtro por tipo de atividade
-        activity_types = ["Todas as Atividades", "Apenas Plantio", "Apenas Colheita", "Plantio e Colheita"]
+        activity_types = ["All Activities", "Only Planting", "Only Harvesting", "Planting and Harvesting"]
         selected_activity = st.selectbox(
             "⚡ Tipo de Atividade:",
             activity_types,
@@ -293,10 +293,10 @@ def _filter_timeline_data(crop_calendar: dict, states_info: dict, region: str, c
             
             for _month, activity in calendar_data.items():
                 if (activity and 
-                    (activity_type == "Todas as Atividades" or
-                     (activity_type == "Apenas Plantio" and activity == 'P') or
-                     (activity_type == "Apenas Colheita" and activity == 'H') or
-                     (activity_type == "Plantio e Colheita" and activity == 'PH'))):
+                    (activity_type == "All Activities" or
+                     (activity_type == "Only Planting" and activity == 'P') or
+                     (activity_type == "Only Harvesting" and activity == 'H') or
+                     (activity_type == "Planting and Harvesting" and activity == 'PH'))):
                     has_matching_activity = True
                     break
             
@@ -346,18 +346,18 @@ def _render_monthly_timeline(filtered_data: dict) -> None:
         return
 
     # Criar gráfico de linha temporal
-    plantio = [monthly_counts[month]['P'] for month in month_names]
-    colheita = [monthly_counts[month]['H'] for month in month_names]
-    ambos = [monthly_counts[month]['PH'] for month in month_names]
+    planting = [monthly_counts[month]['P'] for month in month_names]
+    harvest = [monthly_counts[month]['H'] for month in month_names]
+    both = [monthly_counts[month]['PH'] for month in month_names]
 
     fig_timeline = go.Figure()
 
     # Adicionar linhas para cada tipo de atividade
     fig_timeline.add_trace(go.Scatter(
         x=month_names,
-        y=plantio,
+        y=planting,
         mode='lines+markers',
-        name='🌱 Plantio',
+        name='🌱 Planting',
         line={'color': '#2E8B57', 'width': 3},
         marker={'size': 8},
         hovertemplate='<b>%{fullData.name}</b><br>Mês: %{x}<br>Atividades: %{y}<extra></extra>'
@@ -365,9 +365,9 @@ def _render_monthly_timeline(filtered_data: dict) -> None:
 
     fig_timeline.add_trace(go.Scatter(
         x=month_names,
-        y=colheita,
+        y=harvest,
         mode='lines+markers',
-        name='🌾 Colheita',
+        name='🌾 Harvest',
         line={'color': '#FF6B35', 'width': 3},
         marker={'size': 8},
         hovertemplate='<b>%{fullData.name}</b><br>Mês: %{x}<br>Atividades: %{y}<extra></extra>'
@@ -375,18 +375,18 @@ def _render_monthly_timeline(filtered_data: dict) -> None:
 
     fig_timeline.add_trace(go.Scatter(
         x=month_names,
-        y=ambos,
+        y=both,
         mode='lines+markers',
-        name='🔄 Plantio/Colheita',
+        name='🔄 Planting/Harvesting',
         line={'color': '#4682B4', 'width': 3},
         marker={'size': 8},
         hovertemplate='<b>%{fullData.name}</b><br>Mês: %{x}<br>Atividades: %{y}<extra></extra>'
     ))
 
     fig_timeline.update_layout(
-        title="Timeline de Atividades Agrícolas ao Longo do Ano",
-        xaxis_title="Mês",
-        yaxis_title="Número de Atividades",
+        title="Agricultural Activities Timeline Throughout the Year",
+        xaxis_title="Month",
+        yaxis_title="Number of Activities",
         hovermode='x unified',
         showlegend=True,
         height=400,
@@ -398,13 +398,13 @@ def _render_monthly_timeline(filtered_data: dict) -> None:
     # Adicionar métricas resumidas
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("🌱 Total Plantios", sum(plantio))
+        st.metric("🌱 Total Planting", sum(planting))
     with col2:
-        st.metric("🌾 Total Colheitas", sum(colheita))
+        st.metric("🌾 Total Harvesting", sum(harvesting))
     with col3:
-        st.metric("🔄 Ambas Atividades", sum(ambos))
+        st.metric("🔄 Both Activities", sum(both))
     with col4:
-        st.metric("📊 Total Atividades", total_activities)
+        st.metric("📊 Total Activities", total_activities)
 
 
 def _render_crop_gantt_chart(filtered_data: dict, region: str) -> None:
@@ -430,7 +430,7 @@ def _render_crop_gantt_chart(filtered_data: dict, region: str) -> None:
     colors = ['#2E8B57', '#FF6B35', '#4682B4', '#9370DB', '#20B2AA', '#FF69B4', '#FFA500']
 
     for crop_index, (crop_name, crop_data) in enumerate(list(filtered_data.items())[:10]):
-        # Encontrar períodos de plantio e colheita
+        # Find planting and harvesting periods
         planting_months = set()
         harvest_months = set()
 
@@ -444,32 +444,32 @@ def _render_crop_gantt_chart(filtered_data: dict, region: str) -> None:
                     if activity in ['H', 'PH']:
                         harvest_months.add(month)
 
-        # Criar barras para plantio
+        # Create bars for planting
         if planting_months:
             month_indices = [month_mapping[m] for m in planting_months]
             start_month = min(month_indices)
             end_month = max(month_indices)
 
             gantt_data.append({
-                'Task': f"{crop_name[:30]} - 🌱 Plantio",
+                'Task': f"{crop_name[:30]} - 🌱 Planting",
                 'Start': start_month,
                 'Finish': end_month + 1,
-                'Resource': 'Plantio',
+                'Resource': 'Planting',
                 'Color': colors[crop_index % len(colors)],
                 'Opacity': 0.8
             })
 
-        # Criar barras para colheita
+        # Create bars for harvesting
         if harvest_months:
             month_indices = [month_mapping[m] for m in harvest_months]
             start_month = min(month_indices)
             end_month = max(month_indices)
 
             gantt_data.append({
-                'Task': f"{crop_name[:30]} - 🌾 Colheita",
+                'Task': f"{crop_name[:30]} - 🌾 Harvest",
                 'Start': start_month,
                 'Finish': end_month + 1,
-                'Resource': 'Colheita',
+                'Resource': 'Harvest',
                 'Color': colors[crop_index % len(colors)],
                 'Opacity': 0.5
             })
@@ -478,7 +478,7 @@ def _render_crop_gantt_chart(filtered_data: dict, region: str) -> None:
         st.info("📊 Nenhum período de cultivo encontrado.")
         return
 
-    # Criar gráfico de Gantt usando Plotly
+    # Create Gantt chart using Plotly
     fig_gantt = go.Figure()
 
     for row in gantt_data:
@@ -504,9 +504,9 @@ def _render_crop_gantt_chart(filtered_data: dict, region: str) -> None:
         ))
 
     fig_gantt.update_layout(
-        title=f"Períodos de Cultivo - {region}",
-        xaxis_title="Meses do Ano",
-        yaxis_title="Culturas e Atividades",
+        title=f"Crop Periods - {region}",
+        xaxis_title="Months of the Year",
+        yaxis_title="Crops and Activities",
         xaxis={
             'tickmode': 'array',
             'tickvals': list(range(12)),
@@ -524,11 +524,11 @@ def _render_crop_gantt_chart(filtered_data: dict, region: str) -> None:
     st.markdown("**📊 Resumo do Diagrama:**")
     col1, col2 = st.columns(2)
     with col1:
-        plantio_count = len([g for g in gantt_data if 'Plantio' in g['Task']])
-        st.metric("🌱 Períodos de Plantio", plantio_count)
+        planting_count = len([g for g in gantt_data if 'Planting' in g['Task']])
+        st.metric("🌱 Planting Periods", planting_count)
     with col2:
-        colheita_count = len([g for g in gantt_data if 'Colheita' in g['Task']])
-        st.metric("🌾 Períodos de Colheita", colheita_count)
+        harvest_count = len([g for g in gantt_data if 'Harvest' in g['Task']])
+        st.metric("🌾 Harvest Periods", harvest_count)
 
 
 def _render_temporal_density(filtered_data: dict) -> None:

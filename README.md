@@ -1,203 +1,203 @@
 # 🌍 LANDAGRI-B Dashboard
 
-**Dashboard interativo para análise de iniciativas de monitoramento de uso e cobertura da terra (LULC) no Brasil**
+**Interactive dashboard for analyzing land use and land cover (LULC) monitoring initiatives in Brazil**
 
 [![Python](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/streamlit-1.47.0-red.svg)](https://streamlit.io/)
 [![Status](https://img.shields.io/badge/status-production--ready-green.svg)](https://github.com/Priscasantos/LANDAGRI-B_Dashboard)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-> 🔗 **Repositório**: [https://github.com/Priscasantos/LANDAGRI-B_Dashboard](https://github.com/Priscasantos/LANDAGRI-B_Dashboard)
+> 🔗 **Repository**: [https://github.com/Priscasantos/LANDAGRI-B_Dashboard](https://github.com/Priscasantos/LANDAGRI-B_Dashboard)
 
 ---
 
-## 🚀 Início Rápido
+## 🚀 Quick Start
 
-### Executar o Dashboard
+### Run the Dashboard
 ```bash
-# Método 1: Streamlit direto
+# Method 1: Directly with Streamlit
 python -m streamlit run app.py
 
-# Método 2: Script personalizado com auto-reload
+# Method 2: Custom script with auto-reload
 python run_app.py --port 8501
 
-# Método 3: Com cache desabilitado
+# Method 3: With cache disabled
 python run_app.py --no-cache
 ```
 
-### Acessar
-- **URL Local**: http://localhost:8501
-- **Interface**: Moderna com navegação por abas
-- **Responsivo**: Funciona em desktop e mobile
+### Access
+- **Local URL**: http://localhost:8501
+- **Interface**: Modern tabbed navigation
+- **Responsive**: Works on desktop and mobile
 
 ---
 
-## 📊 Funcionalidades
+## 📊 Features
 
-### 🔍 Análises Disponíveis
-- **Overview**: Visão geral das iniciativas e métricas principais
-- **Temporal**: Análise da evolução temporal dos dados
-- **Detailed**: Comparações detalhadas entre iniciativas
-- **CONAB**: Análise específica dos dados da CONAB
-- **Comparison**: Comparações avançadas multi-dimensionais
+### 🔍 Available Analyses
+- **Overview**: General view of initiatives and key metrics
+- **Temporal**: Analysis of data evolution over time
+- **Detailed**: Detailed comparisons between initiatives
+- **CONAB**: Specific analysis of CONAB data
+- **Comparison**: Advanced multi-dimensional comparisons
 
-### 📈 Visualizações
-- Gráficos interativos com Plotly
-- Mapas geoespaciais
-- Dashboards responsivos
-- Métricas em tempo real
+### 📈 Visualizations
+- Interactive charts with Plotly
+- Geospatial maps
+- Responsive dashboards
+- Real-time metrics
 
 ---
 
-## 🛠️ Tecnologias
+## 🛠️ Technologies
 
 ### Core Stack
-- **Python 3.12** - Linguagem principal
-- **Streamlit 1.47.0** - Framework web
-- **Pandas** - Manipulação de dados
-- **Plotly** - Visualizações interativas
-- **GeoPandas** - Dados geoespaciais
+- **Python 3.12** - Main language
+- **Streamlit 1.47.0** - Web framework
+- **Pandas** - Data manipulation
+- **Plotly** - Interactive visualizations
+- **GeoPandas** - Geospatial data
 
-### Qualidade & Performance
-- **Ruff 0.12.4** - Linter moderno
+### Quality & Performance
+- **Ruff 0.12.4** - Modern linter
 - **Pre-commit** - Git hooks
-- **CacheTools** - Sistema de cache
-- **Memory-profiler** - Monitoramento
+- **CacheTools** - Caching system
+- **Memory-profiler** - Monitoring
 
 ---
 
-## 📚 Documentação
+## 📚 Documentation
 
-> **Toda a documentação detalhada está organizada na pasta [`docs/`](./docs/)**
+> **All detailed documentation is organized in the [`docs/`](./docs/) folder**
 
-### 📋 Principais Documentos
-- [`docs/README.md`](./docs/README.md) - Índice completo da documentação
-- [`docs/RELATORIO_OTIMIZACOES_FINAL.md`](./docs/RELATORIO_OTIMIZACOES_FINAL.md) - Relatório de otimizações
-- [`docs/OTIMIZACOES_FASE3.md`](./docs/OTIMIZACOES_FASE3.md) - Detalhes técnicos das melhorias
+### 📋 Key Documents
+- [`docs/README.md`](./docs/README.md) - Complete documentation index
+- [`docs/RELATORIO_OTIMIZACOES_FINAL.md`](./docs/RELATORIO_OTIMIZACOES_FINAL.md) - Optimization report
+- [`docs/OTIMIZACOES_FASE3.md`](./docs/OTIMIZACOES_FASE3.md) - Technical details of improvements
 
 ---
 
-## ⚡ Comandos Úteis
+## ⚡ Useful Commands
 
-### Desenvolvimento
+### Development
 ```bash
-# Verificar qualidade do código
+# Check code quality
 python -m ruff check .
 
-# Aplicar formatação automática
+# Apply automatic formatting
 python -m ruff format .
 
-# Executar hooks de qualidade
+# Run quality hooks
 pre-commit run --all-files
 
-# Instalar hooks no git
+# Install git hooks
 pre-commit install
 ```
 
-### Debug & Monitoramento
+### Debug & Monitoring
 ```bash
-# Rodar com profiling de memória
+# Run with memory profiling
 python -m memory_profiler app.py
 
-# Debug sem cache
+# Debug without cache
 python run_app.py --no-cache
 
-# Verificar imports e dependências
+# Check imports and dependencies
 python -c "import streamlit; print('✓ OK')"
 ```
 
 ---
 
-## 🏗️ Estrutura do Projeto
+## 🏗️ Project Structure
 
 ```
-📂 dashboard-iniciativas/
-├── 📱 app.py                 # Entry point principal
-├── 🔧 run_app.py            # Script de execução com opções
-├── 📋 requirements.txt      # Dependências
-├── ⚙️ pyproject.toml        # Configuração ruff
+📂 dashboard-iniciatives/
+├── 📱 app.py                 # Main entry point
+├── 🔧 run_app.py            # Execution script with options
+├── 📋 requirements.txt      # Dependencies
+├── ⚙️ pyproject.toml        # Ruff configuration
 ├── 🪝 .pre-commit-config.yaml # Git hooks
 │
-├── 📊 dashboard/            # Módulos do dashboard
-│   ├── overview.py          # Visão geral
-│   ├── temporal.py          # Análise temporal
-│   ├── detailed.py          # Comparações detalhadas
-│   ├── conab.py            # Análise CONAB
-│   └── comparison.py        # Comparações avançadas
+├── 📊 dashboard/            # Dashboard modules
+│   ├── overview.py          # Overview
+│   ├── temporal.py          # Temporal analysis
+│   ├── detailed.py          # Detailed comparisons
+│   ├── conab.py             # CONAB analysis
+│   └── comparison.py        # Advanced comparisons
 │
-├── 🧮 scripts/             # Scripts e utilities
-│   ├── data_generation/    # Processamento de dados
-│   ├── plotting/           # Geração de gráficos
-│   └── utilities/          # Funções auxiliares
+├── 🧮 scripts/               # Scripts and utilities
+│   ├── data_generation/     # Data processing
+│   ├── plotting/            # Chart generation
+│   └── utilities/           # Helper functions
 │
-├── 📁 data/                # Dados e metadados
-├── 🖼️ graphics/           # Gráficos gerados
-├── 💾 cache/              # Cache do sistema
-└── 📚 docs/               # Documentação completa
+├── 📁 data/                 # Data and metadata
+├── 🖼️ graphics/             # Generated graphics
+├── 💾 cache/                # System cache
+└── 📚 docs/                 # Complete documentation
 ```
 
 ---
 
-## 📈 Status do Projeto
+## 📈 Project Status
 
-### ✅ Concluído
-- ✅ **Interface moderna** com streamlit-option-menu
-- ✅ **95% melhoria na qualidade** (283 → 14 problemas de código)
-- ✅ **Performance otimizada** com cache inteligente
-- ✅ **Ferramentas modernas** (Ruff, Pre-commit)
-- ✅ **Documentação organizada** na pasta docs/
+### ✅ Completed
+- ✅ **Modern interface** with streamlit-option-menu
+- ✅ **95% code quality improvement** (283 → 14 issues)
+- ✅ **Optimized performance** with smart caching
+- ✅ **Modern tools** (Ruff, Pre-commit)
+- ✅ **Organized documentation** in the docs/ folder
 
-### 🎯 Métricas de Qualidade
-- **Code Quality**: A- (14 problemas menores restantes)
-- **Performance**: Otimizada com cache TTL 300s
-- **Maintainability**: Excelente com type hints e docstrings
-- **Test Coverage**: Em desenvolvimento
-
----
-
-## 🤝 Contribuição
-
-### Para Desenvolvedores
-1. **Fork** o projeto
-2. **Clone** localmente
-3. **Instale** dependências: `pip install -r requirements.txt`
-4. **Configure** hooks: `pre-commit install`
-5. **Desenvolva** com qualidade: `python -m ruff check .`
-
-### Padrões de Código
-- **Formatação**: Black-compatible (88 chars)
-- **Linting**: Ruff com regras rigorosas
-- **Type Hints**: Obrigatório em funções públicas
-- **Docstrings**: Google-style para documentação
+### 🎯 Quality Metrics
+- **Code Quality**: A- (14 minor issues remaining)
+- **Performance**: Optimized with TTL 300s cache
+- **Maintainability**: Excellent with type hints and docstrings
+- **Test Coverage**: In development
 
 ---
 
-## 📞 Suporte
+## 🤝 Contributing
 
-### Documentação
-- 📖 **Documentação completa**: [`docs/README.md`](./docs/README.md)
-- 🔧 **Configurações**: Arquivos `.toml` e `.yaml`
-- 📊 **Relatórios**: Pasta `docs/` com todos os detalhes
+### For Developers
+1. **Fork** the project
+2. **Clone** locally
+3. **Install** dependencies: `pip install -r requirements.txt`
+4. **Set up** hooks: `pre-commit install`
+5. **Develop** with quality: `python -m ruff check .`
 
-### Execução
+### Code Standards
+- **Formatting**: Black-compatible (88 chars)
+- **Linting**: Ruff with strict rules
+- **Type Hints**: Required in public functions
+- **Docstrings**: Google-style for documentation
+
+---
+
+## 📞 Support
+
+### Documentation
+- 📖 **Full documentation**: [`docs/README.md`](./docs/README.md)
+- 🔧 **Configurations**: `.toml` and `.yaml` files
+- 📊 **Reports**: `docs/` folder with all details
+
+### Running
 - 🚀 **Dashboard**: `python -m streamlit run app.py`
 - 🔍 **Debug**: `python run_app.py --no-cache`
-- ✅ **Qualidade**: `python -m ruff check .`
+- ✅ **Quality**: `python -m ruff check .`
 
 ---
 
-## Rodando o Dashboard (Modo Recomendado)
+## Running the Dashboard (Recommended Mode)
 
-Para sempre rodar o dashboard durante o desenvolvimento ou produção, utilize o comando padrão:
+To always run the dashboard during development or production, use the standard command:
 
 ```sh
 python -m streamlit run app.py --server.port 8501
 ```
 
-Isso garante que o Streamlit rode na porta correta e com a configuração recomendada. Você também pode usar a task do VS Code "Run Streamlit Dashboard (Standard)" para maior praticidade.
+This ensures Streamlit runs on the correct port with the recommended configuration. You can also use the VS Code task "Run Streamlit Dashboard (Standard)" for convenience.
 
 ---
 
-**Dashboard Iniciativas LULC** - Análise moderna de dados LULC para o Brasil 🇧🇷
+**LANDAGRI-B Dashboard** - Modern LULC data analysis for Brazil 🇧🇷
 
-*Desenvolvido com ❤️ usando Python e Streamlit*
+*Developed with ❤️ using Python and Streamlit*

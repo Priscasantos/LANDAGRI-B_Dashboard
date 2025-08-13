@@ -10,7 +10,7 @@ Nova estrutura modular:
 - comparison/: Componentes de análise comparativa  
 - detailed/: Componentes de análise detalhada
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-08-01
 """
 

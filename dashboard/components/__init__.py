@@ -13,10 +13,10 @@ Estrutura:
 - conab/: Componentes específicos para dados CONAB
 - shared/: Componentes compartilhados entre páginas
 
-Author: Dashboard Iniciativas LULC
+Author: LANDAGRI-B Project Team 
 Date: 2025-07-23
 Version: 1.0
 """
 
 __version__ = "1.0.0"
-__author__ = "Dashboard Iniciativas LULC"
+__author__ = "LANDAGRI-B Project Team"

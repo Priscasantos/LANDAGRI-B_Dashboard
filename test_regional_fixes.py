@@ -5,7 +5,7 @@ Test Script for Regional Color Palette and Fixed Functions
 Testa as correções aplicadas nas funções de cobertura espacial e diversidade de culturas,
 verificando as cores regionais e a correção do erro 'set' object is not subscriptable.
 
-Author: Agricultural Dashboard Team  
+Author: LANDAGRI-B Project Team  
 Date: 2025-08-11
 """
 
