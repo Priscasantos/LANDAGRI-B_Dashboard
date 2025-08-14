@@ -272,7 +272,7 @@ def create_conab_crops_evolution_chart(data):
 
 def render_conab_production_overview(data):
     """Renders CONAB production overview"""
-    st.subheader("📊 Production Overview - CONAB")
+    st.subheader("🔎 Production Overview - CONAB")
     
     # Main metrics from 2023/24 season
     latest_year = '2023/24'

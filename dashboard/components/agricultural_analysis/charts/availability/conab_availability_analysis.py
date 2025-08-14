@@ -504,7 +504,7 @@ def _render_crop_gantt_chart(filtered_data: dict, region: str) -> None:
         ))
 
     fig_gantt.update_layout(
-        title=f"Crop Periods - {region}",
+        title=f"",
         xaxis_title="Months of the Year",
         yaxis_title="Crops and Activities",
         xaxis={
@@ -520,8 +520,8 @@ def _render_crop_gantt_chart(filtered_data: dict, region: str) -> None:
 
     st.plotly_chart(fig_gantt, use_container_width=True, key="crop_gantt_chart")
 
-    # Adicionar informações resumidas
-    st.markdown("**📊 Resumo do Diagrama:**")
+    # Add summary information
+    st.markdown("**Data Summary**")
     col1, col2 = st.columns(2)
     with col1:
         planting_count = len([g for g in gantt_data if 'Planting' in g['Task']])

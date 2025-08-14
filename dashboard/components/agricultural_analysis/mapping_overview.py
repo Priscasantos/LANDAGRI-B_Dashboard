@@ -133,7 +133,7 @@ def create_overview_summary_chart(data):
         df,
         x='Crop',
         y='States',
-        title='📊 Coverage: Crop versus Monitored States',
+        title='Coverage: Crop versus Monitored States',
         labels={'States': 'Number of States', 'Crop': 'Crop'},
         color='Activities',
         color_continuous_scale='viridis'
@@ -157,7 +157,7 @@ def render_conab_mapping_metrics(data):
     
     metrics = calculate_conab_metrics(data)
     
-    st.markdown("### 📊 General Summary")
+    st.markdown("### General Summary")
     
     col1, col2, col3, col4 = st.columns(4)
     
@@ -232,7 +232,7 @@ def render_mapping_overview():
     render_conab_mapping_metrics(data)
     
     # Simple overview chart
-    st.markdown("### 📈 Distribution by Crop")
+    st.markdown("### Distribution by Crop")
     fig_overview = create_overview_summary_chart(data)
     if fig_overview:
         st.plotly_chart(fig_overview, use_container_width=True)
@@ -268,5 +268,5 @@ def render_mapping_overview():
 
 if __name__ == "__main__":
     st.set_page_config(page_title="Overview CONAB", layout="wide")
-    st.title("🗺️ Overview - Dados CONAB")
+    st.title("🔎 Overview - Dados CONAB")
     render_mapping_overview()

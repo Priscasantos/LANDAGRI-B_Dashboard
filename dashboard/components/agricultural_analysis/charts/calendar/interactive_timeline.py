@@ -178,7 +178,7 @@ def create_interactive_timeline(filtered_data: dict) -> None:
             # Customize layout
             fig.update_layout(
                 title={
-                    'text': "Interactive Agricultural Activity Timeline",
+                    'text': "",
                     'x': 0.5,
                     'xanchor': 'center',
                     'font': {'size': 20, 'color': '#2c3e50'}
@@ -235,7 +235,7 @@ def create_interactive_timeline(filtered_data: dict) -> None:
             st.plotly_chart(fig, use_container_width=True)
             
             # Display summary statistics
-            st.markdown("### Activity Summary")
+            st.markdown("### Data Summary")
             col1, col2, col3 = st.columns(3)
             
             with col1:

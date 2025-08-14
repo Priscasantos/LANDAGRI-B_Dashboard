@@ -95,7 +95,7 @@ def create_seasonality_index_chart(filtered_data: dict, chart_key: str = "season
             ))
         
         fig.update_layout(
-            title="📈 Seasonality Analysis by Crop",
+            title="Seasonality Analysis by Crop",
             xaxis_title="Months",
             yaxis_title="Activities Intensity",
             height=500,
@@ -325,7 +325,8 @@ def create_polar_seasonality_analysis(filtered_data: dict, chart_key: str = "pol
         
         st.plotly_chart(fig_polar, use_container_width=True, key=chart_key)
         
-        # Adicionar informações complementares
+        # Add complementary information
+        st.markdown("**Data Summary**")
         col1, col2, col3 = st.columns(3)
         
         with col1:

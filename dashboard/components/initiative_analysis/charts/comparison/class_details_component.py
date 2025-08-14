@@ -38,7 +38,7 @@ def render_class_details_tab(filtered_df: pd.DataFrame) -> None:
     
     # Tab-based visualization
     tab1, tab2, tab3 = st.tabs([
-        "📊 Class Overview", 
+        "🔎 Class Overview", 
         "🌾 Agricultural Analysis", 
         "📈 Comparative Charts"
     ])
@@ -55,7 +55,7 @@ def render_class_details_tab(filtered_df: pd.DataFrame) -> None:
 
 def render_class_overview(filtered_df: pd.DataFrame, metadata: dict) -> None:
     """Render class overview with detailed information for each initiative."""
-    st.markdown("##### 📊 Class Information Overview")
+    st.markdown("##### 🔎 Class Information Overview")
     
     class_data = []
     

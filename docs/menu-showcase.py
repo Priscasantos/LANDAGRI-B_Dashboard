@@ -179,7 +179,7 @@ with col1:
         ])
         
         with tab1:
-            st.markdown("### 📊 Dashboard Overview")
+            st.markdown("### 🔎 Dashboard Overview")
             st.markdown("- Resumo geral dos dados")
             st.markdown("- Métricas principais")
             st.markdown("- Gráficos de tendência")

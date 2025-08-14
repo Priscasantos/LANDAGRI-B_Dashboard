@@ -43,7 +43,7 @@ A página **Agriculture Availability** agora possui 6 abas organizadas:
 3. **🌀 Seasonal Patterns** - Sub-abas para padrões sazonais
 4. **🗺 Regional Activity** - Sub-abas para análises regionais
 5. **🎚️ Activity Intensity** - Sub-abas para intensidade de atividades
-6. **📊 Overview** - Visão geral e estatísticas
+6. **🔎 Overview** - Visão geral e estatísticas
 
 ### 3. Funcionalidades Implementadas
 

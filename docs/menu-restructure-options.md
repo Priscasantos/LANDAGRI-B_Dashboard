@@ -6,7 +6,7 @@ Seu dashboard atualmente usa o **streamlit-option-menu** no sidebar com 5 seçõ
 - Overview (🏠)
 - Comparative Analysis (📊)
 - Temporal Analysis (📅)
-- Detailed Analysis (🔍)
+- Detailed Analysis (◌)
 - CONAB Analysis (🗺️)
 
 ## Opções de Menu Disponíveis no Streamlit
@@ -42,7 +42,7 @@ options=[
 **Implementação:**
 ```python
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "📊 Overview", 
+    "🔎 Overview", 
     "📈 Comparative", 
     "⏰ Temporal", 
     "🔍 Detailed", 

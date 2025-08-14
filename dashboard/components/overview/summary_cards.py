@@ -104,7 +104,7 @@ def render(df: pd.DataFrame) -> None:
         temporal_coverage = len(year_columns)
 
     # Renderizar seção de métricas principais
-    st.markdown("#### 📊 LULC Initiative Metrics")
+    st.markdown("#### LULC Initiative Metrics")
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
@@ -156,7 +156,7 @@ def render(df: pd.DataFrame) -> None:
         )
 
     # Renderizar Performance Metrics
-    st.markdown("#### 🎯 Performance Metrics")
+    st.markdown("#### Performance Metrics")
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:

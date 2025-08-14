@@ -224,7 +224,7 @@ def create_tabs_alternative():
     """
     # Criar tabs principais
     tab1, tab2, tab3, tab4 = st.tabs([
-        "📊 Overview", 
+        "🔎 Overview", 
         "📈 Analysis", 
         "🌾 External Data", 
         "⚙️ Settings"

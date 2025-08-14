@@ -68,18 +68,20 @@ def run(metadata=None, df_original=None):
     st.markdown(
         """
         <div style="
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            padding: 2rem;
+            background: linear-gradient(135deg, #80400B 0%, #5a2e07 100%);
+            padding: 1.2rem;
             border-radius: 15px;
             margin-bottom: 2rem;
-            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.05);
         ">
             <h1 style="color: white; margin: 0; font-size: 2.5rem; font-weight: 700;">
-                🔬 Initiative Analysis
+                🏞  Initiative Analysis
             </h1>
-            <p style="color: #dbeafe; margin: 0.5rem 0 0 0; font-size: 1.2rem;">
-                Comprehensive analysis of LULC initiatives with full features
+            <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic">
+                Comprehensive Spatio-temporal Analysis of Thirteen Land Use and Land Cover (LULC) Initiatives. Reference:
+                <a href="https://doi.org/10.3390/rs17132324" target="_blank" rel="noopener noreferrer" style="color: #fdebd6; text-decoration: underline; font-weight: 600;">
+                    Santos et al. (2025).
+                </a>
             </p>
         </div>
         """,
@@ -145,27 +147,25 @@ def render_comparative_analysis(df: pd.DataFrame, metadata: dict) -> None:
     """
     Renderizar análise comparativa com todos os filtros e gráficos dos arquivos legados.
     """
-
     st.markdown(
         """
-    <div style="
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        <div style="
+        background: linear-gradient(135deg, #F7EEDC 0%, #FFF2CC 100%);
         padding: 1.5rem;
         border-radius: 10px;
         margin-bottom: 1.5rem;
-        box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
-    ">
-        <h2 style="color: white; margin: 0; font-size: 1.8rem; font-weight: 600;">
-            📊 Advanced Comparative Analysis
+        box-shadow: 0 4px 16px rgba(255, 203, 128, 0.12);
+        ">
+        <h2 style="color: #5a3716; margin: 0; font-size: 1.8rem; font-weight: 600;">
+            🔠 Comparative Analysis
         </h2>
-        <p style="color: #d1fae5; margin: 0.5rem 0 0 0; font-size: 1rem;">
-            Compare LULC initiatives with advanced filters and multiple visualizations
+        <p style="color: #7a4b18; margin: 0.5rem 0 0 0; font-size: 1rem;">
+            Comparative Analysis of LULC Mapping Initiatives Characteristics.
         </p>
-    </div>
-    """,
+        </div>
+        """,
         unsafe_allow_html=True,
     )
-
 
     # Filtros removidos conforme solicitado. Usar df diretamente.
     filtered_df = df.copy()
@@ -237,21 +237,21 @@ def render_temporal_analysis(df: pd.DataFrame, metadata: dict) -> None:
     """
     st.markdown(
         """
-    <div style="
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        <div style="
+        background: linear-gradient(135deg, #F7EEDC 0%, #FFF2CC 100%);
         padding: 1.5rem;
         border-radius: 10px;
         margin-bottom: 1.5rem;
-        box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
-    ">
-        <h2 style="color: white; margin: 0; font-size: 1.8rem; font-weight: 600;">
-            ⏳ Complete Temporal Analysis
+        box-shadow: 0 4px 16px rgba(255, 203, 128, 0.12);
+        ">
+        <h2 style="color: #5a3716; margin: 0; font-size: 1.8rem; font-weight: 600;">
+            ⏳ Temporal Analysis
         </h2>
-        <p style="color: #fef3c7; margin: 0.5rem 0 0 0; font-size: 1rem;">
-            Timeline, temporal evolution, and gap analysis of LULC initiatives
+        <p style="color: #7a4b18; margin: 0.5rem 0 0 0; font-size: 1rem;">
+            Temporal Analysis of LULC Mapping Initiatives showing trends, gaps, and evolutions over time.
         </p>
-    </div>
-    """,
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
@@ -287,23 +287,24 @@ def render_detailed_analysis(df: pd.DataFrame, metadata: dict) -> None:
     """
     st.markdown(
         """
-    <div style="
-        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        <div style="
+        background: linear-gradient(135deg, #F7EEDC 0%, #FFF2CC 100%);
         padding: 1.5rem;
         border-radius: 10px;
         margin-bottom: 1.5rem;
-        box-shadow: 0 4px 16px rgba(139, 92, 246, 0.2);
-    ">
-        <h2 style="color: white; margin: 0; font-size: 1.8rem; font-weight: 600;">
-            🔍 Detailed Analysis
+        box-shadow: 0 4px 16px rgba(255, 203, 128, 0.12);
+        ">
+        <h2 style="color: #5a3716; margin: 0; font-size: 1.8rem; font-weight: 600;">
+            ◌ Detailed Analysis
         </h2>
-        <p style="color: #ede9fe; margin: 0.5rem 0 0 0; font-size: 1rem;">
-            Detailed comparison with multi-selection and radar charts
+        <p style="color: #7a4b18; margin: 0.5rem 0 0 0; font-size: 1rem;">
+            Detailed Analysis of LULC Mapping Initiatives Using Custom Filtered-Based Search.
         </p>
-    </div>
-    """,
+        </div>
+        """,
         unsafe_allow_html=True,
     )
+
     # Initiative selection for comparison
     st.markdown("### 🎯 Initiative Selection")
     selected_initiatives = st.multiselect(

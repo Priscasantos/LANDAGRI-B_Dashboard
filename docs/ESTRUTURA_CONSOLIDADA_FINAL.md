@@ -29,10 +29,10 @@
 dashboard/
 ├── initiative_analysis.py          # 🎯 Initiative analysis orchestrator
 ├── agricultural_analysis.py        # 🌾 Agricultural analysis orchestrator
-├── overview.py                     # 📊 Overview orchestrator
+├── overview.py                     # 🔎 Overview orchestrator
 ├── temporal.py                     # ⏳ Temporal module (existing)
 ├── components/
-│   ├── initiative_analysis/        # 🔍 Initiative analysis components
+│   ├── initiative_analysis/        # 🏞 Initiative analysis components
 │   │   ├── __init__.py             # Simplified exports (no circular imports)
 │   │   ├── comparative_analysis.py # Comparative analysis
 │   │   ├── temporal_analysis.py    # Temporal analysis
@@ -115,7 +115,7 @@ def load_conab_detailed_data():
 
 ### app.py - Initiative Analysis Section
 ```python
-elif selected_category == "🔍 Initiative Analysis":
+elif selected_category == "🏞 Initiative Analysis":
     if selected_page in ["Temporal Analysis", "Comparative Analysis", "Detailed Analysis"]:
         # Use the new consolidated orchestrator
         from dashboard import initiative_analysis
