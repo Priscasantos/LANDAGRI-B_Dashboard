@@ -34,7 +34,7 @@ def render_overview_metrics(df: pd.DataFrame, meta: dict) -> None:
         df: DataFrame with initiatives data
         meta: Metadata dictionary
     """
-    # st.subheader("📊 LULC Initiative Overview")
+    # st.subheader("🔎 LULC Initiative Overview")
 
     # Use modern summary cards component (includes Coverage Distribution and Performance Metrics)
     summary_cards.render(df)
@@ -50,7 +50,7 @@ def render_initiative_details(df: pd.DataFrame, meta: dict, sensors_meta: dict) 
         sensors_meta: Sensor metadata dictionary
     """
     st.markdown("---")
-    st.subheader("🔍 Initiative Details")
+    st.subheader(" Initiative Details")
 
     if df.empty:
         st.warning("No initiative data available.")
@@ -122,7 +122,7 @@ def _render_selected_initiative(
     # Centralized KEY METRICS section
     st.markdown("""
     <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-        <h2 style="font-size: 2rem; font-weight: 700; color: #1e293b; margin: 0;">📊 KEY METRICS</h2>
+        <h2 style="font-size: 2rem; font-weight: 700; color: #1e293b; margin: 0;">KEY METRICS</h2>
     </div>
     """, unsafe_allow_html=True)
     _render_key_metrics_cards(data)
@@ -228,7 +228,7 @@ def _render_key_metrics_cards(data: pd.Series) -> None:
         st.markdown(
             """
         <div class='metric-card resolution'>
-            <div class='metric-icon'>🔬</div>
+            <div class='metric-icon'>🌌</div>
             <div class='metric-label'>Resolution</div>
             <div class='metric-value'>{}</div>
             <div class='metric-help'>Raster Spatial Resolution</div>
@@ -444,18 +444,17 @@ def run() -> None:
     st.markdown(
         """
     <div style="
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-        padding: 2rem;
+        background: linear-gradient(135deg, #636B2F 0%, #636B2F 100%);
+        padding: 1.2rem;
         border-radius: 15px;
         margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
-        border: 1px solid rgba(255,255,255,0.1);
+        border: 1px solid rgba(99,107,47,1);
     ">
-        <h1 style=\"color: white; margin: 0; font-size: 2.5rem; font-weight: 700;\">
-            🌍 Overview
+        <h1 style="color: white; margin: 0; font-size: 2.5rem; font-weight: 700;">
+            🔎 Overview
         </h1>
-        <p style=\"color: #dbeafe; margin: 0.5rem 0 0 0; font-size: 1.2rem;\">
-            General summary and key metrics of LULC initiatives
+        <p style="color: white; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
+            General Summary and Key Metrics of Land Use and Land Cover (LULC) Initiatives.
         </p>
     </div>
     """,

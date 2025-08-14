@@ -8,7 +8,7 @@ import streamlit as st
 def render():
     """Renders CONAB-specific data"""
     
-    st.markdown("### 📊 General Summary")
+    st.markdown("### General Summary")
     
     # Try to load CONAB data
     data = load_conab_data()

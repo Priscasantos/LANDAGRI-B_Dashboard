@@ -271,8 +271,8 @@ def plot_conab_crop_diversity_by_region(conab_data: Dict[str, Any]) -> go.Figure
             'xanchor': 'center',
             'font': {'size': 15, 'color': '#2C3E50', 'family': 'Arial, sans-serif'}
         },
-        xaxis_title="<b>Crop Diversity Index</b>",
-        yaxis_title="<b>Brazilian Region</b>",
+        xaxis_title="Crop Diversity Index",
+        yaxis_title="Brazilian Region",
         height=500,
         barmode='stack',
         showlegend=True,
@@ -282,7 +282,7 @@ def plot_conab_crop_diversity_by_region(conab_data: Dict[str, Any]) -> go.Figure
             y=1,
             xanchor="left",
             x=1.02,
-            title=dict(text="<b>Crop Types</b>", font=dict(size=14)),
+            title=dict(text="Crop Types", font=dict(size=14)),
             font=dict(size=12)
         ),
         plot_bgcolor='rgba(0,0,0,0)',

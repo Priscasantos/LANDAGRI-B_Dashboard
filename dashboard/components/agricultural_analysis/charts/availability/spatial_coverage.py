@@ -184,7 +184,7 @@ def plot_conab_spatial_coverage_by_state(conab_data: Dict[str, Any]) -> go.Figur
         ),
         text=[f"{c:.1f}%" for c in coverages],
         textposition='outside',
-        textfont=dict(size=12, color='#2C3E50', family='Arial Black'),
+        textfont=dict(size=12, color='#2C3E50', family='Arial, sans-serif'),
         hovertemplate="<b>%{y}</b><br>Coverage: %{x:.1f}%<br><extra></extra>",
         name="Coverage"
     ))
@@ -192,12 +192,12 @@ def plot_conab_spatial_coverage_by_state(conab_data: Dict[str, Any]) -> go.Figur
     # Update layout with modern styling
     fig.update_layout(
         title=dict(
-            text="<b>Spatial Coverage by State</b><br><sub>Agricultural data availability by Brazilian state (colored by region)</sub>",
-            font=dict(size=18, color='#2C3E50', family='Arial Black'),
-            x=0.5
+            text="Agricultural data availability by Brazilian States Coverage (states colored by region)",
+            font=dict(size=15, color='#2C3E50', family='Arial, sans-serif'),
+            x=0.0
         ),
-        xaxis_title="<b>Coverage (%)</b>",
-        yaxis_title="<b>State</b>",
+        xaxis_title="Coverage (%)",
+        yaxis_title="State",
         height=600,
         showlegend=False,
         plot_bgcolor='rgba(248,249,250,0.8)',
@@ -208,13 +208,13 @@ def plot_conab_spatial_coverage_by_state(conab_data: Dict[str, Any]) -> go.Figur
             gridwidth=1,
             gridcolor='rgba(176,196,222,0.3)',
             range=[0, max(coverages) * 1.15] if coverages else [0, 100],
-            tickfont=dict(size=11, color='#2C3E50'),
-            title_font=dict(size=14, color='#2C3E50', family='Arial Black')
+            tickfont=dict(size=12, color='#2C3E50'),
+            title_font=dict(size=15, color='#2C3E50', family='Arial, sans-serif')
         ),
         yaxis=dict(
             showgrid=False,
-            tickfont=dict(size=11, color='#2C3E50'),
-            title_font=dict(size=14, color='#2C3E50', family='Arial Black')
+            tickfont=dict(size=12, color='#2C3E50'),
+            title_font=dict(size=15, color='#2C3E50', family='Arial, sans-serif')
         ),
         margin=dict(l=80, r=120, t=80, b=60)
     )
@@ -349,7 +349,7 @@ def plot_conab_spatial_coverage_by_region(conab_data: Dict[str, Any]) -> go.Figu
         ),
         text=[f"{c:.1f}%" for c in coverages],
         textposition='outside',
-        textfont=dict(size=14, color='#2C3E50', family='Arial Black'),
+        textfont=dict(size=14, color='#2C3E50', family='Arial, sans-serif'),
         hovertemplate="<b>%{y} Region</b><br>Coverage: %{x:.1f}%<br><extra></extra>",
         name="Coverage"
     ))
@@ -357,12 +357,12 @@ def plot_conab_spatial_coverage_by_region(conab_data: Dict[str, Any]) -> go.Figu
     # Update layout with modern styling
     fig.update_layout(
         title=dict(
-            text="<b>Spatial Coverage by Region</b><br><sub>Agricultural data availability by Brazilian region</sub>",
-            font=dict(size=20, color='#2C3E50', family='Arial Black'),
-            x=0.5
+            text="Agricultural data availability by Brazilian Regions Coverage",
+            font=dict(size=15, color='#2C3E50', family='Arial, sans-serif'),
+            x=0.0
         ),
-        xaxis_title="<b>Coverage (%)</b>",
-        yaxis_title="<b>Brazilian Region</b>",
+        xaxis_title="Coverage (%)",
+        yaxis_title="Region",
         height=400,
         showlegend=False,
         plot_bgcolor='rgba(0,0,0,0)',

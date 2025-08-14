@@ -11,10 +11,10 @@ Implementação de um sistema de navegação hierárquico moderno para o Dashboa
 
 ## Estrutura do Menu
 
-### 📊 Overview
+### 🔎 Overview
 - **Dashboard Overview**: Visão geral principal do sistema
 
-### 🔍 Initiative Analysis  
+### 🏞 Initiative Analysis  
 - **Temporal Analysis**: Análise temporal das iniciativas
 - **Comparative Analysis**: Comparação entre diferentes iniciativas
 - **Detailed Analysis**: Análise detalhada individual
@@ -63,12 +63,12 @@ modern_menu_styles = {
 ### Estrutura de Dados
 ```python
 menu_structure = {
-    "📊 Overview": {
+    "🔍 Overview": {
         "icon": "house",
         "pages": ["Dashboard Overview"],
         "page_icons": ["speedometer2"]
     },
-    "🔍 Initiative Analysis": {
+    "🏞 Initiative Analysis": {
         "icon": "search", 
         "pages": ["Temporal Analysis", "Comparative Analysis", "Detailed Analysis"],
         "page_icons": ["calendar-event", "bar-chart", "zoom-in"]
@@ -84,10 +84,10 @@ menu_structure = {
 ## Mapeamento de Páginas
 
 ### Páginas Existentes → Nova Estrutura
-- `overview.py` → **📊 Overview** → Dashboard Overview
-- `temporal.py` → **🔍 Initiative Analysis** → Temporal Analysis
-- `comparison_new.py` → **🔍 Initiative Analysis** → Comparative Analysis
-- `detailed.py` → **🔍 Initiative Analysis** → Detailed Analysis
+- `overview.py` → **🔎 Overview** → Dashboard Overview
+- `temporal.py` → **🏞 Initiative Analysis** → Temporal Analysis
+- `comparison_new.py` → **🏞 Initiative Analysis** → Comparative Analysis
+- `detailed.py` → **🏞 Initiative Analysis** → Detailed Analysis
 - `conab.py` → **🌾 Agricultural Analysis** → Crop Calendar / Agriculture Availability
 
 ### Session State Management

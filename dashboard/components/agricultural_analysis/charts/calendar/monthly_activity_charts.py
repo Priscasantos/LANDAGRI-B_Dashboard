@@ -99,7 +99,7 @@ def create_total_activities_per_month_chart(filtered_data: dict) -> Optional[go.
             df,
             x='Month',
             y='Total_Activities',
-            title="📅 Total Agricultural Activities per Month",
+            title="Total Agricultural Activities per Month",
             labels={
                 'Total_Activities': 'Total Number of Activities',
                 'Month': 'Month of Year'

@@ -20,7 +20,7 @@ The Agricultural Data Availability dashboard has been enhanced with a comprehens
 ├── 🌀 Seasonal Patterns (ready for subtabs expansion)
 ├── 🗺 Regional Activity (ready for subtabs expansion)
 ├── 🎚️ Activity Intensity (ready for subtabs expansion)
-└── 📊 Overview
+└── 🔎 Overview
 ```
 
 ---

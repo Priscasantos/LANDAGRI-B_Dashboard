@@ -40,8 +40,45 @@ def render_agriculture_overview_page():
     """Renders Agriculture Overview page with 3 internal tabs"""
     
     # Page header
-    st.markdown("# 🔎 Agriculture Overview")
-    st.markdown("**Integrated Agricultural Data Information from CONAB and IBGE Portals**")
+    st.markdown(
+        """
+    <div style="
+        background: linear-gradient(135deg, #EC9706 0%, #ffb347 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(236,151,6,0.15);
+        border: 1px solid rgba(236,151,6,0.12);
+    ">
+        <h1 style="color: #8d4004; margin: 0; font-size: 2.5rem; font-weight: 700;">
+            🏞 Agricultural Analysis
+        </h1>
+        <p style="color: #8d4004; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
+            Land Use and Land Cover (LULC) Initiatives Mapping Data Analysis applied to Brazilian Agricultural Context.
+        </p>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        """
+    <div style="
+        background: linear-gradient(135deg, rgba(236,151,6,0.06) 0%, rgba(255,180,71,0.04) 100%);
+        padding: 1rem 1.2rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(236,151,6,0.08);
+    ">
+        <h2 style="color: #8d4004; margin: 0; font-size: 1.6rem; font-weight: 600;">
+            🔎 Agriculture Overview
+        </h2>
+        <p style="color: #8d4004; margin: 0.35rem 0 0 0; font-size: 0.95rem; font-style: italic;">
+            Overview of Integrated Agricultural Data Information from National Supply Company (CONAB) and Brazilian Institute of Geography and Statistics (IBGE) Web Portals.
+        </p>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
     
     # Contextual information
     with st.container():
@@ -67,8 +104,8 @@ def render_agriculture_overview_page():
     
     # Tab 1: General Overview with mapped data
     with tab1:
-        st.markdown("## 🗺️ CONAB Mapping General Overview")
-        st.markdown("*Remote sensing-based agricultural data from National Supply Company (CONAB)*")
+        st.markdown("## 🗺️ CONAB Mapping ")
+        st.markdown("*Remote sensing-based agricultural data from National Supply Company (CONAB).*")
         
         # Import and render mapping component
         try:
@@ -98,8 +135,8 @@ def render_agriculture_overview_page():
     
     # Tab 2: CONAB Estimates
     with tab2:
-        st.markdown("## 📊 CONAB Estimates")
-        st.markdown("*Official production, area and productivity estimates*")
+        st.markdown("## 🌿 CONAB Estimates")
+        st.markdown("*Official production, area and productivity estimates.*")
         
         # Import and render CONAB component
         try:
@@ -110,8 +147,8 @@ def render_agriculture_overview_page():
     
     # Tab 3: IBGE Estimates
     with tab3:
-        st.markdown("## 📈 IBGE Estimates")
-        st.markdown("*Official statistics from Municipal Agricultural Production (PAM)*")
+        st.markdown("## 🌿 IBGE Estimates")
+        st.markdown("*Official statistics from Municipal Agricultural Production (PAM).*")
         
         # Import and render IBGE component
         try:
@@ -123,9 +160,45 @@ def render_agriculture_overview_page():
 
 def render_crop_calendar_page():
     """Renders Crop Calendar page with organized charts from #file:calendar"""
-    
-    st.markdown("# 📅 Crop Calendar")
-    st.markdown("**Temporal Analysis of Brazilian Agricultural Calendar**")
+    st.markdown(
+        """
+    <div style="
+        background: linear-gradient(135deg, #EC9706 0%, #ffb347 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(236,151,6,0.15);
+        border: 1px solid rgba(236,151,6,0.12);
+    ">
+        <h1 style="color: #8d4004; margin: 0; font-size: 2.5rem; font-weight: 700;">
+            🏞 Agricultural Analysis
+        </h1>
+        <p style="color: #8d4004; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
+            Land Use and Land Cover (LULC) Initiatives Mapping Data Analysis applied to Brazilian Agricultural Context.
+        </p>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        """
+    <div style="
+        background: linear-gradient(135deg, rgba(236,151,6,0.06) 0%, rgba(255,180,71,0.04) 100%);
+        padding: 1rem 1.2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(236,151,6,0.08);
+    ">
+        <h2 style="color: #8d4004; margin: 0; font-size: 1.6rem; font-weight: 600;">
+            📅 Crop Calendar
+        </h2>
+        <p style="color: #8d4004; margin: 0.35rem 0 0 0; font-size: 0.95rem; font-style: italic;">
+            Agricultural Calendar Analysis for the Main Brazilian Crops. Mapping Data Acquired from National Supply Company (CONAB).
+        </p>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
     
     # Load data
     data = load_calendar_data()
@@ -161,9 +234,9 @@ def render_crop_calendar_page():
     
     # Organizar gráficos em abas baseado nos arquivos em #file:calendar
     cal_tab1, cal_tab2, cal_tab3 = st.tabs([
-        "🗓️ Heatmaps & Matrix",
-        "📈 Timeline & Regional",
-        "🌍 Spatial & Temporal"
+        "🗓️ Calendar Heatmaps",
+        "⏳ Activities Timeline",
+        "𖦹 Spatio-temporal Distribution"
     ])
     
     with cal_tab1:
@@ -179,9 +252,45 @@ def render_crop_calendar_page():
 
 def render_agriculture_availability_page():
     """Renders Agriculture Availability page with new charts organized in tabs"""
-    
-    st.markdown("# ⏳ Agriculture Availability")
-    st.markdown("**Analysis of Agricultural Data Availability and Quality**")
+    st.markdown(
+        """
+    <div style="
+        background: linear-gradient(135deg, #EC9706 0%, #ffb347 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(236,151,6,0.15);
+        border: 1px solid rgba(236,151,6,0.12);
+    ">
+        <h1 style="color: #8d4004; margin: 0; font-size: 2.5rem; font-weight: 700;">
+            🏞 Agricultural Analysis
+        </h1>
+        <p style="color: #8d4004; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
+            Land Use and Land Cover (LULC) Initiatives Mapping Data Analysis applied to Brazilian Agricultural Context.
+        </p>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        """
+    <div style="
+        background: linear-gradient(135deg, rgba(236,151,6,0.06) 0%, rgba(255,180,71,0.04) 100%);
+        padding: 1rem 1.2rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(236,151,6,0.08);
+    ">
+        <h2 style="color: #8d4004; margin: 0; font-size: 1.6rem; font-weight: 600;">
+            ⏳ Agriculture Availability
+        </h2>
+        <p style="color: #8d4004; margin: 0.35rem 0 0 0; font-size: 0.95rem; font-style: italic;">
+            Agricultural Data Availability Analysis from National Supply Company (CONAB).
+        </p>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
     
     # Load data
     data = load_calendar_data()
@@ -300,12 +409,11 @@ def filter_data(data, selected_culture, selected_region):
 # Crop Calendar tab rendering functions
 def render_calendar_heatmaps_tab(data):
     """Renders heatmaps and matrices tab"""
-    st.markdown("#### 🗓️ Heatmaps & Calendar Matrix")
+    st.markdown("#### 🗓️ Calendar Heatmaps")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("##### 🌡️ Enhanced Calendar Heatmap")
         try:
             from dashboard.components.agricultural_analysis.charts.calendar.enhanced_calendar_heatmap import create_enhanced_calendar_heatmap
             create_enhanced_calendar_heatmap(data)
@@ -313,7 +421,6 @@ def render_calendar_heatmaps_tab(data):
             st.warning(f"⚠️ Enhanced Calendar Heatmap: {e}")
     
     with col2:
-        st.markdown("##### 📊 National Calendar Matrix")
         try:
             from dashboard.components.agricultural_analysis.charts.calendar.national_calendar_matrix import create_calendar_heatmap_chart
             fig = create_calendar_heatmap_chart(data)
@@ -347,7 +454,7 @@ def render_monthly_seasonal_tab(data):
                 st.warning(f"⚠️ Seasonality Analysis: {e}")
         
         with col2:
-            st.markdown("##### 📊 Monthly Overview")
+            st.markdown("##### 🔎 Monthly Overview")
             # Placeholder for additional monthly analysis if needed
             st.info("📊 Additional monthly analysis can be added here")
     
@@ -374,13 +481,13 @@ def render_monthly_seasonal_tab(data):
 
 def render_timeline_regional_tab(data):
     """Renders timeline and regional analysis tab with sub-tabs for each chart"""
-    st.markdown("#### 📈 Timeline & Regional Analysis")
+    st.markdown("#### ⏳ Activities Timeline")
     
     # Create sub-tabs to better organize charts
     timeline_tab1, timeline_tab2, timeline_tab3 = st.tabs([
-        "📅 Monthly & Seasonality",
-        "🗓️ Gantt Chart",
-        "🔄 Polar Seasonality"
+        "🗒 Monthly & Seasonality",
+        "☰ Gantt Chart",
+        "○⃝° Polar Seasonality"
     ])
     
     with timeline_tab1:
@@ -388,7 +495,7 @@ def render_timeline_regional_tab(data):
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("##### 📅 Monthly Activity Charts")
+            st.markdown("##### Monthly Activity and Seasonality Analysis")
             try:
                 from dashboard.components.agricultural_analysis.charts.calendar.monthly_activity_charts import create_total_activities_per_month_chart
                 fig = create_total_activities_per_month_chart(data)
@@ -398,7 +505,7 @@ def render_timeline_regional_tab(data):
                 st.warning(f"⚠️ Monthly Activity Charts: {e}")
         
         with col2:
-            st.markdown("##### 🔄 Seasonality Analysis")
+            st.markdown("#####")
             try:
                 from dashboard.components.agricultural_analysis.charts.calendar.seasonality_analysis import create_seasonality_index_chart
                 create_seasonality_index_chart(data, "seasonality_timeline_regional_tab")
@@ -406,7 +513,7 @@ def render_timeline_regional_tab(data):
                 st.warning(f"⚠️ Seasonality Analysis: {e}")
         
         # Interactive Timeline below the two charts above
-        st.markdown("##### ⏰ Interactive Timeline")
+        st.markdown("##### Interactive Agricultural Activity Timeline")
         try:
             from dashboard.components.agricultural_analysis.charts.calendar.interactive_timeline import create_interactive_timeline
             fig = create_interactive_timeline(data)
@@ -418,7 +525,7 @@ def render_timeline_regional_tab(data):
     
     with timeline_tab2:
         # Gantt Chart in its own tab
-        st.markdown("##### 🗓️ Gantt Chart - Crop Cultivation Periods")
+        st.markdown("##### Crop Cultivation Periods in Brazil")
         try:
             from dashboard.components.agricultural_analysis.charts.calendar.crop_gantt_chart import render_crop_gantt_chart
             
@@ -436,8 +543,7 @@ def render_timeline_regional_tab(data):
     
     with timeline_tab3:
         # Polar Seasonality Analysis in its own sub-tab
-        st.markdown("##### 🔄 Polar Seasonality Analysis")
-        st.markdown("**Polar analysis of agricultural activities throughout the year**")
+        st.markdown("##### Polar analysis of agricultural activities throughout the year")
         
         try:
             # Import and use the polar analysis function created earlier
@@ -1058,7 +1164,7 @@ def plot_conab_crop_diversity(conab_data):
 def render_spatial_coverage_tab(data):
     """Renders spatial coverage tab with subtabs by state and region"""
     st.markdown("### 🗺️ Spatial Coverage Analysis")
-    st.markdown("Analysis of agricultural data spatial coverage across Brazilian states and regions.")
+    st.markdown("*Analysis of agricultural data spatial coverage across Brazilian states and regions.*")
     
     # Create subtabs for state and region
     subtab1, subtab2 = st.tabs(["📍 By State", "🌍 By Region"])
@@ -1091,7 +1197,7 @@ def render_spatial_coverage_tab(data):
 def render_crop_diversity_tab(data):
     """Renders crop diversity tab with subtabs by state and region"""
     st.markdown("### 🌱 Crop Diversity Analysis")
-    st.markdown("Analysis of crop type diversity across Brazilian states and regions.")
+    st.markdown("*Analysis of crop type diversity across Brazilian states and regions.*")
     
     # Create subtabs for state and region
     subtab1, subtab2 = st.tabs(["📍 By State", "🌍 By Region"])
@@ -1124,7 +1230,7 @@ def render_crop_diversity_tab(data):
 def render_seasonal_patterns_tab(data):
     """Renders seasonal patterns tab with subtabs by state and region"""
     st.markdown("### 🌀 Seasonal Patterns Analysis")
-    st.markdown("Analysis of seasonal agricultural activity patterns throughout the year.")
+    st.markdown("*Analysis of seasonal agricultural activity patterns throughout the year.*")
     
     # First level: State vs Region
     main_tab1, main_tab2 = st.tabs(["📍 By State", "🌍 By Region"])
@@ -1185,7 +1291,7 @@ def render_seasonal_patterns_tab(data):
 def render_regional_activity_tab(data):
     """Renders regional activity tab with subtabs by state and region"""
     st.markdown("### 🗺 Regional Activity Analysis")
-    st.markdown("Analysis of agricultural activities across Brazilian states and regions.")
+    st.markdown("*Analysis of agricultural activities across Brazilian states and regions.*")
     
     # First level: State vs Region
     main_tab1, main_tab2 = st.tabs(["📍 By State", "🌍 By Region"])
@@ -1258,7 +1364,7 @@ def render_regional_activity_tab(data):
 def render_activity_intensity_tab(data):
     """Renders activity intensity tab with subtabs by state and region"""
     st.markdown("### 🎚️ Activity Intensity Analysis")
-    st.markdown("Analysis of agricultural activity intensity patterns across time and space.")
+    st.markdown("*Analysis of agricultural activity intensity patterns across time and space.*")
     
     # First level: State vs Region
     main_tab1, main_tab2 = st.tabs(["📍 By State", "🌍 By Region"])
@@ -1796,8 +1902,8 @@ def render_conab_availability_analysis_page():
 
 def render_spatial_temporal_tab(data):
     """Renders CONAB spatial and temporal distribution tab"""
-    st.markdown("#### 🌍 Spatial & Temporal Distribution")
-    st.markdown("**Analysis of CONAB Data Spatial and Temporal Distribution**")
+    st.markdown("#### 𖦹 Spatio-temporal Distribution")
+    st.markdown("*Analysis of CONAB Spatial and Temporal Data Distribution.*")
     
     # Load CONAB data
     conab_data = load_conab_data()
@@ -1820,7 +1926,7 @@ def render_spatial_temporal_tab(data):
         
         # Add additional information
         st.markdown("---")
-        st.markdown("### 📋 Chart Information")
+        st.markdown("### Data Summary")
         
         # Information about the data
         initiative_data = conab_data.get("CONAB Crop Monitoring Initiative", {})

@@ -227,7 +227,7 @@ def create_calendar_heatmap_chart(filtered_data: dict) -> Optional[go.Figure]:
 
         # Personaliza layout
         fig.update_layout(
-            title="🔥 Agricultural Calendar Heatmap (🌱 Planting | 🌾 Harvesting)",
+            title="Agricultural Calendar Heatmap (🌱 Planting | 🌾 Harvesting)",
             xaxis_title="Month of Year",
             yaxis_title="Crop and Activity Type",
             height=400 + (len(y_labels) * 15),

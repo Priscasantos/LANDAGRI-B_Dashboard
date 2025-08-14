@@ -210,20 +210,20 @@ st.markdown(
 with st.sidebar:
     # Estrutura hierárquica do menu
     menu_structure = {
-        "📊 Overview": {
-            "icon": "house",
+        "🔎 Overview": {
+            "icon": "arrow-90deg-right",
             "pages": ["Dashboard Overview"],
-            "page_icons": ["speedometer2"],
+            "page_icons": ["binoculars"],
         },
-        "🔍 Initiative Analysis": {
-            "icon": "search",
+        "🏞 Initiative Analysis": {
+            "icon": "arrow-bar-right",
             "pages": ["Temporal Analysis", "Comparative Analysis", "Detailed Analysis"],
-            "page_icons": ["calendar-event", "bar-chart", "zoom-in"],
+            "page_icons": ["stopwatch-fill", "stack", "zoom-in"],
         },
         "🌾 Agricultural Analysis": {
-            "icon": "leaf",
+            "icon": "arrow-return-right",
             "pages": ["Agriculture Overview", "Crop Calendar", "Agriculture Availability"],
-            "page_icons": ["speedometer2", "calendar3", "graph-up-arrow", "bar-chart-line"],
+            "page_icons": ["database-fill-check", "calendar4-week", "columns-gap"],
         },
     }
 
@@ -277,7 +277,7 @@ with st.sidebar:
 
     # Menu principal - categorias
     selected_category = option_menu(
-        menu_title="🛰️ LANDAGRI-B Dashboard",
+        menu_title="🛰️ LANDAGRI-B Dashboard 🛰️",
         options=list(menu_structure.keys()),
         icons=[menu_structure[cat]["icon"] for cat in menu_structure],
         default_index=0,
@@ -381,13 +381,13 @@ with st.sidebar:
     # Removed: sub-comparison filter, now handled directly on the main page if needed.
 
 # --- Page navigation with hierarchical structure ---
-if selected_category == "📊 Overview":
+if selected_category == "🔎 Overview":
     if selected_page == "Dashboard Overview":
         from dashboard import overview
 
         overview.run()
 
-elif selected_category == "🔍 Initiative Analysis":
+elif selected_category == "🏞 Initiative Analysis":
     if selected_page in [
         "Temporal Analysis",
         "Comparative Analysis",
@@ -411,8 +411,8 @@ if not selected_page:
         """
     **Select a category from the sidebar menu to get started:**
 
-    - 📊 **Overview**: Dashboard overview
-    - 🔍 **Initiative Analysis**: Detailed analyses of initiatives (Temporal, Comparative, Detailed)
+    - 🔎 **Overview**: Dashboard overview
+    - 🏞 **Initiative Analysis**: Detailed analyses of initiatives (Temporal, Comparative, Detailed)
     - 🌾 **Agricultural Analysis**: Agricultural analyses (Crop Calendar, Agricultural Availability)
     """
     )

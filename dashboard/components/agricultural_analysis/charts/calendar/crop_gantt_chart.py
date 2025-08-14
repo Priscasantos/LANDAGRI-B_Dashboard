@@ -117,7 +117,7 @@ def render_crop_gantt_chart(filtered_data: Dict[str, Any], region: str = "Brasil
 
     # Optimize layout for clarity and performance
     fig_gantt.update_layout(
-        title=f"Crop Periods - {region}",
+        title=f"",
         xaxis_title="Months of the Year",
         yaxis_title="Crops and Activities",
         xaxis={
@@ -138,7 +138,7 @@ def render_crop_gantt_chart(filtered_data: Dict[str, Any], region: str = "Brasil
     st.plotly_chart(fig_gantt, use_container_width=True, key="crop_gantt_chart")
 
     # Adicionar informações resumidas
-    st.markdown("**📊 Resumo do Diagrama:**")
+    st.markdown("**Data Summary**")
     col1, col2 = st.columns(2)
     with col1:
         plantio_count = len([g for g in gantt_data if 'Planting' in g['Task']])
