@@ -61,21 +61,25 @@ MODERN_COLORS = {
     'coverage_poor': '#E74C3C'       # Poor coverage
 }
 
-# Crop-specific colors
+# Crop-specific colors (enhanced palette with high contrast and accessibility)
+# Palette chosen to provide strong visual distinction between crop types
 CROP_COLORS = {
-    'Cotton': '#8B4513',
-    'Irrigated Rice': '#4682B4', 
-    'Coffee': '#6B4423',
-    'Sugar cane': '#32CD32',
-    'Other winter crops': '#FFD700',
-    'Other summer crops': '#FFA500',
-    'Corn': '#FFFF00',
-    'Soybean': '#8B0000',
-    'Sugar cane mill': '#228B22',
-    'Beans': '#8FBC8F',
-    'Wheat': '#DEB887',
-    'Cassava': '#CD853F',
-    'default': '#808080'
+    'Corn': '#1f77b4',           # Blue
+    'Soybean': '#ff7f0e',        # Orange
+    'Wheat': '#2ca02c',          # Green
+    'Rice': '#d62728',           # Red (for generic rice)
+    'Irrigated Rice': '#d62728', # Red (same family as Rice)
+    'Sugar cane': '#9467bd',     # Purple
+    'Sugar cane mill': '#8c564b',# Brown
+    'Coffee': '#e377c2',         # Pink
+    'Beans': '#7f7f7f',          # Gray
+    'Cassava': '#bcbd22',        # Olive
+    'Cotton': '#17becf',         # Teal/Cyan
+    'Other winter crops': '#aec7e8',
+    'Other summer crops': '#ffbb78',
+    'Millet': '#98df8a',
+    'Sorghum': '#ff9896',
+    'default': '#6c757d'         # Neutral dark gray fallback
 }
 
 def get_state_acronym(state_name: str) -> str:

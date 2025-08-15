@@ -15,13 +15,13 @@ import numpy as np
 
 def plot_activity_intensity_matrix(conab_data: Dict[str, Any]) -> go.Figure:
     """
-    Create a matrix showing activity intensity across months and crops.
+    Create a matrix showing activity intensity across months and states.
     
     Args:
         conab_data: Dictionary containing CONAB crop calendar data
         
     Returns:
-        Plotly figure showing activity intensity matrix
+        Plotly figure showing activity intensity matrix by state and month
     """
     if not conab_data or 'crop_calendar' not in conab_data:
         return go.Figure().update_layout(title="Activity Intensity Matrix (No data available)")
@@ -33,48 +33,64 @@ def plot_activity_intensity_matrix(conab_data: Dict[str, Any]) -> go.Figure:
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
     ]
+    month_abbrev = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     
-    # Prepare crop-month intensity matrix
-    crop_month_intensity = {}
+    # Prepare state-month intensity matrix
+    state_month_intensity = {}
     
     for crop_name, crop_data in crop_calendar.items():
-        crop_month_intensity[crop_name] = {month: 0 for month in month_order}
-        
         for state_info in crop_data:
+            state_code = state_info.get('state_code', '')
             calendar = state_info.get('calendar', {})
             
-            for month, activity in calendar.items():
-                if month in crop_month_intensity[crop_name] and activity and activity.strip():
-                    crop_month_intensity[crop_name][month] += 1
+            if not state_code:
+                continue
+                
+            if state_code not in state_month_intensity:
+                state_month_intensity[state_code] = {month_abbrev[i]: 0 for i in range(12)}
+            
+            # Count activities per month - handle PH (simultaneous planting and harvest)
+            for i, month in enumerate(month_order):
+                activity = calendar.get(month, '')
+                if activity and activity.strip():
+                    activity = activity.strip()
+                    month_short = month_abbrev[i]
+                    # Count each type of activity - PH counts for both P and H
+                    if 'P' in activity:  # Includes both 'P' and 'PH'
+                        state_month_intensity[state_code][month_short] += 1
+                    if 'H' in activity:  # Includes both 'H' and 'PH'
+                        state_month_intensity[state_code][month_short] += 1
     
-    if not crop_month_intensity:
+    if not state_month_intensity:
         return go.Figure().update_layout(title="Activity Intensity Matrix (No data)")
     
     # Convert to matrix format
-    crops = sorted(list(crop_month_intensity.keys()))
+    states = sorted(list(state_month_intensity.keys()))
     
     z_matrix = []
-    for crop in crops:
-        row = [crop_month_intensity[crop][month] for month in month_order]
+    for state in states:
+        row = [state_month_intensity[state][month] for month in month_abbrev]
         z_matrix.append(row)
     
     # Create heatmap
     fig = go.Figure(data=go.Heatmap(
         z=z_matrix,
-        x=month_order,
-        y=crops,
+        x=month_abbrev,
+        y=states,
         colorscale='Viridis',
-        hovertemplate="Crop: %{y}<br>Month: %{x}<br>Intensity: %{z}<extra></extra>",
+        hovertemplate="State: %{y}<br>Month: %{x}<br>Intensity: %{z}<extra></extra>",
         colorbar=dict(title="Activity Intensity")
     ))
     
     fig.update_layout(
-        title="Agricultural Activity Intensity Matrix (Crops vs Months)",
+        title="Agricultural Activity Intensity Matrix (States vs Months)",
         xaxis_title="Month",
-        yaxis_title="Crop Type",
-        height=max(400, len(crops) * 30),
+        yaxis_title="State",
+        height=max(600, len(states) * 25),  # Dynamic height based on number of states
         font=dict(size=10),
-        xaxis=dict(tickangle=45)
+        xaxis=dict(tickangle=45),
+        yaxis=dict(tickfont=dict(size=10))
     )
     
     return fig
@@ -235,13 +251,13 @@ def plot_peak_activity_analysis(conab_data: Dict[str, Any]) -> go.Figure:
 
 def plot_activity_density_map(conab_data: Dict[str, Any]) -> go.Figure:
     """
-    Create a density map showing activity concentration across regions and months.
+    Create a density map showing activity concentration across states and months.
     
     Args:
         conab_data: Dictionary containing CONAB crop calendar data
         
     Returns:
-        Plotly figure showing activity density map
+        Plotly figure showing activity density map by state and month
     """
     if not conab_data or 'crop_calendar' not in conab_data:
         return go.Figure().update_layout(title="Activity Density Map (No data available)")
@@ -253,52 +269,60 @@ def plot_activity_density_map(conab_data: Dict[str, Any]) -> go.Figure:
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
     ]
+    month_abbrev = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     
-    # Prepare region-month density data
-    region_month_density = {}
-    all_regions = set()
+    # Prepare state-month density data
+    state_month_density = {}
+    all_states = set()
     
     for crop_name, crop_data in crop_calendar.items():
         for state_info in crop_data:
-            region = state_info.get('region', 'Unknown')
+            state_code = state_info.get('state_code', '')
             calendar = state_info.get('calendar', {})
             
-            all_regions.add(region)
+            if not state_code:
+                continue
+                
+            all_states.add(state_code)
             
-            if region not in region_month_density:
-                region_month_density[region] = {month: 0 for month in month_order}
+            if state_code not in state_month_density:
+                state_month_density[state_code] = {month_abbrev[i]: 0 for i in range(12)}
             
-            for month, activity in calendar.items():
-                if month in region_month_density[region] and activity and activity.strip():
-                    region_month_density[region][month] += 1
+            # Count activities per month
+            for i, month in enumerate(month_order):
+                activity = calendar.get(month, '')
+                if activity and activity.strip():
+                    month_short = month_abbrev[i]
+                    state_month_density[state_code][month_short] += 1
     
-    if not region_month_density:
+    if not state_month_density:
         return go.Figure().update_layout(title="Activity Density Map (No data)")
     
     # Convert to matrix format
-    regions = sorted(list(all_regions))
+    states = sorted(list(all_states))
     
     z_matrix = []
-    for region in regions:
-        row = [region_month_density[region][month] for month in month_order]
+    for state in states:
+        row = [state_month_density[state][month] for month in month_abbrev]
         z_matrix.append(row)
     
     # Create heatmap with custom colorscale
     fig = go.Figure(data=go.Heatmap(
         z=z_matrix,
-        x=month_order,
-        y=regions,
+        x=month_abbrev,
+        y=states,
         colorscale='Hot',
-        hovertemplate="Region: %{y}<br>Month: %{x}<br>Density: %{z}<extra></extra>",
+        hovertemplate="State: %{y}<br>Month: %{x}<br>Density: %{z}<extra></extra>",
         colorbar=dict(title="Activity Density"),
         showscale=True
     ))
     
     fig.update_layout(
-        title="Agricultural Activity Density Map (Regions vs Months)",
+        title="Agricultural Activity Density Map (States vs Months)",
         xaxis_title="Month",
-        yaxis_title="Region",
-        height=max(400, len(regions) * 50),
+        yaxis_title="State",
+        height=max(400, len(states) * 50),
         font=dict(size=12),
         xaxis=dict(tickangle=45)
     )

@@ -15,13 +15,13 @@ import pandas as pd
 def plot_seasonal_patterns(conab_data: Dict[str, Any]) -> go.Figure:
     """
     Create a seasonal patterns chart showing planting and harvest periods
-    across different seasons and regions.
+    across different seasons by state (horizontal layout).
     
     Args:
         conab_data: Dictionary containing CONAB crop calendar data
         
     Returns:
-        Plotly figure showing seasonal agricultural patterns
+        Plotly figure showing seasonal agricultural patterns by state
     """
     if not conab_data or 'crop_calendar' not in conab_data:
         return go.Figure().update_layout(title="Seasonal Patterns (No data available)")
@@ -37,7 +37,7 @@ def plot_seasonal_patterns(conab_data: Dict[str, Any]) -> go.Figure:
         'Winter': ['June', 'July', 'August']
     }
     
-    # Prepare data for visualization
+    # Prepare data for visualization by state
     pattern_data = []
     
     for crop_name, crop_data in crop_calendar.items():
@@ -47,7 +47,10 @@ def plot_seasonal_patterns(conab_data: Dict[str, Any]) -> go.Figure:
             region = state_info.get('region', '')
             calendar = state_info.get('calendar', {})
             
-            # Count activities by season
+            if not state_code:
+                continue
+            
+            # Count activities by season for each state
             season_activities = {'Spring': 0, 'Summer': 0, 'Autumn': 0, 'Winter': 0}
             
             for month, activity in calendar.items():
@@ -62,7 +65,8 @@ def plot_seasonal_patterns(conab_data: Dict[str, Any]) -> go.Figure:
                 if count > 0:
                     pattern_data.append({
                         'Crop': crop_name,
-                        'State': state_name,
+                        'State': state_code,
+                        'State_Name': state_name,
                         'Region': region,
                         'Season': season,
                         'Activities': count
@@ -74,11 +78,8 @@ def plot_seasonal_patterns(conab_data: Dict[str, Any]) -> go.Figure:
     # Convert to DataFrame
     df = pd.DataFrame(pattern_data)
     
-    # Create sunburst chart for hierarchical view
-    fig = go.Figure()
-    
-    # Aggregate data by region and season
-    region_season_data = df.groupby(['Region', 'Season'])['Activities'].sum().reset_index()
+    # Aggregate data by state and season
+    state_season_data = df.groupby(['State', 'Season'])['Activities'].sum().reset_index()
     
     # Color mapping for seasons
     season_colors = {
@@ -88,26 +89,38 @@ def plot_seasonal_patterns(conab_data: Dict[str, Any]) -> go.Figure:
         'Winter': '#87CEEB'   # Sky blue
     }
     
+    # Get all states and sort them
+    all_states = sorted(state_season_data['State'].unique())
+    
+    # Create horizontal bar chart
+    fig = go.Figure()
+    
     # Create separate traces for each season
     for season in ['Spring', 'Summer', 'Autumn', 'Winter']:
-        season_data = region_season_data[region_season_data['Season'] == season]
+        season_data = state_season_data[state_season_data['Season'] == season]
         
-        if not season_data.empty:
-            fig.add_trace(go.Bar(
-                x=season_data['Region'],
-                y=season_data['Activities'],
-                name=season,
-                marker_color=season_colors[season],
-                hovertemplate=f"<b>{season}</b><br>Region: %{{x}}<br>Activities: %{{y}}<extra></extra>"
-            ))
+        # Create a complete list for all states (including zeros)
+        activities_by_state = []
+        for state in all_states:
+            state_activities = season_data[season_data['State'] == state]['Activities'].sum()
+            activities_by_state.append(state_activities)
+        
+        fig.add_trace(go.Bar(
+            y=all_states,  # Y-axis for horizontal bars
+            x=activities_by_state,  # X-axis for horizontal bars
+            name=season,
+            marker_color=season_colors[season],
+            orientation='h',  # Horizontal orientation
+            hovertemplate=f"<b>{season}</b><br>State: %{{y}}<br>Activities: %{{x}}<extra></extra>"
+        ))
     
-    # Update layout
+    # Update layout for horizontal display
     fig.update_layout(
-        title="Seasonal Agricultural Activity Patterns by Region",
-        xaxis_title="Region",
-        yaxis_title="Number of Activities",
+        title="Seasonal Agricultural Activity Patterns by State",
+        xaxis_title="Number of Activities",
+        yaxis_title="State",
         barmode='stack',
-        height=500,
+        height=800,  # Increased height for better state visibility
         showlegend=True,
         legend=dict(
             orientation="h",
@@ -115,6 +128,10 @@ def plot_seasonal_patterns(conab_data: Dict[str, Any]) -> go.Figure:
             y=1.02,
             xanchor="right",
             x=1
+        ),
+        yaxis=dict(
+            tickfont=dict(size=10),  # Smaller font for better readability
+            automargin=True
         )
     )
     
@@ -123,71 +140,82 @@ def plot_seasonal_patterns(conab_data: Dict[str, Any]) -> go.Figure:
 
 def plot_crop_seasonal_distribution(conab_data: Dict[str, Any]) -> go.Figure:
     """
-    Create a heatmap showing crop distribution across seasons and regions.
+    Create a heatmap showing crop distribution by state and month.
     
     Args:
         conab_data: Dictionary containing CONAB crop calendar data
         
     Returns:
-        Plotly figure showing crop seasonal distribution
+        Plotly figure showing crop distribution by state and month
     """
     if not conab_data or 'crop_calendar' not in conab_data:
-        return go.Figure().update_layout(title="Crop Seasonal Distribution (No data available)")
+        return go.Figure().update_layout(title="Crop Distribution by State and Month (No data available)")
     
     crop_calendar = conab_data['crop_calendar']
     
-    # Define seasons and their months
-    seasons = {
-        'Spring': ['September', 'October', 'November'],
-        'Summer': ['December', 'January', 'February'],
-        'Autumn': ['March', 'April', 'May'],
-        'Winter': ['June', 'July', 'August']
-    }
+    # Month order for proper sorting
+    month_order = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ]
+    month_abbrev = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     
-    # Prepare data matrix: crops vs seasons
-    crop_season_matrix = {}
+    # Prepare data matrix: states vs months with activity counts
+    state_month_matrix = {}
     
     for crop_name, crop_data in crop_calendar.items():
-        crop_season_matrix[crop_name] = {'Spring': 0, 'Summer': 0, 'Autumn': 0, 'Winter': 0}
-        
         for state_info in crop_data:
+            state_code = state_info.get('state_code', '')
             calendar = state_info.get('calendar', {})
             
-            for month, activity in calendar.items():
+            if not state_code:
+                continue
+                
+            if state_code not in state_month_matrix:
+                state_month_matrix[state_code] = {month_abbrev[i]: 0 for i in range(12)}
+            
+            # Count activities per month for this state
+            for i, month in enumerate(month_order):
+                activity = calendar.get(month, '')
                 if activity and activity.strip():
-                    for season, months in seasons.items():
-                        if month in months:
-                            crop_season_matrix[crop_name][season] += 1
-                            break
+                    activity = activity.strip()
+                    month_short = month_abbrev[i]
+                    # Count each type of activity - PH counts for both P and H
+                    if 'P' in activity:  # Includes both 'P' and 'PH'
+                        state_month_matrix[state_code][month_short] += 1
+                    if 'H' in activity:  # Includes both 'H' and 'PH'
+                        state_month_matrix[state_code][month_short] += 1
     
-    if not crop_season_matrix:
-        return go.Figure().update_layout(title="Crop Seasonal Distribution (No data)")
+    if not state_month_matrix:
+        return go.Figure().update_layout(title="Crop Distribution by State and Month (No data)")
     
     # Convert to matrix format for heatmap
-    crops = list(crop_season_matrix.keys())
-    seasons_list = ['Spring', 'Summer', 'Autumn', 'Winter']
+    states = sorted(state_month_matrix.keys())
     
     z_matrix = []
-    for crop in crops:
-        row = [crop_season_matrix[crop][season] for season in seasons_list]
+    for state in states:
+        row = [state_month_matrix[state][month] for month in month_abbrev]
         z_matrix.append(row)
     
     # Create heatmap
     fig = go.Figure(data=go.Heatmap(
         z=z_matrix,
-        x=seasons_list,
-        y=crops,
+        x=month_abbrev,
+        y=states,
         colorscale='Viridis',
-        hovertemplate="Crop: %{y}<br>Season: %{x}<br>Activities: %{z}<extra></extra>",
-        colorbar=dict(title="Number of Activities")
+        hovertemplate="State: %{y}<br>Month: %{x}<br>Activities: %{z}<extra></extra>",
+        colorbar=dict(title="Number of Planting/Harvesting Activities")
     ))
     
     fig.update_layout(
-        title="Crop Activity Distribution Across Seasons",
-        xaxis_title="Season",
-        yaxis_title="Crop Type",
-        height=max(400, len(crops) * 30),
-        font=dict(size=10)
+        title="Crop Activity Distribution by State and Month",
+        xaxis_title="Month",
+        yaxis_title="State",
+        height=max(600, len(states) * 25),  # Dynamic height based on number of states
+        font=dict(size=10),
+        xaxis=dict(tickangle=45),  # Rotate month names for better readability
+        yaxis=dict(tickfont=dict(size=10))
     )
     
     return fig

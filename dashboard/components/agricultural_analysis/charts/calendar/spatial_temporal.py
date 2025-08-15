@@ -23,6 +23,7 @@ def plot_conab_spatial_temporal_distribution(conab_data: Dict[str, Any]) -> go.F
     """
     Create a spatial and temporal distribution chart for CONAB mapping initiatives.
     Shows states/areas coverage over time in a timeline format.
+    Brazil is excluded from the visualization.
     """
     if not conab_data:
         return go.Figure().update_layout(title="CONAB Spatial and Temporal Distribution (No data available)")
@@ -84,26 +85,35 @@ def plot_conab_spatial_temporal_distribution(conab_data: Dict[str, Any]) -> go.F
     # Create figure
     fig = go.Figure()
     
-    # Get unique crop types and assign colors
+    # Get unique crop types and assign improved colors
     crop_types = sorted(df['Crop'].unique())
-    colors = px.colors.qualitative.Set3
-    crop_colors = {crop: colors[i % len(colors)] for i, crop in enumerate(crop_types)}
+    # Enhanced color palette with better contrast and visibility
+    improved_colors = [
+        '#1f77b4',  # Blue
+        '#ff7f0e',  # Orange  
+        '#2ca02c',  # Green
+        '#d62728',  # Red
+        '#9467bd',  # Purple
+        '#8c564b',  # Brown
+        '#e377c2',  # Pink
+        '#7f7f7f',  # Gray
+        '#bcbd22',  # Olive
+        '#17becf',  # Cyan
+        '#aec7e8',  # Light Blue
+        '#ffbb78',  # Light Orange
+        '#98df8a',  # Light Green
+        '#ff9896',  # Light Red
+        '#c5b0d5'   # Light Purple
+    ]
+    crop_colors = {crop: improved_colors[i % len(improved_colors)] for i, crop in enumerate(crop_types)}
     # Track which crops have already been added to legend
     legend_added = set()
     
-    # Filter out Brazil from state processing and sort remaining states
-    states_without_brazil = [s for s in all_states if s != "Brazil"]
-    states_list = sorted(states_without_brazil, reverse=True)  # Reverse order for top-to-bottom alphabetical
-    # Add Brazil at the end (bottom) of the list
-    states_list.append("Brazil")
+    # Remove Brazil entirely from state processing and sort remaining states
+    states_list = sorted([s for s in all_states if s != "Brazil"], reverse=True)  # Reverse order for top-to-bottom alphabetical
 
-
-    
-    # Add traces for each state, colored by crop type (skip Brazil for now)
+    # Add traces for each state, colored by crop type
     for state in states_list:
-        if state == "Brazil":
-            continue  # Skip Brazil, handle it separately
-        
         state_data = df[df['State'] == state]
         if not state_data.empty:
             # Group by crop type for this state
@@ -147,70 +157,44 @@ def plot_conab_spatial_temporal_distribution(conab_data: Dict[str, Any]) -> go.F
                             hovertemplate=f"<b>{state}</b><br>Crop: {crop}<br>Period: {start}-{end}<br><extra></extra>"
                         )
                         fig.add_trace(go.Scatter(**trace_params))
-    
-    # Add Brazil trace at the bottom showing the overall temporal coverage
-    if timeline_data:
-        # Get the overall time range for Brazil
-        all_years = sorted(df['Year'].unique())
-        if all_years:
-            brazil_start = min(all_years)
-            brazil_end = max(all_years)
-            
-            # Add a trace for Brazil spanning the entire period
-            trace_params = validate_plotly_params(
-                x=[brazil_start, brazil_end],
-                y=["Brazil", "Brazil"],
-                mode='lines',
-                line=dict(width=15, color='#808080'),  # Gray color for Brazil
-                name='Sugar cane mill',
-                showlegend=True,
-                hovertemplate=f"<b>Brazil</b><br>Overall Period: {brazil_start}-{brazil_end}<br><extra></extra>"
-            )
-            fig.add_trace(go.Scatter(**trace_params)) 
 
-    # Possível implementação futura para cores por mesorregião:
-    # Seria necessário carregar o dicionário de mesorregiões e mapear cores por estado
-    # Exemplo:
-    # state_color_map = load_mesoregion_colors()
-    # ticktext_colored = create_colored_tick_labels(states_list, state_color_map)
-    
-    # Update layout with type-safe parameters
+    # Update layout with standardized font and presentation (matching seasonal distribution)
     layout_params = validate_plotly_params(
-        title="",
-        xaxis_title="<b>Year</b>",
-        yaxis_title="<b>Region</b>",
-        height=600,
+        title="CONAB Spatial and Temporal Distribution",
+        xaxis_title="Year",
+        yaxis_title="State",
+        height=max(600, len(states_list) * 25),  # Dynamic height like seasonal distribution
+        font=dict(size=10),  # Consistent font size
         showlegend=True,
         legend=dict(
-            orientation="v",
-            yanchor="top",
-            y=1,
-            xanchor="left",
-            x=1.02,
-            title=dict(text="<b>Crop Type</b>")
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1,
+            title=dict(text="Crop Type")
         ),
         yaxis=dict(
             categoryorder='array',
             categoryarray=states_list,
-            showgrid=False,      # Remove o grid do eixo y
-            gridcolor='#E5ECF6',  # Cor do grid do eixo y
-            ticks='outside',     # Adiciona ticks externos no eixo y
-            ticklen=8,            # Tamanho dos ticks (opcional)
-            tickcolor='black',  # Cor dos ticks do eixo y
-            tickfont=dict(size=14),  # Ajuste o tamanho se quiser
-            showline=True,      # Remove a linha externa do eixo y
-            linewidth=0,         # Define espessura da linha como 0
+            showgrid=False,
+            ticks='outside',
+            ticklen=8,
+            tickcolor='black',
+            tickfont=dict(size=10),  # Consistent with seasonal distribution
+            showline=True,
+            linewidth=0,
             zeroline=False
         ),
         xaxis=dict(
-            dtick=1,  # Define o espaçamento entre os ticks do eixo x
-            showgrid=False,      # Remove o grid do eixo x
-            gridcolor='#E5ECF6',  # Cor do grid do eixo x
-            ticks='outside',     # Adiciona ticks externos no eixo x
-            ticklen=8,            # Tamanho dos ticks (opcional)
-            tickcolor='black',  # Cor dos ticks do eixo x
-            showline=True,      # Remove a linha externa do eixo x
-            linewidth=0,         # Define espessura da linha como 0
+            dtick=1,
+            showgrid=False,
+            ticks='outside',
+            ticklen=8,
+            tickcolor='black',
+            tickfont=dict(size=10),  # Consistent font size
+            showline=True,
+            linewidth=0,
             zeroline=False
         )
     )
