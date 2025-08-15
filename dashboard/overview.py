@@ -26,6 +26,50 @@ if scripts_path not in sys.path:
     sys.path.insert(0, scripts_path)
 
 
+def extract_classification_data_for_overview(data: pd.Series, metadata: dict) -> str:
+    """
+    Extrai dados de classificação para o overview, suportando tanto class_legend
+    simples quanto detailed_products complexos (ex: ESRI).
+    
+    Args:
+        data: Série com dados da iniciativa do DataFrame
+        metadata: Metadados da iniciativa
+        
+    Returns:
+        String JSON contendo as classificações para renderização
+    """
+    # Primeiro, verificar se existe detailed_products no metadata
+    if "detailed_products" in metadata:
+        detailed_products = metadata["detailed_products"]
+        if detailed_products and isinstance(detailed_products, list):
+            return json.dumps(detailed_products)
+    
+    # Fallback para class_legend do DataFrame
+    class_legend = data.get("Class_Legend", "")
+    if isinstance(class_legend, str) and class_legend.strip():
+        # Tentar fazer parse como JSON primeiro
+        try:
+            parsed = json.loads(class_legend)
+            return json.dumps(parsed)
+        except json.JSONDecodeError:
+            # Se não for JSON, tratar como string separada por vírgulas
+            if class_legend.strip() != "[]":
+                classes = [cls.strip() for cls in class_legend.split(",")]
+                return json.dumps(classes)
+    
+    # Verificar class_legend no metadata como fallback
+    if "class_legend" in metadata:
+        class_legend_meta = metadata["class_legend"]
+        if isinstance(class_legend_meta, str) and class_legend_meta.strip():
+            classes = [cls.strip() for cls in class_legend_meta.split(",")]
+            return json.dumps(classes)
+        elif isinstance(class_legend_meta, list):
+            return json.dumps(class_legend_meta)
+    
+    # Retornar lista vazia se não houver dados de classificação
+    return json.dumps([])
+
+
 def render_overview_metrics(df: pd.DataFrame, meta: dict) -> None:
     """
     Render key metrics using modern components.
@@ -132,8 +176,9 @@ def _render_selected_initiative(
 
     with col_left:
         st.markdown("### 🏷️ Classification")
-        class_legend = data.get("Class_Legend", "[]")
-        lulc_classes.render_lulc_classes_section(class_legend)
+        # Usar a nova função para extrair dados de classificação
+        classification_json = extract_classification_data_for_overview(data, metadata)
+        lulc_classes.render_lulc_classes_section(classification_json)
 
     with col_right:
         st.markdown("### 🔧 Technical Details")
@@ -161,7 +206,6 @@ def _render_key_metrics_cards(data: pd.Series) -> None:
     except Exception:
         available_years = []
     years_coverage = len(available_years)
-    frequency = str(data.get("Temporal_Frequency", "")).strip()
 
     # Custom CSS for colored cards
     st.markdown(
@@ -342,11 +386,40 @@ def _render_sensor_details(data: pd.Series, sensors_meta: dict) -> None:
 
         # Spectral bands information
         bands = sensor_data.get("spectral_bands", [])
-        if bands:
+        if bands and isinstance(bands, list | dict):
             with st.expander("🌈 Spectral Bands"):
-                bands_df = pd.DataFrame(bands)
-                if not bands_df.empty:
-                    st.dataframe(bands_df, use_container_width=True)
+                try:
+                    # Verificar se bands é uma lista de dicionários ou um dicionário
+                    if isinstance(bands, list) and len(bands) > 0:
+                        # Verificar se todos os itens são dicionários
+                        if all(isinstance(item, dict) for item in bands):
+                            bands_df = pd.DataFrame(bands)
+                            if not bands_df.empty:
+                                st.dataframe(bands_df, use_container_width=True)
+                            else:
+                                st.info("💡 No spectral bands data available.")
+                        else:
+                            # Se não são dicionários, mostrar como lista simples
+                            st.write("**Available Bands:**")
+                            for i, band in enumerate(bands, 1):
+                                st.write(f"• Band {i}: {band}")
+                    elif isinstance(bands, dict):
+                        # Se é um dicionário, tentar criar DataFrame
+                        bands_df = pd.DataFrame([bands])
+                        if not bands_df.empty:
+                            st.dataframe(bands_df, use_container_width=True)
+                        else:
+                            st.info("💡 No spectral bands data available.")
+                    else:
+                        st.info("💡 Spectral bands data format not supported.")
+                except Exception:
+                    # Se ainda assim falhar, mostrar erro de forma amigável
+                    st.warning(f"💡 Could not display spectral bands data: {type(bands).__name__} format.")
+                    st.write(f"**Raw data:** {bands}")
+        elif bands:
+            # Se bands existe mas não é list/dict, mostrar como texto
+            st.markdown("**Spectral Bands:**")
+            st.write(str(bands))
     else:
         # Display basic sensor information
         st.markdown(f"**🛰️ Sensor:** {sensor_info}")

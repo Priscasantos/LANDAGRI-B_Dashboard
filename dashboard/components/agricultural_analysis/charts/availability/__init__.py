@@ -21,7 +21,12 @@ from .regional_activity import (
     plot_regional_activity_comparison,
     plot_state_activity_heatmap,
     plot_regional_crop_specialization,
-    plot_activity_timeline_by_region
+    plot_activity_timeline_by_region,
+    plot_state_activity_comparison,
+    plot_state_crop_distribution,
+    plot_state_activity_timeline,
+    plot_regional_activity_heatmap,
+    plot_regional_activity_timeline
 )
 from .activity_intensity import (
     plot_activity_intensity_matrix,
@@ -48,6 +53,11 @@ __all__ = [
     "plot_state_activity_heatmap",
     "plot_regional_crop_specialization",
     "plot_activity_timeline_by_region",
+    "plot_state_activity_comparison",
+    "plot_state_crop_distribution", 
+    "plot_state_activity_timeline",
+    "plot_regional_activity_heatmap",
+    "plot_regional_activity_timeline",
     "plot_activity_intensity_matrix",
     "plot_peak_activity_analysis",
     "plot_activity_density_map",

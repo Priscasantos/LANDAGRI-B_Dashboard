@@ -520,7 +520,7 @@
         "methodology": "Hybrid",
         "classification_method": "Supervised Random Forest and Deep Learning",
         "number_of_classes": 29,
-        "class_legend": "Forest, Non-Forest Natural Formation, Farming, Non-Vegetated Area, Water And Not Observed, And More",
+        "class_legend": "Forest Formation, Savanna Formation, Mangrove, Restinga Woodland, Wetland, Grassland Formation, Other Non-Forest Natural Formation, Soybean, Sugar Cane, Mosaic of Uses, Other Temporary Crops, Coffee, Citrus, Oil Palm, Other Perennial Crops, Pasture, Mosaic of Agriculture and Pasture, Forest Plantation, Beach and Dune, Urban Area, Mining, Other Non-Vegetated Areas, River Lake and Ocean, Aquaculture, Salt Flat, Glacier, Rocky Outcrop, Other Water Bodies, Not Observed",
         "accuracy": {
             "overall": 93.0,
             "by_collection": [
@@ -538,7 +538,7 @@
             ]
         },
         "number_of_agriculture_classes": 13,
-        "agricultural_capabilities": "Pasture, temporary crops, soybean, sugar cane, rice, cotton, other temporary crops, coffee, citrus, oil palm, other perennial crops, forestry plantation, mosaic of uses",
+        "agricultural_capabilities": "Soybean, sugar cane, coffee, citrus, oil palm, pasture, other temporary crops (corn, cotton, rice, beans, etc.), other perennial crops, forest plantation, mosaic of agriculture and pasture, mosaic of uses, aquaculture",
         "algorithm": "Supervised Random Forest and U-Net Deep learning algorithms applied to Landsat series data",
         "sensors_referenced": [
             { "sensor_key": "LANDSAT_LEGACY_TM_ETM_OLI" }

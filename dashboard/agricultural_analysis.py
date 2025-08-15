@@ -209,34 +209,39 @@ def render_crop_calendar_page():
     
     # Global filters
     st.markdown("### 🎛️ Filters")
+    st.info("💡 **Tip:** Use the multiselect filters below to focus on specific crops and regions. All options are selected by default.")
     col1, col2 = st.columns(2)
     
     with col1:
         cultures = get_available_cultures(data)
-        selected_culture = st.selectbox(
-            "🌾 Select Crop:",
-            options=['All'] + cultures,
-            index=0
+        selected_cultures = st.multiselect(
+            "🌾 Select Crops:",
+            options=cultures,
+            default=cultures  # All crops selected by default
         )
     
     with col2:
         regions = get_available_regions(data)
-        selected_region = st.selectbox(
-            "🗺️ Select Region:",
-            options=['All'] + regions,
-            index=0
+        selected_regions = st.multiselect(
+            "🗺️ Select Regions:",
+            options=regions,
+            default=regions  # All regions selected by default
         )
     
     # Filter data
-    filtered_data = filter_data(data, selected_culture, selected_region)
+    filtered_data = filter_data(data, selected_cultures, selected_regions)
     
     st.divider()
     
     # Organizar gráficos em abas baseado nos arquivos em #file:calendar
-    cal_tab1, cal_tab2, cal_tab3 = st.tabs([
+    cal_tab1, cal_tab2, cal_tab3, cal_tab4, cal_tab5, cal_tab6, cal_tab7 = st.tabs([
         "🗓️ Calendar Heatmaps",
-        "⏳ Activities Timeline",
-        "𖦹 Spatio-temporal Distribution"
+        "⏳ Activities Timeline", 
+        "𖦹 Spatio-temporal Distribution",
+        "🌞 Seasonal Overview",
+        "📊 Crop Distribution", 
+        "📈 Monthly Intensity",
+        "⚡ Activity Intensity"
     ])
     
     with cal_tab1:
@@ -247,6 +252,18 @@ def render_crop_calendar_page():
     
     with cal_tab3:
         render_spatial_temporal_tab(filtered_data)
+    
+    with cal_tab4:
+        render_seasonal_overview_tab(filtered_data)
+    
+    with cal_tab5:
+        render_crop_distribution_tab(filtered_data)
+    
+    with cal_tab6:
+        render_monthly_intensity_tab(filtered_data)
+    
+    with cal_tab7:
+        render_activity_intensity_tab(filtered_data)
 
 
 
@@ -298,41 +315,37 @@ def render_agriculture_availability_page():
     if not data:
         st.warning("⚠️ Data for availability analysis not available")
         return
-    
-    # Global filters (same as crop calendar)
+
+    # Global filters
     st.markdown("### 🎛️ Filters")
     col1, col2 = st.columns(2)
     
     with col1:
         cultures = get_available_cultures(data)
-        selected_culture = st.selectbox(
-            "🌾 Select Crop:",
-            options=['All'] + cultures,
-            index=0,
-            key="avail_culture"
+        selected_cultures = st.multiselect(
+            "🌾 Select Crops:",
+            options=cultures,
+            default=cultures  # All crops selected by default
         )
     
     with col2:
         regions = get_available_regions(data)
-        selected_region = st.selectbox(
-            "🗺️ Select Region:",
-            options=['All'] + regions,
-            index=0,
-            key="avail_region"
+        selected_regions = st.multiselect(
+            "🗺️ Select Regions:",
+            options=regions,
+            default=regions  # All regions selected by default
         )
     
     # Filter data
-    filtered_data = filter_data(data, selected_culture, selected_region)
+    filtered_data = filter_data(data, selected_cultures, selected_regions)
     
     st.divider()
     
     # Organizar gráficos em abas
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    tab1, tab2, tab3 = st.tabs([
         "🗺️ Spatial Coverage",
         "🌱 Crop Diversity",
-        "🌀 Seasonal Patterns",
-        "🗺 Regional Activity",
-        "🎚️ Activity Intensity"
+        "🗺 Regional Activity"
     ])
     
     with tab1:
@@ -340,17 +353,9 @@ def render_agriculture_availability_page():
     
     with tab2:
         render_crop_diversity_tab(filtered_data)
-    
+
     with tab3:
-        render_seasonal_patterns_tab(filtered_data)
-    
-    with tab4:
         render_regional_activity_tab(filtered_data)
-    
-    with tab5:
-        render_activity_intensity_tab(filtered_data)
-
-
 
 # Helper functions
 def load_calendar_data():
@@ -382,22 +387,23 @@ def get_available_regions(data):
     return sorted(list(regions))
 
 
-def filter_data(data, selected_culture, selected_region):
-    """Filters data based on selection"""
+def filter_data(data, selected_cultures, selected_regions):
+    """Filters data based on multiple selections"""
     if not data or 'crop_calendar' not in data:
         return data
     
     filtered_data = {'crop_calendar': {}}
     
     for crop_name, crop_data in data['crop_calendar'].items():
-        # Filter by crop
-        if selected_culture != 'All' and crop_name != selected_culture:
+        # Filter by crops - if no crops selected, show all
+        if selected_cultures and crop_name not in selected_cultures:
             continue
         
-        # Filter by region
+        # Filter by regions - if no regions selected, show all
         filtered_states = []
         for state_info in crop_data:
-            if selected_region == 'All' or state_info.get('region') == selected_region:
+            state_region = state_info.get('region')
+            if not selected_regions or state_region in selected_regions:
                 filtered_states.append(state_info)
         
         if filtered_states:
@@ -435,10 +441,9 @@ def render_monthly_seasonal_tab(data):
     st.markdown("#### 📊 Monthly & Seasonal Analysis")
     
     # Create sub-tabs to better organize charts
-    monthly_tab1, monthly_tab2, monthly_tab3 = st.tabs([
+    monthly_tab1, monthly_tab2 = st.tabs([
         "🔄 Seasonality & Monthly",
-        "🎯 Polar Activity",
-        "🌾 Crop Distribution"
+        "🎯 Polar Activity"
     ])
     
     with monthly_tab1:
@@ -469,14 +474,14 @@ def render_monthly_seasonal_tab(data):
         except Exception as e:
             st.warning(f"⚠️ Polar Activity Chart: {e}")
     
-    with monthly_tab3:
-        # Crop Distribution in its own tab
-        st.markdown("##### 🌾 Crop Distribution")
-        try:
-            from dashboard.components.agricultural_analysis.charts.calendar.crop_distribution_charts import render_crop_distribution_charts
-            render_crop_distribution_charts(data)
-        except Exception as e:
-            st.warning(f"⚠️ Crop Distribution: {e}")
+    # with monthly_tab3:
+    #     # Crop Distribution in its own tab
+    #     st.markdown("##### 🌾 Crop Distribution")
+    #     try:
+    #         from dashboard.components.agricultural_analysis.charts.calendar.crop_distribution_charts import render_crop_distribution_charts
+    #         render_crop_distribution_charts(data)
+    #     except Exception as e:
+    #         st.warning(f"⚠️ Crop Distribution: {e}")
 
 
 def render_timeline_regional_tab(data):
@@ -512,15 +517,15 @@ def render_timeline_regional_tab(data):
             except Exception as e:
                 st.warning(f"⚠️ Seasonality Analysis: {e}")
         
-        # Interactive Timeline below the two charts above
-        st.markdown("##### Interactive Agricultural Activity Timeline")
-        try:
-            from dashboard.components.agricultural_analysis.charts.calendar.interactive_timeline import create_interactive_timeline
-            fig = create_interactive_timeline(data)
-            if fig:
-                st.plotly_chart(fig, use_container_width=True)
-        except Exception as e:
-            st.warning(f"⚠️ Interactive Timeline: {e}")
+        # # Interactive Timeline below the two charts above
+        # st.markdown("##### Interactive Agricultural Activity Timeline")
+        # try:
+        #     from dashboard.components.agricultural_analysis.charts.calendar.interactive_timeline import create_interactive_timeline
+        #     fig = create_interactive_timeline(data)
+        #     if fig:
+        #         st.plotly_chart(fig, use_container_width=True)
+        # except Exception as e:
+        #     st.warning(f"⚠️ Interactive Timeline: {e}")
     
     
     with timeline_tab2:
@@ -1086,6 +1091,8 @@ def plot_conab_spatial_coverage(conab_data):
 def plot_conab_crop_diversity(conab_data):
     """Create a crop type diversity chart showing crop types by state."""
     import plotly.graph_objects as go
+    # Use central crop color palette
+    from dashboard.components.agricultural_analysis.charts.availability.color_palettes import get_crop_color
     
     if not conab_data:
         return go.Figure().update_layout(title="CONAB Crop Diversity (No data available)")
@@ -1110,18 +1117,6 @@ def plot_conab_crop_diversity(conab_data):
     states = sorted(state_crops.keys())
     crop_types = list(set([crop for crops in state_crops.values() for crop in crops]))
     
-    # Color map for different crops
-    color_map = {
-        'Cotton': '#8B4513',
-        'Irrigated Rice': '#4682B4',
-        'Coffee': '#6B4423',
-        'Sugar cane': '#32CD32',
-        'Other winter crops': '#FFD700',
-        'Other summer crops': '#FFA500',
-        'Corn': '#FFFF00',
-        'Soybean': '#8B0000',
-        'Sugar cane mill': '#228B22'
-    }
     
     fig = go.Figure()
     
@@ -1137,7 +1132,7 @@ def plot_conab_crop_diversity(conab_data):
             y=states,
             orientation='h',
             name=crop,
-            marker=dict(color=color_map.get(crop, '#808080')),
+            marker=dict(color=get_crop_color(crop)),
             hovertemplate=f"<b>{crop}</b><br>State: %{{y}}<br>Count: %{{x}}<br><extra></extra>"
         ))
     
@@ -1162,69 +1157,37 @@ def plot_conab_crop_diversity(conab_data):
 
 # Funções de renderização das abas da Agriculture Availability
 def render_spatial_coverage_tab(data):
-    """Renders spatial coverage tab with subtabs by state and region"""
+    """Renders spatial coverage tab with state-level analysis"""
     st.markdown("### 🗺️ Spatial Coverage Analysis")
-    st.markdown("*Analysis of agricultural data spatial coverage across Brazilian states and regions.*")
+    st.markdown("*Analysis of agricultural data spatial coverage across Brazilian states.*")
     
-    # Create subtabs for state and region
-    subtab1, subtab2 = st.tabs(["📍 By State", "🌍 By Region"])
-    
-    with subtab1:
-        try:
-            from dashboard.components.agricultural_analysis.charts.availability import plot_conab_spatial_coverage_by_state
-            fig = plot_conab_spatial_coverage_by_state(data)
-            if fig:
-                st.plotly_chart(fig, use_container_width=True)
-                st.markdown("**Analysis:** Coverage percentage by state, showing data availability across Brazilian states using acronyms.")
-            else:
-                st.warning("⚠️ Unable to generate spatial coverage chart by state")
-        except Exception as e:
-            st.error(f"❌ Error loading spatial coverage chart by state: {e}")
-    
-    with subtab2:
-        try:
-            from dashboard.components.agricultural_analysis.charts.availability import plot_conab_spatial_coverage_by_region
-            fig = plot_conab_spatial_coverage_by_region(data)
-            if fig:
-                st.plotly_chart(fig, use_container_width=True)
-                st.markdown("**Analysis:** Coverage percentage by Brazilian region (North, Northeast, Central-West, Southeast, South).")
-            else:
-                st.warning("⚠️ Unable to generate spatial coverage chart by region")
-        except Exception as e:
-            st.error(f"❌ Error loading spatial coverage chart by region: {e}")
+    try:
+        from dashboard.components.agricultural_analysis.charts.availability import plot_conab_spatial_coverage_by_state
+        fig = plot_conab_spatial_coverage_by_state(data)
+        if fig:
+            st.plotly_chart(fig, use_container_width=True)
+            st.markdown("**Analysis:** Coverage percentage by state, showing data availability across Brazilian states using acronyms.")
+        else:
+            st.warning("⚠️ Unable to generate spatial coverage chart")
+    except Exception as e:
+        st.error(f"❌ Error loading spatial coverage chart: {e}")
 
 
 def render_crop_diversity_tab(data):
-    """Renders crop diversity tab with subtabs by state and region"""
+    """Renders crop diversity tab with state-level analysis"""
     st.markdown("### 🌱 Crop Diversity Analysis")
-    st.markdown("*Analysis of crop type diversity across Brazilian states and regions.*")
+    st.markdown("*Analysis of crop type diversity across Brazilian states.*")
     
-    # Create subtabs for state and region
-    subtab1, subtab2 = st.tabs(["📍 By State", "🌍 By Region"])
-    
-    with subtab1:
-        try:
-            from dashboard.components.agricultural_analysis.charts.availability import plot_conab_crop_diversity_by_state
-            fig = plot_conab_crop_diversity_by_state(data)
-            if fig:
-                st.plotly_chart(fig, use_container_width=True)
-                st.markdown("**Analysis:** Number and types of crops cultivated in each state, showing agricultural diversity by state acronym.")
-            else:
-                st.warning("⚠️ Unable to generate crop diversity chart by state")
-        except Exception as e:
-            st.error(f"❌ Error loading crop diversity chart by state: {e}")
-    
-    with subtab2:
-        try:
-            from dashboard.components.agricultural_analysis.charts.availability import plot_conab_crop_diversity_by_region
-            fig = plot_conab_crop_diversity_by_region(data)
-            if fig:
-                st.plotly_chart(fig, use_container_width=True)
-                st.markdown("**Analysis:** Crop diversity patterns across Brazilian regions, highlighting regional agricultural specialization.")
-            else:
-                st.warning("⚠️ Unable to generate crop diversity chart by region")
-        except Exception as e:
-            st.error(f"❌ Error loading crop diversity chart by region: {e}")
+    try:
+        from dashboard.components.agricultural_analysis.charts.availability import plot_conab_crop_diversity_by_state
+        fig = plot_conab_crop_diversity_by_state(data)
+        if fig:
+            st.plotly_chart(fig, use_container_width=True)
+            st.markdown("**Analysis:** Number and types of crops cultivated in each state, showing agricultural diversity by state acronym.")
+        else:
+            st.warning("⚠️ Unable to generate crop diversity chart")
+    except Exception as e:
+        st.error(f"❌ Error loading crop diversity chart: {e}")
 
 
 def render_seasonal_patterns_tab(data):
@@ -1237,48 +1200,15 @@ def render_seasonal_patterns_tab(data):
     
     with main_tab1:
         st.markdown("**Seasonal patterns at state level**")
-        # Sub-tabs for different seasonal pattern visualizations by state
-        seasonal_tab1, seasonal_tab2, seasonal_tab3 = st.tabs([
-            "🌞 Seasonal Overview",
-            "📊 Crop Distribution", 
-            "📈 Monthly Intensity"
-        ])
+        st.info("ℹ️ **Seasonal analysis has been moved to the Crop Calendar page**")
+        st.markdown("""
+        The following sections are now available in the **Crop Calendar** page:
+        - 🌞 **Seasonal Overview** - Overview of seasonal planting and harvest patterns
+        - 📊 **Crop Distribution** - Seasonal distribution heatmaps by state
+        - 📈 **Monthly Intensity** - Monthly activity intensity analysis
         
-        with seasonal_tab1:
-            try:
-                from dashboard.components.agricultural_analysis.charts.availability import plot_seasonal_patterns
-                fig = plot_seasonal_patterns(data)
-                if fig:
-                    st.plotly_chart(fig, use_container_width=True)
-                    st.markdown("**Analysis:** Overview of seasonal planting and harvest patterns across states.")
-                else:
-                    st.warning("⚠️ Unable to generate seasonal patterns chart")
-            except Exception as e:
-                st.error(f"❌ Error loading seasonal patterns chart: {e}")
-        
-        with seasonal_tab2:
-            try:
-                from dashboard.components.agricultural_analysis.charts.availability import plot_crop_seasonal_distribution
-                fig = plot_crop_seasonal_distribution(data)
-                if fig:
-                    st.plotly_chart(fig, use_container_width=True)
-                    st.markdown("**Analysis:** Seasonal distribution heatmap showing when different crops are active in each state.")
-                else:
-                    st.warning("⚠️ Unable to generate seasonal distribution heatmap")
-            except Exception as e:
-                st.error(f"❌ Error loading seasonal distribution heatmap: {e}")
-        
-        with seasonal_tab3:
-            try:
-                from dashboard.components.agricultural_analysis.charts.availability import plot_monthly_activity_intensity
-                fig = plot_monthly_activity_intensity(data)
-                if fig:
-                    st.plotly_chart(fig, use_container_width=True)
-                    st.markdown("**Analysis:** Monthly activity intensity showing peak agricultural periods by state.")
-                else:
-                    st.warning("⚠️ Unable to generate monthly intensity chart")
-            except Exception as e:
-                st.error(f"❌ Error loading monthly intensity chart: {e}")
+        Navigate to the **Crop Calendar** page using the sidebar menu to access these charts.
+        """)
     
     with main_tab2:
         st.markdown("**Seasonal patterns at regional level**")
@@ -1289,148 +1219,101 @@ def render_seasonal_patterns_tab(data):
 
 
 def render_regional_activity_tab(data):
-    """Renders regional activity tab with subtabs by state and region"""
+    """Renders regional activity tab with state-level analysis (region filtering handled by global filters)"""
     st.markdown("### 🗺 Regional Activity Analysis")
-    st.markdown("*Analysis of agricultural activities across Brazilian states and regions.*")
+    st.markdown("*Analysis of agricultural activities across Brazilian states. Use region filter above to focus on specific regions.*")
     
-    # First level: State vs Region
-    main_tab1, main_tab2 = st.tabs(["📍 By State", "🌍 By Region"])
+    # Direct state-level analyses (no more By State/By Region tabs)
+    state_tab1, state_tab2, state_tab3= st.tabs([
+        "📊 Activity Comparison",
+        "🗺️ Activity Heatmap", 
+        "🌾 Crop Distribution"
+    ])
     
-    with main_tab1:
-        st.markdown("**Regional activity analysis at state level**")
-        # Sub-tabs for different regional analyses by state
-        regional_tab1, regional_tab2, regional_tab3, regional_tab4 = st.tabs([
-            "📊 State Comparison",
-            "🗺️ Activity Heatmap",
-            "🌾 Crop Specialization",
-            "⏰ Activity Timeline"
-        ])
-        
-        with regional_tab1:
+    with state_tab1:
             try:
-                from dashboard.components.agricultural_analysis.charts.availability import plot_regional_activity_comparison
-                fig = plot_regional_activity_comparison(data)
+                from dashboard.components.agricultural_analysis.charts.availability import plot_state_activity_comparison
+                fig = plot_state_activity_comparison(data)
                 if fig:
                     st.plotly_chart(fig, use_container_width=True)
-                    st.markdown("**Analysis:** Comparison of agricultural activity levels between states.")
+                    st.markdown("**Analysis:** Comparison of planting and harvesting activities between Brazilian states.")
                 else:
-                    st.warning("⚠️ Unable to generate state comparison chart")
+                    st.warning("⚠️ Unable to generate activity comparison chart")
             except Exception as e:
-                st.error(f"❌ Error loading state comparison chart: {e}")
-        
-        with regional_tab2:
+                st.error(f"❌ Error loading state activity comparison chart: {e}")
+    
+    with state_tab2:
             try:
                 from dashboard.components.agricultural_analysis.charts.availability import plot_state_activity_heatmap
                 fig = plot_state_activity_heatmap(data)
                 if fig:
                     st.plotly_chart(fig, use_container_width=True)
-                    st.markdown("**Analysis:** Heatmap showing activity intensity across states and months.")
+                    st.markdown("**Analysis:** Heatmap showing planting and harvesting activity intensity across Brazilian states.")
                 else:
-                    st.warning("⚠️ Unable to generate state activity heatmap")
+                    st.warning("⚠️ Unable to generate activity heatmap")
             except Exception as e:
                 st.error(f"❌ Error loading state activity heatmap: {e}")
+    
+    with state_tab3:
+            try:
+                from dashboard.components.agricultural_analysis.charts.availability import plot_state_crop_distribution
+                fig = plot_state_crop_distribution(data)
+                if fig:
+                    st.plotly_chart(fig, use_container_width=True)
+                    st.markdown("**Analysis:** Distribution of crop types and their planting/harvesting activities across Brazilian states.")
+                else:
+                    st.warning("⚠️ Unable to generate crop distribution chart")
+            except Exception as e:
+                st.error(f"❌ Error loading crop distribution chart: {e}")
+    
+
+
+
+def render_overview_tab(data):
+        st.markdown("**Activity analysis at Brazilian region level**")
+        # Sub-tabs for different regional analyses
+        region_tab1, region_tab2, region_tab3 = st.tabs([
+            "� Regional Comparison",
+            "🗺️ Regional Heatmap",
+            "🌾 Regional Specialization", 
+            "⏰ Regional Timeline"
+        ])
         
-        with regional_tab3:
+        with region_tab1:
+            try:
+                from dashboard.components.agricultural_analysis.charts.availability import plot_regional_activity_comparison
+                fig = plot_regional_activity_comparison(data)
+                if fig:
+                    st.plotly_chart(fig, use_container_width=True)
+                    st.markdown("**Analysis:** Comparison of agricultural activity levels between Brazilian regions (North, Northeast, Central-West, Southeast, South).")
+                else:
+                    st.warning("⚠️ Unable to generate regional comparison chart")
+            except Exception as e:
+                st.error(f"❌ Error loading regional comparison chart: {e}")
+        
+        with region_tab2:
+            try:
+                from dashboard.components.agricultural_analysis.charts.availability import plot_regional_activity_heatmap
+                fig = plot_regional_activity_heatmap(data)
+                if fig:
+                    st.plotly_chart(fig, use_container_width=True)
+                    st.markdown("**Analysis:** Heatmap showing activity intensity across Brazilian regions and months.")
+                else:
+                    st.warning("⚠️ Unable to generate regional activity heatmap")
+            except Exception as e:
+                st.error(f"❌ Error loading regional activity heatmap: {e}")
+        
+        with region_tab3:
             try:
                 from dashboard.components.agricultural_analysis.charts.availability import plot_regional_crop_specialization
                 fig = plot_regional_crop_specialization(data)
                 if fig:
                     st.plotly_chart(fig, use_container_width=True)
-                    st.markdown("**Analysis:** Crop specialization patterns showing which crops dominate in each state.")
+                    st.markdown("**Analysis:** Crop specialization patterns showing which crops dominate in each Brazilian region.")
                 else:
-                    st.warning("⚠️ Unable to generate crop specialization chart")
+                    st.warning("⚠️ Unable to generate regional crop specialization chart")
             except Exception as e:
-                st.error(f"❌ Error loading crop specialization chart: {e}")
-        
-        with regional_tab4:
-            try:
-                from dashboard.components.agricultural_analysis.charts.availability import plot_activity_timeline_by_region
-                fig = plot_activity_timeline_by_region(data)
-                if fig:
-                    st.plotly_chart(fig, use_container_width=True)
-                    st.markdown("**Analysis:** Timeline of agricultural activities showing seasonal progression by state.")
-                else:
-                    st.warning("⚠️ Unable to generate activity timeline")
-            except Exception as e:
-                st.error(f"❌ Error loading activity timeline: {e}")
-    
-    with main_tab2:
-        st.markdown("**Regional activity analysis at Brazilian region level**")
-        st.info("🔄 Regional-level activity analysis - aggregating state data by Brazilian regions.")
-        # For region, we can reuse the same charts but with data aggregated by region
-        st.markdown("*Regional activity analysis will show patterns for North, Northeast, Central-West, Southeast, and South regions.*")
-
-
-def render_activity_intensity_tab(data):
-    """Renders activity intensity tab with subtabs by state and region"""
-    st.markdown("### 🎚️ Activity Intensity Analysis")
-    st.markdown("*Analysis of agricultural activity intensity patterns across time and space.*")
-    
-    # First level: State vs Region
-    main_tab1, main_tab2 = st.tabs(["📍 By State", "🌍 By Region"])
-    
-    with main_tab1:
-        st.markdown("**Activity intensity analysis at state level**")
-        # Sub-tabs for different intensity analyses by state
-        intensity_tab1, intensity_tab2, intensity_tab3, intensity_tab4 = st.tabs([
-            "🗓️ Intensity Matrix",
-            "⚡ Peak Activity",
-            "🎯 Density Map",
-            "📊 Concentration Index"
-        ])
-        
-        with intensity_tab1:
-            try:
-                from dashboard.components.agricultural_analysis.charts.availability import plot_activity_intensity_matrix
-                fig = plot_activity_intensity_matrix(data)
-                if fig:
-                    st.plotly_chart(fig, use_container_width=True)
-                    st.markdown("**Analysis:** Matrix showing activity intensity across crops and months at state level.")
-                else:
-                    st.warning("⚠️ Unable to generate intensity matrix")
-            except Exception as e:
-                st.error(f"❌ Error loading intensity matrix: {e}")
-        
-        with intensity_tab2:
-            try:
-                from dashboard.components.agricultural_analysis.charts.availability import plot_peak_activity_analysis
-                fig = plot_peak_activity_analysis(data)
-                if fig:
-                    st.plotly_chart(fig, use_container_width=True)
-                    st.markdown("**Analysis:** Peak activity periods throughout the year showing planting and harvest peaks by state.")
-                else:
-                    st.warning("⚠️ Unable to generate peak activity analysis")
-            except Exception as e:
-                st.error(f"❌ Error loading peak activity analysis: {e}")
-        
-        with intensity_tab3:
-            try:
-                from dashboard.components.agricultural_analysis.charts.availability import plot_activity_density_map
-                fig = plot_activity_density_map(data)
-                if fig:
-                    st.plotly_chart(fig, use_container_width=True)
-                    st.markdown("**Analysis:** Density map showing activity concentration across states and months.")
-                else:
-                    st.warning("⚠️ Unable to generate density map")
-            except Exception as e:
-                st.error(f"❌ Error loading density map: {e}")
-        
-        with intensity_tab4:
-            try:
-                from dashboard.components.agricultural_analysis.charts.availability import plot_activity_concentration_index
-                fig = plot_activity_concentration_index(data)
-                if fig:
-                    st.plotly_chart(fig, use_container_width=True)
-                    st.markdown("**Analysis:** Concentration index showing temporal distribution of activities by crop and state.")
-                else:
-                    st.warning("⚠️ Unable to generate concentration index")
-            except Exception as e:
-                st.error(f"❌ Error loading concentration index: {e}")
-    
-    with main_tab2:
-        st.markdown("**Activity intensity analysis at regional level**")
-        st.info("🔄 Regional-level intensity analysis - aggregating state data by Brazilian regions.")
-        st.markdown("*Regional intensity analysis will show activity patterns for North, Northeast, Central-West, Southeast, and South regions.*")
+                st.error(f"❌ Error loading regional crop specialization chart: {e}")
 
 
 def render_overview_tab(data):
@@ -2073,6 +1956,148 @@ def create_mock_conab_data():
             }
         }
     }
+
+
+def render_seasonal_overview_tab(data):
+    """Renders seasonal overview tab for crop calendar"""
+    st.markdown("### 🌞 Seasonal Overview")
+    st.markdown("*Overview of seasonal planting and harvest patterns by state.*")
+    
+    try:
+        from dashboard.components.agricultural_analysis.charts.availability import plot_seasonal_patterns
+        fig = plot_seasonal_patterns(data)
+        if fig:
+            st.plotly_chart(fig, use_container_width=True)
+            st.markdown("**Analysis:** Overview of seasonal planting and harvest patterns across Brazilian states (horizontal display).")
+        else:
+            st.warning("⚠️ Unable to generate seasonal patterns chart")
+    except Exception as e:
+        st.error(f"❌ Error loading seasonal patterns chart: {e}")
+
+
+def render_crop_distribution_tab(data):
+    """Renders crop distribution tab for crop calendar"""
+    st.markdown("### 📊 Crop Distribution")
+    st.markdown("*Distribution of crop types and their planting/harvesting activities by state.*")
+    
+    try:
+        from dashboard.components.agricultural_analysis.charts.availability import plot_crop_seasonal_distribution
+        fig = plot_crop_seasonal_distribution(data)
+        if fig:
+            st.plotly_chart(fig, use_container_width=True)
+            st.markdown("**Analysis:** Distribution of crop types and their planting/harvesting activities across Brazilian states.")
+        else:
+            st.warning("⚠️ Unable to generate crop distribution chart by state")
+    except Exception as e:
+        st.error(f"❌ Error loading crop distribution chart: {e}")
+
+
+def render_monthly_intensity_tab(data):
+    """Renders monthly intensity tab for crop calendar"""
+    st.markdown("### 📈 Monthly Intensity")
+    st.markdown("*Monthly activity intensity showing peak agricultural periods by state.*")
+    
+    try:
+        from dashboard.components.agricultural_analysis.charts.availability import plot_monthly_activity_intensity
+        fig = plot_monthly_activity_intensity(data)
+        if fig:
+            st.plotly_chart(fig, use_container_width=True)
+            st.markdown("**Analysis:** Monthly activity intensity showing peak agricultural periods by state.")
+        else:
+            st.warning("⚠️ Unable to generate monthly intensity chart")
+    except Exception as e:
+        st.error(f"❌ Error loading monthly intensity chart: {e}")
+
+
+def render_activity_intensity_tab(data):
+    """Renders activity intensity analysis tab for crop calendar"""
+    st.markdown("### ⚡ Activity Intensity Analysis")
+    st.markdown("*Advanced analysis of agricultural activity intensity at state level with specialized visualizations.*")
+    
+    # Sub-tabs for different intensity analysis views
+    intensity_tab1, intensity_tab2, intensity_tab3, intensity_tab4 = st.tabs([
+        "🗓️ Intensity Matrix",
+        "⚡ Peak Activity",
+        "🎯 Density Map", 
+        "📊 Concentration Index"
+    ])
+    
+    with intensity_tab1:
+        st.markdown("#### 🗓️ Intensity Matrix")
+        st.markdown("*Matrix visualization of agricultural activity intensity by state and month.*")
+        
+        try:
+            from dashboard.components.agricultural_analysis.charts.availability import plot_state_activity_heatmap
+            fig = plot_state_activity_heatmap(data)
+            if fig:
+                st.plotly_chart(fig, use_container_width=True)
+                st.markdown("**Analysis:** Comprehensive matrix showing activity intensity patterns across all Brazilian states and months.")
+            else:
+                st.warning("⚠️ Unable to generate intensity matrix")
+        except Exception as e:
+            st.error(f"❌ Error loading intensity matrix: {e}")
+    
+    with intensity_tab2:
+        st.markdown("#### ⚡ Peak Activity")
+        st.markdown("*Identification and analysis of peak agricultural activity periods by state.*")
+        
+        try:
+            from dashboard.components.agricultural_analysis.charts.availability import plot_state_activity_timeline
+            fig = plot_state_activity_timeline(data)
+            if fig:
+                st.plotly_chart(fig, use_container_width=True)
+                st.markdown("**Analysis:** Timeline showing peak activity periods and seasonal patterns for agricultural activities by state.")
+            else:
+                st.warning("⚠️ Unable to generate peak activity chart")
+        except Exception as e:
+            st.error(f"❌ Error loading peak activity chart: {e}")
+    
+    with intensity_tab3:
+        st.markdown("#### 🎯 Density Map")
+        st.markdown("*Spatial density analysis of agricultural activities across Brazilian territory.*")
+        
+        try:
+            from dashboard.components.agricultural_analysis.charts.availability import plot_regional_activity_heatmap
+            fig = plot_regional_activity_heatmap(data)
+            if fig:
+                st.plotly_chart(fig, use_container_width=True)
+                st.markdown("**Analysis:** Regional density map showing geographical concentration of agricultural activities.")
+            else:
+                st.warning("⚠️ Unable to generate density map")
+        except Exception as e:
+            st.error(f"❌ Error loading density map: {e}")
+    
+    with intensity_tab4:
+        st.markdown("#### 📊 Concentration Index")
+        st.markdown("*Statistical analysis of activity concentration and distribution patterns.*")
+        
+        try:
+            from dashboard.components.agricultural_analysis.charts.availability import plot_state_activity_comparison
+            fig = plot_state_activity_comparison(data)
+            if fig:
+                st.plotly_chart(fig, use_container_width=True)
+                st.markdown("**Analysis:** Concentration index showing relative activity levels and distribution patterns across states.")
+                
+                # Additional metrics display
+                st.markdown("##### 📈 Key Metrics")
+                col1, col2, col3, col4 = st.columns(4)
+                
+                with col1:
+                    st.metric("Total States", "27", help="All Brazilian states included in analysis")
+                
+                with col2:
+                    st.metric("Peak Season", "Mar-May", help="Months with highest activity concentration")
+                
+                with col3:
+                    st.metric("Activity Range", "High Variation", help="Significant differences between states")
+                
+                with col4:
+                    st.metric("Coverage", "National", help="Complete national territory coverage")
+                    
+            else:
+                st.warning("⚠️ Unable to generate concentration index")
+        except Exception as e:
+            st.error(f"❌ Error loading concentration index: {e}")
 
 
 # Ensure functions are available when imported

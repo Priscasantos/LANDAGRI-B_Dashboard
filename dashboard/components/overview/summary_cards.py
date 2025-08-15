@@ -79,6 +79,8 @@ def render(df: pd.DataFrame) -> None:
     avg_accuracy = 0
     avg_resolution = 0
     total_classes = 0
+    min_classes = 0
+    max_classes = 0
     temporal_coverage = 0
 
     if "Accuracy (%)" in df.columns:
@@ -91,17 +93,28 @@ def render(df: pd.DataFrame) -> None:
 
     if "Classes" in df.columns:
         classes_values = pd.to_numeric(df["Classes"], errors="coerce").dropna()
-        total_classes = classes_values.sum() if not classes_values.empty else 0
-    elif "Number_of_Classes" in df.columns:
-        classes_values = pd.to_numeric(
+        classes_values = pd.to_numeric(df["Classes"], errors="coerce").dropna()
+        if not classes_values.empty:
+            total_classes = int(classes_values.sum())
+            min_classes = int(classes_values.min())
+            max_classes = int(classes_values.max())
+        elif "Number_of_Classes" in df.columns:
+            classes_values = pd.to_numeric(
             df["Number_of_Classes"], errors="coerce"
         ).dropna()
-        total_classes = classes_values.sum() if not classes_values.empty else 0
+            max_classes = int(classes_values.max())
+        else:
+            total_classes = 0
+            min_classes = 0
+            max_classes = 0
 
     # Calcular cobertura temporal (anos únicos)
     year_columns = [col for col in df.columns if col.isdigit() and len(col) == 4]
+    print(year_columns)
     if year_columns:
         temporal_coverage = len(year_columns)
+    else:
+        temporal_coverage = 40
 
     # Renderizar seção de métricas principais
     st.markdown("#### LULC Initiative Metrics")
@@ -190,8 +203,8 @@ def render(df: pd.DataFrame) -> None:
         st.markdown(
             f"""
         <div class="modern-metric-card">
-            <div class="metric-value">🏷️ {total_classes:.0f}</div>
-            <div class="metric-label">Total Classes</div>
+            <div class="metric-value">🏷️ {min_classes:.0f} - {max_classes:.0f}</div>
+            <div class="metric-label">Minimum and Maximum Classes</div>
             <div class="metric-sublabel">Classification categories</div>
         </div>
         """,
