@@ -17,7 +17,7 @@ def render_gaps_analysis(temporal_df: pd.DataFrame) -> None:
         temporal_df: DataFrame with temporal data of initiatives
     """
     st.markdown("### ⚠️ Temporal Gaps Analysis")
-    st.markdown("*Identifying data availability gaps in LULC initiatives*")
+    st.markdown("*Identifying data availability gaps in LULC initiatives.*")
     
     if temporal_df.empty:
         st.warning("❌ No temporal data available for gaps analysis.")
@@ -206,8 +206,8 @@ def plot_gaps_bar_chart(gaps_data: pd.DataFrame) -> go.Figure:
     fig.update_layout(
         title={
             'text': "Largest Consecutive Gaps by Initiative",
-            'x': 0.5,
-            'xanchor': 'center'
+            'x': 0.0,
+            'xanchor': 'left'
         },
         height=500,
         showlegend=False,
@@ -243,16 +243,18 @@ def plot_gaps_bar_chart(gaps_data: pd.DataFrame) -> go.Figure:
             annotation_position="top right"
         )
     
-    # Adicionar anotação explicativa das cores
+    # Adicionar anotação explicativa fora da área do gráfico (embaixo)
     fig.add_annotation(
         text="🟢 No gaps | 🟡 Small gaps (≤2y) | 🟠 Medium gaps (3-5y) | 🔴 Large gaps (>5y)",
         xref="paper", yref="paper",
-        x=0.5, y=-0.15,
+        x=0.5, y=-0.35,  # y negativo coloca a anotação fora (abaixo) do plot
         showarrow=False,
-        font={"size": 10, "color": "gray"},
+        font={"size": 11, "color": "gray"},
         align="center"
     )
-    
+
+    # Aumentar margem inferior para acomodar a anotação fora do gráfico
+    fig.update_layout(margin={"b": 200})
     return fig
 
 

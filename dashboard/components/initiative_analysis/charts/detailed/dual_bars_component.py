@@ -21,7 +21,7 @@ from dashboard.components.shared.chart_core import (
 from dashboard.components.shared.nomenclature import clean_column_names
 
 
-def render_dual_bars_tab(filtered_df: pd.DataFrame) -> None:
+def render_bars_tab(filtered_df: pd.DataFrame) -> None:
     """
     Render dual bars chart tab for detailed comparison.
     
@@ -39,9 +39,12 @@ def render_dual_bars_tab(filtered_df: pd.DataFrame) -> None:
     # Controls for 3 metrics
     st.markdown("**Select up to 3 metrics for comparison:**")
     col1, col2, col3 = st.columns(3)
-    
-    available_metrics = get_numeric_columns(filtered_df)
-    
+
+
+
+    available_metrics = [col for col in filtered_df.columns if pd.api.types.is_numeric_dtype(filtered_df[col])]
+    print(f"Available metrics: {available_metrics}")
+
     with col1:
         metric1 = st.selectbox(
             "First metric:",

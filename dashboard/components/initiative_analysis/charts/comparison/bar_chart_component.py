@@ -21,12 +21,20 @@ def render_bar_chart_tab(filtered_df: pd.DataFrame) -> None:
     Args:
         filtered_df: DataFrame filtrado com dados das iniciativas
     """
-    st.markdown("#### 📊 Bar Chart - Comparação de Iniciativas")
     if filtered_df.empty:
         st.warning("⚠️ Nenhum dado disponível para bar chart.")
         return
     fig = create_bar_chart(filtered_df)
     if fig:
+        # Garantir que o título esteja definido como atributo intrínseco da figura
+        title_text = None
+        try:
+            title_text = fig.layout.title.text
+        except Exception:
+            title_text = None
+        if not title_text:
+            title_text = "Comparative Accuracy of Initiatives"
+        fig.update_layout(title_text=title_text, title_x=0.0)  # centraliza título
         st.plotly_chart(fig, use_container_width=True, key="comparison_bar_chart")
     else:
         st.error("❌ Erro ao gerar bar chart.")
@@ -49,8 +57,10 @@ def create_bar_chart(filtered_df: pd.DataFrame) -> px.bar:
             x="Display_Name",
             y="Accuracy (%)",
             color="Display_Name",
-            title="Acurácia por Iniciativa",
+            title="Accuracy by Initiative",
+            labels={"Display_Name": "Initiative", "Accuracy (%)": "Accuracy (%)"},
+            hover_data=["Accuracy (%)"]
         )
-        apply_standard_layout(fig, xaxis_title="Iniciativa", yaxis_title="Acurácia (%)")
+        apply_standard_layout(fig, xaxis_title="Initiative", yaxis_title="Accuracy (%)")
         return fig
     return px.bar()

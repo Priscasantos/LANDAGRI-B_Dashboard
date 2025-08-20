@@ -416,7 +416,7 @@ def filter_data(data, selected_cultures, selected_regions):
 def render_calendar_heatmaps_tab(data):
     """Renders heatmaps and matrices tab"""
     st.markdown("#### 🗓️ Calendar Heatmaps")
-    
+    st.markdown("*Agricultural Calendar Activities Heatmaps.*")
     col1, col2 = st.columns(2)
     
     with col1:
@@ -487,6 +487,7 @@ def render_monthly_seasonal_tab(data):
 def render_timeline_regional_tab(data):
     """Renders timeline and regional analysis tab with sub-tabs for each chart"""
     st.markdown("#### ⏳ Activities Timeline")
+    st.markdown("*Timeline of Monthly and Seasonal Crop Activities.*")
     
     # Create sub-tabs to better organize charts
     timeline_tab1, timeline_tab2, timeline_tab3 = st.tabs([
@@ -500,7 +501,7 @@ def render_timeline_regional_tab(data):
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("##### Monthly Activity and Seasonality Analysis")
+            st.markdown("##### 🗒 Monthly Activity and Seasonality Analysis")
             try:
                 from dashboard.components.agricultural_analysis.charts.calendar.monthly_activity_charts import create_total_activities_per_month_chart
                 fig = create_total_activities_per_month_chart(data)
@@ -530,7 +531,7 @@ def render_timeline_regional_tab(data):
     
     with timeline_tab2:
         # Gantt Chart in its own tab
-        st.markdown("##### Crop Cultivation Periods in Brazil")
+        st.markdown("##### ☰ Crop Cultivation Periods in Brazil")
         try:
             from dashboard.components.agricultural_analysis.charts.calendar.crop_gantt_chart import render_crop_gantt_chart
             
@@ -548,7 +549,7 @@ def render_timeline_regional_tab(data):
     
     with timeline_tab3:
         # Polar Seasonality Analysis in its own sub-tab
-        st.markdown("##### Polar analysis of agricultural activities throughout the year")
+        st.markdown("##### ○⃝ Polar analysis of agricultural activities throughout the year")
         
         try:
             # Import and use the polar analysis function created earlier
@@ -1224,13 +1225,16 @@ def render_regional_activity_tab(data):
     st.markdown("*Analysis of agricultural activities across Brazilian states. Use region filter above to focus on specific regions.*")
     
     # Direct state-level analyses (no more By State/By Region tabs)
-    state_tab1, state_tab2, state_tab3= st.tabs([
+    state_tab1, state_tab2= st.tabs([
         "📊 Activity Comparison",
-        "🗺️ Activity Heatmap", 
-        "🌾 Crop Distribution"
+        "🗺️ Activity Heatmap"
     ])
     
+
     with state_tab1:
+            # Add a short explanatory text inside the Activity Comparison tab (appears before the chart)
+            st.markdown("##### 📊 Activity Comparison")
+            st.markdown("*Agricultural Calendar Activities Comparison.*")
             try:
                 from dashboard.components.agricultural_analysis.charts.availability import plot_state_activity_comparison
                 fig = plot_state_activity_comparison(data)
@@ -1243,6 +1247,8 @@ def render_regional_activity_tab(data):
                 st.error(f"❌ Error loading state activity comparison chart: {e}")
     
     with state_tab2:
+            st.markdown("##### 🗺️ Activity Heatmap")
+            st.markdown("*Agricultural Calendar Activities Heatmap.*")
             try:
                 from dashboard.components.agricultural_analysis.charts.availability import plot_state_activity_heatmap
                 fig = plot_state_activity_heatmap(data)
@@ -1254,17 +1260,17 @@ def render_regional_activity_tab(data):
             except Exception as e:
                 st.error(f"❌ Error loading state activity heatmap: {e}")
     
-    with state_tab3:
-            try:
-                from dashboard.components.agricultural_analysis.charts.availability import plot_state_crop_distribution
-                fig = plot_state_crop_distribution(data)
-                if fig:
-                    st.plotly_chart(fig, use_container_width=True)
-                    st.markdown("**Analysis:** Distribution of crop types and their planting/harvesting activities across Brazilian states.")
-                else:
-                    st.warning("⚠️ Unable to generate crop distribution chart")
-            except Exception as e:
-                st.error(f"❌ Error loading crop distribution chart: {e}")
+    # with state_tab3:
+    #         try:
+    #             from dashboard.components.agricultural_analysis.charts.availability import plot_state_crop_distribution
+    #             fig = plot_state_crop_distribution(data)
+    #             if fig:
+    #                 st.plotly_chart(fig, use_container_width=True)
+    #                 st.markdown("**Analysis:** Distribution of crop types and their planting/harvesting activities across Brazilian states.")
+    #             else:
+    #                 st.warning("⚠️ Unable to generate crop distribution chart")
+    #         except Exception as e:
+    #             st.error(f"❌ Error loading crop distribution chart: {e}")
     
 
 
@@ -1278,7 +1284,7 @@ def render_overview_tab(data):
             "🌾 Regional Specialization", 
             "⏰ Regional Timeline"
         ])
-        
+
         with region_tab1:
             try:
                 from dashboard.components.agricultural_analysis.charts.availability import plot_regional_activity_comparison

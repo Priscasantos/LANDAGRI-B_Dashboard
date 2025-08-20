@@ -1,136 +1,136 @@
-# Reorganização da Aba Agriculture Availability
+# Reorganization of the Agriculture Availability Tab
 
-## Resumo das Melhorias Implementadas
+## Summary of Implemented Improvements
 
-### 1. Novos Gráficos Criados
+### 1. New Charts Added
 
 #### 🗺️ **Spatial Coverage** (`spatial_coverage.py`)
-- **Função:** `plot_conab_spatial_coverage()`
-- **Descrição:** Análise da cobertura espacial dos dados agrícolas por estado
-- **Visualização:** Gráfico de barras horizontais com percentual de cobertura
+- **Function:** `plot_conab_spatial_coverage()`
+- **Description:** Analyzes spatial coverage of agricultural data by state
+- **Visualization:** Horizontal bar chart with coverage percentage
 
 #### 🌱 **Crop Diversity** (`crop_diversity.py`)
-- **Função:** `plot_conab_crop_diversity()`
-- **Descrição:** Diversidade de tipos de culturas por estado
-- **Visualização:** Gráfico de barras empilhadas mostrando variedade de culturas
+- **Function:** `plot_conab_crop_diversity()`
+- **Description:** Diversity of crop types by state
+- **Visualization:** Stacked bar chart showing crop variety
 
 #### 🌀 **Seasonal Patterns** (`seasonal_patterns.py`)
-- **Funções:**
-  - `plot_seasonal_patterns()` - Padrões sazonais por região
-  - `plot_crop_seasonal_distribution()` - Heatmap de distribuição sazonal
-  - `plot_monthly_activity_intensity()` - Intensidade mensal de atividades
+- **Functions:**
+  - `plot_seasonal_patterns()` — seasonal patterns by region
+  - `plot_crop_seasonal_distribution()` — heatmap of seasonal distribution
+  - `plot_monthly_activity_intensity()` — monthly activity intensity
 
 #### 🗺 **Regional Activity** (`regional_activity.py`)
-- **Funções:**
-  - `plot_regional_activity_comparison()` - Comparação de atividades por região
-  - `plot_state_activity_heatmap()` - Heatmap de intensidade por estado
-  - `plot_regional_crop_specialization()` - Especialização de culturas por região
-  - `plot_activity_timeline_by_region()` - Timeline de atividades regionais
+- **Functions:**
+  - `plot_regional_activity_comparison()` — compare activities by region
+  - `plot_state_activity_heatmap()` — state-level intensity heatmap
+  - `plot_regional_crop_specialization()` — crop specialization by region
+  - `plot_activity_timeline_by_region()` — regional activity timelines
 
 #### 📈 **Activity Intensity** (`activity_intensity.py`)
-- **Funções:**
-  - `plot_activity_intensity_matrix()` - Matriz de intensidade (culturas vs meses)
-  - `plot_peak_activity_analysis()` - Análise de picos de atividade
-  - `plot_activity_density_map()` - Mapa de densidade de atividades
-  - `plot_activity_concentration_index()` - Índice de concentração temporal
+- **Functions:**
+  - `plot_activity_intensity_matrix()` — intensity matrix (crops vs months)
+  - `plot_peak_activity_analysis()` — peak activity analysis
+  - `plot_activity_density_map()` — activity density map
+  - `plot_activity_concentration_index()` — temporal concentration index
 
-### 2. Nova Estrutura de Abas
+### 2. New Tab Structure
 
-A página **Agriculture Availability** agora possui 6 abas organizadas:
+The Agriculture Availability page now contains 6 organized tabs:
 
-1. **🗺️ Spatial Coverage** - Uma aba para cobertura espacial
-2. **🌱 Crop Diversity** - Uma aba para diversidade de culturas  
-3. **🌀 Seasonal Patterns** - Sub-abas para padrões sazonais
-4. **🗺 Regional Activity** - Sub-abas para análises regionais
-5. **🎚️ Activity Intensity** - Sub-abas para intensidade de atividades
-6. **🔎 Overview** - Visão geral e estatísticas
+1. 🗺️ Spatial Coverage — spatial coverage overview  
+2. 🌱 Crop Diversity — crop diversity analysis  
+3. 🌀 Seasonal Patterns — sub-tabs for seasonal patterns  
+4. 🗺 Regional Activity — sub-tabs for regional analyses  
+5. 🎚️ Activity Intensity — sub-tabs for intensity analyses  
+6. 🔎 Overview — general overview and statistics
 
-### 3. Funcionalidades Implementadas
+### 3. Implemented Features
 
-#### ✅ **Funções de Renderização por Aba**
-- `render_spatial_coverage_tab()` - Renderiza gráficos de cobertura espacial
-- `render_crop_diversity_tab()` - Renderiza gráficos de diversidade
-- `render_seasonal_patterns_tab()` - Renderiza 3 sub-abas de padrões sazonais
-- `render_regional_activity_tab()` - Renderiza 4 sub-abas de atividades regionais
-- `render_activity_intensity_tab()` - Renderiza 4 sub-abas de intensidade
-- `render_overview_tab()` - Renderiza estatísticas gerais e informações dos dados
+#### ✅ Tab Rendering Functions
+- `render_spatial_coverage_tab()` — renders spatial coverage charts  
+- `render_crop_diversity_tab()` — renders diversity charts  
+- `render_seasonal_patterns_tab()` — renders 3 seasonal sub-tabs  
+- `render_regional_activity_tab()` — renders 4 regional sub-tabs  
+- `render_activity_intensity_tab()` — renders 4 intensity sub-tabs  
+- `render_overview_tab()` — renders overall statistics and data info
 
-#### ✅ **Tratamento de Erros**
-- Cada gráfico possui tratamento de exceções individual
-- Mensagens de aviso quando dados não estão disponíveis
-- Fallbacks para casos de erro na geração de gráficos
+#### ✅ Error Handling
+- Each chart has individual exception handling  
+- Warning messages when data is unavailable  
+- Fallbacks for chart generation failures
 
-#### ✅ **Integração com Dados CONAB**
-- Todos os gráficos utilizam o arquivo `agricultural_conab_mapping_data_complete.jsonc`
-- Processamento inteligente dos dados de calendário agrícola
-- Cálculos automáticos de métricas e estatísticas
+#### ✅ CONAB Data Integration
+- All charts use `agricultural_conab_mapping_data_complete.jsonc`  
+- Smart processing of crop calendar data  
+- Automatic computation of metrics and statistics
 
-### 4. Uso dos Dados CONAB
+### 4. Use of CONAB Data
 
-Os novos gráficos extraem informações do `agricultural_conab_mapping_data_complete.jsonc`:
+New charts extract information from `agricultural_conab_mapping_data_complete.jsonc`:
 
-- **crop_calendar**: Dados de calendário por cultura e estado
-- **states**: Informações de estados e regiões  
-- **metadata**: Informações sobre estações e legendas
-- **calendar**: Atividades por mês (P=Plantio, H=Colheita, PH=Ambos)
-- **seasons**: Classificação sazonal das atividades
+- `crop_calendar`: calendar data by crop and state  
+- `states`: state and region information  
+- `metadata`: station and legend info  
+- `calendar`: monthly activities (P=Planting, H=Harvest, PH=Both)  
+- `seasons`: seasonal classification of activities
 
-### 5. Melhorias na Experiência do Usuário
+### 5. User Experience Improvements
 
-#### 🎛️ **Filtros Mantidos**
-- Seleção por cultura (mantém compatibilidade)
-- Seleção por região (mantém compatibilidade)
-- Filtros aplicados a todos os gráficos
+#### 🎛️ Preserved Filters
+- Crop selection (backward compatible)  
+- Region selection (backward compatible)  
+- Filters apply across all charts
 
-#### 📊 **Visualizações Interativas**
-- Gráficos Plotly com hover interativo
-- Cores consistentes e significativas
-- Layouts responsivos e profissionais
+#### 📊 Interactive Visualizations
+- Plotly charts with interactive hover  
+- Consistent, meaningful color schemes  
+- Responsive, professional layouts
 
-#### 📱 **Design Responsivo**
-- Layouts que se adaptam ao tamanho da tela
-- Sub-abas para organizar múltiplos gráficos
-- Textos explicativos para cada seção
+#### 📱 Responsive Design
+- Layouts adapt to screen size  
+- Sub-tabs to organize multiple charts  
+- Explanatory text for each section
 
-### 6. Estrutura de Arquivos
+### 6. File Structure
 
 ```
 dashboard/components/agricultural_analysis/charts/availability/
-├── spatial_coverage.py          # Novo - Cobertura espacial
-├── crop_diversity.py           # Existente - Melhorado
-├── seasonal_patterns.py        # Novo - Padrões sazonais
-├── regional_activity.py        # Novo - Atividades regionais  
-├── activity_intensity.py       # Novo - Intensidade de atividades
-├── __init__.py                 # Atualizado com novas importações
-└── ... (outros arquivos existentes)
+├── spatial_coverage.py          # New - spatial coverage
+├── crop_diversity.py            # Existing - improved
+├── seasonal_patterns.py         # New - seasonal patterns
+├── regional_activity.py         # New - regional activities
+├── activity_intensity.py        # New - activity intensity
+├── __init__.py                  # Updated with new imports
+└── ... (other existing files)
 ```
 
-### 7. Como Acessar
+### 7. How to Access
 
-1. Execute o dashboard: `python -m streamlit run app.py`
-2. No menu lateral, clique em **"🌾 Agricultural Analysis"**
-3. Selecione **"Agriculture Availability"** 
-4. Navegue pelas 6 abas principais
-5. Explore as sub-abas dentro de Seasonal Patterns, Regional Activity e Activity Intensity
+1. Run the dashboard: `python -m streamlit run app.py`  
+2. In the sidebar, click "🌾 Agricultural Analysis"  
+3. Select "Agriculture Availability"  
+4. Browse the 6 main tabs  
+5. Explore sub-tabs within Seasonal Patterns, Regional Activity, and Activity Intensity
 
-### 8. Exemplo de Insights Disponíveis
+### 8. Example Insights Available
 
-- **Cobertura Espacial**: Estados com maior/menor cobertura de dados
-- **Diversidade**: Quais estados cultivam mais variedades de culturas
-- **Padrões Sazonais**: Quando ocorrem picos de plantio e colheita
-- **Atividade Regional**: Como as regiões se especializam em diferentes culturas
-- **Intensidade**: Concentração temporal das atividades agrícolas
+- Spatial Coverage: states with highest/lowest data coverage  
+- Diversity: which states grow the widest variety of crops  
+- Seasonal Patterns: timing of planting and harvest peaks  
+- Regional Activity: how regions specialize in different crops  
+- Intensity: temporal concentration of agricultural activities
 
-## Próximos Passos Sugeridos
+## Suggested Next Steps
 
-1. **Testes com Usuários**: Coletar feedback sobre usabilidade das novas abas
-2. **Otimização de Performance**: Cache para gráficos complexos
-3. **Exportação**: Opções para download dos gráficos e dados
-4. **Comparações**: Funcionalidades para comparar períodos ou regiões
-5. **Alertas**: Identificação automática de padrões incomuns
+1. User testing to collect usability feedback  
+2. Performance optimization: caching for complex charts  
+3. Export options: enable downloads for charts and data  
+4. Comparison tools: compare periods or regions  
+5. Alerts: auto-detection of unusual patterns
 
 ---
 
-**Desenvolvido em:** 11/08/2025  
-**Status:** ✅ Implementado e Funcional  
-**Compatibilidade:** Mantém funcionalidades existentes
+**Developed on:** 11/08/2025  
+**Status:** ✅ Implemented and Functional  
+**Compatibility:** Maintains existing functionality

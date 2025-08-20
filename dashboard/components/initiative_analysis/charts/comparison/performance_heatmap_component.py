@@ -62,7 +62,7 @@ def render_performance_heatmap_tab(filtered_df: pd.DataFrame) -> None:
 
 def render_normalized_heatmap(filtered_df: pd.DataFrame) -> None:
     """Render normalized performance heatmap."""
-    st.markdown("##### 🔥 Multi-Dimensional Performance Heatmap")
+    st.markdown("##### Multi-Dimensional Performance Heatmap")
     
     # Get performance metrics
     performance_data = extract_performance_metrics(filtered_df)
@@ -85,7 +85,7 @@ def render_normalized_heatmap(filtered_df: pd.DataFrame) -> None:
 
 def render_metric_comparison(filtered_df: pd.DataFrame) -> None:
     """Render metric comparison charts."""
-    st.markdown("##### � Performance Metric Comparison")
+    st.markdown("##### Performance Metric Comparison")
     
     performance_data = extract_performance_metrics(filtered_df)
     
@@ -155,7 +155,7 @@ def render_metric_comparison(filtered_df: pd.DataFrame) -> None:
 
 def render_performance_radar(filtered_df: pd.DataFrame) -> None:
     """Render performance radar chart with customizable pillars."""
-    st.markdown("##### 🎯 Performance Radar Analysis")
+    st.markdown("##### Performance Radar Analysis")
     
     performance_data = extract_performance_metrics(filtered_df)
     
@@ -312,7 +312,7 @@ def create_performance_heatmap(performance_data: pd.DataFrame) -> go.Figure | No
     
     fig.update_layout(
         title=dict(
-            text="<b>Normalized Performance Heatmap</b><br><span style='font-size:14px;color:#6b7280'>Multi-dimensional performance comparison</span>",
+            text="<b></b><br><span style='font-size:14px;color:#6b7280'></span>",
             x=0.5,
             font=dict(size=18, family="Inter", color="#1f2937")
         ),

@@ -18,7 +18,7 @@ def render_detailed_table_tab(filtered_df: pd.DataFrame) -> None:
     Args:
         filtered_df: Filtered DataFrame with initiative data
     """
-    st.markdown("#### 📋 Detailed Initiative Table")
+    st.markdown("#### Detailed Initiative Table")
     
     if filtered_df.empty:
         st.warning("⚠️ No data available for detailed table.")
