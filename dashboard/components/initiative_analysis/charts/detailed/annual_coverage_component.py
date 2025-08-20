@@ -8,6 +8,7 @@ Author: LANDAGRI-B Project Team
 Date: 2025-08-01
 """
 
+from turtle import title
 import pandas as pd
 import streamlit as st
 
@@ -17,7 +18,6 @@ def render_annual_coverage_tab(filtered_df: pd.DataFrame) -> None:
     Args:
         filtered_df: Filtered DataFrame with initiatives data
     """
-    st.markdown("#### 📅 Annual Initiative Coverage")
     if filtered_df.empty or "available_years" not in filtered_df.columns:
         st.warning("⚠️ No annual coverage data available.")
         return
@@ -47,6 +47,7 @@ def render_annual_coverage_tab(filtered_df: pd.DataFrame) -> None:
             hovertext=f"{name}: {start_years[i]} - {end_years[i]}"
         ))
     fig.update_layout(
+        title="Annual Coverage of Initiatives",
         xaxis_title="Year",
         yaxis_title="Initiative",
         font=dict(family="Inter", size=12),

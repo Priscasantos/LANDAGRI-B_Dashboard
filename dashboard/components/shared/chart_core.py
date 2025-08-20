@@ -121,8 +121,8 @@ def get_standard_colorbar_config():
         Dictionary with colorbar settings
     """
     return {
-        "title": "Value",
-        "titleside": "right",
+        # Use nested title object for Plotly colorbar title settings
+        "title": {"text": "Value", "side": "right"},
         "tickmode": "linear",
         "showticklabels": True,
     }

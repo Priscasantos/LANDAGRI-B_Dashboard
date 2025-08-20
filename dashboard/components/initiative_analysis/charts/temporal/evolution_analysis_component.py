@@ -19,7 +19,7 @@ def render_evolution_analysis(temporal_df: pd.DataFrame) -> None:
         temporal_df: DataFrame with temporal data of initiatives
     """
     st.markdown("### 📈 Evolution Analysis")
-    st.markdown("*Analyzing how LULC initiatives have evolved over time*")
+    st.markdown("*Analyzing how LULC initiatives have evolved over time.*")
     
     if temporal_df.empty:
         st.warning("❌ No temporal data available for evolution analysis.")
@@ -33,7 +33,7 @@ def render_evolution_analysis(temporal_df: pd.DataFrame) -> None:
     tab1, tab2 = st.tabs(["📊 Initiative Timeline", "🔥 Resolution Evolution"])
     
     with tab1:
-        st.markdown("#### Initiative Count Over Time")
+        st.markdown("#### 📊 Initiative Count Over Time")
         fig = plot_evolution_line_chart(temporal_df)
         st.plotly_chart(fig, use_container_width=True, key="evolution_line_chart")
         
@@ -53,7 +53,7 @@ def render_evolution_analysis(temporal_df: pd.DataFrame) -> None:
                     st.metric("Total Years Covered", len(year_counts), "years")
     
     with tab2:
-        st.markdown("#### Spatial Resolution Evolution")
+        st.markdown("#### 🔥 Spatial Resolution Evolution")
         if 'metadata' not in st.session_state:
             st.warning("❌ Metadata not available for resolution evolution analysis.")
             return

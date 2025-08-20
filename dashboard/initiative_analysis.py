@@ -39,7 +39,7 @@ from dashboard.components.initiative_analysis.charts.comparison.bar_chart_compon
 from dashboard.components.initiative_analysis.charts.detailed import (
     render_annual_coverage_tab,
     render_data_table_tab,
-    render_dual_bars_tab,
+    render_bars_tab,
     render_heatmap_tab,
     render_radar_chart_tab,
 )
@@ -172,6 +172,7 @@ def render_comparative_analysis(df: pd.DataFrame, metadata: dict) -> None:
 
     st.markdown("---")
     st.markdown("### 📊 Comparison Charts")
+    st.markdown("### *Comparison of LULC Mapping Initiatives Characteristics using different approaches.*")
 
     # Abas de análise comparativa usando todos os componentes
     tab_labels = [
@@ -324,30 +325,67 @@ def render_detailed_analysis(df: pd.DataFrame, metadata: dict) -> None:
     if "available_years" not in df_filtered.columns:
         df_filtered["available_years"] = df_filtered["Name"].map(lambda n: metadata.get(n, {}).get("available_years", []))
     st.markdown("---")
-    st.markdown("### 📊 Detailed Analyses")
+    st.markdown("### 📊 Detailed Analysis")
+    st.markdown("*Detailed Statistical Analysis.*")
     # Detailed analysis tabs
     tab1, tab2, tab3, tab4, tab5 = st.tabs(
         [
             "📊 Bar Chart",
             "🎯 Radar Chart",
             "🔥 Heatmap",
-            "📈 Data Table",
+            "📋 Data Details",
             "📅 Annual Coverage",
         ]
     )
     with tab1:
-        render_dual_bars_tab(df_filtered)
+        st.markdown("#### 📊 Bar Chart Analysis")
+        render_bars_tab(df_filtered)
 
     with tab2:
+        st.markdown("#### 🎯 Radar Chart Analysis")
         render_radar_chart_tab(df_filtered)
 
     with tab3:
+        st.markdown("#### 🔥 Heatmap Analysis")
+        st.markdown(
+            """
+            <div style="
+                background: linear-gradient(90deg, #f0f7ff 0%, #ffffff 100%);
+                border-left: 4px solid #2563eb;
+                padding: 0.9rem;
+                border-radius: 8px;
+                margin-bottom: 1rem;
+                color: #0f172a;
+                font-size: 0.95rem;
+            ">
+                <strong>ℹ️ Note:</strong>
+                <p style="margin:0.35rem 0 0 0;">
+                    This heatmap highlights the intensity of correspondence between the characteristics of initiatives.
+                    Use it to identify similarity patterns, compare initiatives, and detect potential outliers.
+                    The variables used in the chart are detailed below:
+                </p>
+                <ul style="margin:0.35rem 0 0 1rem 1.2rem; padding:0; font-style: italic;">
+                    <li>Resolution: spatial resolution (m).</li>
+                    <li>Resolution_min_val: Minimum spatial resolution (m) among the initiatives.</li>
+                    <li>Resolution_max_val: Maximum spatial resolution (m) among the initiatives.</li>
+                    <li>Accuracy (%): Overall accuracy (%) among the initiatives.</li>
+                    <li>Accuracy_min_val: Minimum accuracy (%) among the initiatives.</li>
+                    <li>Accuracy_max_val: Maximum accuracy (%) among the initiatives.</li>
+                    <li>Classes: Number of classes among the initiatives.</li>
+                    <li>Num_Agri_Classes: Number of agricultural classes among the initiatives.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
         render_heatmap_tab(df_filtered)
 
     with tab4:
+        st.markdown("### 📋 Data Details")
         render_data_table_tab(df_filtered)
 
     with tab5:
+        st.markdown("#### 📅 Annual Coverage Analysis")
         render_annual_coverage_tab(df_filtered)
 
 

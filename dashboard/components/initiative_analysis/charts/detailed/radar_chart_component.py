@@ -29,6 +29,17 @@ def render_radar_chart_tab(filtered_df: pd.DataFrame) -> None:
         return
     fig = create_radar_chart(filtered_df)
     if fig:
+        # parâmetro intrínseco de título da figura
+        title_text = "Four Dimensions Radar Chart"
+        fig.update_layout(
+            title={
+                "text": title_text,
+                "x": 0.05,
+                "xanchor": "center",
+                "y": 0.95,
+                "font": {"size": 14, "family": "Inter, -apple-system, BlinkMacSystemFont, sans-serif"}
+            }
+        )
         st.plotly_chart(fig, use_container_width=True, key="detailed_radar_chart")
     else:
         st.error("❌ Error generating radar chart.")
@@ -55,9 +66,9 @@ def create_radar_chart(filtered_df: pd.DataFrame) -> go.Figure:
         return fig
     # Selecionar métricas relevantes e amigáveis
     metric_map = {
-        "Accuracy (%)": "Acurácia (%)",
-        "Resolution": "Resolução",
-        "Num_Agri_Classes": "Nº Classes Agrícolas",
+        "Accuracy (%)": "Accuracy (%)",
+        "Resolution": "Resolution",
+        "Num_Agri_Classes": "Number of Agricultural Classes",
         "Classes": "Classes"
     }
     metrics = [col for col in metric_map.keys() if col in filtered_df.columns]
@@ -97,6 +108,13 @@ def create_radar_chart(filtered_df: pd.DataFrame) -> go.Figure:
             }
         },
         showlegend=True,
+        legend=dict(
+            title=dict(
+                text="Initiative",
+                font={"family": "Inter, -apple-system, BlinkMacSystemFont, sans-serif", "size": 12, "color": "#374151"}
+            ),
+            font={"family": "Inter, -apple-system, BlinkMacSystemFont, sans-serif", "size": 12, "color": "#374151"}
+        ),
         font={"family": "Inter, -apple-system, BlinkMacSystemFont, sans-serif", "size": 12, "color": "#374151"},
         paper_bgcolor="white",
         plot_bgcolor="white",

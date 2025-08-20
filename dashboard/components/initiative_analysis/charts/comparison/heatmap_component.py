@@ -56,5 +56,5 @@ def create_heatmap_chart(filtered_df: pd.DataFrame) -> go.Figure:
         return go.Figure()
     corr = filtered_df.select_dtypes(include=[float, int]).corr()
     fig = go.Figure(data=go.Heatmap(z=corr.values, x=corr.columns, y=corr.columns, colorscale="Viridis"))
-    apply_standard_layout(fig, title="Heatmap de Correlação de Métricas", xaxis_title="Métrica", yaxis_title="Métrica")
+    apply_standard_layout(fig, title="Correlation Heatmap of Metrics", xaxis_title="Metric", yaxis_title="Metric")
     return fig

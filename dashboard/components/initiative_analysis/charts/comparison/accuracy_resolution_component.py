@@ -28,7 +28,7 @@ def render_accuracy_resolution_tab(filtered_df: pd.DataFrame) -> None:
     Args:
         filtered_df: DataFrame filtrado com dados das iniciativas
     """
-    st.markdown("#### 🎯 Análise: Precisão vs Resolução Espacial")
+    st.markdown("#### 🎯 Analysis: Accuracy vs Spatial Resolution")
     
     if filtered_df.empty:
         st.warning("⚠️ Nenhum dado disponível para comparação.")
@@ -39,16 +39,16 @@ def render_accuracy_resolution_tab(filtered_df: pd.DataFrame) -> None:
     
     with col1:
         show_labels = st.checkbox(
-            "Mostrar rótulos das iniciativas",
+            "Show initiative labels",
             value=True,
-            help="Exibir nomes das iniciativas no gráfico"
+            help="Display initiative names on the chart"
         )
     
     with col2:
         color_by_type = st.checkbox(
-            "Colorir por tipo",
+            "Color by type",
             value=True,
-            help="Usar cores diferentes para cada tipo de iniciativa"
+            help="Use different colors for each initiative type"
         )
     
     # Informações estatísticas
@@ -57,12 +57,12 @@ def render_accuracy_resolution_tab(filtered_df: pd.DataFrame) -> None:
     with stats_col1:
         accuracy_data = pd.to_numeric(filtered_df.get("Accuracy (%)", []), errors="coerce")
         avg_accuracy = accuracy_data.mean() if not accuracy_data.isna().all() else 0
-        st.metric("Precisão Média", f"{avg_accuracy:.1f}%")
+        st.metric("Average Accuracy", f"{avg_accuracy:.1f}%")
     
     with stats_col2:
         resolution_data = pd.to_numeric(filtered_df.get("Resolution", []), errors="coerce")
         avg_resolution = resolution_data.mean() if not resolution_data.isna().all() else 0
-        st.metric("Resolução Média", f"{avg_resolution:.1f}m")
+        st.metric("Average Resolution", f"{avg_resolution:.1f}m")
     
     with stats_col3:
         valid_data = len([
@@ -70,7 +70,7 @@ def render_accuracy_resolution_tab(filtered_df: pd.DataFrame) -> None:
             if pd.notna(pd.to_numeric(row.get("Accuracy (%)", 0), errors="coerce")) and
                pd.notna(pd.to_numeric(row.get("Resolution", 0), errors="coerce"))
         ])
-        st.metric("Iniciativas Válidas", valid_data)
+        st.metric("Valid Initiatives", valid_data)
     
     # Gerar gráfico
     fig_scatter = plot_accuracy_resolution_scatter(
@@ -160,14 +160,14 @@ def plot_accuracy_resolution_scatter(
         y="Accuracy",
         color=color_column,
         text="Initiative" if show_labels else None,
-        title="Precisão vs Resolução Espacial",
+        title="Accuracy vs Spatial Resolution",
         labels={
-            "Resolution": "Resolução Espacial (m)",
-            "Accuracy": "Precisão (%)",
-            "Type": "Tipo de Iniciativa",
+            "Resolution": "Spatial Resolution (m)",
+            "Accuracy": "Accuracy (%)",
+            "Type": "Initiative Type",
         },
         color_discrete_sequence=get_chart_colors(),
-        hover_data=["Methodology"]
+        hover_data=["Methodology"],
     )
 
     # Melhorar legibilidade
@@ -183,9 +183,9 @@ def plot_accuracy_resolution_scatter(
 
     apply_standard_layout(
         fig,
-        title="Análise Comparativa: Precisão vs Resolução",
-        xaxis_title="Resolução Espacial (m)",
-        yaxis_title="Precisão (%)",
+        title="Comparative Analysis: Accuracy vs Resolution",
+        xaxis_title="Spatial Resolution (m)",
+        yaxis_title="Accuracy (%)",
     )
     
     # Adicionar linhas de referência

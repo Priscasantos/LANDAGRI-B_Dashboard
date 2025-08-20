@@ -55,7 +55,7 @@ def render_class_details_tab(filtered_df: pd.DataFrame) -> None:
 
 def render_class_overview(filtered_df: pd.DataFrame, metadata: dict) -> None:
     """Render class overview with detailed information for each initiative."""
-    st.markdown("##### 🔎 Class Information Overview")
+    st.markdown("##### Class Information Overview")
     
     class_data = []
     
@@ -106,7 +106,6 @@ def render_class_overview(filtered_df: pd.DataFrame, metadata: dict) -> None:
 
 def render_agricultural_analysis(filtered_df: pd.DataFrame, metadata: dict) -> None:
     """Render agricultural classification analysis."""
-    st.markdown("##### 🌾 Agricultural Classification Analysis")
     
     agri_data = []
     
@@ -151,7 +150,6 @@ def render_agricultural_analysis(filtered_df: pd.DataFrame, metadata: dict) -> N
             title_font=dict(size=14, family="Inter", color="#1f2937"),
             xaxis_tickangle=-45
         )
-        st.plotly_chart(fig_agri, use_container_width=True)
         # Add unique key for Streamlit
         st.plotly_chart(fig_agri, use_container_width=True, key=f"agri-bar-{hashlib.md5(str(fig_agri).encode()).hexdigest()}")
     
@@ -166,9 +164,9 @@ def render_agricultural_analysis(filtered_df: pd.DataFrame, metadata: dict) -> N
         )
         fig_ratio.update_layout(
             font=dict(family="Inter", size=12),
-            title_font=dict(size=14, family="Inter", color="#1f2937")
+            title_font=dict(size=14, family="Inter", color="#1f2937"),
+            legend_title_text="Initiative"
         )
-        st.plotly_chart(fig_ratio, use_container_width=True)
         st.plotly_chart(fig_ratio, use_container_width=True, key=f"agri-pie-{hashlib.md5(str(fig_ratio).encode()).hexdigest()}")
     
     # Agricultural capabilities analysis
@@ -202,13 +200,11 @@ def render_agricultural_analysis(filtered_df: pd.DataFrame, metadata: dict) -> N
             font=dict(family="Inter", size=12),
             title_font=dict(size=14, family="Inter", color="#1f2937")
         )
-        st.plotly_chart(fig_caps, use_container_width=True)
         st.plotly_chart(fig_caps, use_container_width=True, key=f"agri-caps-{hashlib.md5(str(fig_caps).encode()).hexdigest()}")
 
 
 def render_comparative_charts(filtered_df: pd.DataFrame, metadata: dict) -> None:
     """Render comparative charts for class analysis."""
-    st.markdown("##### 📈 Comparative Class Analysis")
     
     # Prepare comparative data
     comp_data = []
@@ -270,10 +266,10 @@ def render_comparative_charts(filtered_df: pd.DataFrame, metadata: dict) -> None
             barmode='group',
             font=dict(family="Inter", size=12),
             title_font=dict(size=14, family="Inter", color="#1f2937"),
-            xaxis_tickangle=-45
+            xaxis_tickangle=-45,
+            legend_title_text="Class Type"
         )
         
-        st.plotly_chart(fig_triple, use_container_width=True)
         st.plotly_chart(fig_triple, use_container_width=True, key=f"comp-triple-{hashlib.md5(str(fig_triple).encode()).hexdigest()}")
     
     with col2:
@@ -301,10 +297,10 @@ def render_comparative_charts(filtered_df: pd.DataFrame, metadata: dict) -> None
             barmode='stack',
             font=dict(family="Inter", size=12),
             title_font=dict(size=14, family="Inter", color="#1f2937"),
-            xaxis_tickangle=-45
+            xaxis_tickangle=-45,
+            legend_title_text="Class Type"
         )
         
-        st.plotly_chart(fig_stacked, use_container_width=True)
         st.plotly_chart(fig_stacked, use_container_width=True, key=f"comp-stacked-{hashlib.md5(str(fig_stacked).encode()).hexdigest()}")
     
     # Class efficiency scatter plot
@@ -315,7 +311,7 @@ def render_comparative_charts(filtered_df: pd.DataFrame, metadata: dict) -> None
             y="Agricultural",
             size="Agricultural",
             hover_name="Initiative",
-            title="<b>Agricultural vs Total Classes Relationship</b>",
+            title="<b>Agriculture Classes versus Total Classes Relationship</b>",
             labels={"Total": "Total Classes", "Agricultural": "Agricultural Classes"},
             color="Agricultural",
             color_continuous_scale="RdYlGn"
@@ -324,5 +320,4 @@ def render_comparative_charts(filtered_df: pd.DataFrame, metadata: dict) -> None
             font=dict(family="Inter", size=12),
             title_font=dict(size=14, family="Inter", color="#1f2937")
         )
-        st.plotly_chart(fig_scatter, use_container_width=True)
         st.plotly_chart(fig_scatter, use_container_width=True, key=f"comp-scatter-{hashlib.md5(str(fig_scatter).encode()).hexdigest()}")

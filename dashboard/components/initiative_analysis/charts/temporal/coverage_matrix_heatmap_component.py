@@ -22,7 +22,7 @@ def render_coverage_matrix_heatmap(temporal_data: pd.DataFrame, metadata: dict) 
         metadata: Dictionary of initiative metadata
     """
     st.markdown("### 🗓️ Temporal Coverage Analysis")
-    st.markdown("*Comprehensive analysis of data availability across time and initiatives*")
+    st.markdown("*Comprehensive analysis of data availability across time and initiatives.*")
     
     # Tab-based navigation for different temporal views
     tab1, tab2, tab3, tab4 = st.tabs([
@@ -418,28 +418,47 @@ def render_timeline_analysis(metadata: dict) -> None:
         st.info("No timeline data available.")
         return
     
-    # Create decade visualization
+    # Create decade visualization using a tidy DataFrame (ensures stable ordering and proper colorbar)
     decade_counts = {decade: len(initiatives) for decade, initiatives in decade_data.items()}
-    
+
+    # Build a DataFrame and sort decades numerically (e.g., '1990s' -> 1990)
+    def _decade_key(label: str) -> int:
+        try:
+            return int(str(label).rstrip('s'))
+        except Exception:
+            return 0
+
+    decade_items = sorted(decade_counts.items(), key=lambda kv: _decade_key(kv[0]))
+    decade_df = pd.DataFrame(decade_items, columns=["Decade", "Count"])
+    category_order = decade_df["Decade"].tolist()
+
     fig = px.bar(
-        x=list(decade_counts.keys()),
-        y=list(decade_counts.values()),
+        decade_df,
+        x="Decade",
+        y="Count",
         title="<b>Initiative Launches by Decade</b>",
-        labels={"x": "Decade", "y": "Number of Initiatives Launched"},
-        color=list(decade_counts.values()),
-        color_continuous_scale="Viridis"
+        labels={"Decade": "Decade", "Count": "Number of Initiatives Launched"},
+        color="Count",
+        color_continuous_scale="Viridis",
+        category_orders={"Decade": category_order}
     )
-    
+
     fig.update_layout(
-        font=dict(family="Inter", size=12),
-        title_font=dict(size=16, family="Inter", color="#1f2937"),
-        showlegend=False,
+        font={"family": "Inter", "size": 12},
+        title_font={"size": 16, "family": "Inter", "color": "#1f2937"},
         xaxis_title="<b>Decade</b>",
-        yaxis_title="<b>Number of New Initiatives</b>"
+        yaxis_title="<b>Number of New Initiatives</b>",
+        margin={"t": 100},
+        # Configure colorbar directly in layout to avoid update_traces conflicts
+        coloraxis_colorbar={
+            "title": {"text": "Quantity of Initiatives", "side": "top"},
+            "tickmode": "linear",
+            "showticklabels": True
+        }
     )
-    
+
     st.plotly_chart(fig, use_container_width=True)
-    
+
     # Decade breakdown
     for decade in sorted(decade_data.keys()):
         with st.expander(f"📅 {decade} Details ({len(decade_data[decade])} initiatives)"):

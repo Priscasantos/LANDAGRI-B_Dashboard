@@ -57,7 +57,6 @@ def render_methodology_deepdive_tab(filtered_df: pd.DataFrame) -> None:
 
 def render_methodology_distribution(df: pd.DataFrame, methodology_col: str) -> None:
     """Render methodology distribution charts."""
-    st.markdown("##### 📊 Methodology Distribution Analysis")
     
     # Get methodology frequency
     methodology_counts = df[methodology_col].value_counts().reset_index()
@@ -67,7 +66,18 @@ def render_methodology_distribution(df: pd.DataFrame, methodology_col: str) -> N
         st.info("No methodology data available for distribution analysis.")
         return
     
+    # criar duas colunas e rotear chamadas de st.plotly_chart por key para garantir exibição lado a lado
     col1, col2 = st.columns(2)
+    _original_plotly_chart = st.plotly_chart
+
+    def _routed_plotly_chart(fig, use_container_width=True, key=None, **kwargs):
+        if key == "methodology_pie_chart":
+            return col1.plotly_chart(fig, use_container_width=use_container_width, key=key, **kwargs)
+        if key == "methodology_bar_chart":
+            return col2.plotly_chart(fig, use_container_width=use_container_width, key=key, **kwargs)
+        return _original_plotly_chart(fig, use_container_width=use_container_width, key=key, **kwargs)
+
+    st.plotly_chart = _routed_plotly_chart
     
     with col1:
         # Pie chart
@@ -81,6 +91,7 @@ def render_methodology_distribution(df: pd.DataFrame, methodology_col: str) -> N
         fig_pie.update_layout(
             font=dict(family="Inter", size=12),
             title_font=dict(size=16, family="Inter", color="#1f2937"),
+            legend_title_text="Methodology (Algorithm)"
         )
     st.plotly_chart(fig_pie, use_container_width=True, key="methodology_pie_chart")
     
@@ -103,14 +114,14 @@ def render_methodology_distribution(df: pd.DataFrame, methodology_col: str) -> N
         st.plotly_chart(fig_bar, use_container_width=True, key="methodology_bar_chart")
     
     # Summary metrics
-    st.markdown("##### 📋 Summary Statistics")
+    st.markdown("##### Summary Statistics")
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         st.metric("Total Methodologies", len(methodology_counts))
     with col2:
         most_common = methodology_counts.iloc[0]
-        st.metric("Most Common", most_common["Methodology"][:15] + "..." if len(most_common["Methodology"]) > 15 else most_common["Methodology"])
+        st.metric("Most Common", most_common["Methodology"][:25] + "..." if len(most_common["Methodology"]) > 25 else most_common["Methodology"])
     with col3:
         st.metric("Usage Count", most_common["Count"])
     with col4:
@@ -120,7 +131,6 @@ def render_methodology_distribution(df: pd.DataFrame, methodology_col: str) -> N
 
 def render_technique_comparison(df: pd.DataFrame, methodology_col: str) -> None:
     """Render technique comparison analysis."""
-    st.markdown("##### 🔄 Methodology Technique Analysis")
     
     # Try to categorize methodologies into techniques
     techniques = categorize_methodologies(df[methodology_col].tolist())
@@ -142,40 +152,96 @@ def render_technique_comparison(df: pd.DataFrame, methodology_col: str) -> None:
     )
     fig.update_layout(
         font=dict(family="Inter", size=12),
-        title_font=dict(size=16, family="Inter", color="#1f2937")
+        title_font=dict(size=14, family="Inter", color="#1f2937")
     )
     st.plotly_chart(fig, use_container_width=True, key="methodology_accuracy_heatmap")
 
 
 def render_methodology_trends(df: pd.DataFrame, methodology_col: str) -> None:
-    """Render methodology trends over time if temporal data is available."""
-    st.markdown("##### 📈 Methodology Evolution Trends")
-    
-    # Check if we have temporal data
-    year_cols = [col for col in df.columns if 'year' in col.lower() or 'start' in col.lower()]
-    
+    """
+    Render methodology usage trends over time.
+
+    Detects a temporal column (year/start/date), coerces it to a year
+    integer when possible, drops invalid rows, groups by year and
+    methodology, and renders a Plotly line chart.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Source dataframe containing temporal and methodology columns.
+    methodology_col : str
+        Column name for methodology/categories to color the lines.
+    """
+    # Validate input column
+    if methodology_col not in df.columns:
+        st.warning(f"Column '{methodology_col}' not found.")
+        return
+
+    # Heuristic search for temporal columns
+    temporal_keys = ("year", "start", "date", "timestamp")
+    year_cols = [
+        col for col in df.columns
+        if any(k in col.lower() for k in temporal_keys)
+    ]
     if not year_cols:
         st.info("No temporal data available for trend analysis.")
         return
-    
-    year_col = year_cols[0]
-    
-    # Create methodology trends over time
-    trend_df = df.groupby([year_col, methodology_col]).size().reset_index(name='count')
-    
+
+    # Prefer an explicit 'year' column if present
+    year_col = next((c for c in year_cols if c.lower() == "year"), year_cols[0])
+
+    # Work on a small copy to avoid SettingWithCopyWarning
+    tmp = df[[year_col, methodology_col]].copy()
+
+    # Drop rows missing methodology (they cannot be grouped)
+    tmp = tmp.dropna(subset=[methodology_col])
+
+    # Try to coerce the temporal column to a year integer:
+    # - If datetime-like, extract year
+    # - Otherwise try numeric conversion
+    try:
+        # First attempt: parse as datetimes (avoid deprecated/unsupported kwargs)
+        parsed = pd.to_datetime(tmp[year_col], errors="coerce")
+        if parsed.notna().any():
+            tmp[year_col] = parsed.dt.year
+        else:
+            # Fallback: numeric conversion (e.g., "2020", 2020.0)
+            tmp[year_col] = pd.to_numeric(tmp[year_col], errors="coerce")
+    except Exception:
+        # On unexpected parsing errors, fallback to numeric conversion
+        tmp[year_col] = pd.to_numeric(tmp[year_col], errors="coerce")
+
+    # Drop rows where year parsing failed
+    tmp = tmp.dropna(subset=[year_col])
+    if tmp.empty:
+        st.info("No valid temporal data available for trend analysis.")
+        return
+
+    # Ensure integer year type for consistent grouping/sorting
+    tmp[year_col] = tmp[year_col].astype(int)
+
+    # Group and count occurrences. use observed=True if methodology is categorical
+    trend_df = (
+        tmp.groupby([year_col, methodology_col])
+        .size()
+        .reset_index(name="count")
+        .sort_values(by=year_col)
+    )
+
+    # Build and render the chart
     fig = px.line(
         trend_df,
         x=year_col,
-        y='count',
+        y="count",
         color=methodology_col,
         title="<b>Methodology Usage Trends Over Time</b>",
-        markers=True
+        markers=True,
     )
     fig.update_layout(
         font=dict(family="Inter", size=12),
         title_font=dict(size=16, family="Inter", color="#1f2937"),
         xaxis_title="<b>Year</b>",
-        yaxis_title="<b>Number of Initiatives</b>"
+        yaxis_title="<b>Number of Initiatives</b>",
     )
     st.plotly_chart(fig, use_container_width=True, key="methodology_trends_chart")
 

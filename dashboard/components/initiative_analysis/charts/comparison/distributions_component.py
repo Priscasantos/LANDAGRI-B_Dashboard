@@ -13,6 +13,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+import uuid
 
 from dashboard.components.shared.cache import smart_cache_data
 from dashboard.components.shared.chart_core import (
@@ -28,7 +29,7 @@ def render_distributions_tab(filtered_df: pd.DataFrame) -> None:
     Args:
         filtered_df: DataFrame filtrado com dados das iniciativas
     """
-    st.markdown("#### 📊 Análise de Distribuições")
+    st.markdown("#### 📊 Distributions Analysis")
     
     if filtered_df.empty:
         st.warning("⚠️ Nenhum dado disponível para análise de distribuições.")
@@ -36,35 +37,38 @@ def render_distributions_tab(filtered_df: pd.DataFrame) -> None:
     
     # Sub-abas para diferentes tipos de distribuições
     sub_tab1, sub_tab2, sub_tab3 = st.tabs([
-        "🔧 Metodologias", 
-        "📏 Resolução Espacial", 
-        "⏱️ Cobertura Temporal"
+        "🔧 Methodologies",
+        "📏 Spatial Resolution",
+        "⏱️ Temporal Coverage",
     ])
     
     with sub_tab1:
+        st.markdown("#### 🔧 Methodologies")
         render_methodology_distribution(filtered_df)
     
     with sub_tab2:
+        st.markdown("#### 📏 Spatial Resolution")
         render_resolution_distribution(filtered_df)
     
     with sub_tab3:
+        st.markdown("#### ⏱️ Temporal Coverage")
         render_temporal_coverage_distribution(filtered_df)
 
 
 def render_methodology_distribution(filtered_df: pd.DataFrame) -> None:
     """Renderizar distribuição de metodologias por tipo."""
-    st.markdown("##### Distribuição de Metodologias por Tipo")
     
     fig_methodology = plot_methodology_comparison(filtered_df)
     if fig_methodology:
-        st.plotly_chart(fig_methodology, use_container_width=True, key="methodology_distribution_chart")
+        # Use a short uuid suffix to ensure the chart key is unique across multiple renders
+        unique_key = f"methodology_distribution_chart_{uuid.uuid4().hex[:8]}"
+        st.plotly_chart(fig_methodology, use_container_width=True, key=unique_key)
     else:
         st.info("ℹ️ Dados insuficientes para análise de metodologias.")
 
 
 def render_resolution_distribution(filtered_df: pd.DataFrame) -> None:
     """Renderizar distribuição de resoluções espaciais."""
-    st.markdown("##### Distribuição de Resoluções Espaciais")
     
     fig_resolution = plot_spatial_resolution_comparison(filtered_df)
     if fig_resolution:
@@ -75,7 +79,6 @@ def render_resolution_distribution(filtered_df: pd.DataFrame) -> None:
 
 def render_temporal_coverage_distribution(filtered_df: pd.DataFrame) -> None:
     """Renderizar distribuição de cobertura temporal."""
-    st.markdown("##### Comparação de Cobertura Temporal")
     
     fig_temporal = plot_temporal_coverage_comparison(filtered_df)
     if fig_temporal:
@@ -132,10 +135,13 @@ def plot_methodology_comparison(filtered_df: pd.DataFrame) -> go.Figure:
 
     apply_standard_layout(
         fig,
-        title="Distribuição de Metodologias por Tipo",
-        xaxis_title="Tipo de Iniciativa",
-        yaxis_title="Número de Iniciativas",
+        title="Distribution of Methodologies by Type",
+        xaxis_title="Initiative Type",
+        yaxis_title="Number of Initiatives",
     )
+
+    # Set legend title
+    fig.update_layout(legend=dict(title=dict(text="Methodology")))
 
     fig.update_layout(barmode="group")
     return fig
@@ -177,20 +183,20 @@ def plot_spatial_resolution_comparison(filtered_df: pd.DataFrame) -> go.Figure:
         x="Initiative",
         y="Resolution",
         color="Type",
-        title="Comparação de Resoluções Espaciais",
+        title="Spatial Resolution Comparison",
         labels={
-            "Resolution": "Resolução (m)",
-            "Initiative": "Iniciativas",
-            "Type": "Tipo"
+            "Resolution": "Resolution (m)",
+            "Initiative": "Initiatives",
+            "Type": "Type"
         },
         color_discrete_sequence=get_chart_colors()
     )
 
     apply_standard_layout(
         fig,
-        title="Comparação de Resoluções Espaciais",
-        xaxis_title="Iniciativas",
-        yaxis_title="Resolução (m)"
+        title="Spatial Resolution Comparison",
+        xaxis_title="Initiatives",
+        yaxis_title="Resolution (m)"
     )
 
     return fig
@@ -257,10 +263,13 @@ def plot_temporal_coverage_comparison(filtered_df: pd.DataFrame) -> go.Figure:
 
     apply_standard_layout(
         fig,
-        title="Duração Temporal das Iniciativas",
-        xaxis_title="Duração (anos)",
-        yaxis_title="Iniciativas",
+        title="Temporal Duration of Initiatives",
+        xaxis_title="Duration (years)",
+        yaxis_title="Initiatives",
     )
+
+    # Set legend title
+    fig.update_layout(legend=dict(title=dict(text="Level")))
 
     fig.update_layout(
         height=max(400, len(temporal_data) * 25), 
