@@ -63,7 +63,7 @@ def render_crop_gantt_chart(filtered_data: Dict[str, Any], region: str = "Brasil
             end_month = max(month_indices)
 
             gantt_data.append({
-                'Task': f"{crop_name[:30]} - 🌱 Planting",
+                'Task': f"{crop_name[:30]} - 🌱",
                 'Start': start_month,
                 'Finish': end_month + 1,
                 'Resource': 'Planting',
@@ -78,7 +78,7 @@ def render_crop_gantt_chart(filtered_data: Dict[str, Any], region: str = "Brasil
             end_month = max(month_indices)
 
             gantt_data.append({
-                'Task': f"{crop_name[:30]} - 🌾 Harvest",
+                'Task': f"{crop_name[:30]} - 🌾",
                 'Start': start_month,
                 'Finish': end_month + 1,
                 'Resource': 'Harvest',
@@ -111,13 +111,13 @@ def render_crop_gantt_chart(filtered_data: Dict[str, Any], region: str = "Brasil
             },
             showlegend=False,
             hovertemplate=f"<b>{row['Task']}</b><br>" +
-                         f"Período: {month_names[start_idx]} - {month_names[end_idx]}<br>" +
-                         f"Tipo: {row['Resource']}<extra></extra>"
+                         f"Period: {month_names[start_idx]} - {month_names[end_idx]}<br>" +
+                         f"Activity: {row['Resource']}<extra></extra>"
         ))
 
     # Optimize layout for clarity and performance
     fig_gantt.update_layout(
-        title=f"",
+        title=f"Principal activities in an agricultural Brazilian year",
         xaxis_title="Months of the Year",
         yaxis_title="Crops and Activities",
         xaxis={
@@ -126,10 +126,21 @@ def render_crop_gantt_chart(filtered_data: Dict[str, Any], region: str = "Brasil
             'ticktext': month_names,
             'range': [-0.5, 11.5]
         },
-        height=max(400, len(gantt_data) * 36),
+        height=max(420, len(gantt_data) * 36),
         barmode='overlay',
-        showlegend=False,
-        margin=dict(l=80, r=30, t=60, b=40),
+        showlegend=True,
+        legend=dict(
+            title=dict(text="Activities"),
+            orientation='h',
+            x=0.5,
+            y=-0.12,
+            xanchor='center',
+            yanchor='top',
+            bordercolor='#e5e5e5',
+            borderwidth=1,
+            bgcolor='rgba(255,255,255,0.9)'
+        ),
+        margin=dict(l=80, r=30, t=60, b=140),  # increased bottom margin to fit legend
         plot_bgcolor='white'
     )
     fig_gantt.update_yaxes(automargin=True)
@@ -141,10 +152,10 @@ def render_crop_gantt_chart(filtered_data: Dict[str, Any], region: str = "Brasil
     st.markdown("**Data Summary**")
     col1, col2 = st.columns(2)
     with col1:
-        plantio_count = len([g for g in gantt_data if 'Planting' in g['Task']])
+        plantio_count = len([g for g in gantt_data if '🌱' in g['Task']])
         st.metric("🌱 Planting Periods", plantio_count)
     with col2:
-        harvest_count = len([g for g in gantt_data if 'Harvest' in g['Task']])
+        harvest_count = len([g for g in gantt_data if '🌾' in g['Task']])
         st.metric("🌾 Harvest Periods", harvest_count)
 
 

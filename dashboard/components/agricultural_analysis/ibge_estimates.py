@@ -160,6 +160,7 @@ def render_ibge_production_tab(data):
     """Renders the Production by Crop tab"""
 
     st.markdown("#### Production by Crop from 2023 IBGE PAM Data")
+    st.markdown("*Analysis of crop production data from the 2023 IBGE PAM survey.*")
 
     try:
         import pandas as pd
@@ -234,6 +235,7 @@ def render_ibge_regional_tab(data):
     """Renders the Regional Analysis tab"""
 
     st.markdown("#### IBGE PAM Regional Analysis")
+    st.markdown("*Analysis of regional agricultural data from the 2023 IBGE PAM survey.*")
 
     try:
         import pandas as pd
@@ -459,6 +461,7 @@ def render_ibge_historical_tab(data):
     """Renders historical series (2018-2023)"""
 
     st.markdown("#### IBGE PAM Historical Series (2018-2023)")
+    st.markdown("*Analysis of historical agricultural data from the 2018-2023 IBGE PAM survey.*")
 
     try:
         import pandas as pd

@@ -96,7 +96,7 @@ def calculate_gaps_statistics(temporal_df: pd.DataFrame) -> Dict[str, Any]:
         temporal_df: DataFrame with temporal data
         
     Returns:
-        dict: Estatísticas dos gaps
+        dict: Statistics about gaps
     """
     stats = {}
     
@@ -148,14 +148,13 @@ def calculate_gaps_statistics(temporal_df: pd.DataFrame) -> Dict[str, Any]:
 
 
 def plot_gaps_bar_chart(gaps_data: pd.DataFrame) -> go.Figure:
-    """
-    Gera gráfico de barras para análise de gaps temporais.
-    
+    """Generate a bar chart for temporal gaps analysis.
+
     Args:
-        gaps_data: DataFrame com dados de gaps
-        
+        gaps_data: DataFrame with gaps data
+
     Returns:
-        go.Figure: Figura Plotly com gráfico de barras dos gaps
+        go.Figure: Plotly figure with the gaps bar chart
     """
     if gaps_data.empty:
         fig = go.Figure()
@@ -229,7 +228,7 @@ def plot_gaps_bar_chart(gaps_data: pd.DataFrame) -> go.Figure:
             "zerolinecolor": 'rgba(128,128,128,0.4)',
             "zerolinewidth": 1
         },
-        margin={"b": 120}  # Margem inferior maior para labels rotacionados
+    margin={"b": 120}  # larger bottom margin for rotated labels
     )
     
     # Adicionar linha de referência para gap médio

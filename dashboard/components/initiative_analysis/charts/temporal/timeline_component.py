@@ -28,8 +28,9 @@ def render_timeline_tab(temporal_data: pd.DataFrame, metadata: dict) -> None:
         temporal_data: DataFrame with processed temporal data
         metadata: Dictionary of initiative metadata
     """
-    st.markdown("#### 📊 LULC Initiatives Timeline (1985-2024)")
-    
+    st.markdown("#### 📊 LULC Initiatives Timeline")
+    st.markdown("*Timeline overview of initiatives by year, showing temporal coverage and gaps for the 1985-2024 period.*")
+
     if temporal_data.empty or not metadata:
         st.warning("⚠️ No temporal data available for analysis.")
         return

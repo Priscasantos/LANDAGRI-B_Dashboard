@@ -5,25 +5,23 @@ Regional Calendar Charts
 Módulo de gráficos regionais consolidados do old_calendar/regional/.
 Implementa visualizações específicas por região brasileira.
 
-Autor: LANDAGRI-B Project Team 
+Autor: LANDAGRI-B Project Team
 Data: 2025-08-07
 """
 
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import streamlit as st
-from typing import Dict, List, Optional
 
 # Import do processador CONAB para dados regionais
 from ...agricultural_loader import (
-    safe_get_data, 
-    validate_data_structure
+    safe_get_data,
+    validate_data_structure,
 )
 
 
-def get_region_states() -> Dict[str, List[str]]:
+def get_region_states() -> dict[str, list[str]]:
     """
     Retorna mapeamento de regiões para estados.
     
@@ -40,7 +38,7 @@ def get_region_states() -> Dict[str, List[str]]:
     }
 
 
-def create_regional_conab_data() -> Dict[str, Dict]:
+def create_regional_conab_data() -> dict[str, dict]:
     """
     Cria dados regionais CONAB simulados para fallback.
     
@@ -108,7 +106,7 @@ def filter_data_by_region(filtered_data: dict, region: str) -> dict:
     return {'crop_calendar': regional_calendar}
 
 
-def create_regional_heatmap_chart(filtered_data: dict, region: str) -> Optional[go.Figure]:
+def create_regional_heatmap_chart(filtered_data: dict, region: str) -> go.Figure | None:
     """
     Cria heatmap para região específica com fallback para dados CONAB.
     
@@ -124,65 +122,68 @@ def create_regional_heatmap_chart(filtered_data: dict, region: str) -> Optional[
     try:
         regional_data = filter_data_by_region(filtered_data, region)
         crop_calendar = safe_get_data(regional_data, 'crop_calendar', {})
-        
+
         if not crop_calendar:
-            st.warning(f"📊 No data de calendário available para a região {region}")
+            st.warning(f"📊 No calendar data available for region {region}")
             return None
 
         # Meses
-        months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-                 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
-        
+        months = [
+            'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+            'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+        ]
+
         # Prepara dados para heatmap
-        heatmap_data = []
-        y_labels = []
-        
+        heatmap_data: list[list[int]] = []
+        y_labels: list[str] = []
+
         for crop, states_data in crop_calendar.items():
             if not isinstance(states_data, dict):
                 continue
-                
-            # Linha para plantio
-            planting_row = []
-            harvesting_row = []
-            
-            for month_idx, month in enumerate(months, 1):
+
+            planting_row: list[int] = []
+            harvesting_row: list[int] = []
+
+            for month_idx, _month in enumerate(months, 1):
                 planting_count = 0
                 harvesting_count = 0
                 
-                for state, activities in states_data.items():
+                for _state, activities in states_data.items():
                     if not isinstance(activities, dict):
                         continue
                         
                     planting_months = safe_get_data(activities, 'planting_months', [])
                     harvesting_months = safe_get_data(activities, 'harvesting_months', [])
-                    
+
                     if month_idx in planting_months:
                         planting_count += 1
                     if month_idx in harvesting_months:
                         harvesting_count += 1
-                
+
                 planting_row.append(planting_count)
                 harvesting_row.append(harvesting_count)
-            
+
             heatmap_data.extend([planting_row, harvesting_row])
             y_labels.extend([f"{crop} (🌱)", f"{crop} (🌾)"])
 
         if not heatmap_data:
-            st.info(f"📊 Nenhum dado de heatmap encontrado para {region}")
+            st.info(f"📊 No heatmap data found for {region}")
             return None
 
         # Cria heatmap
-        fig = go.Figure(data=go.Heatmap(
-            z=heatmap_data,
-            x=months,
-            y=y_labels,
-            colorscale='RdYlGn',
-            text=heatmap_data,
-            texttemplate="%{text}",
-            textfont={"size": 10},
-            hoverongaps=False,
-            colorbar=dict(title="Número de<br>Estados")
-        ))
+        fig = go.Figure(
+            data=go.Heatmap(
+                z=heatmap_data,
+                x=months,
+                y=y_labels,
+                colorscale='RdYlGn',
+                text=heatmap_data,
+                texttemplate="%{text}",
+                textfont={"size": 10},
+                hoverongaps=False,
+                colorbar={"title": "Número de<br>Estados"},
+            )
+        )
 
         # Personaliza layout
         fig.update_layout(
@@ -190,17 +191,17 @@ def create_regional_heatmap_chart(filtered_data: dict, region: str) -> Optional[
             xaxis_title="Mês do Ano",
             yaxis_title="Cultura e Tipo de Atividade",
             height=400 + (len(y_labels) * 12),
-            font=dict(size=11)
+            font={"size": 11},
         )
 
         return fig
 
     except Exception as e:
-        st.error(f"❌ Error creating heatmap regional para {region}: {e}")
+        st.error(f"❌ Error creating heatmap for region {region}: {e}")
         return None
 
 
-def create_regional_diversity_chart(filtered_data: dict, region: str) -> Optional[go.Figure]:
+def create_regional_diversity_chart(filtered_data: dict, region: str) -> go.Figure | None:
     """
     Cria gráfico de diversidade para região específica.
     
@@ -226,7 +227,7 @@ def create_regional_diversity_chart(filtered_data: dict, region: str) -> Optiona
         state_diversity = {}
         
         for crop, states_data in crop_calendar.items():
-            for state in states_data.keys():
+            for state in states_data:
                 if state in region_states:
                     if state not in state_diversity:
                         state_diversity[state] = set()
@@ -280,7 +281,7 @@ def create_regional_diversity_chart(filtered_data: dict, region: str) -> Optiona
         return None
 
 
-def create_regional_seasonal_chart(filtered_data: dict, region: str) -> Optional[go.Figure]:
+def create_regional_seasonal_chart(filtered_data: dict, region: str) -> go.Figure | None:
     """
     Cria gráfico sazonal para região específica.
     
@@ -296,9 +297,9 @@ def create_regional_seasonal_chart(filtered_data: dict, region: str) -> Optional
     try:
         regional_data = filter_data_by_region(filtered_data, region)
         crop_calendar = regional_data.get('crop_calendar', {})
-        
+
         if not crop_calendar:
-            st.info(f"📊 No data de calendário available para análise sazonal em {region}")
+            st.info(f"📊 No calendar data available for seasonal analysis in {region}")
             return None
 
         # Meses
@@ -306,11 +307,11 @@ def create_regional_seasonal_chart(filtered_data: dict, region: str) -> Optional
                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
         # Calcula atividade total por mês
-        monthly_planting = {month: 0 for month in months}
-        monthly_harvesting = {month: 0 for month in months}
+        monthly_planting = dict.fromkeys(months, 0)
+        monthly_harvesting = dict.fromkeys(months, 0)
 
-        for crop, states_data in crop_calendar.items():
-            for state, activities in states_data.items():
+        for _, states_data in crop_calendar.items():
+            for _, activities in states_data.items():
                 for month in activities.get('planting_months', []):
                     if month in monthly_planting:
                         monthly_planting[month] += 1
@@ -344,12 +345,12 @@ def create_regional_seasonal_chart(filtered_data: dict, region: str) -> Optional
         max_value = max(max(monthly_planting.values()), max(monthly_harvesting.values()))
         
         fig.update_layout(
-            polar=dict(
-                radialaxis=dict(
-                    visible=True,
-                    range=[0, max_value * 1.1]
-                )
-            ),
+            polar={
+                'radialaxis': {
+                    'visible': True,
+                    'range': [0, max_value * 1.1]
+                }
+            },
             title=f"🌿 Padrão Sazonal - Região {region}",
             height=500,
             showlegend=True
@@ -362,7 +363,7 @@ def create_regional_seasonal_chart(filtered_data: dict, region: str) -> Optional
         return None
 
 
-def create_regional_timeline_chart(filtered_data: dict, region: str) -> Optional[go.Figure]:
+def create_regional_timeline_chart(filtered_data: dict, region: str) -> go.Figure | None:
     """
     Cria timeline para região específica.
     
@@ -390,8 +391,8 @@ def create_regional_timeline_chart(filtered_data: dict, region: str) -> Optional
         # Calcula atividade mensal
         monthly_activities = {month: {'planting': 0, 'harvesting': 0} for month in months}
 
-        for crop, states_data in crop_calendar.items():
-            for state, activities in states_data.items():
+        for _, states_data in crop_calendar.items():
+            for _, activities in states_data.items():
                 for month in activities.get('planting_months', []):
                     if month in monthly_activities:
                         monthly_activities[month]['planting'] += 1
@@ -409,7 +410,7 @@ def create_regional_timeline_chart(filtered_data: dict, region: str) -> Optional
             fill='tozeroy',
             mode='lines',
             name='🌱 Plantio',
-            line=dict(color='lightgreen')
+            line={'color': 'lightgreen'}
         ))
 
         fig.add_trace(go.Scatter(
@@ -418,7 +419,7 @@ def create_regional_timeline_chart(filtered_data: dict, region: str) -> Optional
             fill='tozeroy',
             mode='lines',
             name='🌾 Colheita',
-            line=dict(color='orange')
+            line={'color': 'orange'}
         ))
 
         # Personaliza layout
@@ -485,22 +486,22 @@ def render_all_regional_analysis(filtered_data: dict) -> None:
     Args:
         filtered_data: Dados filtrados do calendário agrícola
     """
-    st.markdown("### 🌎 Análise Regional Detalhada")
+    st.markdown("### 🌎 Detailed Regional Analysis")
     
     # Seletor de região
     regions = list(get_region_states().keys())
     selected_region = st.selectbox(
-        "Selecione uma região para análise detalhada:",
+        "Select a region for detailed analysis:",
         options=regions,
-        key="regional_analysis_selector"
+        key="regional_analysis_selector",
     )
     
     if selected_region:
         render_regional_analysis_for_region(filtered_data, selected_region)
     
     # Opção para mostrar comparação entre regiões
-    if st.checkbox("📊 Mostrar comparação entre todas as regiões", key="show_regional_comparison"):
-        st.markdown("#### 📊 Comparação entre Regiões")
+    if st.checkbox("📊 Show comparison across all regions", key="show_regional_comparison"):
+        st.markdown("#### 📊 Comparison across Regions")
         
         # Cria gráfico comparativo de diversidade por região
         region_diversity = {}
@@ -512,17 +513,16 @@ def render_all_regional_analysis(filtered_data: dict) -> None:
             region_diversity[region] = total_crops
         
         if region_diversity:
-            df_comp = pd.DataFrame(list(region_diversity.items()), 
-                                 columns=['Região', 'Número_Culturas'])
-            df_comp = df_comp.sort_values('Número_Culturas', ascending=True)
-            
+            df_comp = pd.DataFrame(list(region_diversity.items()), columns=['Region', 'Number_Crops'])
+            df_comp = df_comp.sort_values('Number_Crops', ascending=True)
+
             fig_comp = px.bar(
                 df_comp,
-                x='Número_Culturas',
-                y='Região',
+                x='Number_Crops',
+                y='Region',
                 orientation='h',
-                title="🌍 Comparação de Diversidade de Culturas por Região",
-                color='Número_Culturas',
+                title="🌍 Diversity Comparison by Region",
+                color='Number_Crops',
                 color_continuous_scale='Viridis'
             )
             

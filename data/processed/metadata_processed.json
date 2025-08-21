@@ -1,5 +1,5 @@
 {
-  "Copernicus Global Land Cover Service (CGLS) Dynamic Land Cover": {
+  "Copernicus Global Land Cover Service Dynamic Land Cover": {
     "coverage": "Global",
     "acronym": "CGLS",
     "provider": "Copernicus European Union's Space Program",
@@ -36,7 +36,7 @@
     "temporal_span": 5,
     "temporal_gaps": []
   },
-  "Dynamic World V1": {
+  "Google Dynamic World V1": {
     "coverage": "Global",
     "acronym": "GDW",
     "provider": "Google and World Resources Institute",
@@ -815,7 +815,7 @@
       2021
     ]
   },
-  "MapBiomas Brasil": {
+  "MapBiomas": {
     "coverage": "National",
     "acronym": "MapBiomas",
     "provider": "Non-governmental Organizations (NGO's), Universities and Technology Companies",
@@ -898,7 +898,7 @@
     "temporal_span": 39,
     "temporal_gaps": []
   },
-  "IBGE Monitoramento": {
+  "IBGE Monitoring Land Cover and Land Use": {
     "coverage": "National",
     "acronym": "IBGE-MLCU",
     "provider": "Brazilian Institute of Geography and Statistics (IBGE)",
@@ -954,7 +954,7 @@
       2019
     ]
   },
-  "Agricultural Mapping (CONAB)": {
+  "National Supply Company Agricultural Mapping": {
     "coverage": "National",
     "acronym": "CONAB-AM",
     "provider": "National Supply Company (Conab)",

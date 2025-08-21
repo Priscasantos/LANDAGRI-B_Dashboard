@@ -71,7 +71,7 @@ st.set_page_config(
     menu_items={"Report a bug": None, "Get Help": None, "About": None},
 )
 
-# Custom CSS for fonts and modern layout
+# Custom CSS for fonts and modern layout (icons removed)
 st.markdown(
     """
 <style>
@@ -122,13 +122,14 @@ st.markdown(
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
-    /* Styling for navigation links from streamlit-option-menu */
+    /* Styling for navigation links from streamlit-option-menu (icons removed) */
     .nav-link {
         background: rgba(148, 163, 184, 0.1) !important; /* Subtle background */
         margin-bottom: 0.3rem !important;
         border-radius: 0.7rem !important;
         transition: all 0.3s ease !important;
         border-left: 3px solid transparent !important; /* For hover effect */
+        padding-left: 0.9rem !important; /* Adjust for no-icon layout */
     }
     .nav-link:hover {
         background: rgba(59, 130, 246, 0.2) !important; /* Lighter blue on hover */
@@ -142,10 +143,16 @@ st.markdown(
         border-left: 3px solid #60a5fa !important;
         box-shadow: 0 3px 10px rgba(59, 130, 246, 0.3) !important;
     }
-    .nav-link i { /* Icon styling */
-        margin-right: 0.5rem;
-        width: 20px;
-        text-align: center;
+    /* Remove any icons provided by streamlit-option-menu or custom markup */
+    .icon, .menu-title .icon, .nav-link .icon {
+        display: none !important;
+        width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    /* Hide main menu title icon spacing */
+    .menu-title {
+        padding-left: 0.6rem !important;
     }
     /* Responsive adjustments */
     @media (max-width: 900px) {
@@ -284,7 +291,7 @@ with st.sidebar:
         styles=modern_menu_styles,
         key="main_category_menu",
     )
-
+    
     # Sub-menu para categoria selecionada
     selected_page = None
     if selected_category in menu_structure:

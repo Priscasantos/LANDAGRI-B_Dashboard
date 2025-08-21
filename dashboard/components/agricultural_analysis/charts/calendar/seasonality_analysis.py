@@ -100,7 +100,10 @@ def create_seasonality_index_chart(filtered_data: dict, chart_key: str = "season
             yaxis_title="Activities Intensity",
             height=500,
             showlegend=True,
-            hovermode='x unified'
+            hovermode='x unified',
+            legend=dict(
+            title={'text': 'Crop Type', 'font': {'size': 12}}
+            )
         )
         
         st.plotly_chart(fig, use_container_width=True, key=chart_key)
@@ -302,22 +305,23 @@ def create_polar_seasonality_analysis(filtered_data: dict, chart_key: str = "pol
         
         fig_polar.update_layout(
             polar={
-                'radialaxis': {
-                    'visible': True, 
-                    'range': [0, max_value],
-                    'tickfont': {'size': 12}
-                },
-                'angularaxis': {
-                    'tickfont': {'size': 12}
-                }
+            'radialaxis': {
+                'visible': True, 
+                'range': [0, max_value],
+                'tickfont': {'size': 12}
+            },
+            'angularaxis': {
+                'tickfont': {'size': 12}
+            }
             },
             showlegend=True,
             legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=-0.1,
-                xanchor="center",
-                x=0.5
+            title={'text': 'Crop period', 'font': {'size': 12}},
+            orientation="h",
+            yanchor="bottom",
+            y=-0.1,
+            xanchor="center",
+            x=0.5
             ),
             height=600,
             font=dict(size=12)

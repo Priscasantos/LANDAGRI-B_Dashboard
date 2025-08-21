@@ -2,7 +2,7 @@
   "comparison_matrix": [
     {
       "Acronym": "CGLS",
-      "Name": "Copernicus Global Land Cover Service (CGLS) Dynamic Land Cover",
+      "Name": "Copernicus Global Land Cover Service Dynamic Land Cover",
       "Accuracy (%)": 83.3,
       "Resolution (m)": 100.0,
       "Classes": 10,
@@ -13,7 +13,7 @@
     },
     {
       "Acronym": "GDW",
-      "Name": "Dynamic World V1",
+      "Name": "Google Dynamic World V1",
       "Accuracy (%)": 73.8,
       "Resolution (m)": 10.0,
       "Classes": 9,
@@ -134,7 +134,7 @@
     },
     {
       "Acronym": "MapBiomas",
-      "Name": "MapBiomas Brasil",
+      "Name": "MapBiomas Brazil",
       "Accuracy (%)": 93.0,
       "Resolution (m)": 30.0,
       "Classes": 29,
@@ -145,7 +145,7 @@
     },
     {
       "Acronym": "IBGE-MLCU",
-      "Name": "IBGE Monitoramento",
+      "Name": "IBGE Monitoring Land Cover and Land Use",
       "Accuracy (%)": 0.0,
       "Resolution (m)": 30.0,
       "Classes": 12,
@@ -156,7 +156,7 @@
     },
     {
       "Acronym": "CONAB-AM",
-      "Name": "Agricultural Mapping (CONAB)",
+      "Name": "National Supply Company Agricultural Mapping",
       "Accuracy (%)": 0.0,
       "Resolution (m)": 30.0,
       "Classes": 8,
@@ -169,7 +169,7 @@
   "temporal_analysis": {
     "initiatives": [
       {
-        "name": "Copernicus Global Land Cover Service (CGLS) Dynamic Land Cover",
+        "name": "Copernicus Global Land Cover Service Dynamic Land Cover",
         "acronym": "CGLS",
         "years": [
           2015,
@@ -185,7 +185,7 @@
         "gaps": []
       },
       {
-        "name": "Dynamic World V1",
+        "name": "Google Dynamic World V1",
         "acronym": "GDW",
         "years": [
           2017,
@@ -571,7 +571,7 @@
         ]
       },
       {
-        "name": "MapBiomas Brasil",
+        "name": "MapBiomas Brazil",
         "acronym": "MapBiomas",
         "years": [
           1985,
@@ -621,7 +621,7 @@
         "gaps": []
       },
       {
-        "name": "IBGE Monitoramento",
+        "name": "IBGE Monitoring Land Cover and Land Use",
         "acronym": "IBGE-MLCU",
         "years": [
           2000,
@@ -684,7 +684,7 @@
         ]
       },
       {
-        "name": "Agricultural Mapping (CONAB)",
+        "name": "National Supply Company Agricultural Mapping",
         "acronym": "CONAB-AM",
         "years": [
           2000,
@@ -806,7 +806,7 @@
             0,
             0
           ],
-          "name": "Copernicus Global Land Cover Service (CGLS) Dynamic Land Cover"
+          "name": "Copernicus Global Land Cover Service Dynamic Land Cover"
         },
         "GDW": {
           "availability": [
@@ -851,7 +851,7 @@
             1,
             1
           ],
-          "name": "Dynamic World V1"
+          "name": "Google Dynamic World V1"
         },
         "ESRI-10m LULC": {
           "availability": [
@@ -1346,7 +1346,7 @@
             1,
             0
           ],
-          "name": "MapBiomas Brasil"
+          "name": "MapBiomas Brazil"
         },
         "IBGE-MLCU": {
           "availability": [
@@ -1391,7 +1391,7 @@
             0,
             0
           ],
-          "name": "IBGE Monitoramento"
+          "name": "IBGE Monitoring Land Cover and Land Use"
         },
         "CONAB-AM": {
           "availability": [
@@ -1436,7 +1436,7 @@
             1,
             0
           ],
-          "name": "Agricultural Mapping (CONAB)"
+          "name": "National Supply Company Agricultural Mapping"
         }
       }
     },
