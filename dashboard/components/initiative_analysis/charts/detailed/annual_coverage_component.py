@@ -8,7 +8,6 @@ Author: LANDAGRI-B Project Team
 Date: 2025-08-01
 """
 
-from turtle import title
 import pandas as pd
 import streamlit as st
 
