@@ -29,8 +29,9 @@ def render_distributions_tab(filtered_df: pd.DataFrame) -> None:
     Args:
         filtered_df: DataFrame filtrado com dados das iniciativas
     """
-    st.markdown("#### 📊 Distributions Analysis")
-    
+    st.markdown("#### 📉 Distributions Analysis")
+    st.markdown("*Analysis of initiative distributions across different dimensions.*")
+
     if filtered_df.empty:
         st.warning("⚠️ Nenhum dado disponível para análise de distribuições.")
         return
@@ -38,7 +39,7 @@ def render_distributions_tab(filtered_df: pd.DataFrame) -> None:
     # Sub-abas para diferentes tipos de distribuições
     sub_tab1, sub_tab2, sub_tab3 = st.tabs([
         "🔧 Methodologies",
-        "📏 Spatial Resolution",
+        "📉 Distributions Analysis",
         "⏱️ Temporal Coverage",
     ])
     
@@ -47,7 +48,7 @@ def render_distributions_tab(filtered_df: pd.DataFrame) -> None:
         render_methodology_distribution(filtered_df)
     
     with sub_tab2:
-        st.markdown("#### 📏 Spatial Resolution")
+        st.markdown("#### 📉 Distributions Analysis")
         render_resolution_distribution(filtered_df)
     
     with sub_tab3:

@@ -123,6 +123,7 @@ def plot_seasonal_patterns(conab_data: Dict[str, Any]) -> go.Figure:
         height=800,  # Increased height for better state visibility
         showlegend=True,
         legend=dict(
+            title=dict(text="Seasons"),  # Título da legenda
             orientation="h",
             yanchor="bottom",
             y=1.02,
@@ -289,6 +290,7 @@ def plot_monthly_activity_intensity(conab_data: Dict[str, Any]) -> go.Figure:
         height=400,
         showlegend=True,
         legend=dict(
+            title=dict(text="Activities"),
             orientation="h",
             yanchor="bottom",
             y=1.02,

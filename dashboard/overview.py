@@ -527,7 +527,7 @@ def run() -> None:
             🔎 Overview
         </h1>
         <p style="color: white; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
-            General Summary and Key Metrics of Land Use and Land Cover (LULC) Initiatives.
+            General summary and key metrics of Land Use and Land Cover (LULC) initiatives.
         </p>
     </div>
     """,

@@ -101,18 +101,29 @@ def create_total_activities_per_month_chart(filtered_data: dict) -> Optional[go.
             y='Total_Activities',
             title="Total Agricultural Activities per Month",
             labels={
-                'Total_Activities': 'Total Number of Activities',
-                'Month': 'Month of Year'
+            'Total_Activities': 'Total Number of Activities',
+            'Month': 'Month of Year'
             },
             markers=True
         )
+        # Mostrar legenda com rótulo claro
+        fig.update_traces(name='Total Activities', showlegend=True)
 
         # Personaliza layout
         fig.update_layout(
             height=400,
             xaxis_title="Month of Year",
             yaxis_title="Total Number of Activities",
-            showlegend=False
+            showlegend=True,
+            legend=dict(
+            title=dict(text="Legend"),
+            orientation="v",
+            x=1.02,
+            xanchor="left",
+            y=0.5,
+            yanchor="middle"
+            ),
+            margin=dict(t=60, r=140)  # espaço à direita para acomodar a legenda
         )
 
         # Adiciona valores nos pontos
@@ -397,7 +408,7 @@ def create_monthly_activities_stacked_bar_chart(filtered_data: dict) -> Optional
             df_seasonal,
             x='Mês',
             y=['P', 'H', 'PH'],
-            title="📊 Distribuição Mensal de Atividades",
+            title="📊 Monthly Distribution of Activities",
             labels={
                 'value': 'Número de Atividades', 
                 'variable': 'Tipo',

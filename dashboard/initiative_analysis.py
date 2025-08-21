@@ -78,7 +78,7 @@ def run(metadata=None, df_original=None):
                 🏞  Initiative Analysis
             </h1>
             <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic">
-                Comprehensive Spatio-temporal Analysis of Thirteen Land Use and Land Cover (LULC) Initiatives. Reference:
+                Comprehensive spatio-temporal analysis of thirteen Land Use and Land Cover (LULC) initiatives. Reference:
                 <a href="https://doi.org/10.3390/rs17132324" target="_blank" rel="noopener noreferrer" style="color: #fdebd6; text-decoration: underline; font-weight: 600;">
                     Santos et al. (2025).
                 </a>
@@ -160,7 +160,7 @@ def render_comparative_analysis(df: pd.DataFrame, metadata: dict) -> None:
             🔠 Comparative Analysis
         </h2>
         <p style="color: #7a4b18; margin: 0.5rem 0 0 0; font-size: 1rem;">
-            Comparative Analysis of LULC Mapping Initiatives Characteristics.
+            Comparative analysis of LULC mapping initiatives characteristics.
         </p>
         </div>
         """,
@@ -172,13 +172,13 @@ def render_comparative_analysis(df: pd.DataFrame, metadata: dict) -> None:
 
     st.markdown("---")
     st.markdown("### 📊 Comparison Charts")
-    st.markdown("### *Comparison of LULC Mapping Initiatives Characteristics using different approaches.*")
+    st.markdown("*Comparison of LULC mapping initiatives characteristics using different approaches.*")
 
     # Abas de análise comparativa usando todos os componentes
     tab_labels = [
-        "🎯 Accuracy vs Spatial Resolution",
-        "📏 Spatial Resolution",
-        "⭐ Global Accuracy",
+        "𝒂/𝓫 Pairwise Performance",
+        "📉 Distributions Analysis",
+        "🎯 Global Accuracy",
         "🧮 Methodology Distribution",
         "🏷️ Class Details",
         "🔬 Methodology - Deep Dive",
@@ -199,7 +199,7 @@ def render_comparative_analysis(df: pd.DataFrame, metadata: dict) -> None:
     with tab_acc_res:
         render_accuracy_resolution_tab(filtered_df)
     with tab_res:
-        # Spatial resolution (distribution)
+        # Distribution Analysis (distribution)
         render_distributions_tab(filtered_df)  # includes sub-tabs, can be adjusted
     with tab_acc:
         # Global accuracy (bar chart)
@@ -249,7 +249,7 @@ def render_temporal_analysis(df: pd.DataFrame, metadata: dict) -> None:
             ⏳ Temporal Analysis
         </h2>
         <p style="color: #7a4b18; margin: 0.5rem 0 0 0; font-size: 1rem;">
-            Temporal Analysis of LULC Mapping Initiatives showing trends, gaps, and evolutions over time.
+            Temporal analysis of LULC mapping initiatives showing trends, gaps, and evolutions over time.
         </p>
         </div>
         """,
@@ -298,8 +298,8 @@ def render_detailed_analysis(df: pd.DataFrame, metadata: dict) -> None:
         <h2 style="color: #5a3716; margin: 0; font-size: 1.8rem; font-weight: 600;">
             ◌ Detailed Analysis
         </h2>
-        <p style="color: #7a4b18; margin: 0.5rem 0 0 0; font-size: 1rem;">
-            Detailed Analysis of LULC Mapping Initiatives Using Custom Filtered-Based Search.
+        <p style="color: #7a4b18; margin: 0.5rem 0 0 0; font-size: 1rem; font-style: italic;">
+            Detailed analysis of LULC mapping initiatives using custom filtered-based search.
         </p>
         </div>
         """,
@@ -326,7 +326,7 @@ def render_detailed_analysis(df: pd.DataFrame, metadata: dict) -> None:
         df_filtered["available_years"] = df_filtered["Name"].map(lambda n: metadata.get(n, {}).get("available_years", []))
     st.markdown("---")
     st.markdown("### 📊 Detailed Analysis")
-    st.markdown("*Detailed Statistical Analysis.*")
+    st.markdown("*Detailed statistical analysis.*")
     # Detailed analysis tabs
     tab1, tab2, tab3, tab4, tab5 = st.tabs(
         [

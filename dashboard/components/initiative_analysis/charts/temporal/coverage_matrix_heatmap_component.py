@@ -10,7 +10,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-from dashboard.components.shared.chart_core import get_chart_colors
+
 
 
 def render_coverage_matrix_heatmap(temporal_data: pd.DataFrame, metadata: dict) -> None:
@@ -27,7 +27,7 @@ def render_coverage_matrix_heatmap(temporal_data: pd.DataFrame, metadata: dict) 
     # Tab-based navigation for different temporal views
     tab1, tab2, tab3, tab4 = st.tabs([
         "📈 Evolution Trends", 
-        "🗓️ Coverage Matrix", 
+        "🗓️ Coverage Availability", 
         "📊 Coverage Statistics",
         "⏱️ Timeline Analysis"
     ])
@@ -186,109 +186,117 @@ def render_evolution_trends(metadata: dict) -> None:
 
 
 def render_coverage_heatmap(metadata: dict) -> None:
-    """Render modern coverage heatmap with proper scaling."""
-    st.markdown("#### 🗓️ Temporal Coverage Matrix")
-    
-    # Extract temporal data
+    """Simplified temporal coverage view: horizontal timeline per initiative with gaps preserved.
+    Keeps a consistent (larger) height and a clean visual — not a matrix."""
+    st.markdown("#### 🗓️ Temporal Coverage Availability")
+
+
+    # Collect years and initiatives
     all_years = set()
-    for details in metadata.values():
-        available_years = details.get("available_years", [])
-        if available_years:
-            all_years.update([int(y) for y in available_years if isinstance(y, (int, str)) and str(y).isdigit()])
-        else:
-            years_data = details.get("years", {})
-            if years_data:
-                all_years.update([int(y) for y in years_data.keys() if str(y).isdigit()])
-    
-    if not all_years:
-        st.info("No temporal data available for coverage matrix.")
-        return
-    
-    years_sorted = sorted(all_years)
-    initiatives = []
-    matrix = []
-    initiative_metadata = []
-    
-    # Build enhanced coverage matrix
+    initiatives_raw = []
+
     for name, details in metadata.items():
         display_name = details.get('display_name', name)
         available_years = details.get("available_years", [])
         if available_years:
-            years_set = set(int(y) for y in available_years if isinstance(y, (int, str)) and str(y).isdigit())
+            years_set = {int(y) for y in available_years if isinstance(y, (int, str)) and str(y).isdigit()}
         else:
             years_data = details.get("years", {})
-            years_set = set(int(y) for y in years_data.keys() if str(y).isdigit())
-        
-        if years_set:  # Only include initiatives with temporal data
-            row = []
-            for year in years_sorted:
-                row.append(1 if year in years_set else 0)
-            
-            initiatives.append(display_name[:35] + "..." if len(display_name) > 35 else display_name)
-            matrix.append(row)
-            initiative_metadata.append({
-                'name': name,
-                'start_year': min(years_set),
-                'end_year': max(years_set),
-                'coverage_years': len(years_set),
-                'coverage_ratio': len(years_set) / len(years_sorted)
-            })
-    
-    if not matrix:
-        st.info("No coverage data available for visualization.")
+            years_set = {int(y) for y in years_data.keys() if str(y).isdigit()}
+
+        if not years_set:
+            continue
+
+        all_years.update(years_set)
+        initiatives_raw.append({
+            "name": display_name,
+            "short_name": display_name if len(display_name) <= 60 else display_name[:57] + "...",
+            "years": years_set,
+            "start": min(years_set),
+            "coverage": len(years_set)
+        })
+
+    if not all_years or not initiatives_raw:
+        st.info("No temporal data available for coverage view.")
         return
-    
-    # Create enhanced heatmap
-    fig = go.Figure(data=go.Heatmap(
-        z=matrix,
-        x=years_sorted,
-        y=initiatives,
-        colorscale=[
-            [0, '#f8fafc'],      # Light gray for no data
-            [0.5, '#93c5fd'],    # Light blue for partial coverage
-            [1, '#1d4ed8']       # Deep blue for full coverage
-        ],
-        showscale=True,
-        colorbar=dict(
-            title=dict(
-                text="<b>Data<br>Available</b>",
-                font=dict(size=12, family="Inter")
-            ),
-            tickvals=[0, 0.5, 1],
-            ticktext=["No Data", "Partial", "Available"],
-            tickfont=dict(size=10, family="Inter"),
-            len=0.8
-        ),
-        hovertemplate="<b>%{y}</b><br>Year: <b>%{x}</b><br>Data: <b>%{customdata}</b><extra></extra>",
-        customdata=[["Available" if cell == 1 else "Not Available" for cell in row] for row in matrix]
-    ))
-    
+
+    years_sorted = sorted(all_years)
+
+    # Sort initiatives: newest start first, then by coverage desc
+    initiatives_sorted = sorted(initiatives_raw, key=lambda i: (i["start"], -i["coverage"]), reverse=True)
+    initiative_names = [i["short_name"] for i in initiatives_sorted]
+
+    # Build traces: one horizontal trace per initiative using full year axis with None for gaps
+    fig = go.Figure()
+    color = "#2563eb"
+    for idx, inst in enumerate(initiatives_sorted):
+        x_vals = []
+        y_vals = []
+        hover_texts = []
+        for y in years_sorted:
+            if y in inst["years"]:
+                x_vals.append(y)
+                y_vals.append(idx)
+                hover_texts.append(f"<b>{inst['short_name']}</b><br>Year: {y}")
+            else:
+                # None breaks the line (preserves gaps/continuity)
+                x_vals.append(None)
+                y_vals.append(None)
+                hover_texts.append(None)
+
+        fig.add_trace(go.Scattergl(
+            x=x_vals,
+            y=y_vals,
+            mode='lines+markers',
+            name=inst['short_name'],
+            line=dict(color=color, width=3),
+            marker=dict(size=8, color=color),
+            hoverinfo='text',
+            hovertext=hover_texts,
+            connectgaps=False,
+            showlegend=False
+        ))
+
+    # Fixed larger height (consistent)
+    fixed_height = 900
+
+    fig.update_xaxes(
+        title_text="<b>Year</b>",
+        tickmode="array",
+        tickvals=years_sorted,
+        ticktext=[str(y) for y in years_sorted],
+        tickangle=45,
+        tickfont=dict(size=11, family="Inter", color="#374151"),
+        showgrid=True,
+        gridcolor='rgba(203,213,225,0.3)'
+    )
+
+    fig.update_yaxes(
+        title_text="<b>Initiative</b>",
+        tickmode="array",
+        tickvals=list(range(len(initiative_names))),
+        ticktext=initiative_names,
+        tickfont=dict(size=11, family="Inter", color="#111827"),
+        autorange="reversed",
+        automargin=True,
+        showgrid=False
+    )
+
     fig.update_layout(
-        height=max(600, len(initiatives) * 25),
         title=dict(
-            text="<b>Temporal Coverage Matrix (1984-2024)</b><br><span style='font-size:14px;color:#6b7280'>40 years of LULC data availability</span>",
+        text="<b>Year-by-Year Availability (Simplified Line View)</b><br><span style='font-size:12px;color:#6b7280'>Lines show continuity; gaps interrupt the line</span>",
             x=0.5,
-            font=dict(size=18, family="Inter", color="#1f2937")
+            font=dict(family="Inter", size=14, color="#111827")
         ),
-        xaxis=dict(
-            title="<b>Year</b>",
-            tickfont=dict(size=10, family="Inter", color="#6b7280"),
-            showgrid=False,
-            dtick=5,  # Show every 5th year for clarity
-            tickangle=-45
-        ),
-        yaxis=dict(
-            title="<b>Initiative</b>",
-            tickfont=dict(size=9, family="Inter", color="#4b5563"),
-            showgrid=False,
-            automargin=True
-        ),
-        margin=dict(l=250, r=100, t=100, b=80),
+        template="plotly_white",
+        margin=dict(l=260, r=80, t=100, b=120),
+        height=fixed_height,
         plot_bgcolor='white',
         paper_bgcolor='white',
-        font=dict(family="Inter", size=10)
+        hovermode="closest",
+        font=dict(family="Inter", size=11, color="#111827")
     )
-    
+
     st.plotly_chart(fig, use_container_width=True)
 
 

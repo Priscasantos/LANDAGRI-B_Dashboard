@@ -178,7 +178,7 @@ def _render_seasonality_analysis(crop_calendar: dict, states_info: dict) -> None
                 df_seasonal,
                 x='Mês',
                 y=['P', 'H', 'PH'],
-                title="Distribuição Mensal de Atividades",
+                title="Monthly Distribution of Activities",
                 labels={'value': 'Número de Atividades', 'variable': 'Tipo'},
                 color_discrete_map={'P': '#2E8B57', 'H': '#FF6B35', 'PH': '#4682B4'}
             )

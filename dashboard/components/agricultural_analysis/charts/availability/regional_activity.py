@@ -454,7 +454,7 @@ def plot_state_activity_comparison(conab_data: Dict[str, Any]) -> go.Figure:
     fig.add_trace(go.Bar(
         x=states,
         y=planting_activities,
-        name='Planting Activities',
+        name='Planting',
         marker_color='#2E8B57',
         hovertemplate="State: %{x}<br>Planting Activities: %{y}<br><extra></extra>"
     ))
@@ -463,19 +463,27 @@ def plot_state_activity_comparison(conab_data: Dict[str, Any]) -> go.Figure:
     fig.add_trace(go.Bar(
         x=states,
         y=harvest_activities,
-        name='Harvest Activities',
+        name='Harvesting',
         marker_color='#DAA520',
         hovertemplate="State: %{x}<br>Harvest Activities: %{y}<br><extra></extra>"
     ))
     
     fig.update_layout(
-        title="Agricultural Activity Comparison (Planting and Harvesting Activities)",
+        title="Agricultural Activity Comparison",
         xaxis_title="State",
         yaxis_title="Number of Activities",
         height=600,  # Increased height for more states
         barmode='stack',
         showlegend=True,
-        xaxis=dict(tickangle=45)
+        xaxis=dict(tickangle=45),
+        legend=dict(
+            title=dict(text="Activity Type"),
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        )
     )
     
     return fig
@@ -624,12 +632,13 @@ def plot_state_activity_timeline(conab_data: Dict[str, Any]) -> go.Figure:
         ))
     
     fig.update_layout(
-        title="Planting and Harvesting Activity Timeline by State",
+        title="Planting and Harvesting Activity Timeline by Brazilian States",
         xaxis_title="Month",
         yaxis_title="Number of Planting/Harvesting Activities",
         height=600,  # Increased height for better visibility
         showlegend=True,
         legend=dict(
+            title=dict(text="States"),
             orientation="v",
             yanchor="top",
             y=1,

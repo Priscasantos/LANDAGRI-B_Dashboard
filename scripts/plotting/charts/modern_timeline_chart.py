@@ -157,13 +157,13 @@ def plot_modern_timeline_chart(
                     "opacity": 1.0,
                     "line": {"width": 2, "color": "white"},
                 },
-                name="■ Início da Iniciativa" if not legend_start_added else "",
+                name="■ Start of Initiative" if not legend_start_added else "",
                 showlegend=not legend_start_added,
                 legendgroup="starts",
-                hovertemplate=f"<b>{init_data['acronym']} - INÍCIO</b><br>"
-                + f"Ano: {init_data['start_year']}<br>"
-                + f"Tipo: {init_data['type']}<br>"
-                + f"Metodologia: {init_data['methodology']}<extra></extra>",
+                    hovertemplate=f"<b>{init_data['acronym']} - START</b><br>"
+                + f"Year: {init_data['start_year']}<br>"
+                + f"Type: {init_data['type']}<br>"
+                + f"Methodology: {init_data['methodology']}<extra></extra>",
             )
         )
         legend_start_added = True
@@ -182,13 +182,13 @@ def plot_modern_timeline_chart(
                         "opacity": 1.0,
                         "line": {"width": 3, "color": color},
                     },
-                    name="□ Fim da Iniciativa" if not legend_end_added else "",
+                    name="□ End of Initiative" if not legend_end_added else "",
                     showlegend=not legend_end_added,
                     legendgroup="ends",
-                    hovertemplate=f"<b>{init_data['acronym']} - FIM</b><br>"
-                    + f"Ano: {init_data['end_year']}<br>"
-                    + f"Tipo: {init_data['type']}<br>"
-                    + f"Metodologia: {init_data['methodology']}<extra></extra>",
+                    hovertemplate=f"<b>{init_data['acronym']} - END</b><br>"
+                    + f"Year: {init_data['end_year']}<br>"
+                    + f"Type: {init_data['type']}<br>"
+                    + f"Methodology: {init_data['methodology']}<extra></extra>",
                 )
             )
             legend_end_added = True
@@ -213,12 +213,12 @@ def plot_modern_timeline_chart(
                             "opacity": 0.8,
                             "line": {"width": 1, "color": "white"},
                         },
-                        name="● Dados Disponíveis" if not legend_data_added else "",
+                        name="● Data Available" if not legend_data_added else "",
                         showlegend=not legend_data_added,
                         legendgroup="data_points",
                         hovertemplate=f"<b>{init_data['acronym']}</b><br>"
-                        + "Dados disponíveis em: %{x}<br>"
-                        + f"Tipo: {init_data['type']}<extra></extra>",
+                        + "Data available at: %{x}<br>"
+                        + f"Type: {init_data['type']}<extra></extra>",
                     )
                 )
                 legend_data_added = True
@@ -228,7 +228,7 @@ def plot_modern_timeline_chart(
 
     fig.update_layout(
         title={
-            "text": "<b>Cronologia das Iniciativas de Monitoramento LULC</b>",
+            "text": "<b>Timeline of LULC Monitoring Initiatives</b>",
             "x": 0.5,
             "xanchor": "center",
             "font": {
@@ -258,7 +258,7 @@ def plot_modern_timeline_chart(
 
     # Configurar eixos
     fig.update_xaxes(
-        title="<b>Período de Execução (Anos)</b>",
+        title="<b>Execution Period (Years)</b>",
         title_font={"size": 16, "color": "#1e293b", "family": "Arial, sans-serif"},
         range=[min_year - 1, max_year + 1],
         showgrid=True,
@@ -273,7 +273,7 @@ def plot_modern_timeline_chart(
     )
 
     fig.update_yaxes(
-        title="<b>Iniciativas de Monitoramento LULC</b>",
+        title="<b>LULC Monitoring Initiatives</b>",
         title_font={"size": 16, "color": "#1e293b", "family": "Arial, sans-serif"},
         tickmode="array",
         tickvals=y_positions,
@@ -307,35 +307,35 @@ def timeline_with_modern_controls(metadata: dict[str, Any], filtered_df: pd.Data
     """Interface Streamlit para timeline moderno com controles."""
     import streamlit as st
 
-    st.sidebar.subheader("🎨 Controles do Timeline Moderno")
+    st.sidebar.subheader("🎨 Modern Timeline Controls")
 
     # Controles visuais
     show_intervals = st.sidebar.checkbox(
-        "Mostrar Intervalos",
+        "Show Intervals",
         value=True,
-        help="Mostrar linhas conectando pontos de início e fim",
+        help="Show lines connecting start and end points",
     )
 
     show_shadows = st.sidebar.checkbox(
-        "Mostrar Sombreamento",
+        "Show Shadows",
         value=True,
-        help="Mostrar áreas sombreadas para períodos das iniciativas",
+        help="Show shaded areas for initiative periods",
     )
 
     point_size = st.sidebar.slider(
-        "Tamanho dos Pontos", min_value=8, max_value=20, value=12, step=2
+        "Point Size", min_value=8, max_value=20, value=12, step=2
     )
 
     line_width = st.sidebar.slider(
-        "Largura das Linhas", min_value=3, max_value=15, value=8, step=1
+        "Line Width", min_value=3, max_value=15, value=8, step=1
     )
 
     shadow_opacity = st.sidebar.slider(
-        "Opacidade do Sombreamento", min_value=0.1, max_value=0.5, value=0.25, step=0.05
+        "Shadow Opacity", min_value=0.1, max_value=0.5, value=0.25, step=0.05
     )
 
     chart_height = st.sidebar.slider(
-        "Altura do Gráfico", min_value=400, max_value=1200, value=600, step=50
+        "Chart Height", min_value=400, max_value=1200, value=600, step=50
     )  # Gerar gráfico
     fig = plot_modern_timeline_chart(
         metadata=metadata,
@@ -352,14 +352,14 @@ def timeline_with_modern_controls(metadata: dict[str, Any], filtered_df: pd.Data
     st.plotly_chart(fig, use_container_width=True)
 
     # Mostrar configurações atuais
-    with st.sidebar.expander("📊 Configurações Atuais"):
+    with st.sidebar.expander("📊 Current Settings"):
         st.json(
             {
-                "mostrar_intervalos": show_intervals,
-                "mostrar_sombreamento": show_shadows,
-                "tamanho_pontos": point_size,
-                "largura_linhas": line_width,
-                "opacidade_sombreamento": shadow_opacity,
-                "altura_grafico": chart_height,
+                "show_intervals": show_intervals,
+                "show_shadows": show_shadows,
+                "point_size": point_size,
+                "line_width": line_width,
+                "shadow_opacity": shadow_opacity,
+                "chart_height": chart_height,
             }
         )

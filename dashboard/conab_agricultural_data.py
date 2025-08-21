@@ -198,6 +198,7 @@ def create_area_chart(data):
             names='Crop',
             title=f'Planted Area Distribution for the Current Season ({latest_year})'
         )
+        fig.update_layout(legend_title_text='Crop Type')
         
         fig.update_traces(textposition='inside', textinfo='percent+label')
         return fig

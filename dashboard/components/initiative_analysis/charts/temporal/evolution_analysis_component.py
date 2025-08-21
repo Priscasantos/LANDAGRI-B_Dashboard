@@ -331,8 +331,8 @@ def plot_evolution_heatmap_chart(metadata: dict[str, Any], filtered_df: pd.DataF
     
     # Adicionar anotações de marcos para anos-chave
     milestones = {
-        2000: "Milestone 2000",
-        2020: "Milestone 2020"
+        2000: "Lower Number of Initiatives",
+        2020: "Higher Number of Initiatives"
     }
     
     for year, label in milestones.items():
@@ -392,7 +392,7 @@ def plot_evolution_heatmap_chart(metadata: dict[str, Any], filtered_df: pd.DataF
     fig.add_annotation(
         text="High: <30m | Medium: 30-99m | Coarse: ≥100m",
         xref="paper", yref="paper",
-        x=0.5, y=-0.12,
+        x=0.5, y=-0.20,
         showarrow=False,
         font=dict(size=12, color="gray"),
         align="center"

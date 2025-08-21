@@ -28,7 +28,7 @@ def render_accuracy_resolution_tab(filtered_df: pd.DataFrame) -> None:
     Args:
         filtered_df: DataFrame filtrado com dados das iniciativas
     """
-    st.markdown("#### 🎯 Analysis: Accuracy vs Spatial Resolution")
+    st.markdown("#### 𝒂/𝓫 Pairwise Performance Analysis: Accuracy vs Spatial Resolution")
     
     if filtered_df.empty:
         st.warning("⚠️ Nenhum dado disponível para comparação.")

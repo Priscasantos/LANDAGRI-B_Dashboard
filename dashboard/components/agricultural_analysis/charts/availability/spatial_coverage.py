@@ -52,173 +52,149 @@ from .color_palettes import (
     get_state_acronym
 )
 
-def plot_conab_spatial_coverage_by_state(conab_data: Dict[str, Any]) -> go.Figure:
+def plot_conab_spatial_coverage_by_state(
+    conab_data: Dict[str, Any],
+    region_mapping: Dict[str, str] | None = None,
+    total_years: int = 24,
+    weights: Dict[str, int] | None = None
+) -> go.Figure:
     """
-    Create a spatial coverage chart showing percentage coverage by state (with acronyms).
+    Simplified state-level spatial coverage chart.
+    - Keeps legend (one entry per region).
+    - Colors states by region.
+    - Avoids hardcoded layout details by exposing mapping, weights and total_years.
     """
     if not conab_data:
         return go.Figure().update_layout(title="Spatial Coverage by State (No data available)")
-    
-    # Handle both data formats - CONAB initiative format and crop calendar format
-    state_coverage = {}
-    
+
+    # Default region mapping (can be overridden by caller)
+    if region_mapping is None:
+        region_mapping = {
+            'AC': 'North', 'AP': 'North', 'AM': 'North', 'PA': 'North', 'RO': 'North', 'RR': 'North', 'TO': 'North',
+            'AL': 'Northeast', 'BA': 'Northeast', 'CE': 'Northeast', 'MA': 'Northeast', 'PB': 'Northeast',
+            'PE': 'Northeast', 'PI': 'Northeast', 'RN': 'Northeast', 'SE': 'Northeast',
+            'DF': 'Central-West', 'GO': 'Central-West', 'MT': 'Central-West', 'MS': 'Central-West',
+            'ES': 'Southeast', 'MG': 'Southeast', 'RJ': 'Southeast', 'SP': 'Southeast',
+            'PR': 'South', 'RS': 'South', 'SC': 'South'
+        }
+
+    # Default weights (activity, crop count, active months)
+    if weights is None:
+        weights = {'activity': 60, 'crop': 30, 'density': 10}
+
+    state_coverage: Dict[str, Any] = {}
+
+    # Normalize both supported input formats into state_coverage
     if "CONAB Crop Monitoring Initiative" in conab_data:
-        # Original CONAB initiative format
-        initiative_data = conab_data.get("CONAB Crop Monitoring Initiative", {})
-        crop_coverage = initiative_data.get("detailed_crop_coverage", {})
-        
-        for crop, crop_info in crop_coverage.items():
-            regions = crop_info.get("regions", [])
-            first_crop_years = crop_info.get("first_crop_years", {})
-            second_crop_years = crop_info.get("second_crop_years", {})
-            
-            for state in regions:
-                state_acronym = get_state_acronym(state)
-                if state_acronym not in state_coverage:
-                    state_coverage[state_acronym] = set()
-                
-                # Add years from first semester
-                if state in first_crop_years:
-                    for year_range in first_crop_years[state]:
-                        start_year = int(year_range.split('-')[0])
-                        end_year = int(year_range.split('-')[1])
-                        for year in range(start_year, end_year + 1):
-                            state_coverage[state_acronym].add(year)
-                
-                # Add years from second semester
-                if state in second_crop_years:
-                    for year_range in second_crop_years[state]:
-                        start_year = int(year_range.split('-')[0])
-                        end_year = int(year_range.split('-')[1])
-                        for year in range(start_year, end_year + 1):
-                            state_coverage[state_acronym].add(year)
-    
+        initiative = conab_data.get("CONAB Crop Monitoring Initiative", {})
+        crops_info = initiative.get("detailed_crop_coverage", {})
+        for crop, info in crops_info.items():
+            regions = info.get("regions", [])
+            for sem in ("first_crop_years", "second_crop_years"):
+                sem_dict = info.get(sem, {})
+                for state in regions:
+                    st = get_state_acronym(state)
+                    state_coverage.setdefault(st, set())
+                    if state in sem_dict:
+                        for yr_range in sem_dict[state]:
+                            start, end = (int(x) for x in yr_range.split('-'))
+                            state_coverage[st].update(range(start, end + 1))
     elif 'crop_calendar' in conab_data:
-        # Crop calendar format - IMPROVED CALCULATION
         crop_calendar = conab_data['crop_calendar']
-        
-        for crop_name, crop_data in crop_calendar.items():
-            for state_info in crop_data:
-                # Get state name correctly
+        for crop_name, crop_states in crop_calendar.items():
+            for state_info in crop_states:
                 state = state_info.get('state_name', state_info.get('state', 'Unknown'))
-                state_acronym = get_state_acronym(state)
-                calendar = state_info.get('calendar', {})
-                
-                if state_acronym not in state_coverage:
-                    state_coverage[state_acronym] = {
-                        'total_activities': 0,
-                        'active_months': 0,
-                        'crops': set()
-                    }
-                
-                # Count ALL activities (more precise than just crop count)
-                active_months_this_crop = 0
-                total_activities_this_crop = 0
-                
-                for month, activity in calendar.items():
+                st = get_state_acronym(state)
+                cal = state_info.get('calendar', {})
+                entry = state_coverage.setdefault(st, {'total_activities': 0, 'active_months': 0, 'crops': set()})
+                active_months_this = 0
+                total_acts_this = 0
+                for _, activity in cal.items():
                     if activity and activity.strip():
-                        active_months_this_crop += 1
-                        total_activities_this_crop += 1
-                        # Count different activity types (P, H, PH) with different weights
+                        active_months_this += 1
+                        total_acts_this += 1
                         if activity.strip() == 'PH':
-                            total_activities_this_crop += 1  # Bonus for combined activities
-                
-                if total_activities_this_crop > 0:
-                    state_coverage[state_acronym]['crops'].add(crop_name)
-                    state_coverage[state_acronym]['total_activities'] += total_activities_this_crop
-                    state_coverage[state_acronym]['active_months'] += active_months_this_crop
-    
+                            total_acts_this += 1
+                if total_acts_this > 0:
+                    entry['crops'].add(crop_name)
+                    entry['total_activities'] += total_acts_this
+                    entry['active_months'] += active_months_this
     else:
         return go.Figure().update_layout(title="Spatial Coverage by State (No compatible data format)")
-    
+
     if not state_coverage:
         return go.Figure().update_layout(title="Spatial Coverage by State (No coverage data)")
-    
-    # IMPROVED: Calculate coverage percentages using activity density
-    states = []
-    coverages = []
-    
+
+    # Compute coverage percentages
+    states: list[str] = []
+    coverages: list[float] = []
+
     if "CONAB Crop Monitoring Initiative" in conab_data:
-        # For CONAB initiative, use temporal coverage
-        total_years = 24
-        for state, years in state_coverage.items():
-            coverage_percent = (len(years) / total_years) * 100
-            states.append(state)
-            coverages.append(coverage_percent)
+        for st, years in state_coverage.items():
+            pct = (len(years) / total_years) * 100 if total_years > 0 else 0
+            states.append(st)
+            coverages.append(pct)
     else:
-        # For crop calendar, use improved activity-based calculation
-        max_total_activities = max(data['total_activities'] for data in state_coverage.values()) if state_coverage else 1
-        max_crops = max(len(data['crops']) for data in state_coverage.values()) if state_coverage else 1
-        max_active_months = max(data['active_months'] for data in state_coverage.values()) if state_coverage else 1
-        
-        for state, data in state_coverage.items():
-            # Combine multiple factors for more nuanced coverage calculation
-            activity_factor = (data['total_activities'] / max_total_activities) * 60  # 60% weight
-            crop_factor = (len(data['crops']) / max_crops) * 30  # 30% weight
-            density_factor = (data['active_months'] / max_active_months) * 10  # 10% weight
-            
-            coverage_percent = activity_factor + crop_factor + density_factor
-            states.append(state)
-            coverages.append(coverage_percent)
-    
-    # Sort by coverage percentage
-    sorted_data = sorted(zip(states, coverages), key=lambda x: x[1], reverse=True)
-    states, coverages = zip(*sorted_data)
-    
-    # Apply regional colors to states
+        max_acts = max((v['total_activities'] for v in state_coverage.values()), default=1)
+        max_crops = max((len(v['crops']) for v in state_coverage.values()), default=1)
+        max_months = max((v['active_months'] for v in state_coverage.values()), default=1)
+
+        for st, v in state_coverage.items():
+            a = (v['total_activities'] / max_acts) * weights['activity'] if max_acts else 0
+            c = (len(v['crops']) / max_crops) * weights['crop'] if max_crops else 0
+            d = (v['active_months'] / max_months) * weights['density'] if max_months else 0
+            states.append(st)
+            coverages.append(a + c + d)
+
+    # Sort descending
+    sorted_pairs = sorted(zip(states, coverages), key=lambda x: x[1], reverse=True)
+    states, coverages = zip(*sorted_pairs)
+
+    # Colors per state by region, and collect region-to-color map
     colors = []
-    for state in states:
-        colors.append(get_state_color(state, use_dark=True))
-    
-    # Create figure with modern styling and regional colors
+    region_colors: Dict[str, str] = {}
+    for st in states:
+        region = region_mapping.get(st, 'Unknown')
+        color = get_region_color(region, use_dark=True)
+        colors.append(color)
+        region_colors.setdefault(region, color)
+
+    # Build figure: one bar trace with per-bar colors + simple legend entries per region
     fig = go.Figure()
-    
     fig.add_trace(go.Bar(
-        x=coverages,
-        y=states,
+        x=list(coverages),
+        y=list(states),
         orientation='h',
-        marker=dict(
-            color=colors,
-            line=dict(color='rgba(255,255,255,0.8)', width=1.5),
-            pattern=dict(shape='', size=8)
-        ),
+        marker=dict(color=colors),
         text=[f"{c:.1f}%" for c in coverages],
         textposition='outside',
-        textfont=dict(size=12, color='#2C3E50', family='Arial, sans-serif'),
-        hovertemplate="<b>%{y}</b><br>Coverage: %{x:.1f}%<br><extra></extra>",
-        name="Coverage"
+        hovertemplate="<b>%{y}</b><br>Coverage: %{x:.1f}%<extra></extra>",
+        showlegend=False
     ))
-    
-    # Update layout with modern styling
+
+    # Add one minimal legend item per region (legendonly traces)
+    for region_name, color in region_colors.items():
+        fig.add_trace(go.Bar(
+            x=[0],
+            y=[''],
+            marker=dict(color=color),
+            name=region_name,
+            showlegend=True,
+            hoverinfo='none',
+            visible='legendonly'
+        ))
+
+    # Minimal, non-hardcoded layout — include Y axis title with acronyms
     fig.update_layout(
-        title=dict(
-            text="Agricultural data availability by Brazilian States Coverage (states colored by region)",
-            font=dict(size=15, color='#2C3E50', family='Arial, sans-serif'),
-            x=0.0
-        ),
+        title="Agricultural data availability by Brazilian States (colored by region)",
         xaxis_title="Coverage (%)",
-        yaxis_title="State",
-        height=600,
-        showlegend=False,
-        plot_bgcolor='rgba(248,249,250,0.8)',
-        paper_bgcolor='white',
-        font=dict(family='Arial, sans-serif', size=12, color='#2C3E50'),
-        xaxis=dict(
-            showgrid=True,
-            gridwidth=1,
-            gridcolor='rgba(176,196,222,0.3)',
-            range=[0, max(coverages) * 1.15] if coverages else [0, 100],
-            tickfont=dict(size=12, color='#2C3E50'),
-            title_font=dict(size=15, color='#2C3E50', family='Arial, sans-serif')
-        ),
-        yaxis=dict(
-            showgrid=False,
-            tickfont=dict(size=12, color='#2C3E50'),
-            title_font=dict(size=15, color='#2C3E50', family='Arial, sans-serif')
-        ),
-        margin=dict(l=80, r=120, t=80, b=60)
+        yaxis_title="Brazilian States (Acronym)",
+        height=min(700, 40 * len(states) + 120),
+        showlegend=True,
+        legend=dict(title='Region'),
+        margin=dict(l=80, r=140, t=80, b=60)
     )
-    
+
     return fig
 
 

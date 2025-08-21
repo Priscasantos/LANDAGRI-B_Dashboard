@@ -126,3 +126,39 @@ def get_standard_colorbar_config():
         "tickmode": "linear",
         "showticklabels": True,
     }
+
+
+# ----------------------
+# Chart theme helpers
+# ----------------------
+HOVER_TEMPLATE_CROP = "<b>{}</b><br>State: %{{y}}<br>Intensity: %{{x}}<extra></extra>"
+HOVER_TEMPLATE_REGION = "<b>{}</b><br>Region: %{{y}}<br>Intensity: %{{x}}<extra></extra>"
+
+
+def calc_height(n_rows: int, min_height: int = 400, per_row: int = 25) -> int:
+    """Calculate a reasonable figure height based on number of rows.
+
+    Keeps existing behavior used in crop_diversity.py while centralizing logic.
+    """
+    try:
+        return max(min_height, int(n_rows) * per_row)
+    except Exception:
+        return min_height
+
+
+def build_standard_layout(title: str = "", title_x: float = 0.5, **overrides) -> dict:
+    """Return a standard layout dict for Plotly figures.
+
+    This centralizes common layout values used across charts. Callers can
+    pass overrides to customize specific keys (e.g., height, margins).
+    """
+    base = {
+        "title": {"text": title, "x": title_x, "xanchor": "center", "font": {"size": 15, "color": "#2C3E50", "family": "Arial, sans-serif"}},
+        "barmode": "stack",
+        "plot_bgcolor": "rgba(0,0,0,0)",
+        "paper_bgcolor": "rgba(0,0,0,0)",
+        "font": {"family": "Arial, sans-serif", "size": 12, "color": "#2C3E50"},
+        "legend": {"orientation": "v", "x": 1.02, "y": 1, "bordercolor": "rgba(44,62,80,0.1)", "borderwidth": 1, "bgcolor": "rgba(255,255,255,0.9)"},
+    }
+    base.update(overrides)
+    return base

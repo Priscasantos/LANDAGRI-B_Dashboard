@@ -59,14 +59,14 @@ def create_conab_spatial_coverage_chart(conab_data: dict) -> Optional[go.Figure]
         fig = px.pie(
             values=list(region_coverage.values()),
             names=list(region_coverage.keys()),
-            title="🌍 Cobertura Espacial CONAB por Região"
+            title="🌍 CONAB Spatial Coverage by Region"
         )
 
         fig.update_layout(height=400)
         return fig
 
     except Exception as e:
-        st.error(f"❌ Erro ao criar gráfico de cobertura espacial: {e}")
+        st.error(f"❌ Error creating spatial coverage chart: {e}")
         return None
 
 
@@ -139,7 +139,7 @@ def create_conab_quality_metrics_chart(conab_data: dict) -> Optional[go.Figure]:
             r=values,
             theta=categories,
             fill='toself',
-            name='Métricas de Qualidade',
+            name='Quality Metrics',
             line={'color': 'rgb(90, 171, 71)', 'width': 2},
             fillcolor='rgba(90, 171, 71, 0.3)'
         ))
@@ -151,14 +151,14 @@ def create_conab_quality_metrics_chart(conab_data: dict) -> Optional[go.Figure]:
                     'range': [0, 100]
                 }
             },
-            title="📊 Métricas de Qualidade CONAB (%)",
+            title="📊 CONAB Quality Metrics (%)",
             height=500
         )
 
         return fig
 
     except Exception as e:
-        st.error(f"❌ Erro ao criar métricas de qualidade CONAB: {e}")
+        st.error(f"❌ Error creating CONAB quality metrics: {e}")
         return None
 
 
@@ -193,15 +193,15 @@ def create_conab_crop_distribution_chart(conab_data: dict) -> Optional[go.Figure
             x=crop_counts.values,
             y=crop_counts.index,
             orientation='h',
-            title="🌾 Distribuição de Culturas CONAB",
-            labels={'x': 'Número de Iniciativas', 'y': 'Tipo de Cultura'}
+            title="🌾 CONAB Crop Distribution",
+            labels={'x': 'Number of Initiatives', 'y': 'Crop Type'}
         )
 
         fig.update_layout(height=400)
         return fig
 
     except Exception as e:
-        st.error(f"❌ Erro ao criar gráfico de distribuição de culturas: {e}")
+        st.error(f"❌ Error creating crop distribution chart: {e}")
         return None
 
 
@@ -220,34 +220,34 @@ def render_conab_charts_tab(conab_data: dict) -> None:
         Renders directly in Streamlit
     """
     if not conab_data:
-        st.info("📊 Dados CONAB não disponíveis para análise")
+        st.info("📊 CONAB data not available for analysis")
         return
     
-    st.markdown("### 📊 Análises Específicas CONAB")
+    st.markdown("### 📊 CONAB Specific Analyses")
     
     # Create tabs for different CONAB analyses
-    tab1, tab2, tab3 = st.tabs(["🌍 Cobertura", "📊 Qualidade", "🌾 Culturas"])
+    tab1, tab2, tab3 = st.tabs(["🌍 Coverage", "📊 Quality", "🌾 Crops"])
     
     with tab1:
-        st.markdown("#### 🌍 Cobertura Espacial CONAB")
+        st.markdown("#### 🌍 CONAB Spatial Coverage")
         spatial_fig = create_conab_spatial_coverage_chart(conab_data)
         if spatial_fig:
             st.plotly_chart(spatial_fig, use_container_width=True)
         else:
-            st.info("📊 Dados insuficientes para análise de cobertura espacial")
-    
+            st.info("📊 Insufficient data for spatial coverage analysis")
+
     with tab2:
-        st.markdown("#### 📊 Métricas de Qualidade")
+        st.markdown("#### 📊 Quality Metrics")
         quality_fig = create_conab_quality_metrics_chart(conab_data)
         if quality_fig:
             st.plotly_chart(quality_fig, use_container_width=True)
         else:
-            st.info("📊 Dados insuficientes para análise de qualidade")
-    
+            st.info("📊 Insufficient data for quality analysis")
+
     with tab3:
-        st.markdown("#### 🌾 Distribuição de Culturas")
+        st.markdown("#### 🌾 Crop Distribution")
         crop_fig = create_conab_crop_distribution_chart(conab_data)
         if crop_fig:
             st.plotly_chart(crop_fig, use_container_width=True)
         else:
-            st.info("📊 Dados insuficientes para análise de culturas")
+            st.info("📊 Insufficient data for crop analysis")
