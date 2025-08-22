@@ -38,7 +38,8 @@ def render_performance_heatmap_tab(filtered_df: pd.DataFrame) -> None:
         filtered_df: Filtered DataFrame with initiative data
     """
     st.markdown("#### 🔥 Normalized Performance Analysis")
-    
+    st.markdown("*Comparison of initiatives across normalized performance metrics (scaled 0–1).*")
+
     if filtered_df.empty:
         st.warning("⚠️ No data available for performance analysis.")
         return

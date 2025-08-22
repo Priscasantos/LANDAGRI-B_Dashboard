@@ -22,6 +22,8 @@ def render_bar_chart_tab(filtered_df: pd.DataFrame) -> None:
         filtered_df: DataFrame filtrado com dados das iniciativas
     """
     st.markdown("#### 🎯 Global Accuracy Comparison")
+    st.markdown("*Accuracy comparison between Initiatives.*")
+
     if filtered_df.empty:
         st.warning("⚠️ Nenhum dado disponível para bar chart.")
         return

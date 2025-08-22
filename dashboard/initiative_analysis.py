@@ -181,7 +181,7 @@ def render_comparative_analysis(df: pd.DataFrame, metadata: dict) -> None:
         "🎯 Global Accuracy",
         "🧮 Methodology Distribution",
         "🏷️ Class Details",
-        "🔬 Methodology - Deep Dive",
+        "🔬 Methodology Deep Dive",
         "🔥 Normalized Performance",
         "📋 Detailed Table",
     ]
@@ -339,10 +339,20 @@ def render_detailed_analysis(df: pd.DataFrame, metadata: dict) -> None:
     )
     with tab1:
         st.markdown("#### 📊 Bar Chart Analysis")
+        st.markdown(
+            "Use the bar charts below to compare the selected initiatives across key numeric metrics "
+            "(e.g., spatial resolution, overall accuracy, and class counts). Adjust selections or hover "
+            "over bars for detailed values."
+        )
+
         render_bars_tab(df_filtered)
 
     with tab2:
         st.markdown("#### 🎯 Radar Chart Analysis")
+        st.markdown(
+            "This radar chart visualizes the multi-dimensional profiles of the selected initiatives (e.g., resolution, accuracy, class counts). Use it to compare strengths and weaknesses across initiatives."
+        )
+
         render_radar_chart_tab(df_filtered)
 
     with tab3:
@@ -382,10 +392,14 @@ def render_detailed_analysis(df: pd.DataFrame, metadata: dict) -> None:
 
     with tab4:
         st.markdown("### 📋 Data Details")
+        st.markdown("*The table below provides sortable details of the selected initiatives.*")
         render_data_table_tab(df_filtered)
 
     with tab5:
         st.markdown("#### 📅 Annual Coverage Analysis")
+        st.markdown(
+            "Annual availability and temporal coverage for the selected initiatives. Use the chart below to inspect year-by-year presence, identify coverage gaps, and compare temporal completeness across initiatives."
+        )
         render_annual_coverage_tab(df_filtered)
 
 

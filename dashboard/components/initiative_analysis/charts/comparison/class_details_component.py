@@ -25,6 +25,7 @@ def render_class_details_tab(filtered_df: pd.DataFrame) -> None:
         filtered_df: Filtered DataFrame with initiative data
     """
     st.markdown("#### 🏷️ Initiative Class Details Analysis")
+    st.markdown("*Comparative view of class distributions and agricultural capabilities across initiatives.*")
     
     if filtered_df.empty:
         st.warning("⚠️ No initiative data available for class analysis.")
