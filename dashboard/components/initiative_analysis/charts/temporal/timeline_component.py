@@ -276,7 +276,8 @@ def plot_timeline_chart(
     # Modern and responsive layout with improved typography
     fig.update_layout(
         title=dict(
-            text=f"<b>LULC Initiatives Timeline</b><br><span style='font-size:14px;color:#6b7280'>{len(timeline_data)} initiatives • {MIN_YEAR}-{MAX_YEAR}</span>",
+            # text=f"<b>LULC Initiatives Timeline</b><br><span style='font-size:14px;color:#6b7280'>{len(timeline_data)} initiatives • {MIN_YEAR}-{MAX_YEAR}</span>",
+            text=f"<b>LULC Initiatives Timeline</b><br><span style='font-size:14px;color:#6b7280'>Initiatives • {MIN_YEAR}-{MAX_YEAR}</span>",
             x=0.5,
             font=dict(size=20, family="Inter, -apple-system, BlinkMacSystemFont, sans-serif", color="#1f2937"),
             pad=dict(b=30)

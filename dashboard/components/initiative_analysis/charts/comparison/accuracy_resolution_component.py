@@ -31,7 +31,7 @@ def render_accuracy_resolution_tab(filtered_df: pd.DataFrame) -> None:
     st.markdown("#### 𝒂/𝓫 Pairwise Performance Analysis: Accuracy vs Spatial Resolution")
     
     if filtered_df.empty:
-        st.warning("⚠️ Nenhum dado disponível para comparação.")
+        st.warning("⚠️ No data available for comparison.")
         return
     
     # Controles de visualização
@@ -106,7 +106,7 @@ def plot_accuracy_resolution_scatter(
     if filtered_df.empty:
         fig = go.Figure()
         fig.add_annotation(
-            text="Nenhum dado disponível para comparação",
+            text="No data available for comparison",
             xref="paper",
             yref="paper",
             x=0.5,
@@ -140,7 +140,7 @@ def plot_accuracy_resolution_scatter(
     if not plot_data:
         fig = go.Figure()
         fig.add_annotation(
-            text="Dados insuficientes para análise de precisão vs resolução",
+            text="Insufficient data for accuracy vs resolution analysis",
             xref="paper",
             yref="paper",
             x=0.5,
@@ -195,7 +195,7 @@ def plot_accuracy_resolution_scatter(
             y=avg_accuracy,
             line_dash="dash",
             line_color="gray",
-            annotation_text=f"Precisão Média: {avg_accuracy:.1f}%"
+            annotation_text=f"Average Accuracy: {avg_accuracy:.1f}%"
         )
     
     if plot_df["Resolution"].max() > 0:
@@ -204,7 +204,7 @@ def plot_accuracy_resolution_scatter(
             x=avg_resolution,
             line_dash="dash",
             line_color="gray",
-            annotation_text=f"Resolução Média: {avg_resolution:.1f}m"
+            annotation_text=f"Average Resolution: {avg_resolution:.1f}m"
         )
 
     return fig

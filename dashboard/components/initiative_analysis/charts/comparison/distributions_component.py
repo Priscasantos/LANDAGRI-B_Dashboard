@@ -33,7 +33,7 @@ def render_distributions_tab(filtered_df: pd.DataFrame) -> None:
     st.markdown("*Analysis of initiative distributions across different dimensions.*")
 
     if filtered_df.empty:
-        st.warning("⚠️ Nenhum dado disponível para análise de distribuições.")
+        st.warning("⚠️ No data available for distributions analysis.")
         return
     
     # Sub-abas para diferentes tipos de distribuições
@@ -65,7 +65,7 @@ def render_methodology_distribution(filtered_df: pd.DataFrame) -> None:
         unique_key = f"methodology_distribution_chart_{uuid.uuid4().hex[:8]}"
         st.plotly_chart(fig_methodology, use_container_width=True, key=unique_key)
     else:
-        st.info("ℹ️ Dados insuficientes para análise de metodologias.")
+        st.info("ℹ️ Insufficient data for methodology analysis.")
 
 
 def render_resolution_distribution(filtered_df: pd.DataFrame) -> None:
@@ -75,7 +75,7 @@ def render_resolution_distribution(filtered_df: pd.DataFrame) -> None:
     if fig_resolution:
         st.plotly_chart(fig_resolution, use_container_width=True, key="resolution_distribution_chart")
     else:
-        st.info("ℹ️ Dados insuficientes para análise de resolução.")
+        st.info("ℹ️ Insufficient data for resolution analysis.")
 
 
 def render_temporal_coverage_distribution(filtered_df: pd.DataFrame) -> None:
@@ -85,7 +85,7 @@ def render_temporal_coverage_distribution(filtered_df: pd.DataFrame) -> None:
     if fig_temporal:
         st.plotly_chart(fig_temporal, use_container_width=True, key="temporal_coverage_distribution_chart")
     else:
-        st.info("ℹ️ Dados insuficientes para análise temporal.")
+        st.info("ℹ️ Insufficient data for temporal analysis.")
 
 
 @smart_cache_data(ttl=300)

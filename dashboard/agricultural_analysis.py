@@ -43,17 +43,16 @@ def render_agriculture_overview_page():
     st.markdown(
         """
     <div style="
-        background: linear-gradient(135deg, #EC9706 0%, #ffb347 100%);
+        background: linear-gradient(135deg, #EC9706 0%, #626C01 100%);
         padding: 2rem;
         border-radius: 15px;
         margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(236,151,6,0.15);
         border: 1px solid rgba(236,151,6,0.12);
     ">
-        <h1 style="color: #8d4004; margin: 0; font-size: 2.5rem; font-weight: 700;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 2.5rem; font-weight: 700;">
             🏞 Agricultural Analysis
         </h1>
-        <p style="color: #8d4004; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
+        <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
             Land Use and Land Cover (LULC) initiatives mapping data analysis applied to Brazilian agricultural context.
         </p>
     </div>
@@ -163,17 +162,16 @@ def render_crop_calendar_page():
     st.markdown(
         """
     <div style="
-        background: linear-gradient(135deg, #EC9706 0%, #ffb347 100%);
+        background: linear-gradient(135deg, #EC9706 0%, #626C01 100%);
         padding: 2rem;
         border-radius: 15px;
         margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(236,151,6,0.15);
         border: 1px solid rgba(236,151,6,0.12);
     ">
-        <h1 style="color: #8d4004; margin: 0; font-size: 2.5rem; font-weight: 700;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 2.5rem; font-weight: 700;">
             🏞 Agricultural Analysis
         </h1>
-        <p style="color: #8d4004; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
+        <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
             Land Use and Land Cover (LULC) initiatives mapping data analysis applied to Brazilian agricultural context.
         </p>
     </div>
@@ -272,17 +270,16 @@ def render_agriculture_availability_page():
     st.markdown(
         """
     <div style="
-        background: linear-gradient(135deg, #EC9706 0%, #ffb347 100%);
+        background: linear-gradient(135deg, #EC9706 0%, #626C01 100%);
         padding: 2rem;
         border-radius: 15px;
         margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(236,151,6,0.15);
         border: 1px solid rgba(236,151,6,0.12);
     ">
-        <h1 style="color: #8d4004; margin: 0; font-size: 2.5rem; font-weight: 700;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 2.5rem; font-weight: 700;">
             🏞 Agricultural Analysis
         </h1>
-        <p style="color: #8d4004; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
+        <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
             Land Use and Land Cover (LULC) initiatives mapping data analysis applied to Brazilian agricultural context.
         </p>
     </div>
