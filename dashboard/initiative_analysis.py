@@ -68,13 +68,13 @@ def run(metadata=None, df_original=None):
     st.markdown(
         """
         <div style="
-            background: linear-gradient(135deg, #80400B 0%, #5a2e07 100%);
+            background: linear-gradient(135deg, #80400B 0%, #626C01 100%);
             padding: 1.2rem;
             border-radius: 15px;
             margin-bottom: 2rem;
             border: 1px solid rgba(255,255,255,0.05);
         ">
-            <h1 style="color: white; margin: 0; font-size: 2.5rem; font-weight: 700;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 2.5rem; font-weight: 700;">
                 🏞  Initiative Analysis
             </h1>
             <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic">

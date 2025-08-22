@@ -43,7 +43,6 @@ def render_bars_tab(filtered_df: pd.DataFrame) -> None:
 
 
     available_metrics = [col for col in filtered_df.columns if pd.api.types.is_numeric_dtype(filtered_df[col])]
-    print(f"Available metrics: {available_metrics}")
 
     with col1:
         metric1 = st.selectbox(

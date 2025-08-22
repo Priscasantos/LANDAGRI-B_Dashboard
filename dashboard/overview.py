@@ -517,16 +517,16 @@ def run() -> None:
     st.markdown(
         """
     <div style="
-        background: linear-gradient(135deg, #636B2F 0%, #636B2F 100%);
+        background: linear-gradient(135deg, #636B2F 0%, #626C01 100%);
         padding: 1.2rem;
         border-radius: 15px;
         margin-bottom: 2rem;
         border: 1px solid rgba(99,107,47,1);
     ">
-        <h1 style="color: white; margin: 0; font-size: 2.5rem; font-weight: 700;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 2.5rem; font-weight: 700;">
             🔎 Overview
         </h1>
-        <p style="color: white; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
+        <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
             General summary and key metrics of Land Use and Land Cover (LULC) initiatives.
         </p>
     </div>
