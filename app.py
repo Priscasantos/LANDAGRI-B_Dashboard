@@ -28,6 +28,34 @@ except Exception:
     pass
 
 def render():
+    # Robust local module loader to avoid import cache/key conflicts in some environments (e.g., Streamlit reload)
+    def _load_dashboard_module(module_name: str):
+        import importlib
+        import importlib.util
+        from types import ModuleType
+
+        # Ensure project root is first in path
+        if root_path not in sys.path:
+            sys.path.insert(0, root_path)
+
+        # If a conflicting 'dashboard' exists in sys.modules that's not our package, drop it
+        dash_mod = sys.modules.get('dashboard')
+        if dash_mod is not None and not hasattr(dash_mod, '__path__'):
+            sys.modules.pop('dashboard', None)
+
+        try:
+            return importlib.import_module(f"dashboard.{module_name}")
+        except Exception:
+            # Fallback: load directly from file path
+            mod_path = current_dir / 'dashboard' / f'{module_name}.py'
+            if not mod_path.exists():
+                raise
+            spec = importlib.util.spec_from_file_location(f'_local_dashboard_{module_name}', str(mod_path))
+            if spec and spec.loader:
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)  # type: ignore[attr-defined]
+                return mod
+            raise
     # Import the JSON interpreter inside render to avoid Streamlit UI at import time
     try:
         from scripts.utilities.json_interpreter import interpret_initiatives_metadata
@@ -136,26 +164,22 @@ def render():
 
     if current_category == "Overview":
         if current_page == "Dashboard Overview":
-            from dashboard import overview
-
+            overview = _load_dashboard_module('overview')
             overview.run()
 
     elif current_category == "Initiative Analysis":
         if current_page in ["Temporal Analysis", "Comparative Analysis", "Detailed Analysis"]:
-            from dashboard import initiative_analysis
-
+            initiative_analysis = _load_dashboard_module('initiative_analysis')
             initiative_analysis.run()
 
     elif current_category == "Agricultural Analysis":
         if current_page in ["Agriculture Overview", "Crop Calendar", "Agriculture Availability"]:
-            from dashboard import agricultural_analysis
-
+            agricultural_analysis = _load_dashboard_module('agricultural_analysis')
             agricultural_analysis.run()
 
     elif current_category == "About":
         if current_page == "About the Dashboard":
-            from dashboard import about
-
+            about = _load_dashboard_module('about')
             about.run()
 
 
