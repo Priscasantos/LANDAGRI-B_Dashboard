@@ -37,28 +37,21 @@ def render_distributions_tab(filtered_df: pd.DataFrame) -> None:
         return
     
     # Sub-abas para diferentes tipos de distribuições
-    sub_tab1, sub_tab2, sub_tab3 = st.tabs([
-        "🔧 Methodologies",
+    sub_tab1, sub_tab2 = st.tabs([
         "📉 Distributions Analysis",
         "⏱️ Temporal Coverage",
     ])
-    
+     
     with sub_tab1:
-        st.markdown("#### 🔧 Methodologies")
-        render_methodology_distribution(filtered_df)
-    
-    with sub_tab2:
         st.markdown("#### 📉 Distributions Analysis")
         render_resolution_distribution(filtered_df)
     
-    with sub_tab3:
+    with sub_tab2:
         st.markdown("#### ⏱️ Temporal Coverage")
         render_temporal_coverage_distribution(filtered_df)
 
-
 def render_methodology_distribution(filtered_df: pd.DataFrame) -> None:
     """Renderizar distribuição de metodologias por tipo."""
-    
     fig_methodology = plot_methodology_comparison(filtered_df)
     if fig_methodology:
         # Use a short uuid suffix to ensure the chart key is unique across multiple renders
@@ -88,7 +81,7 @@ def render_temporal_coverage_distribution(filtered_df: pd.DataFrame) -> None:
         st.info("ℹ️ Insufficient data for temporal analysis.")
 
 
-@smart_cache_data(ttl=300)
+# @smart_cache_data(ttl=300)
 def plot_methodology_comparison(filtered_df: pd.DataFrame) -> go.Figure:
     """
     Comparação de metodologias por tipo de iniciativa.
@@ -99,6 +92,9 @@ def plot_methodology_comparison(filtered_df: pd.DataFrame) -> go.Figure:
     Returns:
         Figura Plotly com análise de metodologias
     """
+    st.markdown("#### 🧮 Methodology Distribution")
+    st.markdown("*Comparison of methodologies across initiatives and their level of coverage.*")
+
     if filtered_df.empty:
         return None
 

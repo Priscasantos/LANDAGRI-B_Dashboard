@@ -25,6 +25,7 @@ def render_methodology_deepdive_tab(filtered_df: pd.DataFrame) -> None:
         filtered_df: Filtered DataFrame with initiative data
     """
     st.markdown("#### 🔬 Methodology Deep Dive Analysis")
+    st.markdown("*Comparative analysis of methodology performance and accuracy across initiatives.*")
     
     if filtered_df.empty:
         st.warning("⚠️ No initiative data available for methodology analysis.")
