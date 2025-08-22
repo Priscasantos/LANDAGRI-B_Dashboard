@@ -139,17 +139,17 @@ def run(logo_width: int = DEFAULT_LOGO_WIDTH_PX) -> None:
         """
     )
 
-    # Seção de logos institucionais
+    # Seção de logos institucionais (usando caminhos absolutos)
     st.markdown("---")
 
-    # Prefer relative path (relative to current working directory) for Streamlit compatibility.
-    # Fallback to file location if the relative path is not found.
-    logos_dir = Path("data") / "Logos_partners"
-    if not logos_dir.exists():
-        try:
-            logos_dir = Path(__file__).resolve().parent.parent / "data" / "Logos_partners"
-        except NameError:
-            logos_dir = Path.cwd() / "data" / "Logos_partners"
+    try:
+        # Base absoluto a partir da localização deste arquivo
+        base_dir = Path(__file__).resolve().parent.parent
+    except NameError:
+        # Em alguns contextos (por exemplo, REPL) __file__ pode não existir — usar cwd absoluto
+        base_dir = Path.cwd().resolve()
+
+    logos_dir = (base_dir / "data" / "Logos_partners").resolve()
 
     logo_col1, logo_col2, logo_col3 = st.columns(3, gap="small")
 

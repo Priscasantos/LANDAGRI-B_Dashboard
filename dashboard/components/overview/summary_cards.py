@@ -110,7 +110,6 @@ def render(df: pd.DataFrame) -> None:
 
     # Calcular cobertura temporal (anos únicos)
     year_columns = [col for col in df.columns if col.isdigit() and len(col) == 4]
-    print(year_columns)
     if year_columns:
         temporal_coverage = len(year_columns)
     else:
