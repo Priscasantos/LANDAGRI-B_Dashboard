@@ -1,55 +1,25 @@
 # 📚 Documentation - LANDAGRI-B Dashboard
 
-**Last updated:** July 23, 2025  
-**Version:** 3.1  
-**Status:** Actively in development
+**Last updated:** September 2, 2025  
+**Version:** 1.0.0  
+**Status:** Stable Release
 
 ---
 
-## 📋 Documentation Index
+## 📋 Overview
 
-### 🏗️ Development Reports
+This folder contains documentation for the LANDAGRI-B Dashboard project. For the main project documentation, see the [root README.md](../README.md).
 
-- [`RELATORIO_OTIMIZACOES_FINAL.md`](./RELATORIO_OTIMIZACOES_FINAL.md) - Complete report of implemented optimizations
-- [`OTIMIZACOES_FASE3.md`](./OTIMIZACOES_FASE3.md) - Details of Phase 3 optimizations
-- [`FASE3_OTIMIZACOES_FINAIS.md`](./FASE3_OTIMIZACOES_FINAIS.md) - Final optimizations for Phase 3
-- [`MODERNIZATION_REPORT.md`](./MODERNIZATION_REPORT.md) - Dashboard modernization report
-- [`REORGANIZACAO_CODEBASE.md`](./REORGANIZACAO_CODEBASE.md) - Documentation reorganization report
+### Key Documents (if available)
 
-### 🐛 Fixes and Migration
-
-- [`FONT_WEIGHT_FIX.md`](./FONT_WEIGHT_FIX.md) - Plotly Font Weight bug fix
-- [`SENSOR_METADATA_FIX.md`](./SENSOR_METADATA_FIX.md) - Sensor metadata system fix
-- [`MIGRATION_REPORT.md`](./MIGRATION_REPORT.md) - Agricultural data migration report
-
-### 🔧 Agricultural System
-
-- [`SISTEMA_PROCESSADORES_AGRICOLAS.md`](./SISTEMA_PROCESSADORES_AGRICOLAS.md) - Agricultural data processors system
-- [`relatorio-limpeza-validacao.md`](./relatorio-limpeza-validacao.md) - Data cleaning and validation report
-
-### 📊 Data and Resources
-
-- [`README_brazil-vector.md`](./README_brazil-vector.md) - Documentation for Brazil vector data
-- [`ORGANIZACAO_DOCUMENTACAO.md`](./ORGANIZACAO_DOCUMENTACAO.md) - Documentation organization
-
-### 🔧 Configuration Files
-
-- [`../pyproject.toml`](../pyproject.toml) - Ruff (linter) configuration
-- [`../.pre-commit-config.yaml`](../.pre-commit-config.yaml) - Git hooks configuration
-- [`../.streamlit/config.toml`](../.streamlit/config.toml) - Streamlit settings
+- Project setup and usage instructions are in the root README.md.
+- Release notes for v1.0.0 are available in [RELEASE_v1.0.0.md](./RELEASE_v1.0.0.md) (if restored).
 
 ---
 
-## 🚀 How to Use this Documentation
+## 🚀 Quick Start
 
-### For Developers
-
-1. **Quick Start**: Read `RELATORIO_OTIMIZACOES_FINAL.md`
-2. **Technical Details**: See `OTIMIZACOES_FASE3.md`
-3. **Data**: Check `README_brazil-vector.md` for data understanding
-4. **Agricultural System**: See `SISTEMA_PROCESSADORES_AGRICOLAS.md`
-
-### For Users
+For developers and users:
 
 1. **Run Dashboard**: `python -m streamlit run app.py`
 2. **Check Quality**: `python -m ruff check .`
@@ -59,27 +29,12 @@
 
 ## 📈 Version History
 
-### v3.1 (07/23/2025)
+### v1.0.0 (09/02/2025)
 
-- ✅ Complete documentation reorganization
-- ✅ All documentation files moved to `docs/`
-- ✅ Removal of temporary test and validation files
-- ✅ Agricultural processors system implemented
-- ✅ Documentation index updated
-
-### v3.0 (07/22/2025)
-
-- ✅ Complete code quality optimizations
-- ✅ 95% quality improvement (283 → 14 issues)
-- ✅ Modern tools configured (Ruff, Pre-commit)
-- ✅ Performance optimized
-- ✅ Documentation organized
-
-### v2.x (Previous)
-
-- Core features implemented
-- Modern interface with streamlit-option-menu
-- Optimized cache system
+- ✅ Stable release with all core features
+- ✅ Documentation cleaned and organized
+- ✅ Zenodo DOI preparation
+- ✅ Performance optimizations implemented
 
 ---
 
@@ -94,43 +49,15 @@
 
 ### Quality & Tools
 
-- **Ruff 0.12.4** - Modern, fast linter
-- **Pre-commit 4.2.0** - Automated Git hooks
-- **Black-compatible** - Consistent formatting
-
-### Performance
-
-- **CacheTools** - Advanced caching system
-- **Memory-profiler** - Memory monitoring
-- **DiskCache** - Persistent cache
+- **Ruff 0.12.4** - Modern linter
+- **Pre-commit** - Git hooks
 
 ---
 
 ## 📞 Contact and Support
 
-For development questions:
-
-- Check the optimization reports
-- Review settings in `.toml` and `.yaml` files
-- Run the quality check commands
+For questions, check the main README.md or open an issue on GitHub.
 
 ---
 
-## 🔄 Next Steps
-
-### Planned
-
-- [ ] Unit tests implementation
-- [ ] Production deployment
-- [ ] API documentation
-- [ ] Performance benchmarks
-
-### Under Evaluation
-
-- [ ] Migration to FastAPI backend
-- [ ] WebSockets implementation
-- [ ] Advanced dashboard analytics
-
----
-
-*Documentation maintained automatically - LANDAGRI-B Dashboard*
+LANDAGRI-B Dashboard - Open Source Agricultural Monitoring Tool
