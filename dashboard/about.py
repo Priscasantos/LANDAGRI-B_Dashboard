@@ -114,13 +114,13 @@ def run(logo_width: int = DEFAULT_LOGO_WIDTH_PX) -> None:
     st.markdown("### ©️ Citation")
     st.markdown(
         """
-        This work is part of the LANDAGRI project, licensed under the Creative Commons Attribution 4.0 International License.
+        This work is part of the LANDAGRI project, built under the MIT License.
 
-        The reproduction of this work is permitted as long as appropriate credit is given.
+        Use and reproduction of the dashboard results are authorized, as long as proper credit is given.
 
-        If you use this dashboard in academic or technical work, please cite the products and the LANDAGRI-B project using the following articles:
-        - Initiatives and products informations article: [Santos et al. (2025)](https://doi.org/10.3390/rs17132324).
-        - Project's main article: [Santos and Adami (2025)](http://mtc-m16c.sid.inpe.br/ibi/sid.inpe.br/mtc-m18/2010/10.19.13.42?ibiurl.clientinformation.citingitem=sid.inpe.br/mtc-m18/2010/12.15.11.49&linktype=relative);
+        If you use this dashboard in academic or technical work, please cite the products and the LANDAGRI-B project using the following references:
+        - Initiatives and products information main article: [Santos et al. (2025)](https://doi.org/10.3390/rs17132324).
+        - Project's main article: [Santos and Adami (2025)](http://mtc-m16c.sid.inpe.br/ibi/sid.inpe.br/mtc-m18/2010/10.19.13.42?ibiurl.clientinformation.citingitem=sid.inpe.br/mtc-m18/2010/12.15.11.49&linktype=relative).
         - LANDAGRI-B repository in Zenodo: [Santos, Silva, and Adami (2025)](https://doi.org/10.5281/zenodo.17042299).
         """
     )
@@ -130,7 +130,7 @@ def run(logo_width: int = DEFAULT_LOGO_WIDTH_PX) -> None:
         """
         Questions or suggestions can be directed to the project team.
 
-        📧 E-mail: priscilla.santos@inpe.br
+        📧 E-mail: priscilla.santos@inpe.br (head)
 
         🔗 GitHub: https://github.com/landagri-b
         """
