@@ -5,7 +5,7 @@ Overview Dashboard - Modern Implementation
 Clean, component-based overview dashboard using only modular components.
 This replaces all legacy overview implementations.
 
-Author: LANDAGRI-B Project Team 
+Author: LANDAGRI-B Project Team
 Date: 2025-07-30
 """
 
@@ -152,6 +152,7 @@ def _render_selected_initiative(
         color: #fff;
         font-size: 1.35rem;
         font-weight: 700;
+        font-family: Arial, sans-serif;
         letter-spacing: 0.01em;
         display: flex;
         align-items: center;
@@ -166,7 +167,7 @@ def _render_selected_initiative(
     # Centralized KEY METRICS section
     st.markdown("""
     <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-        <h2 style="font-size: 2rem; font-weight: 700; color: #1e293b; margin: 0;">KEY METRICS</h2>
+        <h2 style="font-size: 2rem; font-weight: 700; color: #1e293b; margin: 0; font-family: Arial, sans-serif;">KEY METRICS</h2>
     </div>
     """, unsafe_allow_html=True)
     _render_key_metrics_cards(data)
@@ -229,23 +230,27 @@ def _render_key_metrics_cards(data: pd.Series) -> None:
     .metric-icon {
         font-size: 2.1rem;
         margin-bottom: 0.2rem;
+        font-family: Arial, sans-serif;
     }
     .metric-label {
         font-size: 1.1rem;
         font-weight: 600;
         color: #334155;
         margin-bottom: 0.2rem;
+        font-family: Arial, sans-serif;
     }
     .metric-value {
         font-size: 1.7rem;
         font-weight: 700;
         color: #1e293b;
+        font-family: Arial, sans-serif;
     }
     .metric-help {
         font-size: 0.9rem;
         color: #64748b;
         margin-top: 0.2rem;
         text-align: center;
+        font-family: Arial, sans-serif;
     }
     </style>
     """,
@@ -523,10 +528,10 @@ def run() -> None:
         margin-bottom: 2rem;
         border: 1px solid rgba(99,107,47,1);
     ">
-        <h1 style="color: #ffffff; margin: 0; font-size: 2.5rem; font-weight: 700;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 2.5rem; font-weight: 700; font-family: Arial, sans-serif;">
             🔎 Overview
         </h1>
-        <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
+        <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic; font-family: Arial, sans-serif;">
             General summary and key metrics of Land Use and Land Cover (LULC) initiatives.
         </p>
     </div>

@@ -7,7 +7,7 @@ using CONAB crop calendar data. Includes both state and regional views.
 """
 
 import plotly.graph_objects as go
-from typing import Dict, Any
+from typing import Any
 from .color_palettes import (
     get_state_color, 
     get_region_color, 
@@ -17,10 +17,11 @@ from .color_palettes import (
 )
 from ....shared.chart_core import HOVER_TEMPLATE_CROP, HOVER_TEMPLATE_REGION, calc_height, build_standard_layout
 
-def plot_conab_crop_diversity_by_state(conab_data: Dict[str, Any]) -> go.Figure:
+def plot_conab_crop_diversity_by_state(conab_data: dict[str, Any]) -> go.Figure:
     """
     Crop diversity chart showing presence/weight of each crop per state (acronym).
     Each crop is a separate trace so the legend shows crops (culturas), not regions.
+    The legend items are sorted alphabetically.
     """
     if not conab_data:
         return go.Figure().update_layout(title="Crop Diversity by State (No data available)")
@@ -71,38 +72,76 @@ def plot_conab_crop_diversity_by_state(conab_data: Dict[str, Any]) -> go.Figure:
         '#b3de69', '#fccde5', '#d9d9d9', '#bc80bd', '#ccebc5'   # More variants
     ]
 
+    # Define specific color palettes for crop variations
+    brown_palette = ['#8B4513', '#A0522D', '#CD853F']  # Dark to light brown
+    yellow_palette = ['#FFD700', '#FFFF00', "#F0F0A2"]  # Dark to light yellow
+    
+    # Specific colors for main crops
+    specific_colors = {
+        'Wheat': '#2ca02c',      # Green
+        'Cotton': '#17becf',     # Teal
+        'Rice': '#d62728',       # Red
+        'Soybean': '#ff7f0e'     # Orange
+    }
+
     # Assign colors to crops
     crop_color_map = {}
-    for i, crop in enumerate(crop_series.keys()):
-        explicit_color = get_crop_color(crop)
-        crop_color_map[crop] = (
-            explicit_color if explicit_color != '#808080' 
-            else enhanced_palette[i % len(enhanced_palette)]
-        )
+    sorted_crops = sorted(crop_series.keys())  # Alphabetical order for legend
+    for i, crop in enumerate(sorted_crops):
+        if crop.startswith('Beans ('):
+            # Extract harvest number
+            if '1st' in crop:
+                crop_color_map[crop] = brown_palette[0]  # Darkest brown
+            elif '2nd' in crop:
+                crop_color_map[crop] = brown_palette[1]  # Medium brown
+            elif '3rd' in crop or '3th' in crop:
+                crop_color_map[crop] = brown_palette[2]  # Lightest brown
+            else:
+                crop_color_map[crop] = brown_palette[0]  # Default to darkest
+        elif crop.startswith('Corn ('):
+            # Extract harvest number
+            if '1st' in crop:
+                crop_color_map[crop] = yellow_palette[0]  # Darkest yellow
+            elif '2nd' in crop:
+                crop_color_map[crop] = yellow_palette[1]  # Medium yellow
+            elif '3rd' in crop or '3th' in crop:
+                crop_color_map[crop] = yellow_palette[2]  # Lightest yellow
+            else:
+                crop_color_map[crop] = yellow_palette[0]  # Default to darkest
+        elif crop in specific_colors:
+            crop_color_map[crop] = specific_colors[crop]
+        else:
+            # Use enhanced palette for other crops
+            crop_color_map[crop] = enhanced_palette[i % len(enhanced_palette)]
 
-    # Create visualization
+    # Create visualization with crops in alphabetical order (legend sorted)
     fig = go.Figure()
-    for crop, values in crop_series.items():
+    for crop in sorted_crops:
+        values = crop_series[crop]
         fig.add_trace(go.Bar(
             x=values,
             y=states,
             orientation='h',
             name=crop,
-            marker=dict(
-                color=crop_color_map[crop],
-                line=dict(color='rgba(255,255,255,0.6)', width=0.5)
-            ),
-            hovertemplate=HOVER_TEMPLATE_CROP.format(crop)
+            marker={
+                'color': crop_color_map[crop],
+                'line': {'color': 'rgba(255,255,255,0.6)', 'width': 0.5}
+            },
+            hovertemplate=HOVER_TEMPLATE_CROP.format(crop),
+            legendrank=sorted_crops.index(crop)  # Ensures legend order is alphabetical
         ))
 
     # Configure layout
-    state_layout = build_standard_layout("Crop Diversity by State (legend: crops)", title_x=0.5,
+    state_layout = build_standard_layout("Crop Diversity by State", title_x=0.05,
                                          xaxis_title="Crop Presence / Intensity (weighted)",
                                          yaxis_title="State (Acronym)",
                                          height=calc_height(len(states), min_height=400, per_row=25),
-                                         margin=dict(l=100, r=260, t=80, b=60),
-                                         yaxis=dict(autorange='reversed', tickfont=dict(size=11)),
-                                         legend={'title': {'text': 'Crops', 'font': {'size': 12}}}
+                                         margin={'l': 100, 'r': 260, 't': 80, 'b': 60},
+                                         yaxis={'autorange': 'reversed', 'tickfont': {'size': 11, 'family': 'Arial, sans-serif'}, 'title_font': {'family': 'Arial, sans-serif'}},
+                                         xaxis={'title_font': {'family': 'Arial, sans-serif'}},
+                                         legend={'title': {'text': 'Crops', 'font': {'size': 12, 'family': 'Arial, sans-serif'}},
+                                                 'traceorder': 'normal'},
+                                         font={'family': 'Arial, sans-serif'}
                                          )
 
     fig.update_layout(**state_layout)
@@ -110,7 +149,7 @@ def plot_conab_crop_diversity_by_state(conab_data: Dict[str, Any]) -> go.Figure:
     return fig
 
 
-def _extract_initiative_data(initiative_data: Dict[str, Any], state_crop_weights: Dict, all_crops: set) -> None:
+def _extract_initiative_data(initiative_data: dict[str, Any], state_crop_weights: dict, all_crops: set) -> None:
     """Extract data from CONAB initiative format."""
     crop_coverage = initiative_data.get("detailed_crop_coverage", {})
     for crop, crop_info in crop_coverage.items():
@@ -122,7 +161,7 @@ def _extract_initiative_data(initiative_data: Dict[str, Any], state_crop_weights
             state_crop_weights[state_acr][crop] += 1
 
 
-def _extract_calendar_data(crop_calendar: Dict[str, Any], state_crop_weights: Dict, all_crops: set) -> None:
+def _extract_calendar_data(crop_calendar: dict[str, Any], state_crop_weights: dict, all_crops: set) -> None:
     """Extract data from crop calendar format."""
     for crop_name, crop_data in crop_calendar.items():
         all_crops.add(crop_name)
@@ -136,12 +175,12 @@ def _extract_calendar_data(crop_calendar: Dict[str, Any], state_crop_weights: Di
                 state_crop_weights[state_acr][crop_name] += active_months
 
 # Legacy function for backward compatibility
-def plot_conab_crop_diversity(conab_data: Dict[str, Any]) -> go.Figure:
+def plot_conab_crop_diversity(conab_data: dict[str, Any]) -> go.Figure:
     """Legacy function - defaults to state view"""
     return plot_conab_crop_diversity_by_state(conab_data)
 
 
-def plot_conab_crop_diversity_by_region(conab_data: Dict[str, Any]) -> go.Figure:
+def plot_conab_crop_diversity_by_region(conab_data: dict[str, Any]) -> go.Figure:
     """
     Create a crop type diversity chart showing crop types by Brazilian region.
     Aggregates state data into regional patterns.
@@ -227,7 +266,7 @@ def plot_conab_crop_diversity_by_region(conab_data: Dict[str, Any]) -> go.Figure
     all_crops = set()
     for region_data in region_crops.values():
         all_crops.update(region_data.keys())
-    all_crops = sorted(list(all_crops))
+    all_crops = sorted(all_crops)
     
     # Create figure with regional color scheme
     fig = go.Figure()
@@ -253,11 +292,11 @@ def plot_conab_crop_diversity_by_region(conab_data: Dict[str, Any]) -> go.Figure
             y=regions,
             orientation='h',
             name=crop,
-            marker=dict(
-                color=get_crop_color(crop),
-                line=dict(color='rgba(255,255,255,0.6)', width=1),
-                opacity=0.8
-            ),
+            marker={
+                'color': get_crop_color(crop),
+                'line': {'color': 'rgba(255,255,255,0.6)', 'width': 1},
+                'opacity': 0.8
+            },
             hovertemplate=HOVER_TEMPLATE_REGION.format(crop)
         ))
     
@@ -267,9 +306,9 @@ def plot_conab_crop_diversity_by_region(conab_data: Dict[str, Any]) -> go.Figure
                                           yaxis_title="Brazilian Region",
                                           height=500,
                                           legend={'title': {'text': 'Crop Types', 'font': {'size': 14}}, 'orientation': 'v', 'yanchor': 'top', 'y': 1, 'xanchor': 'left', 'x': 1.02},
-                                          xaxis=dict(showgrid=True, gridwidth=1, gridcolor='rgba(128,128,128,0.3)', showline=True, linewidth=2, linecolor='#2C3E50', title_font=dict(size=14, color='#2C3E50', family='Arial, sans-serif')),
-                                          yaxis=dict(showgrid=False, showline=True, linewidth=2, linecolor='#2C3E50', title_font=dict(size=14, color='#2C3E50', family='Arial, sans-serif'), tickfont=dict(size=12, color='#2C3E50', family='Arial, sans-serif')),
-                                          margin=dict(l=60, r=120, t=80, b=60)
+                                          xaxis={'showgrid': True, 'gridwidth': 1, 'gridcolor': 'rgba(128,128,128,0.3)', 'showline': True, 'linewidth': 2, 'linecolor': '#2C3E50', 'title_font': {'size': 14, 'color': '#2C3E50', 'family': 'Arial, sans-serif'}},
+                                          yaxis={'showgrid': False, 'showline': True, 'linewidth': 2, 'linecolor': '#2C3E50', 'title_font': {'size': 14, 'color': '#2C3E50', 'family': 'Arial, sans-serif'}, 'tickfont': {'size': 12, 'color': '#2C3E50', 'family': 'Arial, sans-serif'}},
+                                          margin={'l': 60, 'r': 120, 't': 80, 'b': 60}
                                           )
 
     fig.update_layout(**region_layout)

@@ -63,6 +63,7 @@ def plot_conab_spatial_coverage_by_state(
     - Keeps legend (one entry per region).
     - Colors states by region.
     - Avoids hardcoded layout details by exposing mapping, weights and total_years.
+    - Legend and Y axis are sorted alphabetically.
     """
     if not conab_data:
         return go.Figure().update_layout(title="Spatial Coverage by State (No data available)")
@@ -118,7 +119,6 @@ def plot_conab_spatial_coverage_by_state(
                 if total_acts_this > 0:
                     entry['crops'].add(crop_name)
                     entry['total_activities'] += total_acts_this
-                    entry['active_months'] += active_months_this
     else:
         return go.Figure().update_layout(title="Spatial Coverage by State (No compatible data format)")
 
@@ -185,6 +185,23 @@ def plot_conab_spatial_coverage_by_state(
         ))
 
     # Minimal, non-hardcoded layout — include Y axis title with acronyms
+    # Sort region_colors by region name (alphabetical order) for legend
+    sorted_region_colors = dict(sorted(region_colors.items(), key=lambda x: x[0]))
+
+    # Remove previous legendonly traces and add them in alphabetical order
+    # (Remove all traces except the main bar)
+    fig.data = fig.data[:1]
+    for region_name, color in sorted_region_colors.items():
+        fig.add_trace(go.Bar(
+            x=[0],
+            y=[''],
+            marker=dict(color=color),
+            name=region_name,
+            showlegend=True,
+            hoverinfo='none',
+            visible='legendonly'
+        ))
+
     fig.update_layout(
         title="Agricultural data availability by Brazilian States (colored by region)",
         xaxis_title="Coverage (%)",

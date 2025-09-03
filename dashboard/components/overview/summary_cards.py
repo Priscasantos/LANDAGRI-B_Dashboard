@@ -25,7 +25,7 @@ def render(df: pd.DataFrame) -> None:
         """
     <style>
     .modern-metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #01739E 0%, #01A6B7 50%, #632FFE 100%);
         color: white;
         padding: 1.5rem;
         border-radius: 15px;
@@ -203,7 +203,7 @@ def render(df: pd.DataFrame) -> None:
             f"""
         <div class="modern-metric-card">
             <div class="metric-value">🏷️ {min_classes:.0f} - {max_classes:.0f}</div>
-            <div class="metric-label">Minimum and Maximum Classes</div>
+            <div class="metric-label">Min. to Max. of Classes</div>
             <div class="metric-sublabel">Classification categories</div>
         </div>
         """,

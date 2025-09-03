@@ -56,7 +56,7 @@ class MenuStyles:
             background: #ffffff;
             padding: 0;
             margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            font-family: Arial, sans-serif;
         }}
         
         /* Título do menu principal */
