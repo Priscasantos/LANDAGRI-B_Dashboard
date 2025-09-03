@@ -74,12 +74,12 @@ def run(metadata=None, df_original=None):
             margin-bottom: 2rem;
             border: 1px solid rgba(255,255,255,0.05);
         ">
-            <h1 style="color: #ffffff; margin: 0; font-size: 2.5rem; font-weight: 700;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 2.5rem; font-weight: 700; font-family: Arial, sans-serif;">
                 🏞  Initiative Analysis
             </h1>
-            <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic">
+            <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic; font-family: Arial, sans-serif;">
                 Comprehensive spatio-temporal analysis of thirteen Land Use and Land Cover (LULC) initiatives. Reference:
-                <a href="https://doi.org/10.3390/rs17132324" target="_blank" rel="noopener noreferrer" style="color: #fdebd6; text-decoration: underline; font-weight: 600;">
+                <a href="https://doi.org/10.3390/rs17132324" target="_blank" rel="noopener noreferrer" style="color: #fdebd6; text-decoration: underline; font-weight: 600; font-family: Arial, sans-serif;">
                     Santos et al. (2025).
                 </a>
             </p>
@@ -156,10 +156,10 @@ def render_comparative_analysis(df: pd.DataFrame, metadata: dict) -> None:
         margin-bottom: 1.5rem;
         box-shadow: 0 4px 16px rgba(255, 203, 128, 0.12);
         ">
-        <h2 style="color: #5a3716; margin: 0; font-size: 1.8rem; font-weight: 600;">
+        <h2 style="color: #5a3716; margin: 0; font-size: 1.8rem; font-weight: 600; font-family: Arial, sans-serif;">
             🔠 Comparative Analysis
         </h2>
-        <p style="color: #7a4b18; margin: 0.5rem 0 0 0; font-size: 1rem;">
+        <p style="color: #7a4b18; margin: 0.5rem 0 0 0; font-size: 1rem; font-family: Arial, sans-serif;">
             Comparative analysis of LULC mapping initiatives characteristics.
         </p>
         </div>
@@ -245,10 +245,10 @@ def render_temporal_analysis(df: pd.DataFrame, metadata: dict) -> None:
         margin-bottom: 1.5rem;
         box-shadow: 0 4px 16px rgba(255, 203, 128, 0.12);
         ">
-        <h2 style="color: #5a3716; margin: 0; font-size: 1.8rem; font-weight: 600;">
+        <h2 style="color: #5a3716; margin: 0; font-size: 1.8rem; font-weight: 600; font-family: Arial, sans-serif;">
             ⏳ Temporal Analysis
         </h2>
-        <p style="color: #7a4b18; margin: 0.5rem 0 0 0; font-size: 1rem;">
+        <p style="color: #7a4b18; margin: 0.5rem 0 0 0; font-size: 1rem; font-family: Arial, sans-serif;">
             Temporal analysis of LULC mapping initiatives showing trends, gaps, and evolutions over time.
         </p>
         </div>
@@ -295,10 +295,10 @@ def render_detailed_analysis(df: pd.DataFrame, metadata: dict) -> None:
         margin-bottom: 1.5rem;
         box-shadow: 0 4px 16px rgba(255, 203, 128, 0.12);
         ">
-        <h2 style="color: #5a3716; margin: 0; font-size: 1.8rem; font-weight: 600;">
+        <h2 style="color: #5a3716; margin: 0; font-size: 1.8rem; font-weight: 600; font-family: Arial, sans-serif;">
             ◌ Detailed Analysis
         </h2>
-        <p style="color: #7a4b18; margin: 0.5rem 0 0 0; font-size: 1rem; font-style: italic;">
+        <p style="color: #7a4b18; margin: 0.5rem 0 0 0; font-size: 1rem; font-style: italic; font-family: Arial, sans-serif;">
             Detailed analysis of LULC mapping initiatives using custom filtered-based search.
         </p>
         </div>
@@ -369,12 +369,12 @@ def render_detailed_analysis(df: pd.DataFrame, metadata: dict) -> None:
                 font-size: 0.95rem;
             ">
                 <strong>ℹ️ Note:</strong>
-                <p style="margin:0.35rem 0 0 0;">
+                <p style="margin:0.35rem 0 0 0; font-family: Arial, sans-serif;">
                     This heatmap highlights the intensity of correspondence between the characteristics of initiatives.
                     Use it to identify similarity patterns, compare initiatives, and detect potential outliers.
                     The variables used in the chart are detailed below:
                 </p>
-                <ul style="margin:0.35rem 0 0 1rem 1.2rem; padding:0; font-style: italic;">
+                <ul style="margin:0.35rem 0 0 1rem 1.2rem; padding:0; font-style: italic; font-family: Arial, sans-serif;">
                     <li>Resolution: spatial resolution (m).</li>
                     <li>Resolution_min_val: Minimum spatial resolution (m) among the initiatives.</li>
                     <li>Resolution_max_val: Maximum spatial resolution (m) among the initiatives.</li>

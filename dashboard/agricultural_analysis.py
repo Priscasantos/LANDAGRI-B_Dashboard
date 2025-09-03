@@ -49,10 +49,10 @@ def render_agriculture_overview_page():
         margin-bottom: 2rem;
         border: 1px solid rgba(236,151,6,0.12);
     ">
-        <h1 style="color: #ffffff; margin: 0; font-size: 2.5rem; font-weight: 700;">
-            🏞 Agricultural Analysis
+        <h1 style="color: #ffffff; margin: 0; font-size: 2.5rem; font-weight: 700; font-family: Arial, sans-serif;">
+            🌾 Agricultural Analysis
         </h1>
-        <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
+        <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic; font-family: Arial, sans-serif;">
             Land Use and Land Cover (LULC) initiatives mapping data analysis applied to Brazilian agricultural context.
         </p>
     </div>
@@ -68,10 +68,10 @@ def render_agriculture_overview_page():
         margin-bottom: 1rem;
         border: 1px solid rgba(236,151,6,0.08);
     ">
-        <h2 style="color: #8d4004; margin: 0; font-size: 1.6rem; font-weight: 600;">
+        <h2 style="color: #8d4004; margin: 0; font-size: 1.6rem; font-weight: 600; font-family: Arial, sans-serif;">
             🔎 Agriculture Overview
         </h2>
-        <p style="color: #8d4004; margin: 0.35rem 0 0 0; font-size: 0.95rem; font-style: italic;">
+        <p style="color: #8d4004; margin: 0.35rem 0 0 0; font-size: 0.95rem; font-style: italic; font-family: Arial, sans-serif;">
             Overview of integrated agricultural data information from National Supply Company (CONAB) and Brazilian Institute of Geography and Statistics (IBGE) web portals.
         </p>
     </div>
@@ -168,10 +168,10 @@ def render_crop_calendar_page():
         margin-bottom: 2rem;
         border: 1px solid rgba(236,151,6,0.12);
     ">
-        <h1 style="color: #ffffff; margin: 0; font-size: 2.5rem; font-weight: 700;">
-            🏞 Agricultural Analysis
+        <h1 style="color: #ffffff; margin: 0; font-size: 2.5rem; font-weight: 700; font-family: Arial, sans-serif;">
+            🌾 Agricultural Analysis
         </h1>
-        <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
+        <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic; font-family: Arial, sans-serif;">
             Land Use and Land Cover (LULC) initiatives mapping data analysis applied to Brazilian agricultural context.
         </p>
     </div>
@@ -187,10 +187,10 @@ def render_crop_calendar_page():
         margin-bottom: 2rem;
         border: 1px solid rgba(236,151,6,0.08);
     ">
-        <h2 style="color: #8d4004; margin: 0; font-size: 1.6rem; font-weight: 600;">
+        <h2 style="color: #8d4004; margin: 0; font-size: 1.6rem; font-weight: 600; font-family: Arial, sans-serif;">
             📅 Crop Calendar
         </h2>
-        <p style="color: #8d4004; margin: 0.35rem 0 0 0; font-size: 0.95rem; font-style: italic;">
+        <p style="color: #8d4004; margin: 0.35rem 0 0 0; font-size: 0.95rem; font-style: italic; font-family: Arial, sans-serif;">
             Agricultural calendar analysis for the main Brazilian crops. Mapping data acquired from National Supply Company (CONAB).
         </p>
     </div>
@@ -276,10 +276,10 @@ def render_agriculture_availability_page():
         margin-bottom: 2rem;
         border: 1px solid rgba(236,151,6,0.12);
     ">
-        <h1 style="color: #ffffff; margin: 0; font-size: 2.5rem; font-weight: 700;">
-            🏞 Agricultural Analysis
+        <h1 style="color: #ffffff; margin: 0; font-size: 2.5rem; font-weight: 700; font-family: Arial, sans-serif;">
+            🌾 Agricultural Analysis
         </h1>
-        <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic;">
+        <p style="color: #fdebd6; margin: 0.5rem 0 0 0; font-size: 1.2rem; font-style: italic; font-family: Arial, sans-serif;">
             Land Use and Land Cover (LULC) initiatives mapping data analysis applied to Brazilian agricultural context.
         </p>
     </div>
@@ -295,10 +295,10 @@ def render_agriculture_availability_page():
         margin-bottom: 1rem;
         border: 1px solid rgba(236,151,6,0.08);
     ">
-        <h2 style="color: #8d4004; margin: 0; font-size: 1.6rem; font-weight: 600;">
+        <h2 style="color: #8d4004; margin: 0; font-size: 1.6rem; font-weight: 600; font-family: Arial, sans-serif;">
             ⏳ Agriculture Availability
         </h2>
-        <p style="color: #8d4004; margin: 0.35rem 0 0 0; font-size: 0.95rem; font-style: italic;">
+        <p style="color: #8d4004; margin: 0.35rem 0 0 0; font-size: 0.95rem; font-style: italic; font-family: Arial, sans-serif;">
             Agricultural data availability analysis from National Supply Company (CONAB).
         </p>
     </div>

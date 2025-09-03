@@ -17,12 +17,9 @@ Structure following app.py:
 - Crop Calendar: Interactive calendar by state/crop with consolidated tabs
 - Agriculture Availability: Data quality and availability
 
-Author: LANDAGRI-B Project Team 
+Author: LANDAGRI-B Project Team
 Date: 2025-08-07
 """
-
-import sys
-from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
@@ -43,11 +40,6 @@ from dashboard.components.agricultural_analysis.helpers import (
     validate_calendar_data,
     get_crop_summary,
     get_regional_summary
-)
-from dashboard.components.agricultural_analysis.agriculture_overview.agricultural_overview import render_agricultural_overview
-from dashboard.components.agricultural_analysis.charts.availability import (
-    render_calendar_availability_analysis,
-    render_crop_availability_tab
 )
 from dashboard.components.agricultural_analysis.charts.calendar import (
     render_complete_calendar_analysis
@@ -104,10 +96,10 @@ def _render_agriculture_overview_page(calendar_data: dict, agricultural_data: di
         box-shadow: 0 8px 32px rgba(46, 139, 87, 0.2);
         border: 1px solid rgba(255,255,255,0.1);
     ">
-        <h1 style="color: white; margin: 0; font-size: 2.5rem; font-weight: 700;">
+        <h1 style="color: white; margin: 0; font-size: 2.5rem; font-weight: 700; font-family: Arial, sans-serif;">
             📊 Agriculture Overview
         </h1>
-        <p style="color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; font-size: 1.2rem;">
+        <p style="color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; font-size: 1.2rem; font-family: Arial, sans-serif;">
             Consolidated view of Brazilian agriculture with agricultural data
         </p>
     </div>
@@ -412,7 +404,7 @@ def _render_crop_calendar_page(calendar_data: dict, agricultural_data: dict):
         else:
             st.warning("⚠️ Regional data not available")
     
-    # Tab 5: Interactive Calendar  
+    # Tab 5: Interactive Calendar
     with tab5:
         st.markdown("### 🔧 Interactive Calendars")
         
@@ -787,7 +779,7 @@ def _render_crop_diversity_chart(agricultural_data: dict, calendar_data: dict):
         # Calendar data
         if calendar_data:
             crop_calendar = calendar_data.get('crop_calendar', {})
-            for crop in crop_calendar.keys():
+            for crop in crop_calendar:
                 crops_data.append({
                     'Crop': crop,
                     'Source': 'Agricultural Calendar',
@@ -991,7 +983,7 @@ def _render_geographic_coverage(calendar_data: dict, agricultural_data: dict):
         if calendar_data:
             states = calendar_data.get('states', {})
             regions = {}
-            for state_code, state_info in states.items():
+            for _state_code, state_info in states.items():
                 region = state_info.get('region', 'Não especificado')
                 if region not in regions:
                     regions[region] = 0

@@ -4,7 +4,7 @@ Color Palettes for Agricultural Analysis Dashboard
 
 Consistent color palettes for Brazilian states and regions in agricultural visualizations.
 
-Author: LANDAGRI-B Project Team 
+Author: LANDAGRI-B Project Team
 Date: 2025-08-11
 """
 
@@ -29,7 +29,7 @@ REGIONAL_COLORS_DARK = {
 # State to region mapping
 STATE_TO_REGION = {
     # North (Norte)
-    'AC': 'North', 'AP': 'North', 'AM': 'North', 'PA': 'North', 
+    'AC': 'North', 'AP': 'North', 'AM': 'North', 'PA': 'North',
     'RO': 'North', 'RR': 'North', 'TO': 'North',
     
     # Northeast (Nordeste)
@@ -142,7 +142,7 @@ def get_coverage_color(coverage_percentage: float) -> str:
     if coverage_percentage >= 75:
         return MODERN_COLORS['coverage_excellent']
     elif coverage_percentage >= 50:
-        return MODERN_COLORS['coverage_good'] 
+        return MODERN_COLORS['coverage_good']
     elif coverage_percentage >= 25:
         return MODERN_COLORS['coverage_fair']
     else:
@@ -158,7 +158,10 @@ def get_crop_color(crop_name: str) -> str:
     Returns:
         Hex color code for the crop
     """
-    return CROP_COLORS.get(crop_name, CROP_COLORS['default'])
+    # Extract base crop name by removing harvest information in parentheses
+    import re
+    base_crop = re.sub(r'\s*\([^)]*\)$', '', crop_name).strip()
+    return CROP_COLORS.get(base_crop, CROP_COLORS.get(crop_name, CROP_COLORS['default']))
 
 def get_gradient_colors(num_colors: int = 5) -> list:
     """
