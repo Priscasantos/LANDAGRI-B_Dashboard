@@ -121,7 +121,7 @@ def run(logo_width: int = DEFAULT_LOGO_WIDTH_PX) -> None:
         If you use this dashboard in academic or technical work, please cite the products and the LANDAGRI-B project using the following articles:
         - Initiatives and products informations article: [Santos et al. (2025)](https://doi.org/10.3390/rs17132324).
         - Project's main article: [Santos and Adami (2025)](http://mtc-m16c.sid.inpe.br/ibi/sid.inpe.br/mtc-m18/2010/10.19.13.42?ibiurl.clientinformation.citingitem=sid.inpe.br/mtc-m18/2010/12.15.11.49&linktype=relative);
-        - LANDAGRI-B repository in Zenodo: [Santos, Silva and Adami (2025)](https://github.com/landagri-b).
+        - LANDAGRI-B repository in Zenodo: [Santos, Silva, and Adami (2025)](https://doi.org/10.5281/zenodo.17042299).
         """
     )
     st.markdown("---")

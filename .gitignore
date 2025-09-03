@@ -41,3 +41,113 @@ system_report.json
 data/brazil-vector/
 # Documentation is tracked - docs/ folder should always be included
 cache/
+
+# Additional Python ignores
+*.egg
+dist/
+build/
+*.whl
+*.tar.gz
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.cache/
+*.so
+*.pyd
+*.dll
+*.exe
+*.msi
+
+# Agentic tools and AI-generated files
+agentic_tools/
+ai_generated/
+*.ai
+tools/
+mcp_*/
+sequential_thinking/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Logs and debug
+logs/
+*.log
+debug.log
+error.log
+
+# Node.js (if any)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Data and cache
+cache/
+*.cache
+data/temp/
+data/cache/
+
+# Secrets and keys
+secrets/
+*.key
+*.pem
+config/secrets.json
+
+# Build and distribution
+build/
+dist/
+*.egg-info/
+*.whl
+*.tar.gz
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Package managers
+Pipfile.lock
+poetry.lock
+requirements-dev.txt
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Documentation builds
+docs/_build/
+docs/build/
+
+# Miscellaneous
+*.zip
+*.rar
+*.7z
+*.gz
+*.bz2
+*.tar
