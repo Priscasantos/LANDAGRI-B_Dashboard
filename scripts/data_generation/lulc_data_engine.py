@@ -14,18 +14,18 @@ Key features:
 - English standardization throughout
 - Visualization-ready data structures
 
-Author: LANDAGRI-B Project Team 
+Author: LANDAGRI-B Project Team
 Date: 2025
 """
 
 import contextlib
+from datetime import datetime
 import json
+from pathlib import Path
 import re
 import sys
-import warnings
-from datetime import datetime
-from pathlib import Path
 from typing import Any
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -42,6 +42,9 @@ except ImportError:
     # Fallback if config module is not available
     def standardize_dataframe_columns(df):
         return df
+
+
+from dashboard.components.shared.methodology_taxonomy import classify  # noqa: E402
 
 
 class UnifiedDataProcessor:
@@ -345,93 +348,6 @@ class UnifiedDataProcessor:
         else:
             return "Other"
 
-    def categorize_methodology(self, method: str) -> str:
-        """Unified methodology categorization function."""
-        method_lower = method.lower()
-
-        if any(
-            term in method_lower
-            for term in ["deep learning", "neural network", "cnn", "u-net"]
-        ):
-            return "Deep Learning"
-        elif any(
-            term in method_lower
-            for term in [
-                "machine learning",
-                "random forest",
-                "gradient boost",
-                "catboost",
-            ]
-        ):
-            return "Machine Learning"
-        elif any(term in method_lower for term in ["visual interpretation", "visual"]):
-            return "Visual Interpretation"
-        elif any(
-            term in method_lower
-            for term in ["statistical", "regression", "decision tree"]
-        ):
-            return "Statistical Methods"
-        else:
-            return "Combined"
-
-    def standardize_methodology(self, classification_method: str) -> str:
-        """Standardize methodology into broader categories for better chart visualization."""
-        if not classification_method:
-            return "Unknown"
-
-        method = classification_method.lower()
-
-        # Deep Learning and Neural Networks
-        if any(
-            word in method
-            for word in [
-                "deep learning",
-                "neural network",
-                "u-net",
-                "cnn",
-                "convolutional",
-            ]
-        ):
-            return "Deep Learning"
-
-        # Machine Learning (traditional)
-        elif any(
-            word in method
-            for word in [
-                "random forest",
-                "gradient boost",
-                "decision tree",
-                "machine learning",
-                "catboost",
-            ]
-        ):
-            return "Machine Learning"
-
-        # Visual Interpretation with other methods = Hybrid
-        elif "visual interpretation" in method:
-            if any(
-                word in method
-                for word in [
-                    "machine learning",
-                    "spectral",
-                    "classification",
-                    "random forest",
-                    "deep learning",
-                    "bhattacharya",
-                ]
-            ):
-                return "Hybrid"
-            else:
-                return "Visual Interpretation"
-
-        # Combined methods
-        elif "combined" in method or "," in method:
-            return "Hybrid"
-
-        # Default fallback
-        else:
-            return "Machine Learning"
-
     def categorize_coverage(self, coverage: str) -> str:
         """Unified coverage categorization function."""
         # return self.coverage_mapping.get(coverage, \'Regional\') # Removed as mappings are now handled by json_interpreter
@@ -534,6 +450,15 @@ class UnifiedDataProcessor:
             accuracy = self._parse_enhanced_accuracy(
                 accuracy_raw
             )  # Create standardized row with English columns
+            methodology = classify(initiative_data.get("classification_method", ""))
+            if methodology.label is None:
+                raise ValueError(
+                    f"Cannot classify methodology for initiative "
+                    f"{initiative_name!r}: classification_method="
+                    f"{initiative_data.get('classification_method', '')!r} matched no "
+                    f"known family. Add a term to TERM_FAMILIES in "
+                    f"dashboard/components/shared/methodology_taxonomy.py."
+                )
             row = {
                 "Name": initiative_name,
                 "Acronym": initiative_data.get("acronym", initiative_name[:8]),
@@ -557,15 +482,12 @@ class UnifiedDataProcessor:
                 "Algorithm": initiative_data.get(
                     "methodology", ""
                 ),  # Detailed technical description
-                "Methodology": self.standardize_methodology(
-                    initiative_data.get("classification_method", "")
-                ),  # Standardized category
+                "Methodology": methodology.label,  # Derived MECE leaf (SSoT)
                 "Classification Method": initiative_data.get(
                     "classification_method", ""
                 ),
-                "Method Category": self.categorize_methodology(
-                    initiative_data.get("classification_method", "")
-                ),
+                "Method Category": methodology.label,  # Same leaf as Methodology
+                "Methodology Components": "|".join(sorted(methodology.families)),
                 "Temporal Frequency": initiative_data.get("temporal_frequency", ""),
                 "Update Frequency": initiative_data.get("update_frequency", ""),
                 "Classes Legend": initiative_data.get("class_legend", ""),
@@ -614,6 +536,17 @@ class UnifiedDataProcessor:
                     "temporal_gaps": temporal_info_meta[
                         "temporal_gaps"
                     ],  # Store as list of ints in metadata dict
+                    # Derived MECE methodology fields (single source of truth)
+                    "Methodology": classify(
+                        initiative_data.get("classification_method", "")
+                    ).label,
+                    "Methodology Components": "|".join(
+                        sorted(
+                            classify(
+                                initiative_data.get("classification_method", "")
+                            ).families
+                        )
+                    ),
                 }
             )
 
@@ -1178,7 +1111,9 @@ class UnifiedDataProcessor:
                 "trend": (
                     "improving"
                     if correlation > 0.1
-                    else "stable" if abs(correlation) <= 0.1 else "declining"
+                    else "stable"
+                    if abs(correlation) <= 0.1
+                    else "declining"
                 ),
             }
 

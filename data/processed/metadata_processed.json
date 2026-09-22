@@ -15,7 +15,7 @@
     "temporal_frequency": "Annual",
     "update_frequency": "Annual",
     "reference_system": "EPSG:4326",
-    "methodology": "Hybrid",
+    "methodology": "Shallow ML",
     "classification_method": "Supervised Random Forest",
     "number_of_classes": 10,
     "class_legend": "Forest, Shrubland, Herbaceous Vegetation, Herbaceous Wetland, Moss And Lichen, Bare/Sparse Vegetation, Cropland, Urban/Built-Up, Snow And Ice, Permanent Water Bodies",
@@ -34,7 +34,9 @@
     "start_year": 2015,
     "end_year": 2019,
     "temporal_span": 5,
-    "temporal_gaps": []
+    "temporal_gaps": [],
+    "Methodology": "Shallow ML",
+    "Methodology Components": "Shallow ML"
   },
   "Google Dynamic World V1": {
     "coverage": "Global",
@@ -71,7 +73,9 @@
     "start_year": 2017,
     "end_year": 2024,
     "temporal_span": 8,
-    "temporal_gaps": []
+    "temporal_gaps": [],
+    "Methodology": "Deep Learning",
+    "Methodology Components": "Deep Learning"
   },
   "ESRI-10m Annual LULC": {
     "coverage": "Global",
@@ -141,7 +145,9 @@
     "start_year": 2017,
     "end_year": 2024,
     "temporal_span": 8,
-    "temporal_gaps": []
+    "temporal_gaps": [],
+    "Methodology": "Deep Learning",
+    "Methodology Components": "Deep Learning"
   },
   "Global LULC change 2000 and 2020": {
     "coverage": "Global",
@@ -159,8 +165,8 @@
     "temporal_frequency": "Quadriennial",
     "update_frequency": "Quadriennial",
     "reference_system": "EPSG:4326",
-    "methodology": "Machine Learning",
-    "classification_method": "Supervised Machine Learning",
+    "methodology": "Hybrid",
+    "classification_method": "Decision/Regression Trees and U-Net CNN",
     "number_of_classes": 7,
     "class_legend": "Terra Firma Vegetation Cover, Wetland, Open Surface Water, Snow/Ice, Cropland, Built-Up And Ocean",
     "overall_accuracy": 85.0,
@@ -195,7 +201,9 @@
       2017,
       2018,
       2019
-    ]
+    ],
+    "Methodology": "Hybrid",
+    "Methodology Components": "Deep Learning|Shallow ML"
   },
   "Global Pasture Watch (GPW)": {
     "coverage": "Global",
@@ -220,7 +228,7 @@
     "temporal_frequency": "Biennial",
     "update_frequency": "Biennial",
     "reference_system": "EPSG:4326",
-    "methodology": "Machine Learning",
+    "methodology": "Shallow ML",
     "classification_method": "Supervised Machine Learning",
     "number_of_classes": 3,
     "class_legend": "Cultivated Grassland (CG), Natural/Semi-Natural Grassland (NSG), Other Land Cover (OLC)",
@@ -267,7 +275,9 @@
       2017,
       2019,
       2021
-    ]
+    ],
+    "Methodology": "Shallow ML",
+    "Methodology Components": "Shallow ML"
   },
   "South America Soybean Maps": {
     "coverage": "Continental",
@@ -305,12 +315,15 @@
     "update_frequency": "Annual",
     "reference_system": "EPSG:4326",
     "methodology": "Hybrid",
-    "classification_method": "Combined",
+    "classification_method": "Regression, Visual Interpretation, and Decision Trees",
     "number_of_classes": 2,
     "class_legend": "Soybean, No Data",
     "overall_accuracy": 94.0,
     "number_of_agriculture_classes": 1,
     "agricultural_capabilities": "Soybean 1st season, Corn 2nd season",
+    "references": [
+      "Song, X.-P., Hansen, M.C., Potapov, P., et al. (2021). Massive soybean expansion in South America since 2000 and implications for conservation. Nature Sustainability, 4, 784–792. DOI: 10.1038/s41893-021-00729-z"
+    ],
     "algorithm": "Regression, visual interpretation, and decision tree methods",
     "sensors_referenced": [
       {
@@ -323,7 +336,9 @@
     "start_year": 2000,
     "end_year": 2023,
     "temporal_span": 24,
-    "temporal_gaps": []
+    "temporal_gaps": [],
+    "Methodology": "Hybrid",
+    "Methodology Components": "Shallow ML|Statistical / Spectral|Visual Interpretation"
   },
   "WorldCover 10m 2021": {
     "coverage": "Global",
@@ -338,7 +353,7 @@
     "temporal_frequency": "Annual",
     "update_frequency": "Annual",
     "reference_system": "EPSG:4326",
-    "methodology": "Machine Learning",
+    "methodology": "Shallow ML",
     "classification_method": "Gradient Boosting Decision Tree Algorithm",
     "number_of_classes": 11,
     "class_legend": "Tree Cover, Shrubland, Grassland, Cropland, Built-Up, Bare/Sparse Vegetation, Snow and Ice, Permanent Water Bodies, Herbaceous Wetland, Mangroves, Moss, Lichen",
@@ -372,7 +387,9 @@
     "start_year": 2020,
     "end_year": 2021,
     "temporal_span": 2,
-    "temporal_gaps": []
+    "temporal_gaps": [],
+    "Methodology": "Shallow ML",
+    "Methodology Components": "Shallow ML"
   },
   "WorldCereal": {
     "coverage": "Global",
@@ -386,7 +403,7 @@
     "temporal_frequency": "Annual and Seasonal",
     "update_frequency": "Annual",
     "reference_system": "EPSG:4326",
-    "methodology": "Machine Learning",
+    "methodology": "Shallow ML",
     "classification_method": "Gradient Boosting on decision trees",
     "number_of_classes": 5,
     "class_legend": "Temporary (One-Year Cycle) Crops, Winter Cereals, Spring Cereals, Maize Season Maize And Second Season Maize",
@@ -443,7 +460,9 @@
     "start_year": 2021,
     "end_year": 2021,
     "temporal_span": 1,
-    "temporal_gaps": []
+    "temporal_gaps": [],
+    "Methodology": "Shallow ML",
+    "Methodology Components": "Shallow ML"
   },
   "PRODES Deforestation, Warnings and Vegetation for Brazilian Biomes": {
     "coverage": "National",
@@ -551,7 +570,9 @@
     "start_year": 2001,
     "end_year": 2023,
     "temporal_span": 23,
-    "temporal_gaps": []
+    "temporal_gaps": [],
+    "Methodology": "Visual Interpretation",
+    "Methodology Components": "Visual Interpretation"
   },
   "DETER Deforestation, Warnings and Vegetation for Brazilian Biomes": {
     "coverage": "National",
@@ -670,7 +691,9 @@
     "start_year": 2001,
     "end_year": 2023,
     "temporal_span": 23,
-    "temporal_gaps": []
+    "temporal_gaps": [],
+    "Methodology": "Hybrid",
+    "Methodology Components": "Statistical / Spectral|Visual Interpretation"
   },
   "TerraClass Amazonia": {
     "coverage": "Regional",
@@ -754,7 +777,9 @@
       2017,
       2019,
       2021
-    ]
+    ],
+    "Methodology": "Hybrid",
+    "Methodology Components": "Deep Learning|Statistical / Spectral|Visual Interpretation"
   },
   "TerraClass Cerrado": {
     "coverage": "Regional",
@@ -813,7 +838,9 @@
     "temporal_gaps": [
       2019,
       2021
-    ]
+    ],
+    "Methodology": "Hybrid",
+    "Methodology Components": "Deep Learning|Statistical / Spectral|Visual Interpretation"
   },
   "MapBiomas": {
     "coverage": "National",
@@ -868,7 +895,7 @@
     "methodology": "Hybrid",
     "classification_method": "Supervised Random Forest and Deep Learning",
     "number_of_classes": 29,
-    "class_legend": "Forest, Non-Forest Natural Formation, Farming, Non-Vegetated Area, Water And Not Observed, And More",
+    "class_legend": "Forest Formation, Savanna Formation, Mangrove, Restinga Woodland, Wetland, Grassland Formation, Other Non-Forest Natural Formation, Soybean, Sugar Cane, Mosaic of Uses, Other Temporary Crops, Coffee, Citrus, Oil Palm, Other Perennial Crops, Pasture, Mosaic of Agriculture and Pasture, Forest Plantation, Beach and Dune, Urban Area, Mining, Other Non-Vegetated Areas, River Lake and Ocean, Aquaculture, Salt Flat, Glacier, Rocky Outcrop, Other Water Bodies, Not Observed",
     "accuracy": {
       "overall": 93.0,
       "by_collection": [
@@ -886,7 +913,7 @@
       ]
     },
     "number_of_agriculture_classes": 13,
-    "agricultural_capabilities": "Pasture, temporary crops, soybean, sugar cane, rice, cotton, other temporary crops, coffee, citrus, oil palm, other perennial crops, forestry plantation, mosaic of uses",
+    "agricultural_capabilities": "Soybean, sugar cane, coffee, citrus, oil palm, pasture, other temporary crops (corn, cotton, rice, beans, etc.), other perennial crops, forest plantation, mosaic of agriculture and pasture, mosaic of uses, aquaculture",
     "algorithm": "Supervised Random Forest and U-Net Deep learning algorithms applied to Landsat series data",
     "sensors_referenced": [
       {
@@ -896,7 +923,9 @@
     "start_year": 1985,
     "end_year": 2023,
     "temporal_span": 39,
-    "temporal_gaps": []
+    "temporal_gaps": [],
+    "Methodology": "Hybrid",
+    "Methodology Components": "Deep Learning|Shallow ML"
   },
   "IBGE Monitoring Land Cover and Land Use": {
     "coverage": "National",
@@ -952,12 +981,14 @@
       2015,
       2017,
       2019
-    ]
+    ],
+    "Methodology": "Visual Interpretation",
+    "Methodology Components": "Visual Interpretation"
   },
   "National Supply Company Agricultural Mapping": {
     "coverage": "National",
     "acronym": "CONAB-AM",
-    "provider": "National Supply Company (Conab)",
+    "provider": "National Supply Company (CONAB)",
     "source": "MODIS, Sentinel-2 MSI, and Landsat series",
     "spatial_resolution": 30,
     "available_years": [
@@ -1019,6 +1050,8 @@
     "start_year": 2000,
     "end_year": 2023,
     "temporal_span": 24,
-    "temporal_gaps": []
+    "temporal_gaps": [],
+    "Methodology": "Hybrid",
+    "Methodology Components": "Shallow ML|Statistical / Spectral|Visual Interpretation"
   }
 }

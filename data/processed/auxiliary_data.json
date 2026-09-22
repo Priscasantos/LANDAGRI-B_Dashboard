@@ -134,7 +134,7 @@
     },
     {
       "Acronym": "MapBiomas",
-      "Name": "MapBiomas Brazil",
+      "Name": "MapBiomas",
       "Accuracy (%)": 93.0,
       "Resolution (m)": 30.0,
       "Classes": 29,
@@ -571,7 +571,7 @@
         ]
       },
       {
-        "name": "MapBiomas Brazil",
+        "name": "MapBiomas",
         "acronym": "MapBiomas",
         "years": [
           1985,
@@ -1346,7 +1346,7 @@
             1,
             0
           ],
-          "name": "MapBiomas Brazil"
+          "name": "MapBiomas"
         },
         "IBGE-MLCU": {
           "availability": [
@@ -1542,7 +1542,7 @@
     "gaps_analysis": {},
     "temporal_overlap": {}
   },
-  "generation_timestamp": "2025-07-23T12:06:01.090174",
+  "generation_timestamp": "2026-09-22T16:04:42.281464",
   "data_summary": {
     "total_initiatives": 15,
     "initiatives_with_temporal_data": 15,
@@ -1564,6 +1564,7 @@
       "Methodology",
       "Classification Method",
       "Method Category",
+      "Methodology Components",
       "Temporal Frequency",
       "Update Frequency",
       "Classes Legend",

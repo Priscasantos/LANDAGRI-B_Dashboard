@@ -20,6 +20,12 @@ from dashboard.components.shared.chart_core import (
     apply_standard_layout,
     get_chart_colors,
 )
+from dashboard.components.shared.methodology_taxonomy import (
+    LEAVES,
+    METHODOLOGY_COLORS,
+    canonical_label,
+    present_leaves,
+)
 
 
 def render_distributions_tab(filtered_df: pd.DataFrame) -> None:
@@ -98,37 +104,55 @@ def plot_methodology_comparison(filtered_df: pd.DataFrame) -> go.Figure:
     if filtered_df.empty:
         return None
 
-    # Verificar se temos as colunas necessárias
-    if "Type" not in filtered_df.columns or "Methodology" not in filtered_df.columns:
+    # Pin the canonical methodology column; fall back to any methodology column.
+    if "Methodology" in filtered_df.columns:
+        methodology_column = "Methodology"
+    else:
+        methodology_column = next(
+            (column for column in filtered_df.columns if "method" in column.lower()),
+            None,
+        )
+    if methodology_column is None or "Type" not in filtered_df.columns:
         return None
+
+    # Canonicalise labels through the SSoT so the six MECE leaves are the only
+    # categories shown (Deep Learning stays its own leaf, never "Machine Learning").
+    methodology_data = filtered_df[["Type", methodology_column]].copy()
+    methodology_data["Methodology"] = [
+        canonical_label(value) for value in methodology_data[methodology_column]
+    ]
 
     # Contar metodologias por tipo
     methodology_counts = (
-        filtered_df.groupby(["Type", "Methodology"]).size().reset_index(name="Count")
+        methodology_data.groupby(["Type", "Methodology"]).size().reset_index(name="Count")
     )
 
     if methodology_counts.empty:
         return None
 
-    # Criar gráfico de barras agrupadas
+    # Criar gráfico de barras agrupadas (stable SSoT colors, present leaves only)
+    leaf_counts = {leaf: 0 for leaf in LEAVES}
+    for label in methodology_data["Methodology"]:
+        leaf_counts[label] = leaf_counts.get(label, 0) + 1
+
     fig = go.Figure()
 
-    colors = get_chart_colors()
-    methodologies = methodology_counts["Methodology"].unique()
-
-    for i, methodology in enumerate(methodologies):
-        method_data = methodology_counts[
-            methodology_counts["Methodology"] == methodology
-        ]
+    for leaf in present_leaves(leaf_counts):
+        method_data = methodology_counts[methodology_counts["Methodology"] == leaf]
+        if method_data.empty:
+            continue
 
         fig.add_trace(
             go.Bar(
-                name=methodology,
+                name=leaf,
                 x=method_data["Type"],
                 y=method_data["Count"],
-                marker_color=colors[i % len(colors)],
+                marker_color=METHODOLOGY_COLORS[leaf],
             )
         )
+
+    if not fig.data:
+        return None
 
     apply_standard_layout(
         fig,

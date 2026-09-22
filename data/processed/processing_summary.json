@@ -1,9 +1,9 @@
 {
-  "processing_timestamp": "2025-07-23T12:06:01.090174",
+  "processing_timestamp": "2026-09-22T16:04:42.281464",
   "data_statistics": {
     "total_initiatives": 15,
     "initiatives_with_temporal_data": 15,
-    "column_count": 28,
+    "column_count": 29,
     "unique_providers": 11,
     "coverage_types": [],
     "resolution_range": {
