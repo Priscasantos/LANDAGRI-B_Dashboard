@@ -12,7 +12,7 @@ extra-streamlit-components>=0.1.80
 
 # Data processing and visualization
 scikit-learn>=1.7.0
-kaleido>=0.2.1
+kaleido>=1.0
 commentjson>=0.9.0
 
 # Geospatial support

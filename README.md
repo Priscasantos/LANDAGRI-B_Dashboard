@@ -2,14 +2,14 @@
 
 **Interactive Dashboard for Analyzing Land Use and Land Cover (LULC) Monitoring Initiatives in Brazil**
 
-[![Python](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/streamlit-1.47.0-red.svg)](https://streamlit.io/)
 [![Status](https://img.shields.io/badge/status-production--ready-green.svg)](https://github.com/Priscasantos/LANDAGRI-B_Dashboard)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.17042299-blue.svg)](https://doi.org/10.5281/zenodo.17042299)
 
-> **Repository**: [https://github.com/Priscasantos/LANDAGRI-B_Dashboard](https://github.com/Priscasantos/LANDAGRI-B_Dashboard)  
-> **Version**: 1.0.0 (Stable Release)  
+> **Repository**: [https://github.com/Priscasantos/LANDAGRI-B_Dashboard](https://github.com/Priscasantos/LANDAGRI-B_Dashboard)
+> **Version**: 1.0.0 (Stable Release)
 > **Last Updated**: September 2, 2025
 
 ---
@@ -25,7 +25,7 @@ This software contributes to the field of remote sensing and geospatial analysis
 ## � Quick Start
 
 ### Prerequisites
-- Python 3.12 or higher
+- Python 3.10 or higher
 - Internet connection for data fetching
 
 ### Installation and Execution
@@ -74,7 +74,7 @@ Access the application at <http://localhost:8501>.
 ## 🛠️ Technical Specifications
 
 ### Core Technologies
-- **Programming Language**: Python 3.12
+- **Programming Language**: Python 3.10
 - **Web Framework**: Streamlit 1.47.0
 - **Data Processing**: Pandas, GeoPandas
 - **Visualization**: Plotly

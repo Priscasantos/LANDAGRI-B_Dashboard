@@ -28,7 +28,7 @@ repos:
     rev: 25.1.0
     hooks:
       - id: black
-        language_version: python3.12
+        language_version: python3.10
         args: [--line-length=88]
 
   # isort - Organização de imports
