@@ -3,8 +3,10 @@ import { ResponsiveContainer, PieChart as RcPieChart, Pie, Cell, Tooltip, Legend
 import {
   CHART_TOOLTIP_STYLE,
   CHART_TOOLTIP_LABEL_STYLE,
+  formatTickValue,
   paletteColor,
 } from './chartTheme';
+import { useT } from '../../../i18n/LanguageContext';
 
 export interface RechartsPieSlice {
   label: string;
@@ -29,6 +31,9 @@ export function RechartsPieChart({
   height = 350,
   donut = true,
 }: RechartsPieChartProps): ReactElement {
+  const { locale } = useT('charts');
+  const valueTip = (v: unknown): string =>
+    typeof v === 'number' ? formatTickValue(v, locale) : String(v ?? '');
   return (
     <figure
       role="img"
@@ -37,12 +42,12 @@ export function RechartsPieChart({
       className="w-full min-w-0 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
     >
       <figcaption className="sr-only">
-        {title}. {data.map((d) => `${d.label}: ${d.value}`).join('; ')}.
+        {title}. {data.map((d) => `${d.label}: ${formatTickValue(d.value, locale)}`).join('; ')}.
       </figcaption>
       <div style={{ width: '100%', minWidth: 0, height }} aria-hidden="true" className="min-w-0">
-        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+        <ResponsiveContainer width="100%" height={height} minWidth={0}>
           <RcPieChart>
-            <Tooltip contentStyle={CHART_TOOLTIP_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} />
+            <Tooltip contentStyle={CHART_TOOLTIP_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} formatter={valueTip} />
             <Legend
               iconType="square"
               iconSize={8}

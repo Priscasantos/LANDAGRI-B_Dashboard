@@ -7,6 +7,8 @@ import {
 } from '../hooks/use-theme-manager';
 import { THEME_PRESETS } from '../config/theme-presets';
 import { FONT_OPTIONS } from '../lib/fonts';
+import { useT } from '../i18n/LanguageContext';
+import type { TKey } from '../i18n/types';
 
 const RADIO_CARD_CLASS =
   'flex min-w-0 max-w-full items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs cursor-pointer focus-within:ring-2 focus-within:ring-blue-500';
@@ -19,6 +21,7 @@ const RADIO_CARD_CLASS =
  */
 export default function ThemeCustomizer(): ReactElement {
   const [open, setOpen] = useState(false);
+  const { t } = useT('customizer');
   const {
     preset,
     setPreset,
@@ -31,14 +34,37 @@ export default function ThemeCustomizer(): ReactElement {
     resetCustomizations,
   } = useThemeManager();
 
+  // Rótulos de opção via dicionário (config/hooks seguem PT estático).
+  const presetLabel: Record<string, TKey<'customizer'>> = {
+    default: 'presetDefault',
+    agro: 'presetAgro',
+    'agro-v2': 'presetAgroV2',
+    terra: 'presetTerra',
+    ambar: 'presetAmbar',
+  };
+  const densityLabel: Record<string, TKey<'customizer'>> = {
+    comfortable: 'densityComfortable',
+    compact: 'densityCompact',
+  };
+  const radiusLabel: Record<string, TKey<'customizer'>> = {
+    sm: 'radiusSm',
+    md: 'radiusMd',
+    lg: 'radiusLg',
+  };
+  const fontLabel: Record<string, TKey<'customizer'>> = {
+    default: 'fontDefault',
+    mono: 'fontMono',
+    system: 'fontSystem',
+  };
+
   return (
     <div className="relative">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        aria-label="Personalizar tema"
-        title="Personalizar tema"
+        aria-label={t('customize')}
+        title={t('customize')}
         className="flex items-center justify-center w-9 h-9 rounded-lg bg-transparent hover:bg-surface-hover text-fg-secondary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         <SlidersHorizontal size={18} aria-hidden="true" />
@@ -46,12 +72,12 @@ export default function ThemeCustomizer(): ReactElement {
       {open && (
         <div
           role="dialog"
-          aria-label="Personalizar tema"
+          aria-label={t('customize')}
           className="absolute right-0 mr-2 mt-2 w-72 max-w-[calc(100vw-1rem)] rounded-xl border border-border bg-surface p-4 shadow-lg z-50 space-y-4"
         >
           <fieldset>
             <legend className="text-xs font-bold uppercase tracking-wider text-fg-muted mb-2">
-              Predefinição
+              {t('preset')}
             </legend>
             <div className="grid grid-cols-2 gap-2">
               {THEME_PRESETS.map((p) => (
@@ -59,7 +85,7 @@ export default function ThemeCustomizer(): ReactElement {
                   <input
                     type="radio"
                     name="landagri-preset"
-                    aria-label={p.label}
+                    aria-label={t(presetLabel[p.value] ?? 'presetDefault')}
                     checked={preset.value === p.value}
                     onChange={() => setPreset(p.value)}
                     className="accent-blue-500"
@@ -70,7 +96,7 @@ export default function ThemeCustomizer(): ReactElement {
                     style={{ backgroundColor: p.light.primary }}
                   />
                   <span aria-hidden="true" className="text-xs font-medium text-fg">
-                    {p.label}
+                    {t(presetLabel[p.value] ?? 'presetDefault')}
                   </span>
                 </label>
               ))}
@@ -78,7 +104,7 @@ export default function ThemeCustomizer(): ReactElement {
           </fieldset>
           <fieldset>
             <legend className="text-xs font-bold uppercase tracking-wider text-fg-muted mb-2">
-              Densidade
+              {t('density')}
             </legend>
             <div className="flex flex-wrap gap-2">
               {DENSITY_OPTIONS.map((d) => (
@@ -86,13 +112,13 @@ export default function ThemeCustomizer(): ReactElement {
                   <input
                     type="radio"
                     name="landagri-density"
-                    aria-label={d.label}
+                    aria-label={t(densityLabel[d.value])}
                     checked={density === d.value}
                     onChange={() => setDensity(d.value)}
                     className="accent-blue-500"
                   />
                   <span aria-hidden="true" className="text-xs font-medium text-fg">
-                    {d.label}
+                    {t(densityLabel[d.value])}
                   </span>
                 </label>
               ))}
@@ -100,7 +126,7 @@ export default function ThemeCustomizer(): ReactElement {
           </fieldset>
           <fieldset>
             <legend className="text-xs font-bold uppercase tracking-wider text-fg-muted mb-2">
-              Raio das bordas
+              {t('radius')}
             </legend>
             <div className="flex flex-wrap gap-2">
               {RADIUS_OPTIONS.map((r) => (
@@ -108,13 +134,13 @@ export default function ThemeCustomizer(): ReactElement {
                   <input
                     type="radio"
                     name="landagri-radius"
-                    aria-label={r.label}
+                    aria-label={t(radiusLabel[r.value])}
                     checked={radius === r.value}
                     onChange={() => setRadius(r.value)}
                     className="accent-blue-500"
                   />
                   <span aria-hidden="true" className="text-xs font-medium text-fg">
-                    {r.label}
+                    {t(radiusLabel[r.value])}
                   </span>
                 </label>
               ))}
@@ -122,7 +148,7 @@ export default function ThemeCustomizer(): ReactElement {
           </fieldset>
           <fieldset>
             <legend className="text-xs font-bold uppercase tracking-wider text-fg-muted mb-2">
-              Fonte
+              {t('font')}
             </legend>
             <div className="flex flex-col gap-2">
               {FONT_OPTIONS.map((f) => (
@@ -130,13 +156,13 @@ export default function ThemeCustomizer(): ReactElement {
                   <input
                     type="radio"
                     name="landagri-font"
-                    aria-label={f.label}
+                    aria-label={t(fontLabel[f.value])}
                     checked={font === f.value}
                     onChange={() => setFont(f.value)}
                     className="accent-blue-500"
                   />
                   <span aria-hidden="true" className="text-xs font-medium text-fg">
-                    {f.label}
+                    {t(fontLabel[f.value])}
                   </span>
                 </label>
               ))}
@@ -147,7 +173,7 @@ export default function ThemeCustomizer(): ReactElement {
             onClick={resetCustomizations}
             className="w-full rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-fg-secondary hover:bg-surface-hover focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Restaurar padrão
+            {t('reset')}
           </button>
         </div>
       )}

@@ -1,12 +1,14 @@
 import { useMemo } from 'react';
 import DataTable from '../../ui/DataTable';
 import { useDashboardStore } from '../../../stores/dashboardStore';
+import { useT } from '../../../i18n/LanguageContext';
 
 interface DataDetailsTabProps {
   selectedInitiatives: string[];
 }
 
 export default function DataDetailsTab({ selectedInitiatives }: DataDetailsTabProps) {
+  const { t } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const tableData = useMemo(
@@ -40,33 +42,33 @@ export default function DataDetailsTab({ selectedInitiatives }: DataDetailsTabPr
   );
 
   const columns = [
-    { key: 'displayName', label: 'Initiative' },
-    { key: 'acronym', label: 'Acronym' },
-    { key: 'provider', label: 'Provider' },
-    { key: 'source', label: 'Source' },
-    { key: 'coverage', label: 'Coverage' },
-    { key: 'methodology', label: 'Methodology' },
-    { key: 'accuracy', label: 'Accuracy (%)' },
-    { key: 'accuracyMin', label: 'Acc Min' },
-    { key: 'accuracyMax', label: 'Acc Max' },
-    { key: 'resolution', label: 'Resolution (m)' },
-    { key: 'resolutionMin', label: 'Res Min' },
-    { key: 'resolutionMax', label: 'Res Max' },
-    { key: 'classes', label: 'Classes' },
-    { key: 'agriClasses', label: 'Agri Classes' },
-    { key: 'agriCapabilities', label: 'Agri Capabilities' },
-    { key: 'startYear', label: 'Start Year' },
-    { key: 'endYear', label: 'End Year' },
-    { key: 'years', label: 'Years of Data' },
-    { key: 'frequency', label: 'Frequency' },
-    { key: 'algorithm', label: 'Algorithm' },
-    { key: 'classificationMethod', label: 'Class Method' },
+    { key: 'displayName', label: t('colInitiative') },
+    { key: 'acronym', label: t('colAcronym') },
+    { key: 'provider', label: t('colProvider') },
+    { key: 'source', label: t('colSource') },
+    { key: 'coverage', label: t('colCoverage') },
+    { key: 'methodology', label: t('colMethodology') },
+    { key: 'accuracy', label: t('colAccuracyPct') },
+    { key: 'accuracyMin', label: t('colAccMin') },
+    { key: 'accuracyMax', label: t('colAccMax') },
+    { key: 'resolution', label: t('colResolutionM') },
+    { key: 'resolutionMin', label: t('colResMin') },
+    { key: 'resolutionMax', label: t('colResMax') },
+    { key: 'classes', label: t('colClasses') },
+    { key: 'agriClasses', label: t('colAgriClasses') },
+    { key: 'agriCapabilities', label: t('colAgriCapabilities') },
+    { key: 'startYear', label: t('colStartYear') },
+    { key: 'endYear', label: t('colEndYear') },
+    { key: 'years', label: t('colYearsData') },
+    { key: 'frequency', label: t('colFrequency') },
+    { key: 'algorithm', label: t('colAlgorithm') },
+    { key: 'classificationMethod', label: t('colClassMethod') },
   ];
 
   if (tableData.length === 0) {
     return (
       <div className="py-8 text-center text-fg-muted">
-        No initiatives selected. Use the multi-select above to choose initiatives.
+        {t('noSelectionMulti')}
       </div>
     );
   }
@@ -74,7 +76,7 @@ export default function DataDetailsTab({ selectedInitiatives }: DataDetailsTabPr
   return (
     <div className="space-y-4">
       <p className="text-sm text-fg-secondary">
-        Complete data details for selected initiatives with all available metadata.
+        {t('dataDetailsIntro')}
       </p>
       <DataTable columns={columns} data={tableData} className="max-h-[600px] overflow-y-auto" />
     </div>

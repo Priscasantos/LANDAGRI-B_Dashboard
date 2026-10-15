@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useDashboardStore } from '../stores/dashboardStore';
 import { getBasename } from '../config/routes';
 import { parseInitiatives } from '../lib/dataParser';
+import { getInitiativeDisplayName } from '../data/glossary';
+import { useLanguage } from '../i18n/LanguageContext';
 import type { InitiativeMetadata, InitiativeRow } from '../types/initiative';
 import type { SensorMap } from '../types/sensor';
 
@@ -122,4 +124,14 @@ export function useFilteredInitiatives(): InitiativeRow[] {
  */
 export function useInitiative(name: string | null): InitiativeRow | undefined {
   return useDashboardStore((state) => (name ? state.getInitiativeByName(name) : undefined));
+}
+
+/**
+ * Nome de exibição da iniciativa no locale ativo (Fase 1 i18n).
+ * Reaproveita os dados já buscados — sem fetch duplicado; nomes próprios
+ * passam pelo glossário (`getInitiativeDisplayName`) sem alteração.
+ */
+export function useInitiativeDisplayName(): (name: string) => string {
+  const { locale } = useLanguage();
+  return (name: string): string => getInitiativeDisplayName(name, locale);
 }

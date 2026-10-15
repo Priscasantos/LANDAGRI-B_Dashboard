@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import Card from '../../ui/Card';
 import GroupedBarChart from '../../charts/GroupedBarChart';
+import { useT } from '../../../i18n/LanguageContext';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 
@@ -23,6 +24,8 @@ interface SeasonalOverviewTabProps {
 }
 
 export default function SeasonalOverviewTab({ selectedCrops, selectedRegions }: SeasonalOverviewTabProps) {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
@@ -88,23 +91,21 @@ export default function SeasonalOverviewTab({ selectedCrops, selectedRegions }: 
 
   return (
     <Card padding="lg" hover={false}>
-      <h3 className="text-base font-semibold text-fg mb-3">Seasonal Overview — Planting &amp; Harvest Patterns</h3>
+      <h3 className="text-base font-semibold text-fg mb-3">{tBody('hSeasonal')}</h3>
       {noData ? (
-        <p className="text-fg-muted text-center py-8">No data available for selected filters.</p>
+        <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
       ) : (
         <GroupedBarChart
           categories={seasonalData.categories}
           series={seasonalData.series}
-          xlabel="Season"
-          ylabel="Activity Count"
+          xlabel={t('season')}
+          ylabel={t('activityCount')}
           height={400}
         />
       )}
       <div className="mt-4 p-3 bg-surface-alt rounded-lg">
         <p className="text-xs text-fg-secondary">
-          <strong>Note:</strong> Seasons are defined as: Spring (Oct-Dec), Summer (Jan-Mar),
-          Autumn (Apr-Jun), Winter (Jul-Sep) based on the Southern Hemisphere calendar.
-          Values represent the total count of active crop activities per season.
+          <strong>{tBody('noteLabel')}</strong> {tBody('seasonNote')}
         </p>
       </div>
     </Card>

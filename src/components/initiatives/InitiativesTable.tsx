@@ -1,6 +1,7 @@
 import { useMemo, type ReactElement } from 'react';
 import DataTable from '../ui/DataTable';
 import { useDashboardStore } from '../../stores/dashboardStore';
+import { useT } from '../../i18n/LanguageContext';
 
 interface InitiativesTableProps {
   className?: string;
@@ -18,6 +19,7 @@ interface InitiativesTableProps {
  * lands on stable v8. Reversible: pure wrapper.
  */
 export default function InitiativesTable({ className = '' }: InitiativesTableProps): ReactElement {
+  const { t } = useT('overview');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const data = useMemo(
@@ -37,28 +39,28 @@ export default function InitiativesTable({ className = '' }: InitiativesTablePro
 
   const columns = useMemo(
     () => [
-      { key: 'iniciativa', label: 'Iniciativa' },
-      { key: 'cobertura', label: 'Área (Cobertura)' },
-      { key: 'periodo', label: 'Anos (Período)' },
+      { key: 'iniciativa', label: t('colInitiative') },
+      { key: 'cobertura', label: t('colCoverage') },
+      { key: 'periodo', label: t('colPeriod') },
       {
         key: 'resolucao',
-        label: 'Resolução (m)',
+        label: t('colResolution'),
         format: (v: unknown): string => (typeof v === 'number' && v > 0 ? `${v}m` : '-'),
       },
       {
         key: 'acuracia',
-        label: 'Acurácia (%)',
+        label: t('colAccuracy'),
         format: (v: unknown): string =>
           typeof v === 'number' && v > 0 ? `${v.toFixed(1)}%` : '-',
       },
     ],
-    [],
+    [t],
   );
 
   if (initiatives.length === 0) {
     return (
       <p className="text-sm text-fg-muted py-8 text-center" role="status">
-        Nenhuma iniciativa carregada. Verifique a conexão com os dados.
+        {t('noInitiatives')}
       </p>
     );
   }

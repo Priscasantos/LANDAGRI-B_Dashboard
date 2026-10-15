@@ -272,6 +272,22 @@ h2 {
   text-wrap: balance;
 }
 
+/* Mono — JetBrains Mono 500–600 com tabular-nums (números/código alinham
+   em tabelas e KPIs; ver Google Fonts link no index.html + src/lib/fonts.ts). */
+code,
+kbd,
+pre,
+.font-mono {
+  font-family: var(--font-mono, var(--font-family-mono));
+  font-variant-numeric: tabular-nums;
+}
+
+/* Recharts herda a fonte ativa da página (customizer troca via CSS sem
+   rebuild); Plotly usa a string resolvida (`resolveChartFontFamily`). */
+.recharts-wrapper {
+  font-family: inherit;
+}
+
 p,
 li {
   line-height: 1.6;
@@ -350,4 +366,10 @@ li {
 }
 .animate-slide-up {
   animation: slide-up 0.3s ease-out;
+}
+
+/* ===== Mapa (Fase 3): tiles OSM legíveis no dark sem trocar de provedor ===== */
+/* Só o pane de tiles é filtrado — controles/atribuição seguem intactos. */
+.dark .leaflet-tiles-dark .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.92);
 }

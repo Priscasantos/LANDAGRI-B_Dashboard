@@ -160,6 +160,8 @@ declare module 'plotly.js' {
   export interface Legend {
     x?: number;
     y?: number;
+    xanchor?: string;
+    yanchor?: string;
     orientation?: 'v' | 'h';
     bgcolor?: string;
     bordercolor?: string;

@@ -3,8 +3,11 @@ import BaseChart from '../../charts/BaseChart';
 import type { Data } from 'plotly.js';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
+import { useT } from '../../../i18n/LanguageContext';
 
 export default function MethodologyDeepDiveTab() {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const { methods, methodData, methodAccuracy } = useMemo(() => {
@@ -37,7 +40,7 @@ export default function MethodologyDeepDiveTab() {
   }, [initiatives]);
 
   if (methods.length === 0) {
-    return <div className="py-8 text-center text-fg-muted">No methodology data available.</div>;
+    return <div className="py-8 text-center text-fg-muted">{tBody('noMethodologyData')}</div>;
   }
 
   // Pie: methodology distribution
@@ -47,7 +50,7 @@ export default function MethodologyDeepDiveTab() {
     type: 'pie',
     marker: { colors: CATEGORICAL_COLORS.slice(0, methodData.length) },
     textinfo: 'label+percent',
-    hovertemplate: '<b>%{label}</b><br>Count: %{value}<extra></extra>',
+    hovertemplate: `<b>%{label}</b><br>${t('count')}: %{value}<extra></extra>`,
   };
 
   // Horizontal bar: accuracy by methodology
@@ -61,7 +64,7 @@ export default function MethodologyDeepDiveTab() {
     },
     text: methodAccuracy.map((d) => `${d.avgAccuracy}%`),
     textposition: 'outside',
-    hovertemplate: '<b>%{y}</b><br>Avg Accuracy: %{x}%<extra></extra>',
+    hovertemplate: `<b>%{y}</b><br>${t('avgAccuracy')}: %{x}%<extra></extra>`,
   };
 
   // Line trend: accuracy trends by methodology over time (simplified - show method vs avg accuracy)
@@ -76,29 +79,29 @@ export default function MethodologyDeepDiveTab() {
       color: CATEGORICAL_COLORS[i % CATEGORICAL_COLORS.length],
       line: { width: 2, color: 'white' },
     },
-    hovertemplate: '<b>%{x}</b><br>Avg Accuracy: %{y:.1f}%<extra></extra>',
+    hovertemplate: `<b>%{x}</b><br>${t('avgAccuracy')}: %{y:.1f}%<extra></extra>`,
   }));
 
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <h3 className="text-base font-semibold text-fg mb-2">Methodology Distribution</h3>
+          <h3 className="text-base font-semibold text-fg mb-2">{tBody('hMethodologyDist')}</h3>
           <BaseChart
             data={[pieTrace]}
             layout={{
-              title: { text: 'Methodology Breakdown', x: 0 },
+              title: { text: t('methodologyBreakdown'), x: 0 },
               height: 350,
             }}
           />
         </div>
         <div>
-          <h3 className="text-base font-semibold text-fg mb-2">Avg Accuracy by Methodology</h3>
+          <h3 className="text-base font-semibold text-fg mb-2">{tBody('hAvgByMethod')}</h3>
           <BaseChart
             data={[hbarTrace]}
             layout={{
-              title: { text: 'Accuracy by Methodology Type', x: 0 },
-              xaxis: { title: 'Avg Accuracy (%)' },
+              title: { text: t('accuracyByMethodology'), x: 0 },
+              xaxis: { title: t('avgAccuracyPct') },
               yaxis: { title: '' },
               height: Math.max(250, methods.length * 50),
               margin: { l: 150, r: 40, t: 40, b: 50 },
@@ -109,16 +112,16 @@ export default function MethodologyDeepDiveTab() {
 
       {/* Accuracy comparison */}
       <div>
-        <h3 className="text-base font-semibold text-fg mb-2">Methodology Accuracy Trends</h3>
+        <h3 className="text-base font-semibold text-fg mb-2">{tBody('hAccuracyTrends')}</h3>
         <p className="text-sm text-fg-secondary mb-3">
-          Average overall accuracy achieved by each methodology type.
+          {tBody('trendsIntro')}
         </p>
         <BaseChart
           data={lineTraces}
           layout={{
-            title: { text: 'Methodology Accuracy Comparison', x: 0 },
-            xaxis: { title: 'Methodology' },
-            yaxis: { title: 'Avg Accuracy (%)', range: [0, 105] },
+            title: { text: t('methodologyAccuracyComparison'), x: 0 },
+            xaxis: { title: t('methodology') },
+            yaxis: { title: t('avgAccuracyPct'), range: [0, 105] },
             height: 400,
             showlegend: true,
           }}
@@ -130,9 +133,9 @@ export default function MethodologyDeepDiveTab() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
-              <th className="px-4 py-2 text-left font-semibold text-fg-secondary bg-surface-alt">Methodology</th>
-              <th className="px-4 py-2 text-right font-semibold text-fg-secondary bg-surface-alt">Count</th>
-              <th className="px-4 py-2 text-right font-semibold text-fg-secondary bg-surface-alt">Avg Accuracy</th>
+              <th className="px-4 py-2 text-left font-semibold text-fg-secondary bg-surface-alt">{tBody('thMethodology')}</th>
+              <th className="px-4 py-2 text-right font-semibold text-fg-secondary bg-surface-alt">{tBody('thCount')}</th>
+              <th className="px-4 py-2 text-right font-semibold text-fg-secondary bg-surface-alt">{tBody('thAvgAccuracy')}</th>
             </tr>
           </thead>
           <tbody>

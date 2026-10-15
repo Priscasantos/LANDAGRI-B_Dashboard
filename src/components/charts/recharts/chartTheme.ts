@@ -3,6 +3,7 @@
  * Uses LANDAGRI-B CSS variables with hex fallbacks so charts follow
  * light/dark theme without hardcoded colors. Reversible: pure constants.
  */
+import type { Locale } from '../../../i18n/types';
 export const CHART_GRID_STROKE = 'var(--color-chart-grid, #e3e8ef)';
 
 export const CHART_TICK_FILL = 'var(--color-chart-text, #1f2937)';
@@ -38,4 +39,20 @@ export const RECHARTS_PALETTE: readonly string[] = [
 export function paletteColor(index: number, override?: string): string {
   if (override) return override;
   return RECHARTS_PALETTE[index % RECHARTS_PALETTE.length];
+}
+
+/**
+ * Formata tick/tooltip/figcaption pelo locale ativo (Fase 2 qualidade).
+ * Eixos de ano passam inteiros crus (sem agrupar `2.020`); eixos de valor
+ * usam `toLocaleString` (pt-BR `1.234,5` · en `1,234.5`).
+ */
+export function formatTickValue(value: number | string, locale: Locale): string {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return String(value);
+  return value.toLocaleString(locale, { maximumFractionDigits: 1 });
+}
+
+/** Eixo de ano: inteiro cru, sem separador de milhar (2020, nunca 2.020). */
+export function formatYearTick(value: number | string): string {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return String(value);
+  return String(Math.trunc(value));
 }

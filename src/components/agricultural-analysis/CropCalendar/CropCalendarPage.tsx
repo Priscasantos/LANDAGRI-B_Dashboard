@@ -10,12 +10,14 @@ import CropDistributionTab from './CropDistributionTab';
 import MonthlyIntensityTab from './MonthlyIntensityTab';
 import ActivityIntensityTab from './ActivityIntensityTab';
 import conabMapping from '../../../data/processed/conab_mapping.json';
+import { useT } from '../../../i18n/LanguageContext';
 
 interface MappingDataType {
   crop_calendar?: Record<string, unknown[]>;
 }
 
 export default function CropCalendarPage() {
+  const { t } = useT('agricultural');
   const mappingData = conabMapping as MappingDataType;
   const cropCalendar = mappingData?.crop_calendar;
 
@@ -48,43 +50,43 @@ export default function CropCalendarPage() {
   const calendarTabs = [
     {
       id: 'heatmaps',
-      label: 'Calendar Heatmaps',
+      label: t('tabHeatmaps'),
       icon: CalendarDays,
       content: <CalendarHeatmapsTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
     },
     {
       id: 'timeline',
-      label: 'Activities Timeline',
+      label: t('tabActivitiesTimeline'),
       icon: History,
       content: <ActivitiesTimelineTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
     },
     {
       id: 'spatiotemporal',
-      label: 'Spatio-temporal Distribution',
+      label: t('tabSpatioTemporal'),
       icon: Map,
       content: <SpatioTemporalTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
     },
     {
       id: 'seasonal',
-      label: 'Seasonal Overview',
+      label: t('tabSeasonal'),
       icon: Sun,
       content: <SeasonalOverviewTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
     },
     {
       id: 'distribution',
-      label: 'Crop Distribution',
+      label: t('tabCropDistribution'),
       icon: BarChart3,
       content: <CropDistributionTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
     },
     {
       id: 'intensity',
-      label: 'Monthly Intensity',
+      label: t('tabMonthly'),
       icon: TrendingUp,
       content: <MonthlyIntensityTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
     },
     {
       id: 'activity',
-      label: 'Activity Intensity',
+      label: t('tabActivity'),
       icon: Zap,
       content: <ActivityIntensityTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
     },

@@ -2,12 +2,14 @@ import { useMemo } from 'react';
 import { GanttChart, TrendingUp, Clock, TriangleAlert } from 'lucide-react';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import Tabs from '../../ui/Tabs';
+import { useT } from '../../../i18n/LanguageContext';
 import TimelineTab from './TimelineTab';
 import EvolutionTab from './EvolutionTab';
 import CoverageTab from './CoverageTab';
 import GapAnalysisTab from './GapAnalysisTab';
 
 export default function TemporalPage() {
+  const { t } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const temporalData = useMemo(
@@ -35,25 +37,25 @@ export default function TemporalPage() {
   const tabs = [
     {
       id: 'timeline',
-      label: 'Timeline',
+      label: t('tabTimeline'),
       icon: GanttChart,
       content: <TimelineTab data={temporalData} />,
     },
     {
       id: 'evolution',
-      label: 'Evolution',
+      label: t('tabEvolution'),
       icon: TrendingUp,
       content: <EvolutionTab data={temporalData} />,
     },
     {
       id: 'coverage',
-      label: 'Temporal Coverage',
+      label: t('tabTemporalCoverage'),
       icon: Clock,
       content: <CoverageTab data={temporalData} />,
     },
     {
       id: 'gaps',
-      label: 'Gap Analysis',
+      label: t('tabGapAnalysis'),
       icon: TriangleAlert,
       content: <GapAnalysisTab data={temporalData} />,
     },

@@ -5,6 +5,7 @@ import SummaryCards from '../components/overview/SummaryCards';
 import OverviewMap from '../components/overview/OverviewMap';
 import InitiativesTable from '../components/initiatives/InitiativesTable';
 import InitiativeSelector from '../components/overview/InitiativeSelector';
+import { useT } from '../i18n/LanguageContext';
 import KeyMetricsCards from '../components/overview/KeyMetricsCards';
 import LulcClasses from '../components/overview/LulcClasses';
 import TechnicalDetails from '../components/overview/TechnicalDetails';
@@ -13,6 +14,7 @@ import AgriculturalCharts from '../components/overview/AgriculturalCharts';
 import type { SensorMap } from '../types/sensor';
 
 export default function OverviewPage() {
+  const { t } = useT('overview');
   const { initiatives, selection, sensors, setSelectedInitiative } = useDashboardStore();
 
   // Auto-select first initiative if none selected
@@ -44,7 +46,7 @@ export default function OverviewPage() {
       <hr className="my-6 border-border" />
 
       {/* Initiative Details */}
-      <h2 className="text-xl font-bold text-fg mb-4">Initiative Details</h2>
+      <h2 className="text-xl font-bold text-fg mb-4">{t('detailsHeading')}</h2>
       <InitiativeSelector />
 
       {selectedData && (
@@ -56,21 +58,21 @@ export default function OverviewPage() {
 
           {/* Key Metrics */}
           <div className="flex justify-center mb-4">
-            <h2 className="text-2xl font-bold text-fg">KEY METRICS</h2>
+            <h2 className="text-2xl font-bold text-fg">{t('keyMetrics')}</h2>
           </div>
           <KeyMetricsCards data={selectedData} />
 
           {/* Two-column layout */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
-              <h3 className="flex items-center gap-1.5 text-lg font-bold text-fg mb-3"><Tags size={18} aria-hidden="true" className="shrink-0" /> Classification</h3>
+              <h3 className="flex items-center gap-1.5 text-lg font-bold text-fg mb-3"><Tags size={18} aria-hidden="true" className="shrink-0" /> {t('hClassification')}</h3>
               <LulcClasses classification={classificationJson} />
             </div>
             <div>
-              <h3 className="flex items-center gap-1.5 text-lg font-bold text-fg mb-3"><Wrench size={18} aria-hidden="true" className="shrink-0" /> Technical Details</h3>
+              <h3 className="flex items-center gap-1.5 text-lg font-bold text-fg mb-3"><Wrench size={18} aria-hidden="true" className="shrink-0" /> {t('hTechnical')}</h3>
               <TechnicalDetails data={selectedData} />
 
-              <h3 className="flex items-center gap-1.5 text-lg font-bold text-fg mb-3 mt-6"><Satellite size={18} aria-hidden="true" className="shrink-0" /> Sensor Information</h3>
+              <h3 className="flex items-center gap-1.5 text-lg font-bold text-fg mb-3 mt-6"><Satellite size={18} aria-hidden="true" className="shrink-0" /> {t('hSensor')}</h3>
               <SensorInfo sensorKeys={selectedData.Sensors} sensors={sensors as SensorMap} />
             </div>
           </div>
@@ -87,7 +89,7 @@ export default function OverviewPage() {
       {/* Initiatives table (iniciativa/área/ano) */}
       <section aria-labelledby="initiatives-table-heading">
         <h2 id="initiatives-table-heading" className="text-xl font-bold text-fg mb-4">
-          Iniciativas
+          {t('hInitiatives')}
         </h2>
         <InitiativesTable />
       </section>

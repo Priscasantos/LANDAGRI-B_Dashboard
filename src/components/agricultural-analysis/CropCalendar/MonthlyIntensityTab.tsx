@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import Card from '../../ui/Card';
 import HeatmapChart from '../../charts/HeatmapChart';
 import LineChart from '../../charts/LineChart';
+import { useT } from '../../../i18n/LanguageContext';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 
@@ -35,6 +36,8 @@ interface MonthlyIntensityTabProps {
 }
 
 export default function MonthlyIntensityTab({ selectedCrops, selectedRegions }: MonthlyIntensityTabProps) {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
@@ -103,15 +106,15 @@ export default function MonthlyIntensityTab({ selectedCrops, selectedRegions }: 
   return (
     <div className="space-y-6">
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">Monthly Activity Intensity Heatmap</h3>
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hMonthlyHeatmap')}</h3>
         {noData ? (
-          <p className="text-fg-muted text-center py-8">No data available for selected filters.</p>
+          <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
         ) : (
           <HeatmapChart
             z={heatmapZ.z}
             x={heatmapZ.months}
             y={heatmapZ.crops}
-            title="Activity Intensity (Crops × Months)"
+            title={t('activityIntensityCropsMonths')}
             height={Math.max(300, heatmapZ.crops.length * 40 + 100)}
             colorscale={[
               [0, '#f3f4f6'],
@@ -124,14 +127,14 @@ export default function MonthlyIntensityTab({ selectedCrops, selectedRegions }: 
       </Card>
 
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">Activity Intensity by Month</h3>
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hIntensityByMonth')}</h3>
         {noData ? (
-          <p className="text-fg-muted text-center py-8">No data available.</p>
+          <p className="text-fg-muted text-center py-8">{tBody('noData')}</p>
         ) : (
           <LineChart
             series={intensitySeries.series}
-            xlabel="Month"
-            ylabel="Total Activity Count"
+            xlabel={t('month')}
+            ylabel={t('totalActivityCount')}
             height={350}
           />
         )}

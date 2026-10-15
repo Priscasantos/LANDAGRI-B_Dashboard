@@ -11,21 +11,23 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useSidebar } from '../ui/sidebar';
+import { useT } from '../../i18n/LanguageContext';
+import type { TKey } from '../../i18n/types';
 
 interface SidebarSubItem {
-  title: string;
+  titleKey: TKey<'nav'>;
   url: string;
 }
 
 interface SidebarNavItem {
-  title: string;
+  titleKey: TKey<'nav'>;
   url: string;
   icon: LucideIcon;
   items?: SidebarSubItem[];
 }
 
 interface SidebarNavGroup {
-  label: string;
+  labelKey: TKey<'nav'>;
   items: SidebarNavItem[];
 }
 
@@ -33,61 +35,63 @@ interface SidebarNavGroup {
  * LANDAGRI-B section map (adapted from the shadcn-dashboard reference
  * `app-sidebar.tsx`). Demo groups (mail/tasks/chat/calendar/users/faqs/
  * pricing, auth pages, errors, settings) are intentionally dropped —
- * only the 5 product modules remain. Labels mirror `Header.tsx` so the
- * existing e2e nav assertions keep matching.
+ * only the 5 product modules remain. Rótulos via chaves `nav` (Fase 1
+ * i18n) — PT estático preservado em `routes.tsx` para os testes legados.
  */
 const navGroups: SidebarNavGroup[] = [
   {
-    label: 'Visão Geral',
+    labelKey: 'groupOverview',
     items: [
-      { title: 'Visão Geral', url: '/overview', icon: BarChart3 },
+      { titleKey: 'overview', url: '/overview', icon: BarChart3 },
     ],
   },
   {
-    label: 'Análise de Iniciativas',
+    labelKey: 'groupInitiative',
     items: [
       {
-        title: 'Análise de Iniciativas',
+        titleKey: 'initiativeAnalysis',
         url: '/initiative-analysis',
         icon: Calendar,
         items: [
-          { title: 'Análise Temporal', url: '/initiative-analysis/temporal' },
-          { title: 'Análise Comparativa', url: '/initiative-analysis/comparative' },
-          { title: 'Análise Detalhada', url: '/initiative-analysis/detailed' },
+          { titleKey: 'temporal', url: '/initiative-analysis/temporal' },
+          { titleKey: 'comparative', url: '/initiative-analysis/comparative' },
+          { titleKey: 'detailed', url: '/initiative-analysis/detailed' },
         ],
       },
     ],
   },
   {
-    label: 'Análise Agrícola',
+    labelKey: 'groupAgricultural',
     items: [
       {
-        title: 'Análise Agrícola',
+        titleKey: 'agriculturalAnalysis',
         url: '/agricultural-analysis',
         icon: Map,
         items: [
-          { title: 'Panorama Agrícola', url: '/agricultural-analysis/overview' },
-          { title: 'Calendário de Culturas', url: '/agricultural-analysis/crop-calendar' },
-          { title: 'Disponibilidade Agrícola', url: '/agricultural-analysis/availability' },
+          { titleKey: 'agriOverview', url: '/agricultural-analysis/overview' },
+          { titleKey: 'cropCalendar', url: '/agricultural-analysis/crop-calendar' },
+          { titleKey: 'availability', url: '/agricultural-analysis/availability' },
         ],
       },
     ],
   },
   {
-    label: 'Preditivo',
+    labelKey: 'groupPredictive',
     items: [
-      { title: 'Simulador Preditivo', url: '/predictive', icon: BrainCircuit },
+      { titleKey: 'predictive', url: '/predictive', icon: BrainCircuit },
     ],
   },
   {
-    label: 'Sobre',
+    labelKey: 'groupAbout',
     items: [
-      { title: 'Referências', url: '/about', icon: BookOpen },
+      { titleKey: 'about', url: '/about', icon: BookOpen },
     ],
   },
 ];
 
 function SidebarNavContent({ onNavigate }: { onNavigate: () => void }): React.JSX.Element {
+  const { t: tNav } = useT('nav');
+  const { t: tCommon } = useT('common');
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2.5 px-4 pt-5 pb-4">
@@ -95,26 +99,26 @@ function SidebarNavContent({ onNavigate }: { onNavigate: () => void }): React.JS
           to="/overview"
           onClick={onNavigate}
           className="flex items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          aria-label="LANDAGRI-B — ir para Visão Geral"
+          aria-label={tCommon('brandHome')}
         >
           <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-white">
             <Sprout size={20} aria-hidden="true" />
           </span>
           <span className="grid text-left leading-tight">
             <span className="truncate text-sm font-semibold text-fg">LANDAGRI-B</span>
-            <span className="truncate text-xs text-fg-secondary">Agro Dashboard</span>
+            <span className="truncate text-xs text-fg-secondary">{tCommon('brandSubtitle')}</span>
           </span>
         </Link>
       </div>
-      <nav aria-label="Módulos do dashboard" className="flex-1 overflow-y-auto px-3 pb-4">
+      <nav aria-label={tNav('mainNav')} className="flex-1 overflow-y-auto px-3 pb-4">
         {navGroups.map((group) => (
-          <div key={group.label} className="mt-2 first:mt-0">
+          <div key={group.labelKey} className="mt-2 first:mt-0">
             <p className="px-3 pt-5 pb-1.5 text-[11px] font-semibold tracking-wider text-fg-muted uppercase first:pt-1">
-              {group.label}
+              {tNav(group.labelKey)}
             </p>
             <ul className="space-y-1">
               {group.items.map((item) => (
-                <li key={item.title}>
+                <li key={item.url}>
                   <NavLink
                     to={item.url}
                     end={item.items === undefined}
@@ -128,10 +132,10 @@ function SidebarNavContent({ onNavigate }: { onNavigate: () => void }): React.JS
                     }
                   >
                     <item.icon size={17} aria-hidden="true" className="shrink-0" />
-                    <span className="truncate">{item.title}</span>
+                    <span className="truncate">{tNav(item.titleKey)}</span>
                   </NavLink>
                   {item.items && (
-                    <ul aria-label={`Subpáginas de ${item.title}`} className="mt-1 mb-1 ml-9 space-y-1 border-l-2 border-border pl-3">
+                    <ul aria-label={tNav('subpagesOf', { title: tNav(item.titleKey) })} className="mt-1 mb-1 ml-9 space-y-1 border-l-2 border-border pl-3">
                       {item.items.map((sub) => (
                         <li key={sub.url}>
                           <NavLink
@@ -145,7 +149,7 @@ function SidebarNavContent({ onNavigate }: { onNavigate: () => void }): React.JS
                               }`
                             }
                           >
-                            {sub.title}
+                            {tNav(sub.titleKey)}
                           </NavLink>
                         </li>
                       ))}
@@ -158,7 +162,7 @@ function SidebarNavContent({ onNavigate }: { onNavigate: () => void }): React.JS
         ))}
       </nav>
       <div className="border-t border-border px-4 py-3">
-        <p className="text-[11px] text-fg-muted">LANDAGRI-B v2.4 · MapBiomas & IBGE</p>
+        <p className="text-[11px] text-fg-muted">{tNav('sidebarFooter')}</p>
       </div>
     </div>
   );
@@ -171,6 +175,7 @@ function SidebarNavContent({ onNavigate }: { onNavigate: () => void }): React.JS
  */
 export default function AppSidebar(): React.JSX.Element {
   const { mobileOpen, setMobileOpen } = useSidebar();
+  const { t } = useT('nav');
   const close = (): void => setMobileOpen(false);
   // Escape fecha o drawer móvel e devolve o foco ao botão de menu (p3-hardening).
   // Inclui trava de scroll do body + foco inicial no botão fechar.
@@ -195,7 +200,7 @@ export default function AppSidebar(): React.JSX.Element {
       {/* Desktop rail */}
       <aside
         data-testid="app-sidebar"
-        aria-label="Navegação principal"
+        aria-label={t('mainNav')}
         className="sticky top-0 hidden h-screen w-[var(--sidebar-width,260px)] shrink-0 flex-col border-r border-border bg-sidebar-bg lg:flex"
       >
         <SidebarNavContent onNavigate={() => undefined} />
@@ -212,7 +217,7 @@ export default function AppSidebar(): React.JSX.Element {
           <aside
             data-testid="app-sidebar-mobile"
             // Root cause: e2e p3-hardening espera dialog 'Menu de navegação' (substring); rótulo anterior não continha o termo.
-            aria-label="Menu de navegação"
+            aria-label={t('mobileMenu')}
             role="dialog"
             aria-modal="true"
             className="absolute inset-y-0 left-0 flex w-[var(--sidebar-width,260px)] max-w-[85vw] flex-col border-r border-border bg-sidebar-bg shadow-lg"
@@ -220,7 +225,7 @@ export default function AppSidebar(): React.JSX.Element {
             <button
               type="button"
               onClick={close}
-              aria-label="Fechar menu de navegação"
+              aria-label={t('closeMenu')}
               className="absolute top-4 right-3 flex size-8 items-center justify-center rounded-lg text-fg-secondary transition-colors hover:bg-surface-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               <X size={18} aria-hidden="true" />

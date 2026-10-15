@@ -33,7 +33,7 @@ export default function PolarChart({
   const layout: Partial<Layout> = {
     title: title ? { text: title, x: 0.5 } : undefined,
     showlegend: true,
-    legend: { orientation: 'h', y: -0.2 },
+    legend: { orientation: 'h', y: -0.28 },
     polar: {
       radialaxis: {
         visible: true,

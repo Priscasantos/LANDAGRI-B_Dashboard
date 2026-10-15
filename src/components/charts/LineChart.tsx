@@ -51,7 +51,7 @@ export default function LineChart({
     xaxis: { title: { text: xlabel }, tickangle: -45, ...extraXAxis },
     yaxis: { title: { text: ylabel }, ...extraYAxis },
     showlegend: true,
-    legend: { orientation: 'h', y: -0.3 },
+    legend: { orientation: 'h', y: -0.28 },
     hovermode: 'x unified',
     ...restExtraLayout,
   };

@@ -5,6 +5,7 @@ import Card from '../../ui/Card';
 import LineChart from '../../charts/LineChart';
 import GanttChart from '../../charts/GanttChart';
 import PolarChart from '../../charts/PolarChart';
+import { useT } from '../../../i18n/LanguageContext';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 
@@ -40,6 +41,8 @@ interface ActivitiesTimelineTabProps {
 }
 
 export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }: ActivitiesTimelineTabProps) {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
@@ -129,11 +132,11 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
 
   const monthlyContent = (
     <Card padding="lg" hover={false}>
-      <h3 className="text-base font-semibold text-fg mb-3">Monthly &amp; Seasonality</h3>
+      <h3 className="text-base font-semibold text-fg mb-3">{tBody('hMonthlySeasonality')}</h3>
       <LineChart
         series={monthlyActivity.series}
-        xlabel="Month"
-        ylabel="Activity Count"
+        xlabel={t('month')}
+        ylabel={t('activityCount')}
         height={400}
       />
     </Card>
@@ -141,38 +144,38 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
 
   const ganttContent = (
     <Card padding="lg" hover={false}>
-      <h3 className="text-base font-semibold text-fg mb-3">Planting &amp; Harvest Periods (Gantt Chart)</h3>
+      <h3 className="text-base font-semibold text-fg mb-3">{tBody('hPlantingHarvest')}</h3>
       {ganttBars.length > 0 ? (
         <GanttChart
           bars={ganttBars}
-          xlabel="Month (0=Oct, 11=Sep)"
+          xlabel={t('monthAxisNote')}
           height={Math.min(600, Math.max(300, ganttBars.length * 12))}
         />
       ) : (
-        <p className="text-fg-muted text-center py-8">No data available for selected filters.</p>
+        <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
       )}
     </Card>
   );
 
   const polarContent = (
     <Card padding="lg" hover={false}>
-      <h3 className="text-base font-semibold text-fg mb-3">Polar Seasonality Distribution</h3>
+      <h3 className="text-base font-semibold text-fg mb-3">{tBody('hPolarSeasonality')}</h3>
       {polarData.series[0].r.some(v => v > 0) ? (
         <PolarChart
           series={polarData.series}
-          title="Seasonal Activity Distribution"
+          title={t('seasonalActivityDistribution')}
           height={500}
         />
       ) : (
-        <p className="text-fg-muted text-center py-8">No data available for selected filters.</p>
+        <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
       )}
     </Card>
   );
 
   const subTabs = [
-    { id: 'monthly', label: 'Monthly & Seasonality', icon: BarChart3, content: monthlyContent },
-    { id: 'gantt', label: 'Gantt Chart', icon: GanttChartIcon, content: ganttContent },
-    { id: 'polar', label: 'Polar Seasonality', icon: Target, content: polarContent },
+    { id: 'monthly', label: tBody('hMonthlySeasonality'), icon: BarChart3, content: monthlyContent },
+    { id: 'gantt', label: tBody('tabGantt'), icon: GanttChartIcon, content: ganttContent },
+    { id: 'polar', label: tBody('tabPolar'), icon: Target, content: polarContent },
   ];
 
   return <Tabs tabs={subTabs} />;

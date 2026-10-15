@@ -13,6 +13,9 @@ export default defineConfig({
   ],
   use: {
     baseURL: 'http://localhost:4173',
+    // Fase 1 i18n: detecção de locale usa navigator.language — fixa pt-BR
+    // para as asserções PT legadas seguirem determinísticas. Reversível.
+    locale: 'pt-BR',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     testIdAttribute: 'data-testid',

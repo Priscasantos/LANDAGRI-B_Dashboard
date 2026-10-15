@@ -6,6 +6,7 @@ import DataTable from '../../ui/DataTable';
 import MetricCard from '../../ui/MetricCard';
 import HorizontalBarChart from '../../charts/HorizontalBarChart';
 import LineChart from '../../charts/LineChart';
+import { useT } from '../../../i18n/LanguageContext';
 import ibgeData from '../../../data/processed/brazilian_ibge_agricultural_data.json';
 
 interface IBGECropEntry {
@@ -33,6 +34,10 @@ interface IBGEDataType {
 const REGIONS = ['North', 'Northeast', 'Southeast', 'South', 'Central-West'];
 
 export default function IbgeEstimatesTab() {
+  // locale reativo p/ chrome dos gráficos; rótulos de coluna usam o mesmo
+  // namespace `charts` (são legendas da tabela de culturas).
+  const { t, locale } = useT('charts');
+  const { t: tBody } = useT('agricultural');
   const data = ibgeData as IBGEDataType;
   const production = data?.data?.agricultural_production;
 
@@ -141,16 +146,16 @@ export default function IbgeEstimatesTab() {
   }, [production, years]);
 
   const tableColumns = [
-    { key: 'name', label: 'Crop' },
-    { key: 'production', label: 'Production (tonnes)', format: (v: unknown) => (v as number)?.toLocaleString() || '-' },
-    { key: 'area', label: 'Harvested Area (ha)', format: (v: unknown) => (v as number)?.toLocaleString() || '-' },
+    { key: 'name', label: t('crop') },
+    { key: 'production', label: `${t('production')} (${t('tonnes')})`, format: (v: unknown) => (v as number)?.toLocaleString(locale) || '-' },
+    { key: 'area', label: `${t('harvestedArea')} (ha)`, format: (v: unknown) => (v as number)?.toLocaleString(locale) || '-' },
   ];
 
   if (!production || Object.keys(production).length === 0) {
     return (
       <div className="p-8 text-center text-fg-secondary">
-        <p className="text-lg">No IBGE estimates data available.</p>
-        <p className="text-sm mt-2">The IBGE data file may be empty or in an unexpected format.</p>
+        <p className="text-lg">{tBody('noIbgeEstimates')}</p>
+        <p className="text-sm mt-2">{tBody('badIbgeFormat')}</p>
       </div>
     );
   }
@@ -159,22 +164,22 @@ export default function IbgeEstimatesTab() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card padding="lg" hover={false}>
-          <h3 className="text-base font-semibold text-fg mb-3">Top 10 Crops by Production</h3>
+          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hTop10')}</h3>
           {topCrops.length > 0 ? (
             <HorizontalBarChart
               y={topCrops.map(c => c.name)}
               x={topCrops.map(c => c.production / 1000000)}
-              xlabel="Production (million tonnes)"
+              xlabel={`${t('production')} (${t('millionTonnes')})`}
               color="#EC9706"
               height={Math.max(300, topCrops.length * 35)}
             />
           ) : (
-            <p className="text-fg-muted text-center py-8">No data available.</p>
+            <p className="text-fg-muted text-center py-8">{tBody('noData')}</p>
           )}
         </Card>
 
         <Card padding="lg" hover={false}>
-          <h3 className="text-base font-semibold text-fg mb-3">Crop Data Table</h3>
+          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hCropTable')}</h3>
           <DataTable
             columns={tableColumns}
             data={topCrops as unknown as Record<string, unknown>[]}
@@ -187,13 +192,13 @@ export default function IbgeEstimatesTab() {
   const regionalContent = (
     <div className="space-y-6">
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">Regional Distribution Indicators</h3>
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hRegionalIndicators')}</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {REGIONS.map(region => (
             <div key={region} className="bg-amber-50 rounded-lg p-3 text-center border border-amber-200">
               <p className="text-xs text-amber-700 font-medium">{region}</p>
               <p className="text-lg font-bold text-amber-900 mt-1"><Wheat size={20} aria-hidden="true" className="mx-auto" /></p>
-              <p className="text-xs text-amber-600">Major producer</p>
+              <p className="text-xs text-amber-600">{tBody('majorProducer')}</p>
             </div>
           ))}
         </div>
@@ -205,41 +210,41 @@ export default function IbgeEstimatesTab() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card padding="lg" hover={false}>
-          <h3 className="text-base font-semibold text-fg mb-3">Total Production Evolution</h3>
-          <LineChart series={totalProductionEvolution.series} xlabel="Year" ylabel="Production (tonnes)" height={350} />
+          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hTotalProdEvolution')}</h3>
+          <LineChart series={totalProductionEvolution.series} xlabel={t('year')} ylabel={`${t('production')} (${t('tonnes')})`} height={350} />
         </Card>
 
         <Card padding="lg" hover={false}>
-          <h3 className="text-base font-semibold text-fg mb-3">Harvested Area Evolution</h3>
-          <LineChart series={areaEvolution.series} xlabel="Year" ylabel="Area (hectares)" height={350} />
+          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hHarvestedArea')}</h3>
+          <LineChart series={areaEvolution.series} xlabel={t('year')} ylabel={`${t('area')} (${t('hectares')})`} height={350} />
         </Card>
       </div>
 
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">Top 5 Crops — Production Evolution</h3>
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hTop5')}</h3>
         {top5Evolution.series.length > 0 ? (
-          <LineChart series={top5Evolution.series} xlabel="Year" ylabel="Production (tonnes)" height={400} />
+          <LineChart series={top5Evolution.series} xlabel={t('year')} ylabel={`${t('production')} (${t('tonnes')})`} height={400} />
         ) : (
-          <p className="text-fg-muted text-center py-8">No data available.</p>
+          <p className="text-fg-muted text-center py-8">{tBody('noData')}</p>
         )}
       </Card>
     </div>
   );
 
   const subTabs = [
-    { id: 'production', label: 'Production by Crop', icon: BarChart3, content: productionByCropContent },
-    { id: 'regional', label: 'Regional Distribution', icon: MapPin, content: regionalContent },
-    { id: 'historical', label: 'Historical Series', icon: TrendingUp, content: historicalContent },
+    { id: 'production', label: tBody('tabProductionByCrop'), icon: BarChart3, content: productionByCropContent },
+    { id: 'regional', label: tBody('tabRegionalDist'), icon: MapPin, content: regionalContent },
+    { id: 'historical', label: tBody('tabHistorical'), icon: TrendingUp, content: historicalContent },
   ];
 
   return (
     <div className="space-y-6">
       {/* Metric cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard icon={BarChart3} label="Crops Tracked" value={Object.keys(production).length} variant="accuracy" />
-        <MetricCard icon={CalendarDays} label="Period" value={data?.metadata?.period_range || years.join('-')} variant="frequency" />
-        <MetricCard icon={ClipboardList} label="Survey" value={data?.metadata?.survey?.split(' ')[0] || 'PAM'} variant="resolution" />
-        <MetricCard icon={RefreshCw} label="Frequency" value={data?.metadata?.periodicity || 'Annual'} variant="classes" />
+        <MetricCard icon={BarChart3} label={tBody('metricCropsTracked')} value={Object.keys(production).length} variant="accuracy" />
+        <MetricCard icon={CalendarDays} label={tBody('metricPeriod')} value={data?.metadata?.period_range || years.join('-')} variant="frequency" />
+        <MetricCard icon={ClipboardList} label={tBody('metricSurvey')} value={data?.metadata?.survey?.split(' ')[0] || 'PAM'} variant="resolution" />
+        <MetricCard icon={RefreshCw} label={tBody('metricFrequency')} value={data?.metadata?.periodicity || 'Annual'} variant="classes" />
       </div>
 
       <Tabs tabs={subTabs} />

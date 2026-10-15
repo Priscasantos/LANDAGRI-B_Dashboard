@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import AppSidebar from './AppSidebar';
 import SiteHeader from './SiteHeader';
 import { SidebarProvider } from '../ui/sidebar';
+import { useT } from '../../i18n/LanguageContext';
 
 interface BaseLayoutProps {
   children: ReactNode;
@@ -14,10 +15,10 @@ interface BaseLayoutProps {
 /**
  * SaaS app shell (adapted from the reference `base-layout.tsx`).
  * Sidebar + top bar + per-module title + content + footer.
- * Reference-only extras (theme customizer, upgrade-to-pro, sidebar
- * notifications, mocked NavUser) are intentionally omitted in Fase 1.
+ * Skip-link e rodapé traduzidos (Fase 1 i18n, namespace `common`).
  */
 export default function BaseLayout({ children, title, description }: BaseLayoutProps): React.JSX.Element {
+  const { t } = useT('common');
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-background lg:flex lg:items-start">
@@ -25,7 +26,7 @@ export default function BaseLayout({ children, title, description }: BaseLayoutP
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[70] focus:rounded-lg focus:bg-primary focus:px-3 focus:py-2 focus:text-sm focus:text-white"
         >
-          Pular para o conteúdo
+          {t('skipLink')}
         </a>
         <AppSidebar />
         <div className="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-clip">
@@ -51,7 +52,7 @@ export default function BaseLayout({ children, title, description }: BaseLayoutP
           </main>
           <footer className="border-t border-border bg-muted py-6 text-center text-xs text-muted-foreground">
             <div className="mx-auto w-full max-w-(--content-max-width) px-4 sm:px-6 lg:px-8">
-              <p>© {new Date().getFullYear()} LANDAGRI-B Dashboard — Dados: MapBiomas & IBGE</p>
+              <p>{t('footer', { year: new Date().getFullYear() })}</p>
             </div>
           </footer>
         </div>

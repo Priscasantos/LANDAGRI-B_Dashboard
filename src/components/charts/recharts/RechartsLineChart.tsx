@@ -14,8 +14,11 @@ import {
   CHART_TICK_FILL,
   CHART_TOOLTIP_STYLE,
   CHART_TOOLTIP_LABEL_STYLE,
+  formatTickValue,
+  formatYearTick,
   paletteColor,
 } from './chartTheme';
+import { useT } from '../../../i18n/LanguageContext';
 
 export interface RechartsPoint {
   x: string | number;
@@ -51,6 +54,11 @@ export function RechartsLineChart({
   height = 350,
   showMarkers = true,
 }: RechartsLineChartProps): ReactElement {
+  // locale reativo: eixo Y/tooltip com toLocaleString; eixo X (anos) cru.
+  const { locale } = useT('charts');
+  const valueTick = (v: number): string => formatTickValue(v, locale);
+  const valueTip = (v: unknown): string =>
+    typeof v === 'number' ? formatTickValue(v, locale) : String(v ?? '');
   const xValues = Array.from(new Set(series.flatMap((s) => s.data.map((p) => p.x)))).sort((a, b) =>
     a > b ? 1 : -1,
   );
@@ -76,18 +84,19 @@ export function RechartsLineChart({
         {series.map((s) => s.name).join(', ')}.
       </figcaption>
       <div style={{ width: '100%', minWidth: 0, height }} aria-hidden="true" className="min-w-0">
-        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+        <ResponsiveContainer width="100%" height={height} minWidth={0}>
           <RcLineChart data={rows} margin={{ top: 10, right: 24, left: 8, bottom: 8 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} vertical={false} />
-            <XAxis dataKey="x" tick={{ fontSize: 11, fill: CHART_TICK_FILL }} tickLine={false} tickMargin={4} />
+            <XAxis dataKey="x" tick={{ fontSize: 11, fill: CHART_TICK_FILL }} tickLine={false} tickMargin={4} tickFormatter={formatYearTick} />
             <YAxis
               tick={{ fontSize: 11, fill: CHART_TICK_FILL }}
               tickLine={false}
               axisLine={false}
               width={52}
               tickMargin={4}
+              tickFormatter={valueTick}
             />
-            <Tooltip contentStyle={CHART_TOOLTIP_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} />
+            <Tooltip contentStyle={CHART_TOOLTIP_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} formatter={valueTip} />
             <Legend
               iconType="square"
               iconSize={8}

@@ -3,6 +3,7 @@ import BaseChart from '../../charts/BaseChart';
 import type { Data } from 'plotly.js';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
+import { useT } from '../../../i18n/LanguageContext';
 import Select from '../../ui/Select';
 
 interface BarChartTabProps {
@@ -10,6 +11,8 @@ interface BarChartTabProps {
 }
 
 export default function BarChartTab({ selectedInitiatives }: BarChartTabProps) {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const [metric1, setMetric1] = useState('accuracy');
@@ -17,11 +20,11 @@ export default function BarChartTab({ selectedInitiatives }: BarChartTabProps) {
   const [metric3, setMetric3] = useState('classes');
 
   const metricOptions = [
-    { value: 'accuracy', label: 'Overall Accuracy (%)' },
-    { value: 'resolution', label: 'Spatial Resolution (m)' },
-    { value: 'classes', label: 'Number of Classes' },
-    { value: 'agriClasses', label: 'Agriculture Classes' },
-    { value: 'years', label: 'Available Years' },
+    { value: 'accuracy', label: t('overallAccuracy') },
+    { value: 'resolution', label: t('spatialResolution') },
+    { value: 'classes', label: t('numberOfClasses') },
+    { value: 'agriClasses', label: t('agricultureClasses') },
+    { value: 'years', label: t('availableYears') },
   ];
 
   const getMetricValue = (initiative: typeof initiatives[0], metric: string): number => {
@@ -49,7 +52,7 @@ export default function BarChartTab({ selectedInitiatives }: BarChartTabProps) {
   if (filteredData.length === 0) {
     return (
       <div className="py-8 text-center text-fg-muted">
-        No initiatives selected. Use the multi-select above to choose initiatives.
+        {tBody('noSelectionMulti')}
       </div>
     );
   }
@@ -80,24 +83,24 @@ export default function BarChartTab({ selectedInitiatives }: BarChartTabProps) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-fg-secondary">
-        Compare selected initiatives across multiple metrics. Choose up to 3 metrics to display as grouped bars.
+        {tBody('barIntro')}
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Select
-          label="Metric 1"
+          label={tBody('metric1')}
           options={metricOptions}
           value={metric1}
           onChange={setMetric1}
         />
         <Select
-          label="Metric 2"
+          label={tBody('metric2')}
           options={metricOptions}
           value={metric2}
           onChange={setMetric2}
         />
         <Select
-          label="Metric 3"
+          label={tBody('metric3')}
           options={metricOptions}
           value={metric3}
           onChange={setMetric3}
@@ -107,9 +110,9 @@ export default function BarChartTab({ selectedInitiatives }: BarChartTabProps) {
       <BaseChart
         data={traces}
         layout={{
-          title: { text: 'Multi-Metric Comparison', x: 0 },
+          title: { text: t('multiMetricComparison'), x: 0 },
           xaxis: { title: '' },
-          yaxis: { title: 'Value' },
+          yaxis: { title: t('value') },
           barmode: 'group',
           height: 450,
           margin: { l: 60, r: 20, t: 40, b: 120 },

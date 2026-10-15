@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import BaseChart from '../../charts/BaseChart';
 import type { Data } from 'plotly.js';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
+import { useT } from '../../../i18n/LanguageContext';
 
 interface TemporalData {
   name: string;
@@ -21,6 +22,8 @@ interface TimelineTabProps {
 }
 
 export default function TimelineTab({ data }: TimelineTabProps) {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('initiative');
   const sortedData = useMemo(
     () => [...data].sort((a, b) => {
       const covOrder = ['Global', 'Regional', 'National', 'Other'];
@@ -48,7 +51,7 @@ export default function TimelineTab({ data }: TimelineTabProps) {
         line: { width: 2, color: 'white' },
         symbol: 'circle',
       },
-      hovertemplate: `<b>${item.displayName}</b><br>Year: %{x}<br>Coverage: ${item.coverage}<br>Methodology: ${item.methodology}<extra></extra>`,
+      hovertemplate: `<b>${item.displayName}</b><br>${t('year')}: %{x}<br>${t('coverage')}: ${item.coverage}<br>${t('methodology')}: ${item.methodology}<extra></extra>`,
     };
   });
 
@@ -60,7 +63,7 @@ export default function TimelineTab({ data }: TimelineTabProps) {
       y: [item.displayName, item.displayName],
       mode: 'lines',
       type: 'scatter',
-      name: `${item.displayName} period`,
+      name: `${item.displayName} ${t('period').toLowerCase()}`,
       line: { color, width: 3, opacity: 0.5 },
       hoverinfo: 'skip',
       showlegend: false,
@@ -74,16 +77,15 @@ export default function TimelineTab({ data }: TimelineTabProps) {
   return (
     <div className="space-y-4 min-w-0">
       <p className="text-sm text-fg-secondary">
-        Timeline showing available years for each initiative. Each dot represents a year with data.
-        Initiatives are sorted by coverage type (Global first), then by start year.
+        {tBody('timelineIntro')}
       </p>
       <BaseChart
         data={[...lineTraces, ...traces]}
         height={height}
         layout={{
-          title: { text: 'Initiative Timeline', x: 0 },
+          title: { text: t('initiativeTimeline'), x: 0 },
           xaxis: {
-            title: { text: 'Year' },
+            title: { text: t('year') },
             range: [yearMin - 1, yearMax + 1],
             dtick: yearMax - yearMin > 40 ? 5 : 1,
             tickfont: { size: 11 },

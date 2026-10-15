@@ -1,5 +1,6 @@
 import BaseChart from './BaseChart';
 import type { Data } from 'plotly.js';
+import { useT } from '../../i18n/LanguageContext';
 
 interface HistogramChartProps {
   x: number[];
@@ -18,6 +19,7 @@ export default function HistogramChart({
   x, name, xLabel, yLabel, title, color, height,
   nbinsx, opacity = 0.7, showlegend = true,
 }: HistogramChartProps) {
+  const { t } = useT('charts');
   const trace: Data = {
     name,
     x,
@@ -25,7 +27,7 @@ export default function HistogramChart({
     marker: { color: color || '#3b82f6' },
     opacity,
     nbinsx,
-    hovertemplate: '<b>Range: %{x}</b><br>Count: %{y}<extra></extra>',
+    hovertemplate: `<b>${t('range')}: %{x}</b><br>${t('count')}: %{y}<extra></extra>`,
   };
 
   return (

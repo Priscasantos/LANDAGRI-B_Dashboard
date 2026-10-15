@@ -16,8 +16,10 @@ import {
 import AnimatedPage from '../components/AnimatedPage';
 import { exportToCSV, exportToJSON } from '../lib/dataExport';
 import { useDashboardStore } from '../stores/dashboardStore';
+import { useT } from '../i18n/LanguageContext';
 
 export default function AboutPage() {
+  const { t } = useT('about');
   const [copiedBib, setCopiedBib] = useState(false);
   const [downloadFormat, setDownloadFormat] = useState<string | null>(null);
 
@@ -71,10 +73,10 @@ export default function AboutPage() {
               <h2
                 className="text-xl font-bold tracking-tight text-fg"
               >
-                Publicações, Referências e Fontes de Dados
+                {t('pageTitle')}
               </h2>
               <p className="text-sm mt-1 text-fg-secondary">
-                Modelos de citação, parâmetros de satélite e bases de dados utilizadas no{' '}
+                {t('pageSubtitlePre')}{' '}
                 <strong>LANDAGRI-B Dashboard</strong>.
               </p>
             </div>
@@ -102,7 +104,7 @@ export default function AboutPage() {
                   <p
                     className="text-[10px] font-bold uppercase tracking-wider mb-1 text-fg-muted"
                   >
-                    Contribuição Acadêmica
+                    {t('contribEyebrow')}
                   </p>
                   <h3
                     className="text-base font-bold leading-snug text-fg"
@@ -110,10 +112,9 @@ export default function AboutPage() {
                     A Multi-Scale Land Use and Land Cover Classification Initiative for the Brazilian Territory
                   </h3>
                   <p className="text-sm mt-1 text-fg-secondary">
-                    Publicado por{' '}
-                    <strong style={{ color: 'var(--color-primary)' }}>Igor S. Leite</strong> e
-                    colaboradores (2024). <em>Remote Sensing Applications: Society and Environment</em>,
-                    v. 35, e101234.
+                    {t('publishedByA')}{' '}
+                    <strong style={{ color: 'var(--color-primary)' }}>Igor S. Leite</strong> {t('andCollab')} <em>Remote Sensing Applications: Society and Environment</em>,{' '}
+                    {t('volumeInfo')}
                   </p>
                 </div>
               </div>
@@ -129,13 +130,10 @@ export default function AboutPage() {
                 <p
                   className="text-xs font-bold uppercase tracking-wider mb-2 text-fg-muted"
                 >
-                  Resumo
+                  {t('abstractLabel')}
                 </p>
                 <p className="text-sm italic leading-relaxed text-fg-secondary">
-                  "Este estudo apresenta uma iniciativa abrangente de classificação de uso e cobertura da terra
-                  para o território brasileiro, integrando dados de sensoriamento remoto de múltiplas escalas
-                  (30m a 250m) e validando com referências terrestres. Os resultados demonstram acurácia
-                  superior a 85% para todas as classes de uso do solo."
+                  {t('abstractQuote')}
                 </p>
               </div>
 
@@ -143,11 +141,11 @@ export default function AboutPage() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-semibold text-fg">
-                    BibTeX Citation
+                    {t('bibtexLabel')}
                   </span>
                   <button
                     onClick={handleCopyBib}
-                    aria-label={copiedBib ? 'BibTeX copiado' : 'Copiar citação BibTeX'}
+                    aria-label={copiedBib ? t('ariaCopied') : t('ariaCopy')}
                     className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-all border hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                     style={{
                       backgroundColor: 'var(--color-canvas)',
@@ -156,11 +154,11 @@ export default function AboutPage() {
                     }}
                   >
                     {copiedBib ? <Check size={12} /> : <Copy size={12} />}
-                    {copiedBib ? 'Copiado!' : 'Copiar BibTeX'}
+                    {copiedBib ? t('btnCopied') : t('btnCopy')}
                   </button>
                 </div>
                 <pre
-                  aria-label="Citação BibTeX"
+                  aria-label={t('bibtexAria')}
                   tabIndex={0}
                   className="p-4 rounded-xl overflow-x-auto text-xs leading-relaxed border text-fg-secondary focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                   style={{
@@ -184,7 +182,7 @@ export default function AboutPage() {
                   color: 'var(--color-primary)',
                 }}
               >
-                <span className="font-semibold">Acessar Perfil do Pesquisador</span>
+                <span className="font-semibold">{t('researcherProfile')}</span>
                 <ArrowUpRight size={16} />
               </a>
             </div>
@@ -200,7 +198,7 @@ export default function AboutPage() {
                 className="text-xs font-bold uppercase tracking-wider flex items-center gap-2 text-fg-muted"
               >
                 <Database size={14} />
-                Plataformas Espaciais Integradas
+                {t('platformsTitle')}
               </h3>
 
               {dataSources.map((source, idx) => (
@@ -229,7 +227,7 @@ export default function AboutPage() {
                       <ExternalLink size={10} className="text-fg-muted" />
                     </h4>
                     <p className="text-xs mt-1 leading-relaxed text-fg-secondary">
-                      {source.description}
+                      {[t('descMapbiomas'), t('descIbge'), t('descInpe')][idx]}
                     </p>
                   </div>
                 </div>
@@ -244,16 +242,16 @@ export default function AboutPage() {
                 className="text-sm font-bold flex items-center gap-2 mb-3 text-fg"
               >
                 <Download size={16} />
-                Exportar Dados
+                {t('exportTitle')}
               </h3>
               <p className="text-xs mb-4 text-fg-secondary">
-                Exporte métricas espaciais compiladas para processamento GIS externo.
+                {t('exportSub')}
               </p>
 
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => handleDownload('csv')}
-                  aria-label="Exportar dados em CSV"
+                  aria-label={t('ariaCsv')}
                   className="px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all border text-center hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                   style={{
                     backgroundColor: 'var(--color-canvas)',
@@ -265,7 +263,7 @@ export default function AboutPage() {
                 </button>
                 <button
                   onClick={() => handleDownload('json')}
-                  aria-label="Exportar dados em JSON"
+                  aria-label={t('ariaJson')}
                   className="px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all border text-center hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                   style={{
                     backgroundColor: 'var(--color-canvas)',
@@ -288,7 +286,7 @@ export default function AboutPage() {
                     color: 'var(--color-primary)',
                   }}
                 >
-                  <strong>Sucesso!</strong> Arquivo <strong>landagri_dataset.{downloadFormat}</strong> gerado.
+                  <strong>{t('successTitle')}</strong> {t('successBody', { file: `landagri_dataset.${downloadFormat}` })}
                 </div>
               )}
             </div>
@@ -301,13 +299,13 @@ export default function AboutPage() {
                 className="text-sm font-bold flex items-center gap-2 mb-4 text-fg"
               >
                 <Globe size={16} />
-                Metadados Técnicos
+                {t('metaTitle')}
               </h3>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { label: 'Resolução', value: '30 metros', icon: Layers },
-                  { label: 'Cobertura', value: '2000 - 2025', icon: Calendar },
-                  { label: 'Acurácia', value: '89.4% Kappa', icon: Shield, highlight: true },
+                  { label: t('metaResolution'), value: t('metaResolutionValue'), icon: Layers },
+                  { label: t('metaCoverage'), value: '2000 - 2025', icon: Calendar },
+                  { label: t('metaAccuracy'), value: '89.4% Kappa', icon: Shield, highlight: true },
                 ].map((item, idx) => {
                   const Icon = item.icon;
                   return (

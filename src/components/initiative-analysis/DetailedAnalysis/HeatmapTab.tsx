@@ -2,12 +2,15 @@ import { useMemo } from 'react';
 import BaseChart from '../../charts/BaseChart';
 import type { Data } from 'plotly.js';
 import { useDashboardStore } from '../../../stores/dashboardStore';
+import { useT } from '../../../i18n/LanguageContext';
 
 interface HeatmapTabProps {
   selectedInitiatives: string[];
 }
 
 export default function HeatmapTab({ selectedInitiatives }: HeatmapTabProps) {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const { zMatrix, metricLabels } = useMemo(() => {
@@ -19,7 +22,7 @@ export default function HeatmapTab({ selectedInitiatives }: HeatmapTabProps) {
       return { zMatrix: [], metricLabels: [] };
     }
 
-    const metrics = ['Accuracy (%)', 'Resolution (m)', 'Classes', 'Agri Classes', 'Years'];
+    const metrics = [t('overallAccuracyPct'), t('spatialResolution'), t('numberOfClasses'), t('agricultureClasses'), t('availableYears')];
     const metricGetters: ((i: typeof filtered[0]) => number)[] = [
       (i) => i.Accuracy,
       (i) => i.Resolution,
@@ -31,7 +34,7 @@ export default function HeatmapTab({ selectedInitiatives }: HeatmapTabProps) {
     const z = filtered.map((item) => metricGetters.map((getter) => getter(item)));
 
     return { zMatrix: z, metricLabels: metrics };
-  }, [initiatives, selectedInitiatives]);
+  }, [initiatives, selectedInitiatives, t]);
 
   // Compute correlation matrix between metrics (must be before conditional return for React hooks)
   const correlationMatrix = useMemo(() => {
@@ -88,26 +91,25 @@ export default function HeatmapTab({ selectedInitiatives }: HeatmapTabProps) {
     text: correlationMatrix.map((row) => row.map((v: number) => v.toFixed(2))),
     texttemplate: '%{text}',
     textfont: { size: 10, color: 'white' },
-    hovertemplate: '<b>%{x}</b> vs <b>%{y}</b><br>Correlation: %{z:.2f}<extra></extra>',
+    hovertemplate: `<b>%{x}</b> vs <b>%{y}</b><br>${t('correlation')}: %{z:.2f}<extra></extra>`,
   };
 
   return (
     <div className="space-y-4">
       <p className="text-sm text-fg-secondary">
-        Correlation heatmap between metrics across selected initiatives.
-        Values range from -1 (negative correlation) to +1 (positive correlation).
+        {tBody('heatmapIntro')}
       </p>
 
       {zMatrix.length < 2 && (
         <div className="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-2 rounded text-sm">
-          Select at least 2 initiatives to see meaningful correlations.
+          {tBody('needTwo')}
         </div>
       )}
 
       <BaseChart
         data={[heatTrace]}
         layout={{
-          title: { text: 'Metric Correlation Matrix', x: 0 },
+          title: { text: t('metricCorrelationMatrix'), x: 0 },
           xaxis: { title: '' },
           yaxis: { title: '' },
           height: 450,

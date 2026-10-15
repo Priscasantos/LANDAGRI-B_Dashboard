@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ChevronUp, ChevronDown, Search } from 'lucide-react';
+import { useT } from '../../i18n/LanguageContext';
 
 interface Column {
   key: string;
@@ -14,9 +15,14 @@ interface DataTableProps {
   className?: string;
   searchable?: boolean;
   pageSize?: number;
+  /** Sobrescreve o placeholder traduzido (Fase 1 i18n, namespace `tables`). */
+  searchPlaceholder?: string;
+  /** Sobrescreve a mensagem de vazio traduzida. */
+  emptyMessage?: string;
 }
 
-export default function DataTable({ columns, data, className = '', searchable = false, pageSize = 50 }: DataTableProps) {
+export default function DataTable({ columns, data, className = '', searchable = false, pageSize = 50, searchPlaceholder, emptyMessage }: DataTableProps) {
+  const { t, locale } = useT('tables');
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [search, setSearch] = useState('');
@@ -46,9 +52,10 @@ export default function DataTable({ columns, data, className = '', searchable = 
       }
       const strA = String(aVal);
       const strB = String(bVal);
-      return sortDir === 'asc' ? strA.localeCompare(strB) : strB.localeCompare(strA);
+      // Ordenação com o locale ativo (acentos pt-BR: Água ≠ Zebra).
+      return sortDir === 'asc' ? strA.localeCompare(strB, locale) : strB.localeCompare(strA, locale);
     });
-  }, [filtered, sortKey, sortDir]);
+  }, [filtered, sortKey, sortDir, locale]);
 
   // Paginate
   const paged = useMemo(() => {
@@ -79,7 +86,8 @@ export default function DataTable({ columns, data, className = '', searchable = 
           />
           <input
             type="text"
-            placeholder="Search..."
+            placeholder={searchPlaceholder ?? t('searchPlaceholder')}
+            aria-label={searchPlaceholder ?? t('searchPlaceholder')}
             value={search}
             onChange={e => {
               setSearch(e.target.value);
@@ -117,7 +125,7 @@ export default function DataTable({ columns, data, className = '', searchable = 
                   colSpan={columns.length}
                   className="px-4 py-12 text-center text-fg-muted"
                 >
-                  {search ? 'No results matching your search.' : 'No data available.'}
+                  {emptyMessage ?? t('emptyMessage')}
                 </td>
               </tr>
             ) : (
@@ -158,14 +166,15 @@ export default function DataTable({ columns, data, className = '', searchable = 
         <div
           className="flex items-center justify-between mt-3 text-sm text-fg-secondary"
         >
-          <span>{sorted.length} records</span>
+          <span>{t('records', { count: sorted.length })}</span>
           <div className="flex gap-1">
             <button
               onClick={() => setPage(p => Math.max(0, p - 1))}
               disabled={page === 0}
+              aria-label={t('previous')}
               className="px-3 py-1 rounded transition-colors disabled:opacity-40 bg-surface-alt"
             >
-              Previous
+              {t('previous')}
             </button>
             <span className="px-3 py-1">
               {page + 1} / {totalPages}
@@ -173,9 +182,10 @@ export default function DataTable({ columns, data, className = '', searchable = 
             <button
               onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
+              aria-label={t('next')}
               className="px-3 py-1 rounded transition-colors disabled:opacity-40 bg-surface-alt"
             >
-              Next
+              {t('next')}
             </button>
           </div>
         </div>

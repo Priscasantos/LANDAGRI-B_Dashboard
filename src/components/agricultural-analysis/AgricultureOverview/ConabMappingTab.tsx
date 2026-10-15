@@ -4,6 +4,7 @@ import Card from '../../ui/Card';
 import MetricCard from '../../ui/MetricCard';
 import GroupedBarChart from '../../charts/GroupedBarChart';
 import LineChart from '../../charts/LineChart';
+import { useT } from '../../../i18n/LanguageContext';
 import { formatCropName } from '../../../lib/cropNames';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 import conabMappingData from '../../../data/processed/conab_mapping_data.json';
@@ -55,6 +56,8 @@ interface MappingDataType {
 
 type MappingData = MappingDataType;
 export default function ConabMappingTab() {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('agricultural');
   const mappingData = conabMapping as MappingData;
   const mappingDataDetailed = conabMappingData as ConabMappingDataType;
 
@@ -119,8 +122,8 @@ export default function ConabMappingTab() {
   if (!mappingData?.crop_calendar) {
     return (
       <div className="p-8 text-center text-fg-secondary">
-        <p className="text-lg">No CONAB mapping data available.</p>
-        <p className="text-sm mt-2">The mapping data file may be empty or in an unexpected format.</p>
+        <p className="text-lg">{tBody('noConabMapping')}</p>
+        <p className="text-sm mt-2">{tBody('badMappingFormat')}</p>
       </div>
     );
   }
@@ -132,43 +135,43 @@ export default function ConabMappingTab() {
     <div className="space-y-6">
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard icon={Wheat} label="Total Crops" value={metrics.cropCount} variant="accuracy" />
-        <MetricCard icon={Map} label="States Covered" value={metrics.stateCount} variant="resolution" />
-        <MetricCard icon={MapPin} label="Regions" value={metrics.regionCount} variant="classes" />
-        <MetricCard icon={CalendarDays} label="Temporal Span" value={mappingYears} variant="frequency" />
+        <MetricCard icon={Wheat} label={tBody('metricTotalCrops')} value={metrics.cropCount} variant="accuracy" />
+        <MetricCard icon={Map} label={tBody('metricStatesCovered')} value={metrics.stateCount} variant="resolution" />
+        <MetricCard icon={MapPin} label={tBody('metricRegions')} value={metrics.regionCount} variant="classes" />
+        <MetricCard icon={CalendarDays} label={tBody('metricTemporalSpan')} value={mappingYears} variant="frequency" />
       </div>
 
       {/* Crop Regional Distribution */}
-      <Card title="Crop Regional Distribution" padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">Crop Regional Distribution</h3>
+      <Card title={t('cropRegionalDistribution')} padding="lg" hover={false}>
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hCropRegionalDist')}</h3>
         {cropRegionData.series.length > 0 ? (
           <GroupedBarChart
             categories={cropRegionData.categories}
             series={cropRegionData.series}
-            xlabel="Region"
-            ylabel="Number of States"
+            xlabel={t('region')}
+            ylabel={t('statesCount')}
             height={400}
           />
         ) : (
-          <p className="text-fg-muted text-center py-8">No regional distribution data available.</p>
+          <p className="text-fg-muted text-center py-8">{tBody('noRegionalData')}</p>
         )}
       </Card>
 
       {/* Temporal Coverage Evolution */}
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">Temporal Coverage Evolution</h3>
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hTemporalEvolution')}</h3>
         {temporalData.series.length > 0 ? (
           <LineChart
             series={temporalData.series}
-            xlabel="Year"
-            ylabel="Active Mapping"
+            xlabel={t('year')}
+            ylabel={t('activeMapping')}
             height={350}
             showMarkers={false}
             fill="tozeroy"
             layout={{ xaxis: { tickmode: 'linear', dtick: 1, tickformat: 'd' } }}
           />
         ) : (
-          <p className="text-fg-muted text-center py-8">No temporal coverage data available.</p>
+          <p className="text-fg-muted text-center py-8">{tBody('noTemporalData')}</p>
         )}
       </Card>
 
@@ -176,14 +179,14 @@ export default function ConabMappingTab() {
       <Card padding="md" hover={false}>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h4 className="text-sm font-semibold text-fg">Data Source</h4>
+            <h4 className="text-sm font-semibold text-fg">{tBody('dataSource')}</h4>
             <p className="text-xs text-fg-secondary">
               {mappingData?.metadata?.source || 'CONAB'} &mdash;{' '}
               {mappingData?.metadata?.description || 'Agricultural Mapping Data'}
             </p>
             <p className="text-xs text-fg-muted mt-1">
-              Spatial Resolution: {mappingDataDetailed?.metadata?.spatial_resolution || '30m'} |
-              Temporal Coverage: {mappingYears}
+              {tBody('spatialResolutionLabel')}: {mappingDataDetailed?.metadata?.spatial_resolution || '30m'} |
+              {tBody('temporalCoverageLabel')}: {mappingYears}
             </p>
           </div>
           <a
@@ -193,7 +196,7 @@ export default function ConabMappingTab() {
             className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors"
           >
             <Download size={15} aria-hidden="true" className="shrink-0" />
-            Download Data
+            {tBody('downloadData')}
           </a>
         </div>
       </Card>

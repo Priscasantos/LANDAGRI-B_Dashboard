@@ -4,8 +4,12 @@ import type { Data } from 'plotly.js';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
 import { minMaxNormalize } from '../../../lib/normalize';
+import { hoverTemplatesForLocale } from '../../../lib/chartDefaults';
+import { useT } from '../../../i18n/LanguageContext';
 
 export default function NormalizedPerformanceTab() {
+  const { t, locale } = useT('charts');
+  const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const { heatmapData, metricLabels, initiativeLabels, metricComparison, radarData } = useMemo(() => {
@@ -18,7 +22,7 @@ export default function NormalizedPerformanceTab() {
     }
 
     const names = valid.map((i) => i.Display_Name);
-    const metrics = ['Accuracy', 'Resolution (inv)', 'Total Classes', 'Agriculture Classes'];
+    const metrics = [t('accuracyLabel'), t('resolutionInv'), t('totalClasses'), t('agricultureClasses')];
 
     // Build raw matrix [initiatives][metrics]
     const rawMatrix = valid.map((i) => [
@@ -68,10 +72,10 @@ export default function NormalizedPerformanceTab() {
       metricComparison,
       radarData,
     };
-  }, [initiatives]);
+  }, [initiatives, t]);
 
   if (heatmapData.length === 0) {
-    return <div className="py-8 text-center text-fg-muted">No normalized performance data available.</div>;
+    return <div className="py-8 text-center text-fg-muted">{tBody('noNormalizedData')}</div>;
   }
 
   // Heatmap
@@ -96,7 +100,7 @@ export default function NormalizedPerformanceTab() {
     },
     text: metricComparison.map((d) => d.avg.toFixed(2)),
     textposition: 'outside',
-    hovertemplate: '<b>%{x}</b><br>Avg Normalized: %{y:.2f}<extra></extra>',
+    hovertemplate: `<b>%{x}</b><br>${t('avgNormalized')}: %{y:.2f}<extra></extra>`,
   };
 
   // Radar
@@ -109,21 +113,20 @@ export default function NormalizedPerformanceTab() {
     fillcolor: `${d.color}44`,
     line: { color: d.color, width: 2 },
     marker: { color: d.color, size: 6 },
-    hovertemplate: '<b>%{theta}</b><br>%{r:.2f}<extra></extra>',
+    hovertemplate: hoverTemplatesForLocale(locale).radar,
   }));
 
   return (
     <div className="space-y-8">
       <div>
-        <h3 className="text-base font-semibold text-fg mb-2">Normalized Performance Heatmap</h3>
+        <h3 className="text-base font-semibold text-fg mb-2">{tBody('hNormalizedHeatmap')}</h3>
         <p className="text-sm text-fg-secondary mb-3">
-          Metrics normalized to [0, 1] using min-max scaling. Resolution is inverted (higher = better).
-          Darker colors indicate better relative performance.
+          {tBody('normalizedIntro')}
         </p>
         <BaseChart
           data={[heatTrace]}
           layout={{
-            title: { text: 'Normalized Metrics Heatmap (0–1)', x: 0 },
+            title: { text: t('normalizedMetricsHeatmap'), x: 0 },
             xaxis: { title: '' },
             yaxis: { title: '', autorange: 'reversed' },
             height: Math.max(400, initiativeLabels.length * 25),
@@ -134,23 +137,23 @@ export default function NormalizedPerformanceTab() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <h3 className="text-base font-semibold text-fg mb-2">Average Normalized Metrics</h3>
+          <h3 className="text-base font-semibold text-fg mb-2">{tBody('hAvgNormalized')}</h3>
           <BaseChart
             data={[metricBar]}
             layout={{
-              title: { text: 'Average Normalized Score by Metric', x: 0 },
+              title: { text: t('avgNormalizedScoreByMetric'), x: 0 },
               xaxis: { title: '' },
-              yaxis: { title: 'Avg (0–1)' },
+              yaxis: { title: t('avg01') },
               height: 350,
             }}
           />
         </div>
         <div>
-          <h3 className="text-base font-semibold text-fg mb-2">Radar Comparison (Top 5)</h3>
+          <h3 className="text-base font-semibold text-fg mb-2">{tBody('hRadarTop5')}</h3>
           <BaseChart
             data={radarTraces}
             layout={{
-              title: { text: 'Multi-Metric Radar Comparison', x: 0 },
+              title: { text: t('multiMetricRadar'), x: 0 },
               height: 400,
               polar: {
                 radialaxis: { visible: true, range: [0, 1] },

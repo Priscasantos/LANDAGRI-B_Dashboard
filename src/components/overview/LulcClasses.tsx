@@ -1,5 +1,6 @@
 import { LULC_CLASS_COLORS } from '../../types/theme';
 import type { DetailedProduct } from '../../types/initiative';
+import { useT } from '../../i18n/LanguageContext';
 
 interface LulcClassesProps {
   classification: string | DetailedProduct[];
@@ -42,6 +43,7 @@ function parseClassLegend(legend: string): string[] {
 }
 
 export default function LulcClasses({ classification }: LulcClassesProps) {
+  const { t } = useT('overview');
   // Handle detailed products
   if (Array.isArray(classification) && classification.length > 0) {
     return (
@@ -55,7 +57,7 @@ export default function LulcClasses({ classification }: LulcClassesProps) {
               </span>
             </div>
             {product.accuracy > 0 && (
-              <div className="text-xs text-fg-secondary mb-2">Accuracy: {product.accuracy}%</div>
+              <div className="text-xs text-fg-secondary mb-2">{t('accuracyIs', { value: product.accuracy })}</div>
             )}
             <div className="flex flex-wrap gap-1.5">
               {parseClassLegend(product.class_legend).map((cls, i) => (
@@ -72,7 +74,7 @@ export default function LulcClasses({ classification }: LulcClassesProps) {
   if (typeof classification === 'string' && classification) {
     const classes = parseClassLegend(classification);
     if (classes.length === 0) {
-      return <p className="text-sm text-fg-muted italic">No classification data available</p>;
+      return <p className="text-sm text-fg-muted italic">{t('noClassification')}</p>;
     }
     return (
       <div className="flex flex-wrap gap-2">
@@ -93,5 +95,5 @@ export default function LulcClasses({ classification }: LulcClassesProps) {
     );
   }
 
-  return <p className="text-sm text-fg-muted italic">No classification data available</p>;
+  return <p className="text-sm text-fg-muted italic">{t('noClassification')}</p>;
 }

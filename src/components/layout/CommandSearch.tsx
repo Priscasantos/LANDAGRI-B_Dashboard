@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { commandIndex } from '../../config/routes';
+import { useT } from '../../i18n/LanguageContext';
 
 interface CommandSearchProps {
   open: boolean;
@@ -13,6 +14,7 @@ interface CommandSearchProps {
  * Indexes the 5 module routes + initiative/agricultural sub-routes
  * (`commandIndex` in `src/config/routes.tsx`). Dependency-free:
  * a fixed dialog with listbox semantics and full keyboard support.
+ * Fase 1 i18n: rótulos via chaves `nav`; a busca casa PT + EN + url.
  */
 export function CommandSearch({ open, onOpenChange }: CommandSearchProps): React.JSX.Element | null {
   const navigate = useNavigate();
@@ -20,17 +22,31 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps): React
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
+  const { t: tNav } = useT('nav');
+  const { t } = useT('common');
+
+  const entries = useMemo(
+    () =>
+      commandIndex.map((entry) => ({
+        url: entry.url,
+        title: tNav(entry.titleKey),
+        group: tNav(entry.groupKey),
+        fallbackTitle: entry.title,
+      })),
+    [tNav],
+  );
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return commandIndex;
-    return commandIndex.filter(
+    if (!q) return entries;
+    return entries.filter(
       (entry) =>
         entry.title.toLowerCase().includes(q) ||
+        entry.fallbackTitle.toLowerCase().includes(q) ||
         entry.group.toLowerCase().includes(q) ||
         entry.url.toLowerCase().includes(q),
     );
-  }, [query]);
+  }, [query, entries]);
 
   useEffect(() => {
     // Focus after paint so the dialog exists in the DOM.
@@ -77,7 +93,7 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps): React
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Buscar páginas do dashboard"
+        aria-label={t('searchTitle')}
         className="relative w-full max-w-lg overflow-hidden rounded-xl border border-border bg-surface shadow-lg"
       >
         <div className="flex items-center gap-2 border-b border-border px-3">
@@ -89,8 +105,8 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps): React
             aria-expanded="true"
             aria-controls={listId}
             aria-autocomplete="list"
-            aria-label="Buscar páginas"
-            placeholder="Buscar páginas… (ex.: temporal, calendário, simulador)"
+            aria-label={t('searchLabel')}
+            placeholder={t('searchPlaceholder')}
             value={query}
             onChange={handleQueryChange}
             onKeyDown={handleKeyDown}
@@ -103,12 +119,12 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps): React
         <ul
           id={listId}
           role="listbox"
-          aria-label="Resultados da busca"
+          aria-label={t('searchResults')}
           className="max-h-72 overflow-y-auto p-1.5"
         >
           {results.length === 0 && (
             <li className="px-3 py-6 text-center text-sm text-fg-secondary">
-              Nenhuma página encontrada para “{query}”.
+              {t('searchEmpty', { query })}
             </li>
           )}
           {results.map((entry, index) => (
@@ -139,15 +155,16 @@ interface SearchTriggerProps {
 }
 
 export function SearchTrigger({ onClick }: SearchTriggerProps): React.JSX.Element {
+  const { t } = useT('common');
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label="Buscar páginas (Ctrl+K)"
+      aria-label={t('searchShortcut')}
       className="relative flex h-9 w-9 items-center justify-center gap-2 rounded-full border border-border bg-surface px-0 text-sm font-normal text-fg-muted shadow-sm transition-colors hover:bg-surface-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-full sm:justify-start sm:px-3 md:w-44 lg:w-60"
     >
       <Search size={15} aria-hidden="true" />
-      <span className="hidden sm:inline">Buscar…</span>
+      <span className="hidden sm:inline">{t('searchButton')}</span>
       <kbd className="absolute top-1/2 right-1.5 hidden -translate-y-1/2 rounded border border-border bg-surface-alt px-1.5 py-0.5 text-[11px] sm:inline-block">
         ⌘K
       </kbd>

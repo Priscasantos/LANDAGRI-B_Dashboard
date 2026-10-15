@@ -1,4 +1,6 @@
 import type { Layout } from 'plotly.js';
+import { getActiveLocale } from '../i18n';
+import type { Locale } from '../i18n/types';
 import { resolveChartFontFamily } from './fonts';
 
 /**
@@ -68,7 +70,8 @@ export function buildStandardLayout(
       zerolinecolor: 'rgba(148,163,184,0.2)',
       automargin: true,
     },
-    separators: '.,',
+    // Separador por locale (pt-BR: decimal `,` + milhar `.`).
+    separators: separatorsForLocale(getActiveLocale()),
     ...overrides,
   } as Partial<Layout>;
 }
@@ -84,6 +87,13 @@ export function getChartLayout(
   return {
     plot_bgcolor: 'transparent',
     paper_bgcolor: 'transparent',
+    title: {
+      font: {
+        family: fontFamily,
+        size: 16,
+        color: isDark ? '#e2e8f0' : '#1e293b',
+      },
+    },
     font: {
       family: fontFamily,
       size: 12,
@@ -111,11 +121,21 @@ export function getChartLayout(
       automargin: true,
     },
     legend: {
+      // Geometria bottom completa aqui também: layouts sem o standard
+      // (useStandardLayout=false) mantêm a legenda inferior y:-0.28.
+      orientation: 'h',
+      x: 0.5,
+      xanchor: 'center',
+      y: -0.28,
+      yanchor: 'top',
+      itemclick: 'toggle',
+      itemdoubleclick: 'toggleothers',
       font: { color: isDark ? '#cbd5e1' : '#475569' },
       bordercolor: isDark ? '#334155' : '#e3e8ef',
       bgcolor: isDark ? 'rgba(30,41,59,0.9)' : '#ffffff',
       tracegroupgap: 15,
     },
+    separators: separatorsForLocale(getActiveLocale()),
     colorway: isDark
       ? ['#9CCC65', '#7CB342', '#C5E1A5', '#43A047', '#E8A04C', '#FFCA28', '#4DD0E1', '#9FA8DA', '#B0BEC5', '#66BB6A']
       : ['#2E7D32', '#43A047', '#7CB342', '#AED581', '#1B5E20', '#C2701D', '#E6A817', '#0E7C86', '#5C6BC0', '#B0BEC5'],
@@ -139,6 +159,32 @@ export const STANDARD_CONFIG = {
 };
 
 export const HOVER_TEMPLATES = {
+  default: '<b>%{x}</b><br>Valor: %{y}<extra></extra>',
+  percent: '<b>%{label}</b><br>%{percent}<extra></extra>',
+  initiative: '<b>%{x}</b><br>%{y}<extra></extra>',
+  heatmap: '<b>%{x}</b> / <b>%{y}</b><br>Valor: %{z:.2f}<extra></extra>',
+  radar: '<b>%{theta}</b><br>%{r:.2f}<extra></extra>',
+  scatter: '<b>%{x}</b><br>%{y:.1f}<extra></extra>',
+  timeline: '<b>%{customdata[0]}</b><br>Ano: %{x}<br>Período: %{customdata[1]}<extra></extra>',
+};
+
+/**
+ * Plotly locale (Fase 1 i18n).
+ *
+ * Verificado: `plotly.js-dist-min` embarca SÓ `plotly.min.js` — não há
+ * `dist/locale/pt-br.js` neste bundle, então `Plotly.setPlotlyLocale`
+ * não está disponível sem trocar o bundle (risco Fase 1; fila Fase 3).
+ * Em vez disso o locale é aplicado por layout: `separators` por locale
+ * (pt-BR `,.` = decimal vírgula + milhar ponto; en `.,`) e
+ * HOVER_TEMPLATES por idioma abaixo. `getActiveLocale()` lê o
+ * `<html lang>`/localStorage, então trocar o idioma no toggle reflete
+ * nos próximos layouts sem rebuild manual.
+ */
+export function separatorsForLocale(locale: Locale): string {
+  return locale.startsWith('pt') ? ',.' : '.,';
+}
+
+export const HOVER_TEMPLATES_EN = {
   default: '<b>%{x}</b><br>Value: %{y}<extra></extra>',
   percent: '<b>%{label}</b><br>%{percent}<extra></extra>',
   initiative: '<b>%{x}</b><br>%{y}<extra></extra>',
@@ -146,4 +192,13 @@ export const HOVER_TEMPLATES = {
   radar: '<b>%{theta}</b><br>%{r:.2f}<extra></extra>',
   scatter: '<b>%{x}</b><br>%{y:.1f}<extra></extra>',
   timeline: '<b>%{customdata[0]}</b><br>Year: %{x}<br>Period: %{customdata[1]}<extra></extra>',
-};
+} as const;
+
+export type HoverTemplateKey = keyof typeof HOVER_TEMPLATES;
+
+export function hoverTemplatesForLocale(
+  locale: Locale,
+): Record<HoverTemplateKey, string> {
+  if (locale.startsWith('pt')) return { ...HOVER_TEMPLATES };
+  return { ...(HOVER_TEMPLATES_EN as Record<HoverTemplateKey, string>) };
+}

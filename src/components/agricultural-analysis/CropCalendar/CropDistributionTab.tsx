@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import Card from '../../ui/Card';
 import HorizontalBarChart from '../../charts/HorizontalBarChart';
+import { useT } from '../../../i18n/LanguageContext';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 
@@ -23,6 +24,8 @@ interface CropDistributionTabProps {
 }
 
 export default function CropDistributionTab({ selectedCrops, selectedRegions }: CropDistributionTabProps) {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
@@ -99,14 +102,14 @@ export default function CropDistributionTab({ selectedCrops, selectedRegions }: 
   return (
     <div className="space-y-6">
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">Crop Distribution by State</h3>
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hCropDistState')}</h3>
         {noStateData ? (
-          <p className="text-fg-muted text-center py-8">No data available for selected filters.</p>
+          <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
         ) : (
           <HorizontalBarChart
             y={stateCropCounts.labels}
             x={stateCropCounts.values}
-            xlabel="Number of Crops"
+            xlabel={t('cropsCount')}
             color="#EC9706"
             height={Math.max(300, stateCropCounts.labels.length * 30)}
           />
@@ -114,17 +117,17 @@ export default function CropDistributionTab({ selectedCrops, selectedRegions }: 
       </Card>
 
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">Top Crops by Number of States</h3>
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hTopCropsStates')}</h3>
         {topCropsByStates.values.length > 0 ? (
           <HorizontalBarChart
             y={topCropsByStates.labels}
             x={topCropsByStates.values}
-            xlabel="Number of States"
+            xlabel={t('statesCount')}
             color="#626C01"
             height={Math.max(250, topCropsByStates.labels.length * 35)}
           />
         ) : (
-          <p className="text-fg-muted text-center py-8">No data available.</p>
+          <p className="text-fg-muted text-center py-8">{tBody('noData')}</p>
         )}
       </Card>
     </div>

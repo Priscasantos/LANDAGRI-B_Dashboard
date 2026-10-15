@@ -32,7 +32,7 @@ export default function GroupedBarChart({
     yaxis: { title: { text: ylabel } },
     barmode,
     showlegend: true,
-    legend: { orientation: 'h', y: -0.2 },
+    legend: { orientation: 'h', y: -0.28 },
     ...extraLayout,
   };
 

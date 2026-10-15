@@ -20,8 +20,10 @@ import PlotlyLazyChart from '../components/charts/PlotlyLazyChart';
 import { themeDataColor } from '../lib/theme-data';
 import type { Data } from 'plotly.js';
 import { simulateProjections, getDefaultParams, BASELINE_2025 } from '../lib/landCoverSimulation';
+import { useT } from '../i18n/LanguageContext';
 
 export default function PredictivePage() {
+  const { t } = useT('predictive');
   const [reforestationRate, setReforestationRate] = useState(getDefaultParams().reforestationRate);
   const [agriExpansion, setAgriExpansion] = useState(getDefaultParams().agriExpansion);
   const [sustainableAdoption, setSustainableAdoption] = useState(getDefaultParams().sustainableAdoption);
@@ -41,21 +43,21 @@ export default function PredictivePage() {
     {
       type: 'scatter',
       mode: 'lines',
-      name: 'Floresta (Mha)',
+      name: t('seriesForest'),
       x: plotlyYears,
       y: simulatedData.map((d) => d.forestryArea),
     },
     {
       type: 'scatter',
       mode: 'lines',
-      name: 'Agricultura (Mha)',
+      name: t('seriesAgri'),
       x: plotlyYears,
       y: simulatedData.map((d) => d.agricultureArea),
     },
     {
       type: 'scatter',
       mode: 'lines',
-      name: 'Índice de Emissão',
+      name: t('seriesEmission'),
       x: plotlyYears,
       y: simulatedData.map((d) => d.carbonEmissionIndex),
     },
@@ -85,15 +87,15 @@ export default function PredictivePage() {
                 }}
               >
                 <Zap size={11} />
-                <span>Simulador de Cenários</span>
+                <span>{t('simulatorBadge')}</span>
               </div>
               <h2
                 className="text-xl font-bold tracking-tight text-fg"
               >
-                Simulador de Políticas de Uso do Solo
+                {t('pageTitle')}
               </h2>
               <p className="text-sm mt-1 text-fg-secondary">
-                Ajuste os parâmetros abaixo e veja as projeções até <strong>2035</strong>
+                {t('pageSubtitlePre')} <strong>{t('targetYear')}</strong>
               </p>
             </div>
 
@@ -115,7 +117,7 @@ export default function PredictivePage() {
               }}
             >
               <RefreshCw size={14} />
-              Resetar Padrão
+              {t('resetButton')}
             </button>
           </div>
         </div>
@@ -129,16 +131,16 @@ export default function PredictivePage() {
                 className="text-xs font-bold uppercase tracking-wider flex items-center gap-2 text-fg-muted"
               >
                 <Settings2 size={14} />
-                Parâmetros de Política
+                {t('paramsHeading')}
               </h4>
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm text-fg">
                   <label htmlFor="reforestation-rate" className="font-semibold">
-                    Reflorestamento
+                    {t('labelReforestation')}
                   </label>
                   <span className="font-bold" style={{ color: 'var(--color-primary)' }}>
-                    +{reforestationRate}% / ano
+                    {t('ratePerYear', { value: reforestationRate })}
                   </span>
                 </div>
                 <input
@@ -148,22 +150,22 @@ export default function PredictivePage() {
                   max="4"
                   step="0.1"
                   value={reforestationRate}
-                  aria-valuetext={`+${reforestationRate}% por ano`}
+                  aria-valuetext={t('ratePerYearAria', { value: reforestationRate })}
                   onChange={(e) => setReforestationRate(parseFloat(e.target.value))}
                   className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                   style={{ backgroundColor: 'var(--color-border)' }}
                 />
                 <p className="text-xs text-fg-muted">
-                  Taxa de recuperação de áreas degradadas e reflorestamento de reservas legais.
+                  {t('descReforestation')}
                 </p>
               </div>
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm text-fg">
                   <label htmlFor="agri-expansion" className="font-semibold">
-                    Expansão Agrícola
+                    {t('labelAgri')}
                   </label>
-                  <span className="font-bold text-amber-500">+{agriExpansion}% / ano</span>
+                  <span className="font-bold text-amber-500">{t('ratePerYear', { value: agriExpansion })}</span>
                 </div>
                 <input
                   id="agri-expansion"
@@ -172,22 +174,22 @@ export default function PredictivePage() {
                   max="3"
                   step="0.1"
                   value={agriExpansion}
-                  aria-valuetext={`+${agriExpansion}% por ano`}
+                  aria-valuetext={t('ratePerYearAria', { value: agriExpansion })}
                   onChange={(e) => setAgriExpansion(parseFloat(e.target.value))}
                   className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-amber-500 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:outline-none"
                   style={{ backgroundColor: 'var(--color-border)' }}
                 />
                 <p className="text-xs text-fg-muted">
-                  Conversão de pastagens degradadas para agricultura intensiva.
+                  {t('descAgri')}
                 </p>
               </div>
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm text-fg">
                   <label htmlFor="sustainable-adoption" className="font-semibold">
-                    Adoção Sustentável
+                    {t('labelSustainable')}
                   </label>
-                  <span className="font-bold text-emerald-500">{sustainableAdoption}%</span>
+                  <span className="font-bold text-emerald-500">{t('percentValue', { value: sustainableAdoption })}</span>
                 </div>
                 <input
                   id="sustainable-adoption"
@@ -196,13 +198,13 @@ export default function PredictivePage() {
                   max="100"
                   step="5"
                   value={sustainableAdoption}
-                  aria-valuetext={`${sustainableAdoption}%`}
+                  aria-valuetext={t('percentValue', { value: sustainableAdoption })}
                   onChange={(e) => setSustainableAdoption(parseInt(e.target.value))}
                   className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none"
                   style={{ backgroundColor: 'var(--color-border)' }}
                 />
                 <p className="text-xs text-fg-muted">
-                  Integração lavoura-pecuária-floresta (ILPF), plantio direto e bioinsumos.
+                  {t('descSustainable')}
                 </p>
               </div>
             </div>
@@ -220,12 +222,10 @@ export default function PredictivePage() {
                 style={{ color: 'var(--color-primary)' }}
               >
                 <Info size={14} />
-                Sobre o Modelo
+                {t('aboutModel')}
               </h5>
               <p className="text-xs leading-relaxed text-fg-secondary">
-                O simulador projeta cenários baseados em parâmetros do <strong>Plano ABC+</strong> e dados do
-                MapBiomas. Pastagens atuam como amortecedor: recuperando pastagens degradadas,
-                o Brasil pode expandir agricultura e floresta simultaneamente.
+                {t('modelBodyA')} <strong>{t('planName')}</strong> {t('modelBodyB')}
               </p>
             </div>
           </div>
@@ -237,20 +237,20 @@ export default function PredictivePage() {
               <h3
                 className="text-xs font-bold uppercase tracking-wider mb-1 text-fg-muted"
               >
-                Projeção Anual (2025 - 2035)
+                {t('projectionTitle')}
               </h3>
               <p className="text-sm mb-4 text-fg-secondary">
-                Interação entre reflorestamento, expansão agrícola e emissões
+                {t('projectionSub')}
               </p>
 
               <div
                 className="h-80 min-w-0 w-full rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 role="img"
                 tabIndex={0}
-                aria-label={`Projeção anual 2025–2035. Floresta ${result2035.forestryArea} Mha, agricultura ${result2035.agricultureArea} Mha, índice de emissão ${result2035.carbonEmissionIndex}.`}
+                aria-label={t('chartAria', { forestry: result2035.forestryArea, agriculture: result2035.agricultureArea, emission: result2035.carbonEmissionIndex })}
                 style={{ minWidth: 0 }}
               >
-                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                <ResponsiveContainer width="100%" height={320} minWidth={0}>
                   <LineChart data={simulatedData} margin={{ top: 10, right: 24, left: 8, bottom: 8 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
                     <XAxis
@@ -283,7 +283,7 @@ export default function PredictivePage() {
                     />
                     <Line
                       type="monotone"
-                      name="Floresta (Mha)"
+                      name={t('seriesForest')}
                       dataKey="forestryArea"
                       stroke={themeDataColor(0)}
                       strokeWidth={3}
@@ -291,7 +291,7 @@ export default function PredictivePage() {
                     />
                     <Line
                       type="monotone"
-                      name="Pastagem (Mha)"
+                      name={t('seriesPasture')}
                       dataKey="pastureArea"
                       stroke={themeDataColor(1)}
                       strokeWidth={2}
@@ -300,7 +300,7 @@ export default function PredictivePage() {
                     />
                     <Line
                       type="monotone"
-                      name="Agricultura (Mha)"
+                      name={t('seriesAgri')}
                       dataKey="agricultureArea"
                       stroke={themeDataColor(2)}
                       strokeWidth={3}
@@ -308,7 +308,7 @@ export default function PredictivePage() {
                     />
                     <Line
                       type="monotone"
-                      name="Índice de Emissão"
+                      name={t('seriesEmission')}
                       dataKey="carbonEmissionIndex"
                       stroke={themeDataColor(3)}
                       strokeWidth={2}
@@ -326,16 +326,16 @@ export default function PredictivePage() {
                 className="rounded-2xl p-5 border text-center bg-surface border-border"
               >
                 <p className="text-[10px] font-bold uppercase tracking-wider mb-1 text-fg-muted">
-                  Variação Florestal
+                  {t('statForest')}
                 </p>
                 <h3
                   className="text-2xl font-black"
                   style={{ color: forestDelta >= 0 ? '#10b981' : '#ef4444' }}
                 >
-                  {forestDelta >= 0 ? '+' : ''}{forestDelta} Mha
+                  {t('deltaMha', { sign: forestDelta >= 0 ? '+' : '', value: forestDelta })}
                 </h3>
                 <p className="text-xs mt-1 text-fg-muted">
-                  {forestDelta >= 0 ? 'Ganho de cobertura' : 'Perda florestal'}
+                  {forestDelta >= 0 ? t('forestGain') : t('forestLoss')}
                 </p>
               </div>
 
@@ -343,13 +343,13 @@ export default function PredictivePage() {
                 className="rounded-2xl p-5 border text-center bg-surface border-border"
               >
                 <p className="text-[10px] font-bold uppercase tracking-wider mb-1 text-fg-muted">
-                  Expansão Agrícola
+                  {t('statAgri')}
                 </p>
                 <h3 className="text-2xl font-black text-amber-500">
-                  +{agriDelta} Mha
+                  {t('deltaMha', { sign: '+', value: agriDelta })}
                 </h3>
                 <p className="text-xs mt-1 text-fg-muted">
-                  Nova área cultivada
+                  {t('agriNew')}
                 </p>
               </div>
 
@@ -357,16 +357,16 @@ export default function PredictivePage() {
                 className="rounded-2xl p-5 border text-center bg-surface border-border"
               >
                 <p className="text-[10px] font-bold uppercase tracking-wider mb-1 text-fg-muted">
-                  Status de Emissão
+                  {t('statEmission')}
                 </p>
                 <h3
                   className="text-2xl font-black"
                   style={{ color: carbonDelta <= 0 ? '#10b981' : '#ef4444' }}
                 >
-                  {carbonDelta <= 0 ? '' : '+'}{carbonDelta}%
+                  {t('deltaPct', { sign: carbonDelta <= 0 ? '' : '+', value: carbonDelta })}
                 </h3>
                 <p className="text-xs mt-1 text-fg-muted">
-                  {carbonDelta <= 0 ? 'Redução de emissões' : 'Aumento de emissões'}
+                  {carbonDelta <= 0 ? t('emissionDown') : t('emissionUp')}
                 </p>
               </div>
             </div>
@@ -376,17 +376,17 @@ export default function PredictivePage() {
         {/* Plotly island (lazy, chunk separado) — projeção detalhada */}
         <div className="rounded-2xl p-6 border bg-surface border-border">
           <h3 className="text-xs font-bold uppercase tracking-wider mb-1 text-fg-muted">
-            Projeção Detalhada (2025 - 2035)
+            {t('detailedTitle')}
           </h3>
           <p className="text-sm mb-4 text-fg-secondary">
-            Mesma simulação em gráfico interativo (zoom, exportação PNG)
+            {t('detailedSub')}
           </p>
           <PlotlyLazyChart
             data={plotlyTraces}
             layout={{
-              title: { text: 'Projeção detalhada 2025–2035' },
-              xaxis: { title: { text: 'Ano' } },
-              yaxis: { title: { text: 'Mha / Índice' } },
+              title: { text: t('plotlyTitle') },
+              xaxis: { title: { text: t('axisYear') } },
+              yaxis: { title: { text: t('axisMha') } },
             }}
           />
         </div>

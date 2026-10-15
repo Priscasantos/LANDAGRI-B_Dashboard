@@ -4,16 +4,23 @@ import type { Data } from 'plotly.js';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
 import { minMaxNormalize } from '../../../lib/normalize';
+import { hoverTemplatesForLocale } from '../../../lib/chartDefaults';
+import { translate } from '../../../i18n/index';
+import { useT } from '../../../i18n/LanguageContext';
 
 interface RadarTabProps {
   selectedInitiatives: string[];
 }
 
 export default function RadarTab({ selectedInitiatives }: RadarTabProps) {
+  const { t, locale } = useT('charts');
+  const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const { traces } = useMemo(() => {
-    const thetaLabels = ['Overall Accuracy', 'Spatial Resolution', 'Total Classes', 'Agriculture Classes'];
+    // `translate(locale, …)` direto (em vez do `t` do hook): o memo
+    // depende só de `locale`, sem aviso de dep desnecessária no lint.
+    const thetaLabels = [translate(locale, 'charts', 'overallAccuracyLabel'), translate(locale, 'charts', 'spatialResolutionLabel'), translate(locale, 'charts', 'totalClasses'), translate(locale, 'charts', 'agricultureClasses')];
     const filtered = initiatives
       .filter((i) => selectedInitiatives.includes(i.Name))
       .filter((i) => i.Accuracy > 0 && i.Resolution > 0);
@@ -48,16 +55,16 @@ export default function RadarTab({ selectedInitiatives }: RadarTabProps) {
       fillcolor: `${d.color}44`,
       line: { color: d.color, width: 2 },
       marker: { color: d.color, size: 5 },
-      hovertemplate: '<b>%{theta}</b><br>%{r:.2f}<extra></extra>',
+      hovertemplate: hoverTemplatesForLocale(locale).radar,
     }));
 
     return { traces, theta: thetaLabels };
-  }, [initiatives, selectedInitiatives]);
+  }, [initiatives, selectedInitiatives, locale]);
 
   if (traces.length === 0) {
     return (
       <div className="py-8 text-center text-fg-muted">
-        No initiatives selected or insufficient data. Choose initiatives with accuracy and resolution data.
+        {tBody('noSelectionRadar')}
       </div>
     );
   }
@@ -65,13 +72,12 @@ export default function RadarTab({ selectedInitiatives }: RadarTabProps) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-fg-secondary">
-        Radar chart comparing normalized metrics (min-max scaled to [0, 1]) across selected initiatives.
-        Resolution is inverted (higher inverse = better relative resolution).
+        {tBody('radarIntro')}
       </p>
       <BaseChart
         data={traces}
         layout={{
-          title: { text: 'Multi-Metric Radar Comparison', x: 0 },
+          title: { text: t('multiMetricRadar'), x: 0 },
           height: 500,
           polar: {
             radialaxis: {
@@ -82,7 +88,7 @@ export default function RadarTab({ selectedInitiatives }: RadarTabProps) {
           },
           legend: {
             orientation: 'h',
-            y: -0.15,
+            y: -0.28,
           },
         }}
       />

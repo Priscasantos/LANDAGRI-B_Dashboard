@@ -59,7 +59,7 @@ describe('InitiativesTable (Fase 2: iniciativa/área/ano)', () => {
       row({ Name: 'Other', Display_Name: 'Other (OTH)', Acronym: 'OTH' }),
     ]);
     render(<InitiativesTable />);
-    fireEvent.change(screen.getByPlaceholderText(/search/i), { target: { value: 'Other' } });
+    fireEvent.change(screen.getByPlaceholderText(/buscar|search/i), { target: { value: 'Other' } });
     expect(screen.getByText('Other (OTH)')).toBeInTheDocument();
     expect(screen.queryByText('Test Initiative (TST)')).not.toBeInTheDocument();
   });

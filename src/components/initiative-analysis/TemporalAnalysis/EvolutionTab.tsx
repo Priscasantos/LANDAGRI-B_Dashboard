@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Star } from 'lucide-react';
 import BaseChart from '../../charts/BaseChart';
 import type { Data } from 'plotly.js';
+import { useT } from '../../../i18n/LanguageContext';
 
 interface TemporalData {
   name: string;
@@ -21,6 +22,8 @@ interface EvolutionTabProps {
 }
 
 export default function EvolutionTab({ data }: EvolutionTabProps) {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('initiative');
   // 1. Active initiatives per year
   const { activeByYear, peakYear, avgActive } = useMemo(() => {
     if (data.length === 0) return { activeByYear: [], peakYear: 0, avgActive: 0 };
@@ -56,7 +59,7 @@ export default function EvolutionTab({ data }: EvolutionTabProps) {
     y: activeByYear.map((d) => d.count),
     type: 'scatter',
     mode: 'lines+markers',
-    name: 'Active Initiatives',
+    name: t('activeInitiatives'),
     line: { color: '#14b8a6', width: 3 },
     marker: {
       color: activeByYear.map((d) => (d.year === peakYear ? '#f59e0b' : '#14b8a6')),
@@ -66,7 +69,7 @@ export default function EvolutionTab({ data }: EvolutionTabProps) {
     },
     fill: 'tozeroy',
     fillcolor: 'rgba(20,184,166,0.15)',
-    hovertemplate: '<b>%{x}</b><br>Active initiatives: %{y}<extra></extra>',
+    hovertemplate: `<b>%{x}</b><br>${t('activeInitiatives')}: %{y}<extra></extra>`,
   };
 
   // Average line as a scatter trace
@@ -75,7 +78,7 @@ export default function EvolutionTab({ data }: EvolutionTabProps) {
     y: [avgActive, avgActive],
     type: 'scatter',
     mode: 'lines',
-    name: `Average (${avgActive})`,
+    name: `${t('average')} (${avgActive})`,
     line: { color: '#94a3b8', width: 2, dash: 'dash' },
     hoverinfo: 'skip',
   };
@@ -163,11 +166,11 @@ export default function EvolutionTab({ data }: EvolutionTabProps) {
     y: resolutionEvolution.high,
     type: 'scatter',
     mode: 'lines',
-    name: 'High Resolution (<30m)',
+    name: t('highRes'),
     stackgroup: 'resolution',
     line: { color: '#22c55e', width: 1 },
     fillcolor: 'rgba(34,197,94,0.6)',
-    hovertemplate: 'High Res: %{y}<extra></extra>',
+    hovertemplate: `${t('highResShort')}: %{y}<extra></extra>`,
   };
 
   const resMedTrace: Data = {
@@ -175,11 +178,11 @@ export default function EvolutionTab({ data }: EvolutionTabProps) {
     y: resolutionEvolution.medium,
     type: 'scatter',
     mode: 'lines',
-    name: 'Medium Resolution (30-99m)',
+    name: t('mediumRes'),
     stackgroup: 'resolution',
     line: { color: '#eab308', width: 1 },
     fillcolor: 'rgba(234,179,8,0.6)',
-    hovertemplate: 'Medium Res: %{y}<extra></extra>',
+    hovertemplate: `${t('mediumResShort')}: %{y}<extra></extra>`,
   };
 
   const resCoarseTrace: Data = {
@@ -187,11 +190,11 @@ export default function EvolutionTab({ data }: EvolutionTabProps) {
     y: resolutionEvolution.coarse,
     type: 'scatter',
     mode: 'lines',
-    name: 'Coarse Resolution (>=100m)',
+    name: t('coarseRes'),
     stackgroup: 'resolution',
     line: { color: '#ef4444', width: 1 },
     fillcolor: 'rgba(239,68,68,0.6)',
-    hovertemplate: 'Coarse Res: %{y}<extra></extra>',
+    hovertemplate: `${t('coarseResShort')}: %{y}<extra></extra>`,
   };
 
   // Historical markers
@@ -200,7 +203,7 @@ export default function EvolutionTab({ data }: EvolutionTabProps) {
     y: [0, 0],
     type: 'scatter',
     mode: 'markers+text',
-    name: 'Historical Milestones',
+    name: t('historicalMilestones'),
     marker: { size: 1, opacity: 0 },
     text: ['2000<br>Landsat 7', '2020<br>Sentinel-2 era'],
     textposition: ['top left', 'top right'],
@@ -214,7 +217,7 @@ export default function EvolutionTab({ data }: EvolutionTabProps) {
   if (activeByYear.length === 0) {
     return (
       <div className="py-8 text-center text-fg-muted">
-        No temporal data available for evolution analysis.
+        {tBody('noEvolutionData')}
       </div>
     );
   }
@@ -222,17 +225,17 @@ export default function EvolutionTab({ data }: EvolutionTabProps) {
   return (
     <div className="space-y-8">
       <div>
-        <h3 className="text-base font-semibold text-fg mb-2">Active Initiatives per Year</h3>
+        <h3 className="text-base font-semibold text-fg mb-2">{tBody('activePerYear')}</h3>
         <p className="text-sm text-fg-secondary mb-3">
-          Number of active LULC initiatives with available data each year.
-          Peak year highlighted with <Star size={12} aria-hidden="true" className="inline-block align-[-1px]" /> marker. Dashed line shows average.
+          {tBody('activePerYearIntroA')}{' '}
+          <Star size={12} aria-hidden="true" className="inline-block align-[-1px]" /> {tBody('activePerYearIntroB')}
         </p>
         <BaseChart
           data={[activeTrace, avgTrace]}
           layout={{
-            title: { text: 'Active Initiatives Over Time', x: 0 },
-            xaxis: { title: 'Year' },
-            yaxis: { title: 'Active Initiatives', dtick: 1 },
+            title: { text: t('activeInitiativesOverTime'), x: 0 },
+            xaxis: { title: t('year') },
+            yaxis: { title: t('activeInitiatives'), dtick: 1 },
             hovermode: 'x unified',
             height: 400,
             showlegend: true,
@@ -251,7 +254,7 @@ export default function EvolutionTab({ data }: EvolutionTabProps) {
               {
                 x: peakYear,
                 y: Math.max(...activeByYear.map((d) => d.count)),
-                text: `Peak: ${peakYear}`,
+                text: `${t('peak')}: ${peakYear}`,
                 showarrow: true,
                 arrowhead: 1,
                 ax: 0,
@@ -264,17 +267,16 @@ export default function EvolutionTab({ data }: EvolutionTabProps) {
       </div>
 
       <div>
-        <h3 className="text-base font-semibold text-fg mb-2">Resolution Evolution</h3>
+        <h3 className="text-base font-semibold text-fg mb-2">{tBody('resolutionEvolution')}</h3>
         <p className="text-sm text-fg-secondary mb-3">
-          Distribution of initiatives by spatial resolution category over time.
-          High (&lt;30m), Medium (30-99m), and Coarse (&ge;100m).
+          {tBody('resolutionEvolutionIntro')}
         </p>
         <BaseChart
           data={[resCoarseTrace, resMedTrace, resHighTrace, markersTrace]}
           layout={{
-            title: { text: 'Resolution Distribution Over Time', x: 0 },
-            xaxis: { title: 'Year' },
-            yaxis: { title: 'Number of Initiatives' },
+            title: { text: t('resolutionDistributionOverTime'), x: 0 },
+            xaxis: { title: t('year') },
+            yaxis: { title: t('numberOfInitiatives') },
             hovermode: 'x unified',
             height: 400,
             barmode: 'stack',

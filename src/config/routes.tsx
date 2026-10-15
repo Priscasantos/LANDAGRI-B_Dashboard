@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
+import type { TKey } from '../i18n/types';
 
 /**
  * Basename default (gh-pages). Override with `VITE_BASENAME` env.
@@ -44,6 +45,14 @@ export interface AppRoute {
   /** Header subtitle rendered by BaseLayout. */
   description: string;
   /**
+   * Fase 1 i18n: chaves do namespace `nav` resolvidas em `App.tsx` via
+   * `useT('nav')`. `title`/`description` seguem como fallback PT estático
+   * (mantém os testes de metadata + e2e legados verdes).
+   */
+  titleKey: TKey<'nav'>;
+  /** @see titleKey */
+  descriptionKey: TKey<'nav'>;
+  /**
    * When set, App.tsx renders `<Navigate to={redirectTo} replace />`
    * instead of the lazy Component (used by the catch-all 404 route).
    */
@@ -73,6 +82,8 @@ export const appRoutes: AppRoute[] = [
     title: 'Visão Geral',
     description:
       'Resumo geral e métricas-chave das iniciativas de Uso e Cobertura da Terra (LULC).',
+    titleKey: 'overview',
+    descriptionKey: 'routeDescOverview',
   },
   {
     path: '/overview',
@@ -80,6 +91,8 @@ export const appRoutes: AppRoute[] = [
     title: 'Visão Geral',
     description:
       'Resumo geral e métricas-chave das iniciativas de Uso e Cobertura da Terra (LULC).',
+    titleKey: 'overview',
+    descriptionKey: 'routeDescOverview',
   },
   {
     path: '/initiative-analysis/*',
@@ -87,6 +100,8 @@ export const appRoutes: AppRoute[] = [
     title: 'Análise de Iniciativas',
     description:
       'Análise espaço-temporal das iniciativas de Uso e Cobertura da Terra (LULC).',
+    titleKey: 'initiativeAnalysis',
+    descriptionKey: 'routeDescInitiative',
   },
   {
     path: '/agricultural-analysis/*',
@@ -94,6 +109,8 @@ export const appRoutes: AppRoute[] = [
     title: 'Análise Agrícola',
     description:
       'Indicadores agrícolas, calendário de culturas e disponibilidade agregada por região e período.',
+    titleKey: 'agriculturalAnalysis',
+    descriptionKey: 'routeDescAgricultural',
   },
   {
     path: '/predictive',
@@ -101,6 +118,8 @@ export const appRoutes: AppRoute[] = [
     title: 'Simulador Preditivo',
     description:
       'Projeções de uso da terra sob cenários de reflorestamento, expansão agrícola e adoção sustentável.',
+    titleKey: 'predictive',
+    descriptionKey: 'routeDescPredictive',
   },
   {
     path: '/about',
@@ -108,6 +127,8 @@ export const appRoutes: AppRoute[] = [
     title: 'Referências',
     description:
       'Fontes de dados, metodologia e referências do dashboard LANDAGRI-B.',
+    titleKey: 'about',
+    descriptionKey: 'routeDescAbout',
   },
   // Catch-all: unknown paths redirect home (gh-pages SPA has no server 404).
   {
@@ -116,6 +137,8 @@ export const appRoutes: AppRoute[] = [
     title: 'Visão Geral',
     description:
       'Resumo geral e métricas-chave das iniciativas de Uso e Cobertura da Terra (LULC).',
+    titleKey: 'overview',
+    descriptionKey: 'routeDescOverview',
     redirectTo: '/',
   },
 ];
@@ -124,6 +147,13 @@ export interface CommandIndexEntry {
   title: string;
   url: string;
   group: string;
+  /**
+   * Fase 1 i18n: `CommandSearch` resolve `title`/`group` via `useT('nav')`
+   * no render (busca casa PT + EN + url). Campos PT mantidos para os
+   * testes legados do índice.
+   */
+  titleKey: TKey<'nav'>;
+  groupKey: TKey<'nav'>;
 }
 
 /**
@@ -132,45 +162,59 @@ export interface CommandIndexEntry {
  * sub-pages are indexed in the same change that adds them.
  */
 export const commandIndex: CommandIndexEntry[] = [
-  { title: 'Visão Geral', url: '/overview', group: 'Visão Geral' },
+  { title: 'Visão Geral', url: '/overview', group: 'Visão Geral', titleKey: 'overview', groupKey: 'groupOverview' },
   {
     title: 'Análise de Iniciativas',
     url: '/initiative-analysis',
     group: 'Análise de Iniciativas',
+    titleKey: 'initiativeAnalysis',
+    groupKey: 'groupInitiative',
   },
-  { title: 'Análise Temporal', url: '/initiative-analysis/temporal', group: 'Análise de Iniciativas' },
+  { title: 'Análise Temporal', url: '/initiative-analysis/temporal', group: 'Análise de Iniciativas', titleKey: 'temporal', groupKey: 'groupInitiative' },
   {
     title: 'Análise Comparativa',
     url: '/initiative-analysis/comparative',
     group: 'Análise de Iniciativas',
+    titleKey: 'comparative',
+    groupKey: 'groupInitiative',
   },
   {
     title: 'Análise Detalhada',
     url: '/initiative-analysis/detailed',
     group: 'Análise de Iniciativas',
+    titleKey: 'detailed',
+    groupKey: 'groupInitiative',
   },
   {
     title: 'Análise Agrícola',
     url: '/agricultural-analysis',
     group: 'Análise Agrícola',
+    titleKey: 'agriculturalAnalysis',
+    groupKey: 'groupAgricultural',
   },
   {
     title: 'Panorama Agrícola',
     url: '/agricultural-analysis/overview',
     group: 'Análise Agrícola',
+    titleKey: 'agriOverview',
+    groupKey: 'groupAgricultural',
   },
   {
     title: 'Calendário de Culturas',
     url: '/agricultural-analysis/crop-calendar',
     group: 'Análise Agrícola',
+    titleKey: 'cropCalendar',
+    groupKey: 'groupAgricultural',
   },
   {
     title: 'Disponibilidade Agrícola',
     url: '/agricultural-analysis/availability',
     group: 'Análise Agrícola',
+    titleKey: 'availability',
+    groupKey: 'groupAgricultural',
   },
-  { title: 'Simulador Preditivo', url: '/predictive', group: 'Preditivo' },
-  { title: 'Referências', url: '/about', group: 'Sobre' },
+  { title: 'Simulador Preditivo', url: '/predictive', group: 'Preditivo', titleKey: 'predictive', groupKey: 'groupPredictive' },
+  { title: 'Referências', url: '/about', group: 'Sobre', titleKey: 'about', groupKey: 'groupAbout' },
 ];
 
 /** Session-storage key written by `public/404.html` on gh-pages deep links. */

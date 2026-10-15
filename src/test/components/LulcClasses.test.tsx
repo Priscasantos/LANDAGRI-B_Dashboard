@@ -35,6 +35,6 @@ describe('LulcClasses (canonical muted badges)', () => {
 
   it('renders empty state when there is no classification data', () => {
     render(<LulcClasses classification="" />);
-    expect(screen.getByText(/no classification data/i)).toBeInTheDocument();
+    expect(screen.getByText(/sem dados de classificação/i)).toBeInTheDocument();
   });
 });

@@ -39,7 +39,7 @@ export default function PieChart({
   const layout: Partial<Layout> = {
     title: title ? { text: title, x: 0.5 } : undefined,
     showlegend: true,
-    legend: { orientation: 'h', y: -0.2 },
+    legend: { orientation: 'h', y: -0.28 },
     ...extraLayout,
   };
 

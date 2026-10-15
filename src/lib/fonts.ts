@@ -9,7 +9,9 @@
  * line-height 1.1–1.25; `sans` (Inter 400/500/600) para corpo —
  * line-height 1.5–1.6; `mono` (JetBrains Mono) para números/código
  * com `tabular-nums`. Aplicado via `--font-sans`/`--font-display`/
- * `--font-mono` na raiz + `data-font`. Reversível via customizer reset.
+ * `--font-mono` na raiz + `data-font` (regras espelho em `src/index.css`:
+ * h1/h2 display, mono tabular-nums, `.recharts-wrapper` herda a fonte
+ * ativa). Reversível via customizer reset.
  */
 export interface FontOption {
   value: string;

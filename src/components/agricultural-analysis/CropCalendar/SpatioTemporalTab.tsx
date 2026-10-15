@@ -5,6 +5,7 @@ import type { Data, Layout } from 'plotly.js';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
+import { useT } from '../../../i18n/LanguageContext';
 
 interface CalendarRow {
   'Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September': string;
@@ -32,6 +33,8 @@ interface SpatioTemporalTabProps {
 }
 
 export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: SpatioTemporalTabProps) {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
@@ -106,23 +109,23 @@ export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: Sp
           color: cropColors.get(dominantCrop) || CATEGORICAL_COLORS[idx % CATEGORICAL_COLORS.length],
           symbol: 'circle',
         },
-        hovertemplate: `<b>${state}</b><br>Period: ${firstMonth}-${lastMonth}<br>Crop: ${dominantCrop}<extra></extra>`,
+        hovertemplate: `<b>${state}</b><br>${t('period')}: ${firstMonth}-${lastMonth}<br>${t('crop')}: ${dominantCrop}<extra></extra>`,
       });
     });
 
     return traces;
-  }, [rawData, selectedCrops, selectedRegions, statesMap]);
+  }, [rawData, selectedCrops, selectedRegions, statesMap, t]);
 
   const layout: Partial<Layout> = {
-    title: { text: 'Spatio-Temporal Distribution by State', x: 0.5 },
+    title: { text: t('spatioTemporalDistribution'), x: 0.5 },
     xaxis: {
-      title: 'Month Index (0=Oct, 11=Sep)',
+      title: t('monthAxisNote'),
       tickmode: 'array',
       tickvals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
       ticktext: ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
     },
     yaxis: {
-      title: 'State',
+      title: t('state'),
       automargin: true,
     },
     showlegend: false,
@@ -131,11 +134,11 @@ export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: Sp
 
   return (
     <Card padding="lg" hover={false}>
-      <h3 className="text-base font-semibold text-fg mb-3">Spatio-Temporal Distribution</h3>
+      <h3 className="text-base font-semibold text-fg mb-3">{tBody('hSpatioTemporal')}</h3>
       {chartData.length > 0 ? (
         <BaseChart data={chartData} layout={layout} />
       ) : (
-        <p className="text-fg-muted text-center py-8">No data available for selected filters.</p>
+        <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
       )}
     </Card>
   );

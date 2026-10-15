@@ -150,3 +150,95 @@ test.describe('P4 - Theme System (mode + customizer persistence)', () => {
     expect(await computed('--font-sans')).toContain('Inter');
   });
 });
+
+/**
+ * Fase 4 — matriz funcional {pt,en}×{light,dark}: tema + idioma persistem
+ * juntos, `<html lang>` e classe `.dark` combinam, e o mapa aplica o filtro
+ * OSM-dark sem watermark CARTO. (Screenshots comparativos vivem no p2;
+ * aqui só artefatos por combo.)
+ */
+test.describe('P4 - Theme×i18n matrix {pt,en}x{light,dark}', () => {
+  const COMBOS = [
+    { seed: 'pt-BR', tag: 'pt', theme: 'light' },
+    { seed: 'pt-BR', tag: 'pt', theme: 'dark' },
+    { seed: 'en', tag: 'en', theme: 'light' },
+    { seed: 'en', tag: 'en', theme: 'dark' },
+  ] as const;
+
+  for (const { seed, tag, theme } of COMBOS) {
+    test(`overview persiste ${tag}/${theme} + mapa coerente`, async ({
+      page,
+    }) => {
+      await page.addInitScript(
+        ({ lang, th }) => {
+          try {
+            localStorage.setItem('landagri-lang', lang);
+            localStorage.setItem('landagri-theme', th);
+          } catch {
+            /* private mode — segue defaults */
+          }
+        },
+        { lang: seed, th: theme },
+      );
+      const bp = new BasePage(page);
+      await bp.navigate(ROUTES.overview);
+
+      expect(await page.evaluate(() => document.documentElement.lang)).toBe(
+        seed,
+      );
+      const isDark = await page.evaluate(() =>
+        document.documentElement.classList.contains('dark'),
+      );
+      expect(isDark).toBe(theme === 'dark');
+      expect(
+        await page.evaluate(() => localStorage.getItem('landagri-lang')),
+      ).toBe(seed);
+      expect(
+        await page.evaluate(() => localStorage.getItem('landagri-theme')),
+      ).toBe(theme);
+
+      // Mapa: aviso traduzido + filtro dark só no dark + sem watermark.
+      const noCoords =
+        seed === 'pt-BR'
+          ? /Sem coordenadas disponíveis/
+          : /No coordinates available/;
+      const map = page.getByRole('application').first();
+      await expect(map).toBeVisible({ timeout: TIMEOUTS.pageLoad });
+      await expect(map.getByRole('status').first()).toContainText(noCoords, {
+        timeout: TIMEOUTS.pageLoad,
+      });
+      if (theme === 'dark') {
+        await expect(map).toHaveClass(/leaflet-tiles-dark/, {
+          timeout: TIMEOUTS.pageLoad,
+        });
+        await expect(page.locator('.leaflet-tile-pane')).toBeAttached({
+          timeout: TIMEOUTS.pageLoad,
+        });
+      } else {
+        expect(
+          await page.locator('.leaflet-tiles-dark').count(),
+        ).toBe(0);
+      }
+      const bodyText = (await page.locator('body').textContent()) ?? '';
+      expect(bodyText).not.toContain('API KEY REQUIRED');
+
+      await page.reload({ waitUntil: 'networkidle' });
+      await expect(page.locator('main')).toBeVisible({
+        timeout: TIMEOUTS.pageLoad,
+      });
+      expect(await page.evaluate(() => document.documentElement.lang)).toBe(
+        seed,
+      );
+      expect(
+        await page.evaluate(() =>
+          document.documentElement.classList.contains('dark'),
+        ),
+      ).toBe(theme === 'dark');
+
+      await page.screenshot({
+        path: `test-results/p4-theme/overview-${tag}-${theme}.png`,
+        fullPage: true,
+      });
+    });
+  }
+});

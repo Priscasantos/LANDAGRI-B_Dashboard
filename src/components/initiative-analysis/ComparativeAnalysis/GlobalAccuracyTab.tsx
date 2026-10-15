@@ -3,8 +3,11 @@ import BaseChart from '../../charts/BaseChart';
 import type { Data } from 'plotly.js';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
+import { useT } from '../../../i18n/LanguageContext';
 
 export default function GlobalAccuracyTab() {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const chartData = useMemo(() => {
@@ -20,7 +23,7 @@ export default function GlobalAccuracyTab() {
   }, [initiatives]);
 
   if (chartData.length === 0) {
-    return <div className="py-8 text-center text-fg-muted">No accuracy data available.</div>;
+    return <div className="py-8 text-center text-fg-muted">{tBody('noAccuracyData')}</div>;
   }
 
   const barTrace: Data = {
@@ -35,7 +38,7 @@ export default function GlobalAccuracyTab() {
     text: chartData.map((d) => `${d.accuracy}%`),
     textposition: 'outside',
     hovertemplate:
-      '<b>%{x}</b><br>Accuracy: %{y:.1f}%<br>Range: [%{customdata[0]:.1f}% – %{customdata[1]:.1f}%]<extra></extra>',
+      `<b>%{x}</b><br>${t('accuracyLabel')}: %{y:.1f}%<br>${t('range')}: [%{customdata[0]:.1f}% – %{customdata[1]:.1f}%]<extra></extra>`,
     customdata: chartData.map((d) => [d.accuracyMin || 0, d.accuracyMax || 0]),
   };
 
@@ -47,7 +50,7 @@ export default function GlobalAccuracyTab() {
     y: [avgAccuracy, avgAccuracy],
     type: 'scatter',
     mode: 'lines',
-    name: `Average (${avgAccuracy.toFixed(1)}%)`,
+    name: `${t('average')} (${avgAccuracy.toFixed(1)}%)`,
     line: { color: '#ef4444', width: 2, dash: 'dash' },
     hoverinfo: 'skip',
   };
@@ -55,15 +58,14 @@ export default function GlobalAccuracyTab() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-fg-secondary">
-        Global overall accuracy for each LULC initiative. Initiatives sorted by accuracy (descending).
-        Dashed line shows the average accuracy across all initiatives.
+        {tBody('accuracyIntro')}
       </p>
       <BaseChart
         data={[barTrace, avgTrace]}
         layout={{
-          title: { text: 'Overall Accuracy by Initiative', x: 0 },
+          title: { text: t('overallAccuracyByInitiative'), x: 0 },
           xaxis: { title: '' },
-          yaxis: { title: 'Overall Accuracy (%)', range: [0, 105] },
+          yaxis: { title: t('overallAccuracyPct'), range: [0, 105] },
           height: 450,
           margin: { l: 50, r: 20, t: 40, b: 120 },
           shapes: [
@@ -82,17 +84,17 @@ export default function GlobalAccuracyTab() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="bg-surface rounded-lg border border-border p-3 text-center">
-          <div className="text-xs text-fg-secondary">Average Accuracy</div>
+          <div className="text-xs text-fg-secondary">{tBody('cardAvgAccuracy')}</div>
           <div className="text-lg font-bold text-emerald-600">{avgAccuracy.toFixed(1)}%</div>
         </div>
         <div className="bg-surface rounded-lg border border-border p-3 text-center">
-          <div className="text-xs text-fg-secondary">Highest Accuracy</div>
+          <div className="text-xs text-fg-secondary">{tBody('cardHighestAccuracy')}</div>
           <div className="text-lg font-bold text-blue-600">
             {Math.max(...chartData.map((d) => d.accuracy)).toFixed(1)}%
           </div>
         </div>
         <div className="bg-surface rounded-lg border border-border p-3 text-center">
-          <div className="text-xs text-fg-secondary">Lowest Accuracy</div>
+          <div className="text-xs text-fg-secondary">{tBody('cardLowestAccuracy')}</div>
           <div className="text-lg font-bold text-orange-600">
             {Math.min(...chartData.map((d) => d.accuracy)).toFixed(1)}%
           </div>

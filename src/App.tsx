@@ -8,8 +8,9 @@ import { SidebarConfigProvider } from './contexts/sidebar-context';
 import ErrorBoundary from './components/ErrorBoundary';
 import DashboardSkeleton from './components/ui/DashboardSkeleton';
 import BaseLayout from './components/layout/BaseLayout';
-import { appRoutes, getBasename, getRedirectPath } from './config/routes';
+import { appRoutes, getBasename, getRedirectPath, type AppRoute } from './config/routes';
 import { useInitiatives } from './hooks/useInitiatives';
+import { LanguageProvider, useT } from './i18n/LanguageContext';
 
 /**
  * Shared QueryClient with minimal sane defaults.
@@ -31,8 +32,27 @@ const queryClient = new QueryClient({
 
 const basename = getBasename();
 
+/** Resolve título/descrição da rota no locale ativo (Fase 1 i18n). */
+function LocalizedRoute({ route }: { route: AppRoute }): React.JSX.Element {
+  const { t } = useT('nav');
+  if (route.redirectTo) {
+    return <Navigate to={route.redirectTo} replace />;
+  }
+  const Page = route.Component;
+  return (
+    <BaseLayout title={t(route.titleKey)} description={t(route.descriptionKey)}>
+      <ErrorBoundary>
+        <Suspense fallback={<DashboardSkeleton />}>
+          <Page />
+        </Suspense>
+      </ErrorBoundary>
+    </BaseLayout>
+  );
+}
+
 function AppContent(): React.JSX.Element {
   const navigate = useNavigate();
+  const { t } = useT('errors');
 
   // Restore path saved by the gh-pages SPA fallback (public/404.html).
   // Runs before the data gate below so deep links survive the redirect.
@@ -49,7 +69,7 @@ function AppContent(): React.JSX.Element {
       <div className="flex items-center justify-center min-h-screen bg-muted">
         <div className="text-center max-w-md">
           <div className="text-4xl mb-4 text-error" role="img" aria-label="Aviso"><TriangleAlert size={36} aria-hidden="true" className="inline-block" /></div>
-          <h2 className="text-xl font-bold mb-2 text-foreground">Erro ao carregar dados</h2>
+          <h2 className="text-xl font-bold mb-2 text-foreground">{t('dataLoadTitle')}</h2>
           <p className="text-muted-foreground">{error}</p>
         </div>
       </div>
@@ -58,23 +78,11 @@ function AppContent(): React.JSX.Element {
 
   return (
     <Routes>
-      {appRoutes.map(({ path, Component, title, description, redirectTo }) => (
+      {appRoutes.map((route) => (
         <Route
-          key={path}
-          path={path}
-          element={
-            redirectTo ? (
-              <Navigate to={redirectTo} replace />
-            ) : (
-              <BaseLayout title={title} description={description}>
-                <ErrorBoundary>
-                  <Suspense fallback={<DashboardSkeleton />}>
-                    <Component />
-                  </Suspense>
-                </ErrorBoundary>
-              </BaseLayout>
-            )
-          }
+          key={route.path}
+          path={route.path}
+          element={<LocalizedRoute route={route} />}
         />
       ))}
     </Routes>
@@ -101,15 +109,17 @@ export default function App(): React.JSX.Element {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        <ToastProvider>
-          <QueryClientProvider client={queryClient}>
-            <SidebarConfigProvider>
-              <BrowserRouter basename={basename}>
-                <AppContent />
-              </BrowserRouter>
-            </SidebarConfigProvider>
-          </QueryClientProvider>
-        </ToastProvider>
+        <LanguageProvider>
+          <ToastProvider>
+            <QueryClientProvider client={queryClient}>
+              <SidebarConfigProvider>
+                <BrowserRouter basename={basename}>
+                  <AppContent />
+                </BrowserRouter>
+              </SidebarConfigProvider>
+            </QueryClientProvider>
+          </ToastProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

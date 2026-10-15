@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
 import DataTable from '../../ui/DataTable';
 import { useDashboardStore } from '../../../stores/dashboardStore';
+import { useT } from '../../../i18n/LanguageContext';
 
 export default function DetailedTableTab() {
+  const { t } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const tableData = useMemo(
@@ -25,24 +27,24 @@ export default function DetailedTableTab() {
   );
 
   const columns = [
-    { key: 'name', label: 'Initiative' },
-    { key: 'acronym', label: 'Acronym' },
-    { key: 'provider', label: 'Provider' },
-    { key: 'coverage', label: 'Coverage' },
-    { key: 'methodology', label: 'Methodology' },
-    { key: 'accuracy', label: 'Accuracy' },
-    { key: 'resolution', label: 'Resolution' },
-    { key: 'classes', label: 'Classes' },
-    { key: 'agriClasses', label: 'Agri Classes' },
-    { key: 'years', label: 'Years' },
-    { key: 'period', label: 'Period' },
-    { key: 'frequency', label: 'Frequency' },
+    { key: 'name', label: t('colInitiative') },
+    { key: 'acronym', label: t('colAcronym') },
+    { key: 'provider', label: t('colProvider') },
+    { key: 'coverage', label: t('colCoverage') },
+    { key: 'methodology', label: t('colMethodology') },
+    { key: 'accuracy', label: t('colAccuracy') },
+    { key: 'resolution', label: t('colResolution') },
+    { key: 'classes', label: t('colClasses') },
+    { key: 'agriClasses', label: t('colAgriClasses') },
+    { key: 'years', label: t('colYears') },
+    { key: 'period', label: t('colPeriod') },
+    { key: 'frequency', label: t('colFrequency') },
   ];
 
   return (
     <div className="space-y-4">
       <p className="text-sm text-fg-secondary">
-        Complete comparison table of all LULC initiatives with key metrics.
+        {t('tableIntro')}
       </p>
       <DataTable columns={columns} data={tableData} className="max-h-[600px] overflow-y-auto" />
     </div>

@@ -3,8 +3,11 @@ import BaseChart from '../../charts/BaseChart';
 import type { Data } from 'plotly.js';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
+import { useT } from '../../../i18n/LanguageContext';
 
 export default function MethodologyDistributionTab() {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const { methods, coverageTypes, groupedData } = useMemo(() => {
@@ -29,7 +32,7 @@ export default function MethodologyDistributionTab() {
   }, [initiatives]);
 
   if (methods.length === 0) {
-    return <div className="py-8 text-center text-fg-muted">No methodology data available.</div>;
+    return <div className="py-8 text-center text-fg-muted">{tBody('noMethodologyData')}</div>;
   }
 
   const traces: Data[] = coverageTypes.map((cov, idx) => ({
@@ -44,14 +47,14 @@ export default function MethodologyDistributionTab() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-fg-secondary">
-        Distribution of initiatives by methodology type, grouped by coverage category (Global, Regional, National).
+        {tBody('methodologyDistIntro')}
       </p>
       <BaseChart
         data={traces}
         layout={{
-          title: { text: 'Methodology × Coverage Distribution', x: 0 },
-          xaxis: { title: 'Methodology' },
-          yaxis: { title: 'Count', dtick: 1 },
+          title: { text: t('methodologyCoverageDistribution'), x: 0 },
+          xaxis: { title: t('methodology') },
+          yaxis: { title: t('count'), dtick: 1 },
           barmode: 'group',
           height: 400,
         }}

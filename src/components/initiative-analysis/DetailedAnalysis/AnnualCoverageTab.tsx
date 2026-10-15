@@ -3,12 +3,15 @@ import BaseChart from '../../charts/BaseChart';
 import type { Data } from 'plotly.js';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
+import { useT } from '../../../i18n/LanguageContext';
 
 interface AnnualCoverageTabProps {
   selectedInitiatives: string[];
 }
 
 export default function AnnualCoverageTab({ selectedInitiatives }: AnnualCoverageTabProps) {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const { bars, allYears } = useMemo(() => {
@@ -41,7 +44,7 @@ export default function AnnualCoverageTab({ selectedInitiatives }: AnnualCoverag
   if (bars.length === 0) {
     return (
       <div className="py-8 text-center text-fg-muted">
-        No initiatives selected or no temporal coverage data available.
+        {tBody('noSelectionAnnual')}
       </div>
     );
   }
@@ -59,7 +62,7 @@ export default function AnnualCoverageTab({ selectedInitiatives }: AnnualCoverag
     text: bars.map((b) => `${b.start}–${b.end}`),
     textposition: 'inside',
     insidetextanchor: 'middle',
-    hovertemplate: '<b>%{y}</b><br>Period: %{base} – %{base}+%{x}<extra></extra>',
+    hovertemplate: `<b>%{y}</b><br>${t('period')}: %{base} – %{base}+%{x}<extra></extra>`,
   };
 
   const yearRange = allYears.length > 0
@@ -69,15 +72,14 @@ export default function AnnualCoverageTab({ selectedInitiatives }: AnnualCoverag
   return (
     <div className="space-y-4">
       <p className="text-sm text-fg-secondary">
-        Horizontal bars showing the temporal coverage period for each selected initiative.
-        Bar length represents the full span from start year to end year.
+        {tBody('annualIntro')}
       </p>
       <BaseChart
         data={[trace]}
         layout={{
-          title: { text: 'Annual Coverage Timeline', x: 0 },
+          title: { text: t('annualCoverageTimeline'), x: 0 },
           xaxis: {
-            title: 'Year',
+            title: t('year'),
             range: yearRange,
             dtick: yearRange[1] - yearRange[0] > 40 ? 5 : 1,
           },

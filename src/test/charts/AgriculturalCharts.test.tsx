@@ -20,16 +20,16 @@ describe('AgriculturalCharts (recharts)', () => {
   it('renders IBGE/CONAB section heading and does not require plotly', async () => {
     render(<AgriculturalCharts />);
     expect(
-      await screen.findByRole('heading', { name: /brazilian agricultural data/i }),
+      await screen.findByRole('heading', { name: /dados agrícolas brasileiros/i }),
     ).toBeInTheDocument();
-    expect(await screen.findByRole('img', { name: /production evolution/i })).toBeInTheDocument();
-    expect(await screen.findByRole('img', { name: /production distribution/i })).toBeInTheDocument();
-    expect(await screen.findByRole('img', { name: /area harvested/i })).toBeInTheDocument();
+    expect(await screen.findByRole('img', { name: /evolução da produção/i })).toBeInTheDocument();
+    expect(await screen.findByRole('img', { name: /distribuição da produção/i })).toBeInTheDocument();
+    expect(await screen.findByRole('img', { name: /área média colhida/i })).toBeInTheDocument();
   });
 
   it('charts are keyboard-focusable', async () => {
     render(<AgriculturalCharts />);
-    const chart = await screen.findByRole('img', { name: /production evolution/i });
+    const chart = await screen.findByRole('img', { name: /evolução da produção/i });
     chart.focus();
     expect(chart).toHaveFocus();
   });

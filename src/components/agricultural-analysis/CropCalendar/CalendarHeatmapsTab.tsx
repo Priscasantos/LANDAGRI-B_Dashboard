@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import Card from '../../ui/Card';
 import HeatmapChart from '../../charts/HeatmapChart';
+import { useT } from '../../../i18n/LanguageContext';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 
@@ -36,6 +37,8 @@ function parseActivityValue(val: string): number {
 }
 
 export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: CalendarHeatmapsTabProps) {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
@@ -111,7 +114,7 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
     return (
       <Card padding="lg" hover={false}>
         <div className="p-8 text-center text-fg-secondary">
-          <p>No calendar data available for the selected filters.</p>
+          <p>{tBody('noCalendarData')}</p>
         </div>
       </Card>
     );
@@ -120,15 +123,15 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
   return (
     <div className="space-y-6">
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-2">National Calendar Matrix</h3>
+        <h3 className="text-base font-semibold text-fg mb-2">{tBody('hNationalMatrix')}</h3>
         <p className="text-xs text-fg-secondary mb-4">
-          Green = Planting | Orange = Harvest | Blue = Both
+          {tBody('matrixLegend')}
         </p>
         <HeatmapChart
           z={matrix.z}
           x={matrix.months}
           y={matrix.crops}
-          title="Crop Calendar Activity (Planting & Harvest)"
+          title={t('cropCalendarActivity')}
           height={Math.max(300, matrix.crops.length * 50 + 100)}
           colorscale={colorscale}
           zmin={0}
@@ -139,22 +142,22 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
       {/* Legend */}
       <Card padding="md" hover={false}>
         <div className="flex items-center gap-6 flex-wrap">
-          <span className="text-sm font-medium text-fg-secondary">Legend:</span>
+          <span className="text-sm font-medium text-fg-secondary">{t('legend')}:</span>
           <div className="flex items-center gap-2">
             <span className="w-4 h-4 rounded bg-green-500 inline-block" />
-            <span className="text-xs text-fg-secondary">Planting (P)</span>
+            <span className="text-xs text-fg-secondary">{t('planting')}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-4 h-4 rounded bg-orange-500 inline-block" />
-            <span className="text-xs text-fg-secondary">Harvest (H)</span>
+            <span className="text-xs text-fg-secondary">{t('harvest')}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-4 h-4 rounded bg-blue-500 inline-block" />
-            <span className="text-xs text-fg-secondary">Planting &amp; Harvest (PH)</span>
+            <span className="text-xs text-fg-secondary">{t('plantingHarvest')}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-4 h-4 rounded bg-surface-alt inline-block" />
-            <span className="text-xs text-fg-secondary">No activity</span>
+            <span className="text-xs text-fg-secondary">{t('noActivity')}</span>
           </div>
         </div>
       </Card>

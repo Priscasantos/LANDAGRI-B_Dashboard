@@ -1,5 +1,6 @@
 import type { ComponentType, ReactElement, ReactNode } from 'react';
 import Card from './Card';
+import { useT } from '../../i18n/LanguageContext';
 
 export interface SectionCardItem {
   /** Stable key for the grid cell. */
@@ -40,10 +41,11 @@ export default function SectionCards({
   className = '',
   iconAriaHidden = true,
 }: SectionCardsProps): ReactElement {
+  const { t } = useT('common');
   if (items.length === 0) {
     return (
       <p className="text-sm text-fg-muted py-4 text-center" role="status">
-        Nenhum dado disponível para {title}.
+        {t('noDataFor', { title })}
       </p>
     );
   }

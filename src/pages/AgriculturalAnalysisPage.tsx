@@ -1,18 +1,20 @@
 import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import { Sprout, CalendarDays, Package } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useT } from '../i18n/LanguageContext';
 import AgricultureOverviewPage from '../components/agricultural-analysis/AgricultureOverview/AgricultureOverviewPage';
 import CropCalendarPage from '../components/agricultural-analysis/CropCalendar/CropCalendarPage';
 import AgricultureAvailabilityPage from '../components/agricultural-analysis/AgricultureAvailability/AgricultureAvailabilityPage';
 
 
 export default function AgriculturalAnalysisPage() {
+  const { t } = useT('nav');
   const location = useLocation();
 
   const subPages: { path: string; label: string; icon: LucideIcon }[] = [
-    { path: 'overview', label: 'Panorama Agrícola', icon: Sprout },
-    { path: 'crop-calendar', label: 'Calendário de Culturas', icon: CalendarDays },
-    { path: 'availability', label: 'Disponibilidade Agrícola', icon: Package },
+    { path: 'overview', label: t('agriOverview'), icon: Sprout },
+    { path: 'crop-calendar', label: t('cropCalendar'), icon: CalendarDays },
+    { path: 'availability', label: t('availability'), icon: Package },
   ];
 
   return (

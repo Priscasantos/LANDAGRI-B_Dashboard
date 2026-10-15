@@ -1,4 +1,5 @@
 import { Wheat, MapPin } from 'lucide-react';
+import { useT } from '../../../i18n/LanguageContext';
 
 interface CropCalendarFiltersProps {
   crops: string[];
@@ -13,6 +14,7 @@ export default function CropCalendarFilters({
   crops, regions, selectedCrops, selectedRegions,
   onCropsChange, onRegionsChange,
 }: CropCalendarFiltersProps) {
+  const { t } = useT('agricultural');
   const allCropsSelected = selectedCrops.length === crops.length;
   const allRegionsSelected = selectedRegions.length === regions.length;
 
@@ -48,12 +50,12 @@ export default function CropCalendarFilters({
         {/* Crop Filter */}
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
-            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-fg"><Wheat size={15} aria-hidden="true" className="shrink-0" /> Crops</span>
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-fg"><Wheat size={15} aria-hidden="true" className="shrink-0" /> {t('crops')}</span>
             <button
               onClick={toggleAllCrops}
               className="text-xs text-amber-700 hover:text-amber-800 font-medium"
             >
-              {allCropsSelected ? 'Deselect All' : 'Select All'}
+              {allCropsSelected ? t('deselectAll') : t('selectAll')}
             </button>
           </div>
           <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
@@ -76,12 +78,12 @@ export default function CropCalendarFilters({
         {/* Region Filter */}
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
-            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-fg"><MapPin size={15} aria-hidden="true" className="shrink-0" /> Regions</span>
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-fg"><MapPin size={15} aria-hidden="true" className="shrink-0" /> {t('regions')}</span>
             <button
               onClick={toggleAllRegions}
               className="text-xs text-amber-700 hover:text-amber-800 font-medium"
             >
-              {allRegionsSelected ? 'Deselect All' : 'Select All'}
+              {allRegionsSelected ? t('deselectAll') : t('selectAll')}
             </button>
           </div>
           <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
@@ -105,8 +107,7 @@ export default function CropCalendarFilters({
       {/* Active filters summary */}
       <div className="mt-3 pt-3 border-t border-border">
         <p className="text-xs text-fg-muted">
-          Showing <span className="font-medium text-fg-secondary">{selectedCrops.length}</span> crop{selectedCrops.length !== 1 ? 's' : ''} in{' '}
-          <span className="font-medium text-fg-secondary">{selectedRegions.length}</span> region{selectedRegions.length !== 1 ? 's' : ''}
+          {t('showing', { crops: selectedCrops.length, regions: selectedRegions.length, cropUnit: selectedCrops.length === 1 ? t('cropSingular') : t('cropPlural'), regionUnit: selectedRegions.length === 1 ? t('regionSingular') : t('regionPlural') })}
         </p>
       </div>
     </div>

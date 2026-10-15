@@ -1,7 +1,9 @@
 import { useDashboardStore } from '../../stores/dashboardStore';
 import Select from '../ui/Select';
+import { useT } from '../../i18n/LanguageContext';
 
 export default function InitiativeSelector() {
+  const { t } = useT('overview');
   const { initiatives, selection, setSelectedInitiative } = useDashboardStore();
 
   const options = initiatives.map((i) => ({
@@ -11,11 +13,11 @@ export default function InitiativeSelector() {
 
   return (
     <Select
-      label="Select an initiative for detailed analysis:"
+      label={t('selectLabel')}
       options={options}
       value={selection.selectedInitiative || ''}
       onChange={(val) => setSelectedInitiative(val)}
-      placeholder="Choose an initiative..."
+      placeholder={t('selectPlaceholder')}
     />
   );
 }

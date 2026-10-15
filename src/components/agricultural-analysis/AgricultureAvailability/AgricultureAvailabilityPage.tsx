@@ -5,6 +5,7 @@ import Card from '../../ui/Card';
 import HorizontalBarChart from '../../charts/HorizontalBarChart';
 import GroupedBarChart from '../../charts/GroupedBarChart';
 import HeatmapChart from '../../charts/HeatmapChart';
+import { useT } from '../../../i18n/LanguageContext';
 import MetricCard from '../../ui/MetricCard';
 import conabAvailability from '../../../data/processed/conab_availability.json';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
@@ -37,6 +38,8 @@ function parseActivityValue(val: string): number {
 }
 
 export default function AgricultureAvailabilityPage() {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('agricultural');
   const availData = conabAvailability as AvailabilityRow[];
   const calendarData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
@@ -157,22 +160,22 @@ export default function AgricultureAvailabilityPage() {
   const spatialContent = (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <MetricCard icon={Map} label="States/Avail." value={totalStates} variant="accuracy" />
-        <MetricCard icon={Wheat} label="Crops Available" value={totalCrops} variant="resolution" />
-        <MetricCard icon={MapPin} label="Regions" value={totalRegions} variant="classes" />
+        <MetricCard icon={Map} label={tBody('metricStatesAvail')} value={totalStates} variant="accuracy" />
+        <MetricCard icon={Wheat} label={tBody('metricCropsAvailable')} value={totalCrops} variant="resolution" />
+        <MetricCard icon={MapPin} label={tBody('metricRegions')} value={totalRegions} variant="classes" />
       </div>
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">CONAB Spatial Coverage by State</h3>
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hSpatialCoverage')}</h3>
         {stateCoverage.values.length > 0 ? (
           <HorizontalBarChart
             y={stateCoverage.labels}
             x={stateCoverage.values}
-            xlabel="Number of Crops Available"
+            xlabel={t('cropsAvailable')}
             color="#EC9706"
             height={Math.max(300, stateCoverage.labels.length * 25)}
           />
         ) : (
-          <p className="text-fg-muted text-center py-8">No spatial coverage data available.</p>
+          <p className="text-fg-muted text-center py-8">{tBody('noSpatialData')}</p>
         )}
       </Card>
     </div>
@@ -181,17 +184,17 @@ export default function AgricultureAvailabilityPage() {
   const cropDiversityContent = (
     <div className="space-y-6">
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">Crop Diversity by State</h3>
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hCropDiversity')}</h3>
         {cropDiversity.values.length > 0 ? (
           <HorizontalBarChart
             y={cropDiversity.labels}
             x={cropDiversity.values}
-            xlabel="Number of States"
+            xlabel={t('statesCount')}
             color="#626C01"
             height={Math.max(300, cropDiversity.labels.length * 35)}
           />
         ) : (
-          <p className="text-fg-muted text-center py-8">No crop diversity data available.</p>
+          <p className="text-fg-muted text-center py-8">{tBody('noDiversityData')}</p>
         )}
       </Card>
     </div>
@@ -200,38 +203,38 @@ export default function AgricultureAvailabilityPage() {
   const regionalActivitySubTabs = [
     {
       id: 'comparison',
-      label: 'Activity Comparison',
+      label: tBody('subTabComparison'),
       icon: BarChart3,
       content: (
         <Card padding="lg" hover={false}>
-          <h3 className="text-base font-semibold text-fg mb-3">Regional Activity Comparison</h3>
+          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hRegionalComparison')}</h3>
           {regionalActivity.series.length > 0 ? (
             <GroupedBarChart
               categories={regionalActivity.categories}
               series={regionalActivity.series}
-              xlabel="Month"
-              ylabel="Activity Count"
+              xlabel={t('month')}
+              ylabel={t('activityCount')}
               height={400}
             />
           ) : (
-            <p className="text-fg-muted text-center py-8">No regional activity data available.</p>
+            <p className="text-fg-muted text-center py-8">{tBody('noRegionalActivity')}</p>
           )}
         </Card>
       ),
     },
     {
       id: 'heatmap',
-      label: 'Activity Heatmap',
+      label: tBody('subTabHeatmap'),
       icon: Map,
       content: (
         <Card padding="lg" hover={false}>
-          <h3 className="text-base font-semibold text-fg mb-3">Regional Activity Heatmap</h3>
+          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hRegionalHeatmap')}</h3>
           {activityHeatmap.regions.length > 0 ? (
             <HeatmapChart
               z={activityHeatmap.z}
               x={activityHeatmap.months}
               y={activityHeatmap.regions}
-              title="Activity Intensity by Region and Month"
+              title={t('activityIntensityByRegionMonth')}
               height={Math.max(300, activityHeatmap.regions.length * 60 + 100)}
               colorscale={[
                 [0, '#f3f4f6'],
@@ -242,7 +245,7 @@ export default function AgricultureAvailabilityPage() {
               ]}
             />
           ) : (
-            <p className="text-fg-muted text-center py-8">No heatmap data available.</p>
+            <p className="text-fg-muted text-center py-8">{tBody('noHeatmapData')}</p>
           )}
         </Card>
       ),
@@ -250,9 +253,9 @@ export default function AgricultureAvailabilityPage() {
   ];
 
   const tabs = [
-    { id: 'spatial', label: 'Spatial Coverage', icon: Map, content: spatialContent },
-    { id: 'diversity', label: 'Crop Diversity', icon: Sprout, content: cropDiversityContent },
-    { id: 'regional', label: 'Regional Activity', icon: Map, content: <Tabs tabs={regionalActivitySubTabs} /> },
+    { id: 'spatial', label: tBody('tabSpatial'), icon: Map, content: spatialContent },
+    { id: 'diversity', label: tBody('tabDiversity'), icon: Sprout, content: cropDiversityContent },
+    { id: 'regional', label: tBody('tabRegional'), icon: Map, content: <Tabs tabs={regionalActivitySubTabs} /> },
   ];
 
   return (

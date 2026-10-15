@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { BarChart3, Radar, Flame, ClipboardList, CalendarDays } from 'lucide-react';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import Tabs from '../../ui/Tabs';
+import { useT } from '../../../i18n/LanguageContext';
 import BarChartTab from './BarChartTab';
 import RadarTab from './RadarTab';
 import HeatmapTab from './HeatmapTab';
@@ -9,6 +10,7 @@ import DataDetailsTab from './DataDetailsTab';
 import AnnualCoverageTab from './AnnualCoverageTab';
 
 export default function DetailedPage() {
+  const { t } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const initiativeOptions = useMemo(
@@ -31,11 +33,11 @@ export default function DetailedPage() {
   };
 
   const tabs = [
-    { id: 'bar', label: 'Bar Chart', icon: BarChart3, content: <BarChartTab selectedInitiatives={selected} /> },
-    { id: 'radar', label: 'Radar Chart', icon: Radar, content: <RadarTab selectedInitiatives={selected} /> },
-    { id: 'heatmap', label: 'Heatmap', icon: Flame, content: <HeatmapTab selectedInitiatives={selected} /> },
-    { id: 'data', label: 'Data Details', icon: ClipboardList, content: <DataDetailsTab selectedInitiatives={selected} /> },
-    { id: 'coverage', label: 'Annual Coverage', icon: CalendarDays, content: <AnnualCoverageTab selectedInitiatives={selected} /> },
+    { id: 'bar', label: t('tabBar'), icon: BarChart3, content: <BarChartTab selectedInitiatives={selected} /> },
+    { id: 'radar', label: t('tabRadar'), icon: Radar, content: <RadarTab selectedInitiatives={selected} /> },
+    { id: 'heatmap', label: t('tabHeatmap'), icon: Flame, content: <HeatmapTab selectedInitiatives={selected} /> },
+    { id: 'data', label: t('tabDataDetails'), icon: ClipboardList, content: <DataDetailsTab selectedInitiatives={selected} /> },
+    { id: 'coverage', label: t('tabAnnualCoverage'), icon: CalendarDays, content: <AnnualCoverageTab selectedInitiatives={selected} /> },
   ];
 
   return (
@@ -43,7 +45,7 @@ export default function DetailedPage() {
       {/* Multi-select for initiatives */}
       <div>
         <label className="block text-sm font-medium text-fg mb-2">
-          Select Initiatives to Compare
+          {t('selectToCompare')}
         </label>
         <div className="flex flex-wrap gap-2">
           {initiativeOptions.map((opt) => {
@@ -64,7 +66,7 @@ export default function DetailedPage() {
           })}
         </div>
         <p className="text-xs text-fg-muted mt-1">
-          Click to toggle. Selected: {selected.length} initiative{selected.length !== 1 ? 's' : ''}
+          {t('toggleHint', { count: selected.length })}
         </p>
       </div>
 

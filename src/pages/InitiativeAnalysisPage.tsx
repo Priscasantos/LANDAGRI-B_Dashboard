@@ -5,21 +5,24 @@ import TemporalPage from '../components/initiative-analysis/TemporalAnalysis/Tem
 import ComparativePage from '../components/initiative-analysis/ComparativeAnalysis/ComparativePage';
 import DetailedPage from '../components/initiative-analysis/DetailedAnalysis/DetailedPage';
 import { MODULE_THEMES } from '../types/theme';
+import { useT } from '../i18n/LanguageContext';
 
 export default function InitiativeAnalysisPage() {
+  const { t } = useT('nav');
+  const { t: tBody } = useT('initiative');
   const location = useLocation();
   const moduleTheme = MODULE_THEMES['Initiative Analysis'];
 
   const subPages: { path: string; label: string; icon: LucideIcon }[] = [
-    { path: 'temporal', label: 'Análise Temporal', icon: Clock },
-    { path: 'comparative', label: 'Análise Comparativa', icon: GitCompare },
-    { path: 'detailed', label: 'Análise Detalhada', icon: FileSearch },
+    { path: 'temporal', label: t('temporal'), icon: Clock },
+    { path: 'comparative', label: t('comparative'), icon: GitCompare },
+    { path: 'detailed', label: t('detailed'), icon: FileSearch },
   ];
 
   return (
     <div>
       <p className="mt-2 text-base md:text-lg italic text-center text-fg-secondary">
-        Reference: {' '}
+        {tBody('reference')}: {' '}
         <a href="https://doi.org/10.3390/rs17132324" target="_blank" rel="noopener noreferrer" style={{ color: moduleTheme.primary, textDecoration: 'underline', fontWeight: 600 }}>
           Santos et al. (2025).
         </a>

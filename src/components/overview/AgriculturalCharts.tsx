@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Wheat } from 'lucide-react';
 import ChartContainer from '../charts/ChartContainer';
 import { RechartsLineChart } from '../charts/recharts/RechartsLineChart';
+import { useT } from '../../i18n/LanguageContext';
 import type { RechartsLineSeries } from '../charts/recharts/RechartsLineChart';
 import { RechartsPieChart } from '../charts/recharts/RechartsPieChart';
 import type { RechartsPieSlice } from '../charts/recharts/RechartsPieChart';
@@ -97,52 +98,59 @@ function buildAgriChartsData(): AgriChartsData {
  */
 export default function AgriculturalCharts(): React.JSX.Element | null {
   const { lineSeries, pieSlices, barData, latestYear } = useMemo(() => buildAgriChartsData(), []);
+  const { t } = useT('charts');
+  const { t: tBody } = useT('agricultural');
 
   if (lineSeries.length === 0) return null;
+
+  const distributionTitle =
+    latestYear === null
+      ? t('agriProductionDistributionLatest')
+      : t('agriProductionDistribution', { year: latestYear });
 
   return (
     <section className="space-y-6 mt-8 min-w-0" aria-labelledby="agri-charts-heading">
       <h2 id="agri-charts-heading" className="flex items-center gap-1.5 text-xl font-bold text-fg">
-        <Wheat size={20} aria-hidden="true" className="shrink-0" /> Brazilian Agricultural Data
+        <Wheat size={20} aria-hidden="true" className="shrink-0" /> {tBody('hAgriData')}
       </h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-w-0">
         <ChartContainer
-          title="Agricultural Production Evolution (thousands of tons)"
-          description="IBGE PAM/PPM e CONAB"
+          title={t('agriProductionEvolution')}
+          description={tBody('sourceAttribution')}
           className="min-w-0"
         >
           <RechartsLineChart
-            title="Agricultural Production Evolution (thousands of tons)"
+            title={t('agriProductionEvolution')}
             series={lineSeries}
-            xlabel="Year"
-            ylabel="Production (x1000 tons)"
+            xlabel={t('year')}
+            ylabel={t('productionKtons')}
           />
         </ChartContainer>
         <ChartContainer
-          title={`Production Distribution${latestYear ? ` (${latestYear})` : ' (Latest Year)'}`}
+          title={distributionTitle}
           description="IBGE PAM/PPM e CONAB"
           className="min-w-0"
         >
           <RechartsPieChart
-            title={`Production Distribution${latestYear ? ` (${latestYear})` : ' (Latest Year)'}`}
+            title={distributionTitle}
             data={pieSlices}
           />
         </ChartContainer>
       </div>
       <ChartContainer
-        title="Average Area Harvested (thousands of hectares)"
+        title={t('agriAvgArea')}
         description="IBGE PAM/PPM e CONAB"
         className="min-w-0"
       >
         <RechartsBarChart
-          title="Average Area Harvested (thousands of hectares)"
+          title={t('agriAvgArea')}
           data={barData}
-          xlabel="Product"
-          ylabel="Area (x1000 ha)"
+          xlabel={t('product')}
+          ylabel={t('areaKha')}
         />
       </ChartContainer>
       <p className="text-xs text-fg-muted">
-        Fonte: IBGE PAM/PPM e CONAB — dados processados em `src/data/processed/`.
+        {tBody('sourceNote')}
       </p>
     </section>
   );

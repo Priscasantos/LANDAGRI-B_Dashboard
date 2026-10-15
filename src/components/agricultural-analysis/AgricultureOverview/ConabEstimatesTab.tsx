@@ -6,6 +6,7 @@ import LineChart from '../../charts/LineChart';
 import GroupedBarChart from '../../charts/GroupedBarChart';
 import HorizontalBarChart from '../../charts/HorizontalBarChart';
 import PieChart from '../../charts/PieChart';
+import { useT } from '../../../i18n/LanguageContext';
 import conabAgriculturalData from '../../../data/processed/conab_agricultural_data.json';
 
 interface ProductionYear {
@@ -33,6 +34,8 @@ interface ConabAgriData {
 }
 
 export default function ConabEstimatesTab() {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('agricultural');
   const data = conabAgriculturalData as ConabAgriData;
   const crops = data?.crops;
 
@@ -168,8 +171,8 @@ export default function ConabEstimatesTab() {
   if (!crops || Object.keys(crops).length === 0) {
     return (
       <div className="p-8 text-center text-fg-secondary">
-        <p className="text-lg">No CONAB estimates data available.</p>
-        <p className="text-sm mt-2">The agricultural data file may be empty or in an unexpected format.</p>
+        <p className="text-lg">{tBody('noConabEstimates')}</p>
+        <p className="text-sm mt-2">{tBody('badEstimatesFormat')}</p>
       </div>
     );
   }
@@ -181,59 +184,59 @@ export default function ConabEstimatesTab() {
     <div className="space-y-6">
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard icon={Package} label="Total Production" value={`${metrics.totalProduction.toLocaleString()}k ${unitProd.split(' ')[0]}`} variant="accuracy" />
-        <MetricCard icon={Sprout} label="Planted Area" value={`${metrics.totalArea.toLocaleString()}k ha`} variant="resolution" />
-        <MetricCard icon={TrendingUp} label="Avg Productivity" value={`${metrics.avgProductivity} kg/ha`} variant="classes" />
-        <MetricCard icon={Wheat} label="Crops Tracked" value={metrics.cropCount} variant="frequency" />
+        <MetricCard icon={Package} label={tBody('metricTotalProduction')} value={`${metrics.totalProduction.toLocaleString()}k ${unitProd.split(' ')[0]}`} variant="accuracy" />
+        <MetricCard icon={Sprout} label={tBody('metricPlantedArea')} value={`${metrics.totalArea.toLocaleString()}k ha`} variant="resolution" />
+        <MetricCard icon={TrendingUp} label={tBody('metricAvgProductivity')} value={`${metrics.avgProductivity} kg/ha`} variant="classes" />
+        <MetricCard icon={Wheat} label={tBody('metricCropsTracked')} value={metrics.cropCount} variant="frequency" />
       </div>
 
       {/* Production Evolution */}
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">Production Evolution (Total Grains)</h3>
-        <LineChart series={productionEvolution.series} xlabel="Season" ylabel={`Production (${unitProd})`} height={350} />
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hProductionEvolution')}</h3>
+        <LineChart series={productionEvolution.series} xlabel={t('season')} ylabel={`${t('production')} (${unitProd})`} height={350} />
       </Card>
 
       {/* Crop Comparison */}
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">Crop Comparison — Production by Season</h3>
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hCropComparison')}</h3>
         <GroupedBarChart
           categories={cropComparison.categories}
           series={cropComparison.series}
-          xlabel="Season"
-          ylabel={`Production (${unitProd})`}
+          xlabel={t('season')}
+          ylabel={`${t('production')} (${unitProd})`}
           height={400}
         />
       </Card>
 
       {/* Soybean & Corn Productivity */}
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">Productivity — Soybean &amp; Corn</h3>
-        <LineChart series={soybeanCornProductivity.series} xlabel="Season" ylabel="Productivity (kg/ha)" height={350} />
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hSoybeanCorn')}</h3>
+        <LineChart series={soybeanCornProductivity.series} xlabel={t('season')} ylabel={`${t('productivity')} (kg/ha)`} height={350} />
       </Card>
 
       {/* Planted Area Distribution + All Crops by Production */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card padding="lg" hover={false}>
-          <h3 className="text-base font-semibold text-fg mb-3">Planted Area Distribution ({unitArea})</h3>
+          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hPlantedAreaDist', { unit: unitArea })}</h3>
           {plantedAreaDistribution.length > 0 ? (
             <PieChart data={plantedAreaDistribution} height={350} donut />
           ) : (
-            <p className="text-fg-muted text-center py-8">No area data available.</p>
+            <p className="text-fg-muted text-center py-8">{tBody('noAreaData')}</p>
           )}
         </Card>
 
         <Card padding="lg" hover={false}>
-          <h3 className="text-base font-semibold text-fg mb-3">All Crops by Production</h3>
+          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hAllCrops')}</h3>
           {allCropsProduction.values.length > 0 ? (
             <HorizontalBarChart
               y={allCropsProduction.labels}
               x={allCropsProduction.values}
-              xlabel={`Production (${unitProd})`}
+              xlabel={`${t('production')} (${unitProd})`}
               color="#EC9706"
               height={Math.max(250, allCropsProduction.labels.length * 40)}
             />
           ) : (
-            <p className="text-fg-muted text-center py-8">No production data available.</p>
+            <p className="text-fg-muted text-center py-8">{tBody('noProductionData')}</p>
           )}
         </Card>
       </div>
@@ -242,7 +245,7 @@ export default function ConabEstimatesTab() {
       <Card padding="md" hover={false}>
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="text-sm font-semibold text-fg">Data Source</h4>
+            <h4 className="text-sm font-semibold text-fg">{tBody('dataSource')}</h4>
             <p className="text-xs text-fg-secondary">
               {data?.metadata?.source || 'CONAB'} &mdash; {data?.metadata?.description || 'Agricultural Production Data'}
             </p>
@@ -253,7 +256,7 @@ export default function ConabEstimatesTab() {
             rel="noopener noreferrer"
             className="text-sm text-amber-700 hover:text-amber-800 underline"
           >
-            Visit Source
+            {tBody('visitSource')}
           </a>
         </div>
       </Card>

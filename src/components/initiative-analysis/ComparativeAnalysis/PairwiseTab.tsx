@@ -3,8 +3,11 @@ import BaseChart from '../../charts/BaseChart';
 import type { Data } from 'plotly.js';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
+import { useT } from '../../../i18n/LanguageContext';
 
 export default function PairwiseTab() {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const chartData = useMemo(() => {
@@ -22,7 +25,7 @@ export default function PairwiseTab() {
   }, [initiatives]);
 
   if (chartData.length === 0) {
-    return <div className="py-8 text-center text-fg-muted">No pairwise data available.</div>;
+    return <div className="py-8 text-center text-fg-muted">{tBody('noPairwiseData')}</div>;
   }
 
   const scatterTrace: Data = {
@@ -40,22 +43,21 @@ export default function PairwiseTab() {
     textposition: 'top center',
     textfont: { size: 9 },
     hovertemplate:
-      '<b>%{text}</b><br>Accuracy: %{x:.1f}%<br>Resolution: %{y}m<br>Classes: %{customdata}<extra></extra>',
+      `<b>%{text}</b><br>${t('accuracyLabel')}: %{x:.1f}%<br>${t('resolutionLabel')}: %{y}m<br>${t('classes')}: %{customdata}<extra></extra>`,
     customdata: chartData.map((d) => d.classes),
   };
 
   return (
     <div className="space-y-4">
       <p className="text-sm text-fg-secondary">
-        Accuracy vs. Spatial Resolution scatter plot. Marker size represents the number of classes.
-        Hover for details.
+        {tBody('pairwiseIntro')}
       </p>
       <BaseChart
         data={[scatterTrace]}
         layout={{
-          title: { text: 'Accuracy vs Spatial Resolution', x: 0 },
-          xaxis: { title: 'Overall Accuracy (%)', range: [50, 105] },
-          yaxis: { title: 'Spatial Resolution (m)', type: 'log' },
+          title: { text: t('accuracyVsResolution'), x: 0 },
+          xaxis: { title: t('overallAccuracyPct'), range: [50, 105] },
+          yaxis: { title: t('spatialResolution'), type: 'log' },
           height: 500,
           hovermode: 'closest',
         }}

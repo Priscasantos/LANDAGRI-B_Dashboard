@@ -5,6 +5,7 @@ import Card from '../../ui/Card';
 import HeatmapChart from '../../charts/HeatmapChart';
 import GroupedBarChart from '../../charts/GroupedBarChart';
 import HorizontalBarChart from '../../charts/HorizontalBarChart';
+import { useT } from '../../../i18n/LanguageContext';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 
@@ -38,6 +39,8 @@ interface ActivityIntensityTabProps {
 }
 
 export default function ActivityIntensityTab({ selectedCrops, selectedRegions }: ActivityIntensityTabProps) {
+  const { t } = useT('charts');
+  const { t: tBody } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
@@ -133,15 +136,15 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
 
   const intensityContent = (
     <Card padding="lg" hover={false}>
-      <h3 className="text-base font-semibold text-fg mb-3">Activity Intensity Matrix (States × Months)</h3>
+      <h3 className="text-base font-semibold text-fg mb-3">{tBody('hIntensityMatrix')}</h3>
       {noData ? (
-        <p className="text-fg-muted text-center py-8">No data available for selected filters.</p>
+        <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
       ) : (
         <HeatmapChart
           z={intensityMatrix.z}
           x={intensityMatrix.months}
           y={intensityMatrix.states}
-          title="Activity Intensity"
+          title={t('activityIntensity')}
           height={Math.max(400, intensityMatrix.states.length * 25 + 100)}
           colorscale={[
             [0, '#f3f4f6'],
@@ -156,15 +159,15 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
 
   const peakContent = (
     <Card padding="lg" hover={false}>
-      <h3 className="text-base font-semibold text-fg mb-3">Peak Activity Analysis by State</h3>
+      <h3 className="text-base font-semibold text-fg mb-3">{tBody('hPeakActivity')}</h3>
       {noData ? (
-        <p className="text-fg-muted text-center py-8">No data available.</p>
+        <p className="text-fg-muted text-center py-8">{tBody('noData')}</p>
       ) : (
         <GroupedBarChart
           categories={peakActivity.categories}
           series={peakActivity.series}
-          xlabel="State"
-          ylabel="Peak Intensity"
+          xlabel={t('state')}
+          ylabel={t('peakIntensity')}
           height={Math.max(300, peakActivity.categories.length * 20 + 100)}
         />
       )}
@@ -173,14 +176,14 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
 
   const densityContent = (
     <Card padding="lg" hover={false}>
-      <h3 className="text-base font-semibold text-fg mb-3">Activity Density by Region</h3>
+      <h3 className="text-base font-semibold text-fg mb-3">{tBody('hDensityRegion')}</h3>
       {densityByRegion.values.length === 0 || densityByRegion.values.every(v => v === 0) ? (
-        <p className="text-fg-muted text-center py-8">No data available.</p>
+        <p className="text-fg-muted text-center py-8">{tBody('noData')}</p>
       ) : (
         <HorizontalBarChart
           y={densityByRegion.labels}
           x={densityByRegion.values}
-          xlabel="Total Activity"
+          xlabel={t('totalActivity')}
           color="#EC9706"
           height={Math.max(250, densityByRegion.labels.length * 40)}
         />
@@ -190,14 +193,14 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
 
   const concentrationContent = (
     <Card padding="lg" hover={false}>
-      <h3 className="text-base font-semibold text-fg mb-3">Concentration Index by State</h3>
+      <h3 className="text-base font-semibold text-fg mb-3">{tBody('hConcentration')}</h3>
       {concentrationIndex.values.length === 0 || concentrationIndex.values.every(v => v === 0) ? (
-        <p className="text-fg-muted text-center py-8">No data available.</p>
+        <p className="text-fg-muted text-center py-8">{tBody('noData')}</p>
       ) : (
         <HorizontalBarChart
           y={concentrationIndex.labels}
           x={concentrationIndex.values}
-          xlabel="Total Activity Score"
+          xlabel={t('totalActivityScore')}
           color="#626C01"
           height={Math.max(300, concentrationIndex.labels.length * 25)}
         />
@@ -206,10 +209,10 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
   );
 
   const subTabs = [
-    { id: 'matrix', label: 'Intensity Matrix', icon: BarChart3, content: intensityContent },
-    { id: 'peak', label: 'Peak Activity', icon: Zap, content: peakContent },
-    { id: 'density', label: 'Density Map', icon: Map, content: densityContent },
-    { id: 'concentration', label: 'Concentration Index', icon: TrendingUp, content: concentrationContent },
+    { id: 'matrix', label: tBody('tabMatrix'), icon: BarChart3, content: intensityContent },
+    { id: 'peak', label: tBody('tabPeak'), icon: Zap, content: peakContent },
+    { id: 'density', label: tBody('tabDensity'), icon: Map, content: densityContent },
+    { id: 'concentration', label: tBody('tabConcentration'), icon: TrendingUp, content: concentrationContent },
   ];
 
   return <Tabs tabs={subTabs} />;

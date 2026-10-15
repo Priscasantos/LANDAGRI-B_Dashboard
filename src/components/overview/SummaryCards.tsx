@@ -4,6 +4,7 @@ import { useDashboardStore } from '../../stores/dashboardStore';
 import SectionCards from '../ui/SectionCards';
 import type { SectionCardItem } from '../ui/SectionCards';
 import { formatNumber } from '../../lib/normalize';
+import { useT } from '../../i18n/LanguageContext';
 
 /**
  * Summary cards — Fase 2: layout via `SectionCards` (overview variant),
@@ -11,6 +12,7 @@ import { formatNumber } from '../../lib/normalize';
  * trocados por ícones Lucide com `aria-hidden` para leitores de tela.
  */
 export default function SummaryCards(): ReactElement | null {
+  const { t } = useT('overview');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const sections = useMemo((): { coverage: SectionCardItem[]; perf: SectionCardItem[] } | null => {
@@ -31,25 +33,25 @@ export default function SummaryCards(): ReactElement | null {
       key: coverageName,
       label: coverageName,
       value: String(count),
-      hint: `${((count / totalInitiatives) * 100).toFixed(0)}% of total`,
+      hint: t('ofTotal', { pct: ((count / totalInitiatives) * 100).toFixed(0) }),
     }));
 
     const perf: SectionCardItem[] = [
-      { key: 'accuracy', Icon: Target, label: 'Avg Accuracy', value: `${avgAccuracy.toFixed(1)}%` },
-      { key: 'resolution', Icon: Satellite, label: 'Avg Resolution', value: `${avgResolution.toFixed(0)}m` },
-      { key: 'classes', Icon: Tags, label: 'Total Classes', value: formatNumber(totalClasses) },
-      { key: 'years', Icon: CalendarDays, label: 'Temporal Coverage', value: `${totalYears} years` },
+      { key: 'accuracy', Icon: Target, label: t('perfAccuracy'), value: `${avgAccuracy.toFixed(1)}%` },
+      { key: 'resolution', Icon: Satellite, label: t('perfResolution'), value: `${avgResolution.toFixed(0)}m` },
+      { key: 'classes', Icon: Tags, label: t('perfClasses'), value: formatNumber(totalClasses) },
+      { key: 'years', Icon: CalendarDays, label: t('perfYears'), value: t('yearsUnit', { count: totalYears }) },
     ];
 
     return { coverage, perf };
-  }, [initiatives]);
+  }, [initiatives, t]);
 
   if (!sections) return null;
 
   return (
     <div className="space-y-6">
-      <SectionCards variant="overview" title="Distribuição por cobertura" items={sections.coverage} />
-      <SectionCards variant="overview" title="Métricas de desempenho" items={sections.perf} />
+      <SectionCards variant="overview" title={t('titleCoverage')} items={sections.coverage} />
+      <SectionCards variant="overview" title={t('titlePerf')} items={sections.perf} />
     </div>
   );
 }

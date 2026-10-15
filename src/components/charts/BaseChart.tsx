@@ -1,7 +1,9 @@
 import { useEffect, useRef, useMemo, useState, type ReactElement } from 'react';
 import type { Data, Layout, Config } from 'plotly.js';
-import { buildStandardLayout, STANDARD_CONFIG, getChartLayout } from '../../lib/chartDefaults';
+import { buildStandardLayout, STANDARD_CONFIG, getChartLayout, separatorsForLocale } from '../../lib/chartDefaults';
 import { useEffectiveTheme } from '../../hooks/use-theme';
+import { useChartFontFamily } from '../../hooks/use-chart-font';
+import { useT } from '../../i18n/LanguageContext';
 
 interface BaseChartProps {
   data: Data[];
@@ -28,15 +30,25 @@ export default function BaseChart({
 }: BaseChartProps): ReactElement {
   const containerRef = useRef<HTMLDivElement>(null);
   const theme = useEffectiveTheme();
+  // Rebuild do layout em [theme, font, locale] (Fase 2): a fonte vem do
+  // data-font reativo e o locale do provider (separators explícitos).
+  const fontFamily = useChartFontFamily();
+  const { t, locale } = useT('charts');
   const [loadError, setLoadError] = useState(false);
 
   const finalLayout = useMemo(() => {
-    const base = useStandardLayout ? buildStandardLayout({ ...layout, height }) : { ...layout, height };
-    const themeLayout = getChartLayout(theme);
+    const base = useStandardLayout
+      ? buildStandardLayout({ ...layout, height }, fontFamily)
+      : { ...layout, height };
+    const themeLayout = getChartLayout(theme, fontFamily);
+    // Separador explícito do locale reativo (não só do <html lang>): o
+    // toggle PT↔EN refaz o layout com `,.`/`.,` sem remontar o chart.
+    const separators = separatorsForLocale(locale);
 
     return {
       ...base,
       ...themeLayout,
+      separators,
       font: {
         ...base.font,
         ...themeLayout.font,
@@ -57,9 +69,15 @@ export default function BaseChart({
         ...themeLayout.legend,
         ...layout?.legend,
       },
+      // `Layout.title` aceita `string | objeto`: normaliza para objeto
+      // antes do spread (todos os chamadores passam `{ text, x }`).
+      title: {
+        ...(typeof base.title === 'object' ? base.title : {}),
+        ...(typeof themeLayout.title === 'object' ? themeLayout.title : {}),
+        ...(typeof layout?.title === 'object' ? layout.title : {}),
+      },
     };
-  }, [useStandardLayout, layout, height, theme]);
-
+  }, [useStandardLayout, layout, height, theme, fontFamily, locale]);
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -94,13 +112,13 @@ export default function BaseChart({
     <div className="w-full min-w-0 overflow-hidden rounded-xl p-3 bg-surface border border-border">
       {loadError ? (
         <p role="alert" className="text-sm text-fg-secondary p-4 text-center">
-          Não foi possível carregar o gráfico interativo. Tente recarregar a página.
+          {t('chartLoadError')}
         </p>
       ) : (
         <div
           ref={containerRef}
           role="img"
-          aria-label={typeof layout?.title === 'object' ? layout.title.text : 'Gráfico interativo'}
+          aria-label={typeof layout?.title === 'object' ? layout.title.text : t('interactiveChart')}
           className={`w-full min-w-0 ${className}`}
           style={{ width: '100%', minWidth: 0, height, minHeight: Math.min(height, 350) }}
         />
