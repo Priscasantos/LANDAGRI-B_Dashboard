@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import { Sprout, CalendarDays, Package } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -5,6 +6,11 @@ import { useT } from '../i18n/LanguageContext';
 import AgricultureOverviewPage from '../components/agricultural-analysis/AgricultureOverview/AgricultureOverviewPage';
 import CropCalendarPage from '../components/agricultural-analysis/CropCalendar/CropCalendarPage';
 import AgricultureAvailabilityPage from '../components/agricultural-analysis/AgricultureAvailability/AgricultureAvailabilityPage';
+
+// ECharts pilot (reversible): lazy so the echarts chunk loads only on this route.
+const AgricultureAvailabilityEChartsPilotPage = lazy(
+  () => import('../components/agricultural-analysis/AgricultureAvailability/AgricultureAvailabilityEChartsPilotPage'),
+);
 
 
 export default function AgriculturalAnalysisPage() {
@@ -41,6 +47,14 @@ export default function AgriculturalAnalysisPage() {
         <Route path="overview" element={<AgricultureOverviewPage />} />
         <Route path="crop-calendar" element={<CropCalendarPage />} />
         <Route path="availability" element={<AgricultureAvailabilityPage />} />
+        <Route
+          path="availability-echarts"
+          element={
+            <Suspense fallback={null}>
+              <AgricultureAvailabilityEChartsPilotPage />
+            </Suspense>
+          }
+        />
       </Routes>
     </div>
   );

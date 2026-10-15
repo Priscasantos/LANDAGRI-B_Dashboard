@@ -43,6 +43,15 @@ export default defineConfig(({ command }) => {
     rollupOptions: {
       output: {
         manualChunks(id: string) {
+          // ECharts pilot - tree-shaken core + wrapper, before the generic
+          // vendor catch-all. Scoped to node_modules paths so `recharts`
+          // (which contains the substring "echarts") stays in vendor.
+          if (
+            id.includes('node_modules/echarts/') ||
+            id.includes('node_modules/echarts-for-react/') ||
+            id.includes('node_modules/zrender/')
+          )
+            return 'echarts';
           // Plotly - largest library, separate chunk
           if (id.includes('plotly.js-dist-min')) return 'plotly'
           // React Router - often changes less
