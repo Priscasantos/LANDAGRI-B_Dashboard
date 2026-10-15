@@ -10,6 +10,11 @@ import conabAvailability from '../../../data/processed/conab_availability.json';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 import { useT } from '../../../i18n/LanguageContext';
+import {
+  translateCropName,
+  translateMonthShort,
+  translateRegion,
+} from '../../../data/glossary';
 
 const MONTHS_SHORT = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
 
@@ -43,7 +48,7 @@ function parseActivityValue(val: string): number {
  * only the chart renderer changes (Plotly → ECharts SVG).
  */
 export default function AgricultureAvailabilityPage(): ReactElement {
-  const { t: tBody } = useT('agricultural');
+  const { t: tBody, locale } = useT('agricultural');
   const availData = conabAvailability as AvailabilityRow[];
   const calendarData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
@@ -89,13 +94,13 @@ export default function AgricultureAvailabilityPage(): ReactElement {
 
     const stateCoverageData = Object.entries(stateCrops)
       .map(([state, crops]) => ({
-        name: `${state}${stateRegions[state] ? ` (${stateRegions[state]})` : ''}`,
+        name: `${state}${stateRegions[state] ? ` (${translateRegion(stateRegions[state], locale)})` : ''}`,
         value: crops.size,
       }))
       .sort((a, b) => b.value - a.value);
 
     const cropDiversityData = Object.entries(cropStates)
-      .map(([crop, states]) => ({ name: crop, value: states.size }))
+      .map(([crop, states]) => ({ name: translateCropName(crop, locale), value: states.size }))
       .sort((a, b) => b.value - a.value);
 
     const regionMonthActivity: Record<string, number[]> = {};
@@ -123,8 +128,9 @@ export default function AgricultureAvailabilityPage(): ReactElement {
     }
 
     const regionLabels = Object.keys(regionMonthActivity).sort();
+    const translatedMonths = MONTHS_SHORT.map((m) => translateMonthShort(m, locale));
     const regionalActivitySeries = regionLabels.map(region => ({
-      name: region,
+      name: translateRegion(region, locale),
       values: regionMonthActivity[region],
     }));
 
@@ -140,16 +146,16 @@ export default function AgricultureAvailabilityPage(): ReactElement {
         values: cropDiversityData.map(c => c.value),
       },
       regionalActivity: {
-        categories: MONTHS_SHORT,
+        categories: translatedMonths,
         series: regionalActivitySeries,
       },
       activityHeatmap: {
         z: heatmapZ,
-        regions: regionLabels,
-        months: MONTHS_SHORT,
+        regions: regionLabels.map((r) => translateRegion(r, locale)),
+        months: translatedMonths,
       },
     };
-  }, [availData, calendarData, mappingData]);
+  }, [availData, calendarData, mappingData, locale]);
 
   const totalStates = stateCoverage.labels.length;
   const totalCrops = cropDiversity.labels.length;

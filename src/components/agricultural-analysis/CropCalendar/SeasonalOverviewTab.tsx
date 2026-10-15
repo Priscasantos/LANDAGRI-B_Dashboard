@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import Card from '../../ui/Card';
 import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
 import { useT } from '../../../i18n/LanguageContext';
+import { translateActivity, translateSeason } from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 
@@ -24,7 +25,7 @@ interface SeasonalOverviewTabProps {
 }
 
 export default function SeasonalOverviewTab({ selectedCrops, selectedRegions }: SeasonalOverviewTabProps) {
-  const { t: tBody } = useT('agricultural');
+  const { t: tBody, locale } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
@@ -78,13 +79,13 @@ export default function SeasonalOverviewTab({ selectedCrops, selectedRegions }: 
     }
 
     return {
-      categories: seasonNames,
+      categories: seasonNames.map((s) => translateSeason(s, locale)),
       series: [
-        { name: 'Planting', values: seasonNames.map(s => plantBySeason[s]) },
-        { name: 'Harvest', values: seasonNames.map(s => harvestBySeason[s]) },
+        { name: translateActivity('Planting', locale), values: seasonNames.map(s => plantBySeason[s]) },
+        { name: translateActivity('Harvest', locale), values: seasonNames.map(s => harvestBySeason[s]) },
       ],
     };
-  }, [rawData, selectedCrops, selectedRegions, statesMap]);
+  }, [rawData, selectedCrops, selectedRegions, statesMap, locale]);
 
   const noData = seasonalData.series.every(s => s.values.every(v => v === 0));
 

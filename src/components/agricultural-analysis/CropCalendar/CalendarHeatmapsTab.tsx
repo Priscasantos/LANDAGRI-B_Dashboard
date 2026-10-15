@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import Card from '../../ui/Card';
 import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
 import { useT } from '../../../i18n/LanguageContext';
+import { translateCropName, translateMonth } from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 
@@ -38,7 +39,7 @@ function parseActivityValue(val: string): number {
 
 export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: CalendarHeatmapsTabProps) {
   const { t } = useT('charts');
-  const { t: tBody } = useT('agricultural');
+  const { t: tBody, locale } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
@@ -81,7 +82,7 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
     for (const crop of crops) {
       const cropEntries = filtered.filter(f => f.crop === crop);
       if (cropEntries.length === 0) continue;
-      cropLabels.push(crop);
+      cropLabels.push(translateCropName(crop, locale));
 
       const monthSums = monthIndices.map(m => {
         let sum = 0;
@@ -100,8 +101,8 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
       nationalZ.push(monthSums);
     }
 
-    return { z: nationalZ, crops: cropLabels, months: MONTHS };
-  }, [rawData, selectedCrops, selectedRegions, statesMap]);
+    return { z: nationalZ, crops: cropLabels, months: MONTHS.map((m) => translateMonth(m, locale)) };
+  }, [rawData, selectedCrops, selectedRegions, statesMap, locale]);
 
   const colorscale = ['#f3f4f6', '#22c55e', '#f97316', '#3b82f6'];
 

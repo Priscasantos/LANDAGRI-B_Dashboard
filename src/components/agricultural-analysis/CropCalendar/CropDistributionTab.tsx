@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import Card from '../../ui/Card';
 import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
 import { useT } from '../../../i18n/LanguageContext';
+import { translateCropName } from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 
@@ -24,7 +25,7 @@ interface CropDistributionTabProps {
 }
 
 export default function CropDistributionTab({ selectedCrops, selectedRegions }: CropDistributionTabProps) {
-  const { t: tBody } = useT('agricultural');
+  const { t: tBody, locale } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
@@ -63,7 +64,7 @@ export default function CropDistributionTab({ selectedCrops, selectedRegions }: 
 
     // Top crops by number of states
     const topCrops = Object.entries(cropStates)
-      .map(([crop, states]) => ({ name: crop, count: states.size }))
+      .map(([crop, states]) => ({ name: translateCropName(crop, locale), count: states.size }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
 
@@ -94,7 +95,7 @@ export default function CropDistributionTab({ selectedCrops, selectedRegions }: 
         values: topCrops.map(c => c.count),
       },
     };
-  }, [rawData, selectedCrops, selectedRegions, statesMap]);
+  }, [rawData, selectedCrops, selectedRegions, statesMap, locale]);
 
   const noStateData = stateCropCounts.values.every(v => v === 0);
 

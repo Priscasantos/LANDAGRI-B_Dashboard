@@ -3,6 +3,7 @@ import Card from '../../ui/Card';
 import EChartsGantt from '../../charts/echarts/EChartsGantt';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
 import { useT } from '../../../i18n/LanguageContext';
+import { translateCropName, translateMonthShort } from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 
@@ -35,7 +36,7 @@ interface SpatioTemporalTabProps {
 
 export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: SpatioTemporalTabProps) {
   const { t } = useT('charts');
-  const { t: tBody } = useT('agricultural');
+  const { t: tBody, locale } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
@@ -100,12 +101,12 @@ export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: Sp
         start: firstMonth,
         end: lastMonth + 1,
         color,
-        tip: `<b>${state}</b><br>${t('period')}: ${firstMonth}-${lastMonth}<br>${t('crop')}: ${dominantCrop}`,
+        tip: `<b>${state}</b><br>${t('period')}: ${firstMonth}-${lastMonth}<br>${t('crop')}: ${translateCropName(dominantCrop, locale)}`,
       });
     });
 
     return bars;
-  }, [rawData, selectedCrops, selectedRegions, statesMap, t]);
+  }, [rawData, selectedCrops, selectedRegions, statesMap, t, locale]);
 
   return (
     <Card padding="lg" hover={false}>
@@ -113,7 +114,7 @@ export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: Sp
       {chartData.length > 0 ? (
         <EChartsGantt
           bars={chartData}
-          xLabels={MONTHS_SHORT}
+          xLabels={MONTHS_SHORT.map((m) => translateMonthShort(m, locale))}
           captionKey="spatioTemporalDistribution"
           height={Math.max(400, chartData.length * 25 + 100)}
         />

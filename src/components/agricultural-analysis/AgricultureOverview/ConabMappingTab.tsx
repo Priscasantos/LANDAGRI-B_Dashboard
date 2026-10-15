@@ -5,7 +5,7 @@ import MetricCard from '../../ui/MetricCard';
 import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
 import EChartsLine from '../../charts/echarts/EChartsLine';
 import { useT } from '../../../i18n/LanguageContext';
-import { formatCropName } from '../../../lib/cropNames';
+import { translateCropName, translateRegion } from '../../../data/glossary';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 import conabMappingData from '../../../data/processed/conab_mapping_data.json';
 
@@ -56,7 +56,7 @@ interface MappingDataType {
 
 type MappingData = MappingDataType;
 export default function ConabMappingTab() {
-  const { t } = useT('charts');
+  const { t, locale } = useT('charts');
   const { t: tBody } = useT('agricultural');
   const mappingData = conabMapping as MappingData;
   const mappingDataDetailed = conabMappingData as ConabMappingDataType;
@@ -93,13 +93,13 @@ export default function ConabMappingTab() {
     }
 
     return {
-      categories: regions,
+      categories: regions.map((r) => translateRegion(r, locale)),
       series: crops.map(crop => ({
-        name: formatCropName(crop),
+        name: translateCropName(crop, locale),
         values: regions.map(r => regionCounts[crop][r] || 0),
       })),
     };
-  }, [mappingData]);
+  }, [mappingData, locale]);
 
   const temporalData = useMemo(() => {
     const cropsMapping = mappingDataDetailed?.crops_mapping;

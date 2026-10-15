@@ -6,6 +6,11 @@ import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
 import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
 import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
 import { useT } from '../../../i18n/LanguageContext';
+import {
+  translateActivity,
+  translateMonthShort,
+  translateRegion,
+} from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 
@@ -39,7 +44,7 @@ interface ActivityIntensityTabProps {
 }
 
 export default function ActivityIntensityTab({ selectedCrops, selectedRegions }: ActivityIntensityTabProps) {
-  const { t: tBody } = useT('agricultural');
+  const { t: tBody, locale } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
@@ -95,14 +100,14 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
       const intensities = stateMonthIntensity[state];
       const maxVal = Math.max(...intensities);
       const peakIdx = intensities.indexOf(maxVal);
-      return { state, peakMonth: MONTHS_SHORT[peakIdx], peakValue: maxVal };
+      return { state, peakMonth: translateMonthShort(MONTHS_SHORT[peakIdx], locale), peakValue: maxVal };
     });
 
     // Density by region
     const regionLabels = Object.keys(regionMonthIntensity).sort();
     const totalByRegion = regionLabels.map(r => {
       const sum = regionMonthIntensity[r].reduce((a, b) => a + b, 0);
-      return { name: r, value: sum };
+      return { name: translateRegion(r, locale), value: sum };
     });
 
     // Concentration index: states ranked by total activity
@@ -112,11 +117,11 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
     }).sort((a, b) => b.value - a.value);
 
     return {
-      intensityMatrix: { z, states: stateLabels, months: MONTHS_SHORT },
+      intensityMatrix: { z, states: stateLabels, months: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)) },
       peakActivity: {
         categories: peakMonths.map(p => p.state),
         series: [{
-          name: 'Peak Intensity',
+          name: translateActivity('Peak Intensity', locale),
           values: peakMonths.map(p => p.peakValue),
         }],
       },
@@ -129,7 +134,7 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
         values: stateTotals.map(s => s.value),
       },
     };
-  }, [rawData, selectedCrops, selectedRegions, statesMap]);
+  }, [rawData, selectedCrops, selectedRegions, statesMap, locale]);
 
   const noData = intensityMatrix.states.length === 0;
 

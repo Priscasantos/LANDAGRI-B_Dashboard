@@ -6,6 +6,11 @@ import EChartsLine from '../../charts/echarts/EChartsLine';
 import EChartsGantt from '../../charts/echarts/EChartsGantt';
 import EChartsPolar from '../../charts/echarts/EChartsPolar';
 import { useT } from '../../../i18n/LanguageContext';
+import {
+  translateActivity,
+  translateCropName,
+  translateMonthShort,
+} from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 
@@ -41,7 +46,7 @@ interface ActivitiesTimelineTabProps {
 }
 
 export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }: ActivitiesTimelineTabProps) {
-  const { t: tBody } = useT('agricultural');
+  const { t: tBody, locale } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
@@ -94,18 +99,18 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
 
       if (firstPlanting >= 0) {
         ganttEntries.push({
-          label: `${crop} P (${state})`,
+          label: `${translateCropName(crop, locale)} P (${state})`,
           start: firstPlanting,
           end: lastPlanting + 0.5,
-          category: crop,
+          category: translateCropName(crop, locale),
         });
       }
       if (firstHarvest >= 0) {
         ganttEntries.push({
-          label: `${crop} H (${state})`,
+          label: `${translateCropName(crop, locale)} H (${state})`,
           start: firstHarvest,
           end: lastHarvest + 0.5,
-          category: crop,
+          category: translateCropName(crop, locale),
         });
       }
     }
@@ -113,21 +118,21 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
     return {
       monthlyActivity: {
         series: [
-          { name: 'Planting', x: MONTHS_SHORT, y: plantCount, color: '#22c55e' },
-          { name: 'Harvest', x: MONTHS_SHORT, y: harvestCount, color: '#f97316' },
+          { name: translateActivity('Planting', locale), x: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)), y: plantCount, color: '#22c55e' },
+          { name: translateActivity('Harvest', locale), x: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)), y: harvestCount, color: '#f97316' },
         ],
       },
       ganttBars: ganttEntries.slice(0, 100),
       polarData: {
         series: [{
-          name: 'Total Activity',
+          name: translateActivity('Total Activity', locale),
           r: polarR,
-          theta: MONTHS_SHORT,
+          theta: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)),
           fill: 'toself' as const,
         }],
       },
     };
-  }, [rawData, selectedCrops, selectedRegions, statesMap]);
+  }, [rawData, selectedCrops, selectedRegions, statesMap, locale]);
 
   const monthlyContent = (
     <Card padding="lg" hover={false}>
@@ -146,7 +151,7 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
       {ganttBars.length > 0 ? (
         <EChartsGantt
           bars={ganttBars}
-          xLabels={MONTHS_SHORT}
+          xLabels={MONTHS_SHORT.map((m) => translateMonthShort(m, locale))}
           captionKey="monthAxisNote"
           height={Math.min(600, Math.max(300, ganttBars.length * 12))}
         />
@@ -162,7 +167,7 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
       {polarData.series[0].r.some(v => v > 0) ? (
         <EChartsPolar
           series={polarData.series}
-          categories={MONTHS_SHORT}
+          categories={MONTHS_SHORT.map((m) => translateMonthShort(m, locale))}
           captionKey="seasonalActivityDistribution"
           height={500}
         />

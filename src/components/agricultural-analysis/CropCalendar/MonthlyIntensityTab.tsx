@@ -3,6 +3,11 @@ import Card from '../../ui/Card';
 import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
 import EChartsLine from '../../charts/echarts/EChartsLine';
 import { useT } from '../../../i18n/LanguageContext';
+import {
+  translateActivity,
+  translateCropName,
+  translateMonthShort,
+} from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 
@@ -36,7 +41,7 @@ interface MonthlyIntensityTabProps {
 }
 
 export default function MonthlyIntensityTab({ selectedCrops, selectedRegions }: MonthlyIntensityTabProps) {
-  const { t: tBody } = useT('agricultural');
+  const { t: tBody, locale } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
@@ -82,23 +87,23 @@ export default function MonthlyIntensityTab({ selectedCrops, selectedRegions }: 
 
     for (const [crop, intensities] of Object.entries(cropMonthIntensity)) {
       if (selectedCrops.includes(crop)) {
-        cropLabels.push(crop);
+        cropLabels.push(translateCropName(crop, locale));
         z.push(intensities);
       }
     }
 
     return {
-      heatmapZ: { z, crops: cropLabels, months: MONTHS_SHORT },
+      heatmapZ: { z, crops: cropLabels, months: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)) },
       intensitySeries: {
         series: [{
-          name: 'Activity Intensity',
-          x: MONTHS_SHORT,
+          name: translateActivity('Activity Intensity', locale),
+          x: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)),
           y: totalIntensity,
           color: '#EC9706',
         }],
       },
     };
-  }, [rawData, selectedCrops, selectedRegions, statesMap]);
+  }, [rawData, selectedCrops, selectedRegions, statesMap, locale]);
 
   const noData = intensitySeries.series[0].y.every(v => v === 0);
 

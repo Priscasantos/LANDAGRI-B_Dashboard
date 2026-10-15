@@ -7,6 +7,7 @@ import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
 import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
 import EChartsPie from '../../charts/echarts/EChartsPie';
 import { useT } from '../../../i18n/LanguageContext';
+import { translateActivity, translateCropName } from '../../../data/glossary';
 import conabAgriculturalData from '../../../data/processed/conab_agricultural_data.json';
 
 interface ProductionYear {
@@ -34,7 +35,7 @@ interface ConabAgriData {
 }
 
 export default function ConabEstimatesTab() {
-  const { t: tBody } = useT('agricultural');
+  const { t: tBody, locale } = useT('agricultural');
   const data = conabAgriculturalData as ConabAgriData;
   const crops = data?.crops;
 
@@ -85,20 +86,20 @@ export default function ConabEstimatesTab() {
 
     return {
       series: [{
-        name: 'Total Production (thousand tons)',
+        name: translateActivity('Total Production (thousand tons)', locale),
         x: seasons,
         y: seasons.map(s => totalBySeason[s]),
         color: '#EC9706',
       }],
     };
-  }, [crops]);
+  }, [crops, locale]);
 
   const cropComparison = useMemo(() => {
     if (!crops) return { categories: [], series: [] };
     const seasons = ['2018/19', '2019/20', '2020/21', '2021/22', '2022/23', '2023/24'];
 
     const productionSeries = Object.entries(crops).map(([, crop]) => ({
-      name: crop.name,
+      name: translateCropName(crop.name, locale),
       values: seasons.map((s) => {
         const pd = crop.production_data;
         return pd && pd[s] ? pd[s].production : 0;
@@ -106,7 +107,7 @@ export default function ConabEstimatesTab() {
     }));
 
     return { categories: seasons, series: productionSeries };
-  }, [crops]);
+  }, [crops, locale]);
 
   const soybeanCornProductivity = useMemo(() => {
     if (!crops) return { series: [] };
@@ -126,11 +127,11 @@ export default function ConabEstimatesTab() {
       }
     };
 
-    addCrop('soybean', 'Soybean', '#EC9706');
-    addCrop('corn_total', 'Corn (Total)', '#626C01');
+    addCrop('soybean', translateCropName('Soybean', locale), '#EC9706');
+    addCrop('corn_total', translateCropName('Corn (Total)', locale), '#626C01');
 
     return { series };
-  }, [crops]);
+  }, [crops, locale]);
 
   const plantedAreaDistribution = useMemo(() => {
     if (!crops) return [];
@@ -140,13 +141,13 @@ export default function ConabEstimatesTab() {
     for (const [, crop] of Object.entries(crops)) {
       const pd = crop.production_data;
       if (pd && pd[latestSeason] && pd[latestSeason].area > 0) {
-        slices.push({ label: crop.name, value: pd[latestSeason].area });
+        slices.push({ label: translateCropName(crop.name, locale), value: pd[latestSeason].area });
       }
     }
 
     slices.sort((a, b) => b.value - a.value);
     return slices;
-  }, [crops]);
+  }, [crops, locale]);
 
   const allCropsProduction = useMemo(() => {
     if (!crops) return { labels: [], values: [] };
@@ -156,7 +157,7 @@ export default function ConabEstimatesTab() {
     for (const [, crop] of Object.entries(crops)) {
       const pd = crop.production_data;
       if (pd && pd[latestSeason] && pd[latestSeason].production > 0) {
-        items.push({ label: crop.name, value: pd[latestSeason].production });
+        items.push({ label: translateCropName(crop.name, locale), value: pd[latestSeason].production });
       }
     }
 
@@ -165,7 +166,7 @@ export default function ConabEstimatesTab() {
       labels: items.map(i => i.label),
       values: items.map(i => i.value),
     };
-  }, [crops]);
+  }, [crops, locale]);
 
   if (!crops || Object.keys(crops).length === 0) {
     return (

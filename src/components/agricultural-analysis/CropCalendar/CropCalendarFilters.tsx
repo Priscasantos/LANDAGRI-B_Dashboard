@@ -1,5 +1,6 @@
 import { Wheat, MapPin } from 'lucide-react';
 import { useT } from '../../../i18n/LanguageContext';
+import { translateCropName, translateRegion } from '../../../data/glossary';
 
 interface CropCalendarFiltersProps {
   crops: string[];
@@ -14,7 +15,7 @@ export default function CropCalendarFilters({
   crops, regions, selectedCrops, selectedRegions,
   onCropsChange, onRegionsChange,
 }: CropCalendarFiltersProps) {
-  const { t } = useT('agricultural');
+  const { t, locale } = useT('agricultural');
   const allCropsSelected = selectedCrops.length === crops.length;
   const allRegionsSelected = selectedRegions.length === regions.length;
 
@@ -69,7 +70,7 @@ export default function CropCalendarFilters({
                     : 'bg-surface border-border text-fg-secondary hover:border-border'
                 }`}
               >
-                {crop}
+                {translateCropName(crop, locale)}
               </button>
             ))}
           </div>
@@ -97,7 +98,7 @@ export default function CropCalendarFilters({
                     : 'bg-surface border-border text-fg-secondary hover:border-border'
                 }`}
               >
-                {region}
+                {translateRegion(region, locale)}
               </button>
             ))}
           </div>
