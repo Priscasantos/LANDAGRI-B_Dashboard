@@ -60,7 +60,7 @@ test.describe('P4 - Theme System (mode + customizer persistence)', () => {
 
     await dialog.getByRole('radio', { name: /compacta/i }).click();
     await dialog.getByRole('radio', { name: /grande/i }).click();
-    await dialog.getByRole('radio', { name: /verde agro/i }).click();
+    await dialog.getByRole('radio', { name: 'Verde Agro', exact: true }).click();
 
     expect(await page.evaluate(() => localStorage.getItem('landagri-density'))).toBe(
       'compact',
