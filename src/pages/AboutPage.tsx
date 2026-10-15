@@ -1,379 +1,275 @@
 import { useState } from 'react';
 import {
-  BookOpen,
-  Copy,
-  Check,
-  FileText,
+  Compass,
   ExternalLink,
-  Database,
-  Download,
-  ArrowUpRight,
-  Shield,
-  Calendar,
-  Layers,
   Globe,
+  Mail,
+  Map as MapIcon,
+  Quote,
+  Search,
+  Wheat,
+  type LucideIcon,
 } from 'lucide-react';
 import AnimatedPage from '../components/AnimatedPage';
-import { exportToCSV, exportToJSON } from '../lib/dataExport';
-import { useDashboardStore } from '../stores/dashboardStore';
+import { getBasename } from '../config/routes';
 import { useT } from '../i18n/LanguageContext';
 
-export default function AboutPage() {
+const DOI_SANTOS_2025 = 'https://doi.org/10.3390/rs17132324';
+const URL_CONAB = 'https://www.conab.gov.br/';
+const URL_IBGE = 'https://www.ibge.gov.br/';
+const URL_SID_SANTOS_ADAMI =
+  'http://mtc-m16c.sid.inpe.br/ibi/sid.inpe.br/mtc-m18/2010/10.19.13.42?ibiurl.clientinformation.citingitem=sid.inpe.br/mtc-m18/2010/12.15.11.49&linktype=relative';
+const URL_ZENODO = 'https://doi.org/10.5281/zenodo.17042299';
+const CONTACT_EMAIL = 'priscilla.santos@inpe.br';
+const URL_GITHUB = 'https://github.com/landagri-b';
+
+/** Logos institucionais servidos sob o basename do router (sub-path gh-pages). */
+function logoUrl(file: string): string {
+  const base = getBasename().replace(/\/+$/, '');
+  return `${base}/logos/${file}`;
+}
+
+interface PartnerLogoProps {
+  src: string;
+  alt: string;
+  fallbackLabel: string;
+}
+
+/**
+ * Logo com fallback acessível: se o asset não existir, renderiza um
+ * placeholder com o mesmo `alt` em vez de uma imagem quebrada.
+ */
+function PartnerLogo({ src, alt, fallbackLabel }: PartnerLogoProps): React.JSX.Element {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return (
+      <div
+        role="img"
+        aria-label={alt}
+        className="mx-auto flex h-24 w-full max-w-75 items-center justify-center rounded-xl border border-dashed border-border bg-canvas px-4 text-center text-xs text-fg-muted"
+      >
+        {fallbackLabel}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      width={300}
+      loading="lazy"
+      onError={(): void => setFailed(true)}
+      className="mx-auto h-auto max-h-24 w-auto max-w-full object-contain"
+    />
+  );
+}
+
+interface SectionHeadingProps {
+  icon: LucideIcon;
+  title: string;
+  id: string;
+}
+
+function SectionHeading({ icon: Icon, title, id }: SectionHeadingProps): React.JSX.Element {
+  return (
+    <h2
+      id={id}
+      className="flex items-center gap-2 text-lg font-bold tracking-tight text-fg"
+    >
+      <Icon size={20} aria-hidden="true" className="shrink-0 text-primary" />
+      {title}
+    </h2>
+  );
+}
+
+const EXTERNAL_LINK_CLASS =
+  'font-medium text-primary underline decoration-primary/40 underline-offset-2 hover:decoration-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
+
+interface ExternalRefProps {
+  href: string;
+  children: string;
+}
+
+function ExternalRef({ href, children }: ExternalRefProps): React.JSX.Element {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={EXTERNAL_LINK_CLASS}>
+      {children}
+    </a>
+  );
+}
+
+/**
+ * Página institucional — espelha `dashboard/about.py` (Streamlit legado).
+ * Sem exports CSV/JSON e sem Technical Metadata (fora do escopo do antigo);
+ * `src/lib/dataExport` permanece intacto para os demais módulos.
+ */
+export default function AboutPage(): React.JSX.Element {
   const { t } = useT('about');
-  const [copiedBib, setCopiedBib] = useState(false);
-  const [downloadFormat, setDownloadFormat] = useState<string | null>(null);
+  const { t: tNav } = useT('nav');
 
-  const initiatives = useDashboardStore((state) => state.initiatives);
-
-  const handleCopyBib = () => {
-    navigator.clipboard.writeText(bibtexEntry);
-    setCopiedBib(true);
-    setTimeout(() => setCopiedBib(false), 2000);
-  };
-
-  const handleDownload = (format: 'csv' | 'json') => {
-    setDownloadFormat(format);
-    setTimeout(() => setDownloadFormat(null), 3000);
-
-    if (format === 'csv') {
-      // Flatten initiatives into CSV-friendly rows
-      const flatData = initiatives.map((i) => ({
-        name: i.Name,
-        acronym: i.Acronym,
-        coverage: i.Coverage,
-        resolution: i.Resolution,
-        accuracy: i.Accuracy,
-        methodology: i.Methodology,
-        sensors: Array.isArray(i.Sensors) ? i.Sensors.join(';') : i.Sensors,
-      }));
-      exportToCSV(flatData);
-    } else {
-      exportToJSON(initiatives);
-    }
-  };
+  const moduleCards = [
+    {
+      icon: Search,
+      title: t('cardOverviewTitle'),
+      text: t('cardOverviewText'),
+      accent: 'border-l-primary',
+    },
+    {
+      icon: MapIcon,
+      title: t('cardInitiativeTitle'),
+      text: t('cardInitiativeText'),
+      accent: 'border-l-[#8B4513]',
+    },
+  ];
 
   return (
     <AnimatedPage>
       <div className="space-y-6">
-        {/* Header */}
-        <div
-          className="rounded-2xl p-6 border relative overflow-hidden bg-surface border-border"
-        >
-          <div className="flex items-start gap-4">
-            <div
-              className="p-3 rounded-xl shrink-0"
-              style={{
-                backgroundColor: 'var(--color-primary-light)',
-                color: 'var(--color-primary)',
-              }}
-            >
-              <BookOpen size={24} />
-            </div>
-            <div>
-              <h2
-                className="text-xl font-bold tracking-tight text-fg"
-              >
-                {t('pageTitle')}
-              </h2>
-              <p className="text-sm mt-1 text-fg-secondary">
-                {t('pageSubtitlePre')}{' '}
-                <strong>LANDAGRI-B Dashboard</strong>.
-              </p>
-            </div>
+        <p className="max-w-4xl text-sm leading-relaxed text-fg-secondary md:text-base">
+          <strong className="text-fg">{t('introLead')}</strong> {t('introA')}{' '}
+          <em>{tNav('overview')}</em>, <em>{tNav('initiativeAnalysis')}</em> {t('introAnd')}{' '}
+          <em>{tNav('agriculturalAnalysis')}</em>
+          {t('introPlus')} <em>{tNav('about')}</em>
+          {t('introModuleSuffix')} {t('introEnd')}
+        </p>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="space-y-4">
+            {moduleCards.map((card) => {
+              const CardIcon = card.icon;
+              return (
+                <section
+                  key={card.title}
+                  aria-label={card.title}
+                  className={`rounded-xl border border-border border-l-4 bg-card p-5 ${card.accent}`}
+                >
+                  <h2 className="flex items-center gap-2 text-base font-bold text-fg">
+                    <CardIcon size={18} aria-hidden="true" className="shrink-0 text-primary" />
+                    {card.title}
+                  </h2>
+                  <p className="mt-2 text-sm leading-relaxed text-fg-secondary">{card.text}</p>
+                </section>
+              );
+            })}
           </div>
+          <section
+            aria-label={t('cardAgriTitle')}
+            className="rounded-xl border border-border border-l-4 border-l-terra-fill bg-card p-5"
+          >
+            <h2 className="flex items-center gap-2 text-base font-bold text-fg">
+              <Wheat size={18} aria-hidden="true" className="shrink-0 text-primary" />
+              {t('cardAgriTitle')}
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-fg-secondary">{t('cardAgriText')}</p>
+          </section>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left: Academic References */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* Research Citation */}
-            <div
-              className="rounded-2xl p-6 border space-y-4 bg-surface border-border"
-            >
-              <div className="flex gap-4 items-start">
-                <div
-                  className="p-3 rounded-xl shrink-0"
-                  style={{
-                    backgroundColor: 'var(--color-primary-light)',
-                    color: 'var(--color-primary)',
-                  }}
-                >
-                  <FileText size={24} />
-                </div>
-                <div>
-                  <p
-                    className="text-[10px] font-bold uppercase tracking-wider mb-1 text-fg-muted"
-                  >
-                    {t('contribEyebrow')}
-                  </p>
-                  <h3
-                    className="text-base font-bold leading-snug text-fg"
-                  >
-                    A Multi-Scale Land Use and Land Cover Classification Initiative for the Brazilian Territory
-                  </h3>
-                  <p className="text-sm mt-1 text-fg-secondary">
-                    {t('publishedByA')}{' '}
-                    <strong style={{ color: 'var(--color-primary)' }}>Igor S. Leite</strong> {t('andCollab')} <em>Remote Sensing Applications: Society and Environment</em>,{' '}
-                    {t('volumeInfo')}
-                  </p>
-                </div>
-              </div>
+        <section
+          aria-labelledby="about-navigate"
+          className="rounded-xl border border-border border-l-4 border-l-primary bg-card p-5"
+        >
+          <SectionHeading icon={Compass} title={t('navigateTitle')} id="about-navigate" />
+          <ul className="mt-3 list-disc space-y-1.5 pl-6 text-sm leading-relaxed text-fg-secondary">
+            <li>{t('navigateBullet1')}</li>
+            <li>{t('navigateBullet2')}</li>
+            <li>{t('navigateBullet3')}</li>
+          </ul>
+        </section>
 
-              {/* Abstract */}
-              <div
-                className="rounded-xl p-4 border"
-                style={{
-                  backgroundColor: 'var(--color-canvas)',
-                  borderColor: 'var(--color-border)',
-                }}
-              >
-                <p
-                  className="text-xs font-bold uppercase tracking-wider mb-2 text-fg-muted"
-                >
-                  {t('abstractLabel')}
-                </p>
-                <p className="text-sm italic leading-relaxed text-fg-secondary">
-                  {t('abstractQuote')}
-                </p>
-              </div>
+        <section
+          aria-labelledby="about-sources"
+          className="rounded-xl border border-border bg-card p-5"
+        >
+          <SectionHeading icon={Globe} title={t('sourcesTitle')} id="about-sources" />
+          <ul className="mt-3 list-disc space-y-1.5 pl-6 text-sm leading-relaxed text-fg-secondary">
+            <li>
+              {t('sourcesLulcPre')} <ExternalRef href={DOI_SANTOS_2025}>{t('sourcesSantos')}</ExternalRef>.
+            </li>
+            <li>
+              {t('sourcesAgriPre')} <ExternalRef href={URL_CONAB}>CONAB</ExternalRef>{' '}
+              {t('sourcesAnd')} <ExternalRef href={URL_IBGE}>IBGE</ExternalRef>.
+            </li>
+          </ul>
+        </section>
 
-              {/* BibTeX */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-semibold text-fg">
-                    {t('bibtexLabel')}
-                  </span>
-                  <button
-                    onClick={handleCopyBib}
-                    aria-label={copiedBib ? t('ariaCopied') : t('ariaCopy')}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-all border hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
-                    style={{
-                      backgroundColor: 'var(--color-canvas)',
-                      borderColor: 'var(--color-border)',
-                      color: 'var(--color-fg-secondary)',
-                    }}
-                  >
-                    {copiedBib ? <Check size={12} /> : <Copy size={12} />}
-                    {copiedBib ? t('btnCopied') : t('btnCopy')}
-                  </button>
-                </div>
-                <pre
-                  aria-label={t('bibtexAria')}
-                  tabIndex={0}
-                  className="p-4 rounded-xl overflow-x-auto text-xs leading-relaxed border text-fg-secondary focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
-                  style={{
-                    backgroundColor: 'var(--color-canvas)',
-                    borderColor: 'var(--color-border)',
-                  }}
-                >
-                  {bibtexEntry}
-                </pre>
-              </div>
+        <section
+          aria-labelledby="about-citation"
+          className="rounded-xl border border-border bg-card p-5"
+        >
+          <SectionHeading icon={Quote} title={t('citationTitle')} id="about-citation" />
+          <p className="mt-3 text-sm leading-relaxed text-fg-secondary">{t('citationLicense')}</p>
+          <p className="mt-2 text-sm leading-relaxed text-fg-secondary">{t('citationAuth')}</p>
+          <p className="mt-2 text-sm leading-relaxed text-fg-secondary">{t('citationIntro')}</p>
+          <ul className="mt-2 list-disc space-y-1.5 pl-6 text-sm leading-relaxed text-fg-secondary">
+            <li>
+              {t('citationMainArticle')}{' '}
+              <ExternalRef href={DOI_SANTOS_2025}>{t('refSantosMain')}</ExternalRef>.
+            </li>
+            <li>
+              {t('citationProjectArticle')}{' '}
+              <ExternalRef href={URL_SID_SANTOS_ADAMI}>{t('refSantosAdami')}</ExternalRef>.
+            </li>
+            <li>
+              {t('citationZenodo')}{' '}
+              <ExternalRef href={URL_ZENODO}>{t('refZenodo')}</ExternalRef>.
+            </li>
+          </ul>
+        </section>
 
-              {/* ResearchGate link */}
+        <section
+          aria-labelledby="about-contact"
+          className="rounded-xl border border-border bg-card p-5"
+        >
+          <SectionHeading icon={Mail} title={t('contactTitle')} id="about-contact" />
+          <p className="mt-3 text-sm leading-relaxed text-fg-secondary">{t('contactIntro')}</p>
+          <ul className="mt-2 space-y-1.5 text-sm leading-relaxed text-fg-secondary">
+            <li className="flex flex-wrap items-center gap-x-2">
+              <span className="font-semibold text-fg">{t('contactEmailLabel')}</span>
+              <a href={`mailto:${CONTACT_EMAIL}`} className={EXTERNAL_LINK_CLASS}>
+                {CONTACT_EMAIL}
+              </a>
+              <span>{t('contactHeadSuffix')}</span>
+            </li>
+            <li className="flex flex-wrap items-center gap-x-2">
+              <span className="font-semibold text-fg">{t('contactGithubLabel')}</span>
               <a
-                href="https://www.researchgate.net/profile/Igor-Leite-5"
+                href={URL_GITHUB}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-between px-4 py-3 rounded-xl border text-sm transition-all hover:opacity-80"
-                style={{
-                  backgroundColor: 'var(--color-primary-light)',
-                  borderColor: 'var(--color-primary)',
-                  color: 'var(--color-primary)',
-                }}
+                className={`inline-flex items-center gap-1 ${EXTERNAL_LINK_CLASS}`}
               >
-                <span className="font-semibold">{t('researcherProfile')}</span>
-                <ArrowUpRight size={16} />
+                {URL_GITHUB}
+                <ExternalLink size={12} aria-hidden="true" />
               </a>
-            </div>
+            </li>
+          </ul>
+        </section>
+
+        <section
+          aria-label={t('logosLabel')}
+          className="rounded-xl border border-border bg-card p-5"
+        >
+          <div className="grid grid-cols-1 items-center gap-6 sm:grid-cols-3">
+            <PartnerLogo
+              src={logoUrl('INPE.png')}
+              alt={t('logoInpeAlt')}
+              fallbackLabel={t('logoMissing')}
+            />
+            <PartnerLogo
+              src={logoUrl('AGRIRSLAB.png')}
+              alt={t('logoAgrirslabAlt')}
+              fallbackLabel={t('logoMissing')}
+            />
+            <PartnerLogo
+              src={logoUrl('LANDAGRIB.png')}
+              alt={t('logoLandagribAlt')}
+              fallbackLabel={t('logoMissing')}
+            />
           </div>
-
-          {/* Right: Data Sources + Downloads */}
-          <div className="lg:col-span-5 space-y-6">
-            {/* Data Sources */}
-            <div
-              className="rounded-2xl p-6 border space-y-5 bg-surface border-border"
-            >
-              <h3
-                className="text-xs font-bold uppercase tracking-wider flex items-center gap-2 text-fg-muted"
-              >
-                <Database size={14} />
-                {t('platformsTitle')}
-              </h3>
-
-              {dataSources.map((source, idx) => (
-                <div
-                  key={idx}
-                  className="flex gap-3 pb-4"
-                  style={{
-                    borderBottom: idx < dataSources.length - 1 ? '1px solid var(--color-border)' : 'none',
-                  }}
-                >
-                  <div
-                    className="px-2.5 py-1 rounded-lg text-xs font-bold font-mono h-fit shrink-0"
-                    style={{
-                      backgroundColor: `color-mix(in srgb, ${source.color} 15%, transparent)`,
-                      color: source.color,
-                      border: `1px solid color-mix(in srgb, ${source.color} 30%, transparent)`,
-                    }}
-                  >
-                    {source.initials}
-                  </div>
-                  <div>
-                    <h4
-                      className="text-sm font-semibold flex items-center gap-1.5 text-fg"
-                    >
-                      {source.name}
-                      <ExternalLink size={10} className="text-fg-muted" />
-                    </h4>
-                    <p className="text-xs mt-1 leading-relaxed text-fg-secondary">
-                      {[t('descMapbiomas'), t('descIbge'), t('descInpe')][idx]}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Downloads */}
-            <div
-              className="rounded-2xl p-6 border bg-surface border-border"
-            >
-              <h3
-                className="text-sm font-bold flex items-center gap-2 mb-3 text-fg"
-              >
-                <Download size={16} />
-                {t('exportTitle')}
-              </h3>
-              <p className="text-xs mb-4 text-fg-secondary">
-                {t('exportSub')}
-              </p>
-
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => handleDownload('csv')}
-                  aria-label={t('ariaCsv')}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all border text-center hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
-                  style={{
-                    backgroundColor: 'var(--color-canvas)',
-                    borderColor: 'var(--color-border)',
-                    color: 'var(--color-fg-secondary)',
-                  }}
-                >
-                  Download CSV
-                </button>
-                <button
-                  onClick={() => handleDownload('json')}
-                  aria-label={t('ariaJson')}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all border text-center hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
-                  style={{
-                    backgroundColor: 'var(--color-canvas)',
-                    borderColor: 'var(--color-border)',
-                    color: 'var(--color-fg-secondary)',
-                  }}
-                >
-                  Download JSON
-                </button>
-              </div>
-
-              {downloadFormat && (
-                <div
-                  role="status"
-                  aria-live="polite"
-                  className="mt-4 p-3 rounded-xl border text-xs text-center"
-                  style={{
-                    backgroundColor: 'var(--color-primary-light)',
-                    borderColor: 'var(--color-primary)',
-                    color: 'var(--color-primary)',
-                  }}
-                >
-                  <strong>{t('successTitle')}</strong> {t('successBody', { file: `landagri_dataset.${downloadFormat}` })}
-                </div>
-              )}
-            </div>
-
-            {/* Technical Metadata */}
-            <div
-              className="rounded-2xl p-6 border bg-surface border-border"
-            >
-              <h3
-                className="text-sm font-bold flex items-center gap-2 mb-4 text-fg"
-              >
-                <Globe size={16} />
-                {t('metaTitle')}
-              </h3>
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { label: t('metaResolution'), value: t('metaResolutionValue'), icon: Layers },
-                  { label: t('metaCoverage'), value: '2000 - 2025', icon: Calendar },
-                  { label: t('metaAccuracy'), value: '89.4% Kappa', icon: Shield, highlight: true },
-                ].map((item, idx) => {
-                  const Icon = item.icon;
-                  return (
-                    <div
-                      key={idx}
-                      className="p-3 rounded-xl border text-center"
-                      style={{
-                        backgroundColor: 'var(--color-canvas)',
-                        borderColor: 'var(--color-border)',
-                      }}
-                    >
-                      <Icon
-                        size={14}
-                        className="mx-auto mb-1"
-                        style={{ color: item.highlight ? 'var(--color-primary)' : 'var(--color-fg-muted)' }}
-                      />
-                      <p
-                        className="text-[10px] font-bold uppercase tracking-wider text-fg-muted"
-                      >
-                        {item.label}
-                      </p>
-                      <p
-                        className="text-sm font-bold mt-0.5"
-                        style={{
-                          color: item.highlight ? 'var(--color-primary)' : 'var(--color-fg)',
-                        }}
-                      >
-                        {item.value}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
+        </section>
       </div>
     </AnimatedPage>
   );
 }
-
-const bibtexEntry = `@article{leite2024multi,
-  title={A Multi-Scale Land Use and Land Cover Classification Initiative for the Brazilian Territory},
-  author={Leite, Igor S. and Santos, A.B. and Oliveira, C.D.},
-  journal={Remote Sensing Applications: Society and Environment},
-  volume={35},
-  pages={101234},
-  year={2024},
-  publisher={Elsevier}
-}`;
-
-const dataSources = [
-  {
-    initials: 'MB',
-    name: 'MapBiomas Brazil',
-    description: 'Classificação pixel-level Landsat 30m (Coleção 10, 1985-2025). Resolve transições de biomas e limites de pastagens multi-uso.',
-    color: '#16a34a',
-  },
-  {
-    initials: 'IB',
-    name: 'IBGE SIDRA API',
-    description: 'Registros censitários PAM (Produção Agrícola Municipal) e PPM (Pesquisa da Pecuária Municipal) com pesos de grãos e cabeças de gado.',
-    color: '#2563eb',
-  },
-  {
-    initials: 'IN',
-    name: 'INPE PRODES',
-    description: 'Programa de monitoramento de desmatamento mapeando corte raso via análise espectral CCD-WFI acima de 6,25 hectares.',
-    color: '#dc2626',
-  },
-];

@@ -35,16 +35,21 @@ describe('Fase 2b page bodies (RED→GREEN)', () => {
     expect(screen.getByText(/scenario simulator/i)).toBeInTheDocument();
   });
 
-  it('renders AboutPage export section in English after toggle', () => {
+  it('renders AboutPage sources section in English after toggle', () => {
     renderEN(
       <MemoryRouter>
         <AboutPage />
       </MemoryRouter>,
     );
-    expect(screen.getByText('Export Data')).toBeInTheDocument();
+    expect(screen.getByText('Data Sources and References')).toBeInTheDocument();
+    expect(screen.getByText('Citation')).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: /export data in csv/i }),
+      screen.getAllByRole('link', { name: /santos et al\. \(2025\)/i }),
+    ).toHaveLength(2);
+    expect(
+      screen.getByRole('link', { name: /priscilla\.santos@inpe\.br/i }),
     ).toBeInTheDocument();
+    expect(screen.queryByText(/export data/i)).not.toBeInTheDocument();
   });
 
   it('renders the map section title in English after toggle', () => {

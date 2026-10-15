@@ -124,10 +124,10 @@ export const appRoutes: AppRoute[] = [
   {
     path: '/about',
     Component: AboutPage,
-    title: 'Referências',
+    title: 'Sobre o Dashboard LANDAGRI-B',
     description:
-      'Fontes de dados, metodologia e referências do dashboard LANDAGRI-B.',
-    titleKey: 'about',
+      'Conheça os objetivos do Dashboard LANDAGRI-B e como navegar pelos seus módulos especializados.',
+    titleKey: 'aboutTitle',
     descriptionKey: 'routeDescAbout',
   },
   // Catch-all: unknown paths redirect home (gh-pages SPA has no server 404).
@@ -214,7 +214,7 @@ export const commandIndex: CommandIndexEntry[] = [
     groupKey: 'groupAgricultural',
   },
   { title: 'Simulador Preditivo', url: '/predictive', group: 'Preditivo', titleKey: 'predictive', groupKey: 'groupPredictive' },
-  { title: 'Referências', url: '/about', group: 'Sobre', titleKey: 'about', groupKey: 'groupAbout' },
+  { title: 'Sobre', url: '/about', group: 'Sobre', titleKey: 'about', groupKey: 'groupAbout' },
 ];
 
 /** Session-storage key written by `public/404.html` on gh-pages deep links. */

@@ -48,17 +48,26 @@ describe('PredictivePage (simulador 2025→2035)', () => {
   });
 });
 
-describe('AboutPage (exports preserved)', () => {
-  it('keeps CSV/JSON export buttons with accessible names', () => {
+describe('AboutPage (matches legacy Streamlit about.py)', () => {
+  it('renders data sources, citation and contact without export/metadata blocks', () => {
     render(
       <MemoryRouter>
         <AboutPage />
       </MemoryRouter>,
     );
-    expect(screen.getByRole('button', { name: /exportar dados em csv/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /exportar dados em json/i })).toBeInTheDocument();
+    expect(screen.getByText('Fontes de Dados e Referências')).toBeInTheDocument();
+    expect(screen.getByText('Citação')).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: /copiar citação bibtex/i }),
+      screen.getByRole('link', { name: /priscilla\.santos@inpe\.br/i }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /github\.com\/landagri-b/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /exportar dados em/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/metadados técnicos/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/bibtex/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/researchgate/i)).not.toBeInTheDocument();
   });
 });
