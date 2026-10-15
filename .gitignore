@@ -37,3 +37,8 @@ coverage/
 *.local
 *.bak
 .pantheon/
+
+# Playwright artifacts (local only, regenerados via e2e)
+playwright-report/
+playwright-results.json
+test-results/
