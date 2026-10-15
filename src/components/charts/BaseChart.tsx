@@ -1,7 +1,7 @@
 import { useEffect, useRef, useMemo, useState, type ReactElement } from 'react';
 import type { Data, Layout, Config } from 'plotly.js';
 import { buildStandardLayout, STANDARD_CONFIG, getChartLayout } from '../../lib/chartDefaults';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useEffectiveTheme } from '../../hooks/use-theme';
 
 interface BaseChartProps {
   data: Data[];
@@ -27,7 +27,7 @@ export default function BaseChart({
   className = '',
 }: BaseChartProps): ReactElement {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { theme } = useTheme();
+  const theme = useEffectiveTheme();
   const [loadError, setLoadError] = useState(false);
 
   const finalLayout = useMemo(() => {

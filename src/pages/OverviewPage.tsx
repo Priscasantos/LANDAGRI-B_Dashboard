@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useDashboardStore } from '../stores/dashboardStore';
-import ModuleHeader from '../layouts/ModuleHeader';
 import SummaryCards from '../components/overview/SummaryCards';
+import OverviewMap from '../components/overview/OverviewMap';
+import InitiativesTable from '../components/initiatives/InitiativesTable';
 import InitiativeSelector from '../components/overview/InitiativeSelector';
 import KeyMetricsCards from '../components/overview/KeyMetricsCards';
 import LulcClasses from '../components/overview/LulcClasses';
@@ -33,14 +34,11 @@ export default function OverviewPage() {
 
   return (
     <div>
-      <ModuleHeader
-        moduleName="Overview"
-        title="🔎 Overview"
-        subtitle="General summary and key metrics of Land Use and Land Cover (LULC) initiatives."
-      />
-
       {/* Summary metrics */}
       <SummaryCards />
+
+      {/* Leaflet island (lazy, chunk separado) */}
+      <OverviewMap />
 
       <hr className="my-6 border-border" />
 
@@ -85,6 +83,16 @@ export default function OverviewPage() {
 
       {/* Agricultural Data Charts */}
       <AgriculturalCharts />
+
+      <hr className="my-6 border-border" />
+
+      {/* Initiatives table (iniciativa/área/ano) */}
+      <section aria-labelledby="initiatives-table-heading">
+        <h2 id="initiatives-table-heading" className="text-xl font-bold text-fg mb-4">
+          Iniciativas
+        </h2>
+        <InitiativesTable />
+      </section>
     </div>
   );
 }

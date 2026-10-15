@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
-import ModuleHeader from '../layouts/ModuleHeader';
 import TemporalPage from '../components/initiative-analysis/TemporalAnalysis/TemporalPage';
 import ComparativePage from '../components/initiative-analysis/ComparativeAnalysis/ComparativePage';
 import DetailedPage from '../components/initiative-analysis/DetailedAnalysis/DetailedPage';
@@ -17,11 +16,6 @@ export default function InitiativeAnalysisPage() {
 
   return (
     <div>
-      <ModuleHeader
-        moduleName="Initiative Analysis"
-        title="🏞 Initiative Analysis"
-        subtitle="Comprehensive spatio-temporal analysis of thirteen Land Use and Land Cover (LULC) initiatives."
-      />
       <p className="mt-2 text-base md:text-lg italic text-center text-fg-secondary">
         Reference: {' '}
         <a href="https://doi.org/10.3390/rs17132324" target="_blank" rel="noopener noreferrer" style={{ color: moduleTheme.primary, textDecoration: 'underline', fontWeight: 600 }}>

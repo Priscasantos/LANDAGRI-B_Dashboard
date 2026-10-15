@@ -35,6 +35,11 @@ export interface ThemeColors {
   text: string;
   textSecondary: string;
   border: string;
+  /**
+   * @deprecated Fase 3: full-bleed removido. `ModuleHeader` usa `primary`
+   * como accent lateral (`MODULE_ACCENT`), sem fundo em gradiente.
+   * Mantido para compatibilidade — não usar em código novo.
+   */
   headerGradient: string;
   headerTextColor: string;
   headerSubtitleColor: string;
@@ -132,6 +137,17 @@ export const METRIC_GRADIENTS = {
   resolution: 'linear-gradient(135deg, #d1fae5 0%, #6ee7b7 100%)',
   classes: 'linear-gradient(135deg, #fbcfe8 0%, #f472b6 100%)',
   frequency: 'linear-gradient(135deg, #bae6fd 0%, #38bdf8 100%)',
+};
+
+/**
+ * Accent por seção (Fase 3) — substitui o `headerGradient` full-bleed.
+ * Usado como detalhe lateral/texto, nunca como fundo.
+ */
+export const MODULE_ACCENT: Record<ModuleName, string> = {
+  Overview: MODULE_THEMES.Overview.primary,
+  'Initiative Analysis': MODULE_THEMES['Initiative Analysis'].primary,
+  'Agricultural Analysis': MODULE_THEMES['Agricultural Analysis'].primary,
+  About: MODULE_THEMES.About.primary,
 };
 
 // Menu structure matching app.py

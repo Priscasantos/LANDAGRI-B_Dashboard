@@ -1,13 +1,13 @@
-import { BrowserRouter, Routes, Route, useNavigate, type NavigateFunction } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, type NavigateFunction } from 'react-router-dom';
 import { Suspense, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from './contexts/ThemeContext';
+import { ThemeProvider } from './components/theme-provider';
 import { ToastProvider } from './contexts/ToastContext';
 import { SidebarConfigProvider } from './contexts/sidebar-context';
 import ErrorBoundary from './components/ErrorBoundary';
 import DashboardSkeleton from './components/ui/DashboardSkeleton';
-import RootLayout from './layouts/RootLayout';
-import { appRoutes, getBasename } from './config/routes';
+import BaseLayout from './components/layout/BaseLayout';
+import { appRoutes, getBasename, getRedirectPath } from './config/routes';
 import { useInitiatives } from './hooks/useInitiatives';
 
 /**
@@ -45,34 +45,38 @@ function AppContent(): React.JSX.Element {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-surface-alt">
+      <div className="flex items-center justify-center min-h-screen bg-muted">
         <div className="text-center max-w-md">
           <div className="text-4xl mb-4 text-error" role="img" aria-label="Aviso">⚠</div>
-          <h2 className="text-xl font-bold mb-2 text-fg">Erro ao carregar dados</h2>
-          <p className="text-fg-secondary">{error}</p>
+          <h2 className="text-xl font-bold mb-2 text-foreground">Erro ao carregar dados</h2>
+          <p className="text-muted-foreground">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <RootLayout>
-      <Routes>
-        {appRoutes.map(({ path, Component }) => (
-          <Route
-            key={path}
-            path={path}
-            element={
-              <ErrorBoundary>
-                <Suspense fallback={<DashboardSkeleton />}>
-                  <Component />
-                </Suspense>
-              </ErrorBoundary>
-            }
-          />
-        ))}
-      </Routes>
-    </RootLayout>
+    <Routes>
+      {appRoutes.map(({ path, Component, title, description, redirectTo }) => (
+        <Route
+          key={path}
+          path={path}
+          element={
+            redirectTo ? (
+              <Navigate to={redirectTo} replace />
+            ) : (
+              <BaseLayout title={title} description={description}>
+                <ErrorBoundary>
+                  <Suspense fallback={<DashboardSkeleton />}>
+                    <Component />
+                  </Suspense>
+                </ErrorBoundary>
+              </BaseLayout>
+            )
+          }
+        />
+      ))}
+    </Routes>
   );
 }
 
@@ -85,9 +89,8 @@ function useEffectRedirect(navigate: NavigateFunction): void {
     } catch {
       /* private mode: deep-link restore still works via path heuristic */
     }
-    const redirectPath = sessionStorage.getItem('redirectPath');
-    if (redirectPath && redirectPath.startsWith('/') && redirectPath !== '/') {
-      sessionStorage.removeItem('redirectPath');
+    const redirectPath = getRedirectPath(sessionStorage);
+    if (redirectPath) {
       navigate(redirectPath, { replace: true });
     }
   }, [navigate]);

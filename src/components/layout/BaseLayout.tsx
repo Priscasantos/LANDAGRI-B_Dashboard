@@ -1,0 +1,61 @@
+import type { ReactNode } from 'react';
+import AppSidebar from './AppSidebar';
+import SiteHeader from './SiteHeader';
+import { SidebarProvider } from '../ui/sidebar';
+
+interface BaseLayoutProps {
+  children: ReactNode;
+  /** Module title (from the route table — replaces ModuleHeader). */
+  title?: string;
+  /** Module subtitle shown under the title. */
+  description?: string;
+}
+
+/**
+ * SaaS app shell (adapted from the reference `base-layout.tsx`).
+ * Sidebar + top bar + per-module title + content + footer.
+ * Reference-only extras (theme customizer, upgrade-to-pro, sidebar
+ * notifications, mocked NavUser) are intentionally omitted in Fase 1.
+ */
+export default function BaseLayout({ children, title, description }: BaseLayoutProps): React.JSX.Element {
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen bg-background lg:flex lg:items-start">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[70] focus:rounded-lg focus:bg-primary focus:px-3 focus:py-2 focus:text-sm focus:text-white"
+        >
+          Pular para o conteúdo
+        </a>
+        <AppSidebar />
+        <div className="flex min-w-0 min-h-screen flex-1 flex-col">
+          <SiteHeader />
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="mx-auto w-full max-w-(--content-max-width) flex-1 px-4 py-6 sm:px-6 md:py-8 lg:px-8"
+          >
+            {title && (
+              <div className="mb-6">
+                <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+                  {title}
+                </h1>
+                {description && (
+                  <p className="mt-1.5 max-w-3xl text-sm text-muted-foreground md:text-base">
+                    {description}
+                  </p>
+                )}
+              </div>
+            )}
+            {children}
+          </main>
+          <footer className="border-t border-border bg-muted py-6 text-center text-xs text-muted-foreground">
+            <div className="mx-auto w-full max-w-(--content-max-width) px-4 sm:px-6 lg:px-8">
+              <p>© 2026 LANDAGRI-B Dashboard — Dados: MapBiomas & IBGE</p>
+            </div>
+          </footer>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}

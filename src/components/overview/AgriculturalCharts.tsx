@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import Card from '../ui/Card';
+import ChartContainer from '../charts/ChartContainer';
 import { RechartsLineChart } from '../charts/recharts/RechartsLineChart';
 import type { RechartsLineSeries } from '../charts/recharts/RechartsLineChart';
 import { RechartsPieChart } from '../charts/recharts/RechartsPieChart';
@@ -105,9 +105,9 @@ export default function AgriculturalCharts(): React.JSX.Element | null {
         🌾 Brazilian Agricultural Data
       </h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card
+        <ChartContainer
           title="Agricultural Production Evolution (thousands of tons)"
-          className="focus-within:ring-2 focus-within:ring-blue-500"
+          description="IBGE PAM/PPM e CONAB"
         >
           <RechartsLineChart
             title="Agricultural Production Evolution (thousands of tons)"
@@ -115,20 +115,20 @@ export default function AgriculturalCharts(): React.JSX.Element | null {
             xlabel="Year"
             ylabel="Production (x1000 tons)"
           />
-        </Card>
-        <Card
+        </ChartContainer>
+        <ChartContainer
           title={`Production Distribution${latestYear ? ` (${latestYear})` : ' (Latest Year)'}`}
-          className="focus-within:ring-2 focus-within:ring-blue-500"
+          description="IBGE PAM/PPM e CONAB"
         >
           <RechartsPieChart
             title={`Production Distribution${latestYear ? ` (${latestYear})` : ' (Latest Year)'}`}
             data={pieSlices}
           />
-        </Card>
+        </ChartContainer>
       </div>
-      <Card
+      <ChartContainer
         title="Average Area Harvested (thousands of hectares)"
-        className="focus-within:ring-2 focus-within:ring-blue-500"
+        description="IBGE PAM/PPM e CONAB"
       >
         <RechartsBarChart
           title="Average Area Harvested (thousands of hectares)"
@@ -136,7 +136,7 @@ export default function AgriculturalCharts(): React.JSX.Element | null {
           xlabel="Product"
           ylabel="Area (x1000 ha)"
         />
-      </Card>
+      </ChartContainer>
       <p className="text-xs text-fg-muted">
         Fonte: IBGE PAM/PPM e CONAB — dados processados em `src/data/processed/`.
       </p>

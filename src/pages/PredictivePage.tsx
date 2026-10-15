@@ -16,6 +16,9 @@ import {
   Info,
 } from 'lucide-react';
 import AnimatedPage from '../components/AnimatedPage';
+import PlotlyLazyChart from '../components/charts/PlotlyLazyChart';
+import { themeDataColor } from '../lib/theme-data';
+import type { Data } from 'plotly.js';
 import { simulateProjections, getDefaultParams, BASELINE_2025 } from '../lib/landCoverSimulation';
 
 export default function PredictivePage() {
@@ -32,6 +35,31 @@ export default function PredictivePage() {
   const forestDelta = Math.round((result2035.forestryArea - BASELINE_2025.forestryArea) * 10) / 10;
   const agriDelta = Math.round((result2035.agricultureArea - BASELINE_2025.agricultureArea) * 10) / 10;
   const carbonDelta = Math.round(result2035.carbonEmissionIndex - 100);
+
+  const plotlyYears = simulatedData.map((d) => d.year);
+  const plotlyTraces: Data[] = [
+    {
+      type: 'scatter',
+      mode: 'lines',
+      name: 'Floresta (Mha)',
+      x: plotlyYears,
+      y: simulatedData.map((d) => d.forestryArea),
+    },
+    {
+      type: 'scatter',
+      mode: 'lines',
+      name: 'Agricultura (Mha)',
+      x: plotlyYears,
+      y: simulatedData.map((d) => d.agricultureArea),
+    },
+    {
+      type: 'scatter',
+      mode: 'lines',
+      name: 'Índice de Emissão',
+      x: plotlyYears,
+      y: simulatedData.map((d) => d.carbonEmissionIndex),
+    },
+  ];
 
   const handleReset = () => {
     const def = getDefaultParams();
@@ -247,7 +275,7 @@ export default function PredictivePage() {
                       type="monotone"
                       name="Floresta (Mha)"
                       dataKey="forestryArea"
-                      stroke="#3b82f6"
+                      stroke={themeDataColor(0)}
                       strokeWidth={3}
                       dot={false}
                     />
@@ -255,7 +283,7 @@ export default function PredictivePage() {
                       type="monotone"
                       name="Pastagem (Mha)"
                       dataKey="pastureArea"
-                      stroke="#10b981"
+                      stroke={themeDataColor(1)}
                       strokeWidth={2}
                       dot={false}
                       strokeDasharray="4 4"
@@ -264,7 +292,7 @@ export default function PredictivePage() {
                       type="monotone"
                       name="Agricultura (Mha)"
                       dataKey="agricultureArea"
-                      stroke="#f59e0b"
+                      stroke={themeDataColor(2)}
                       strokeWidth={3}
                       dot={false}
                     />
@@ -272,7 +300,7 @@ export default function PredictivePage() {
                       type="monotone"
                       name="Índice de Emissão"
                       dataKey="carbonEmissionIndex"
-                      stroke="#ef4444"
+                      stroke={themeDataColor(3)}
                       strokeWidth={2}
                       dot={false}
                     />
@@ -333,6 +361,24 @@ export default function PredictivePage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Plotly island (lazy, chunk separado) — projeção detalhada */}
+        <div className="rounded-2xl p-6 border bg-surface border-border">
+          <h3 className="text-xs font-bold uppercase tracking-wider mb-1 text-fg-muted">
+            Projeção Detalhada (2025 - 2035)
+          </h3>
+          <p className="text-sm mb-4 text-fg-secondary">
+            Mesma simulação em gráfico interativo (zoom, exportação PNG)
+          </p>
+          <PlotlyLazyChart
+            data={plotlyTraces}
+            layout={{
+              title: { text: 'Projeção detalhada 2025–2035' },
+              xaxis: { title: { text: 'Ano' } },
+              yaxis: { title: { text: 'Mha / Índice' } },
+            }}
+          />
         </div>
       </div>
     </AnimatedPage>

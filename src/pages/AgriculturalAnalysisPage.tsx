@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
-import ModuleHeader from '../layouts/ModuleHeader';
 import AgricultureOverviewPage from '../components/agricultural-analysis/AgricultureOverview/AgricultureOverviewPage';
 import CropCalendarPage from '../components/agricultural-analysis/CropCalendar/CropCalendarPage';
 import AgricultureAvailabilityPage from '../components/agricultural-analysis/AgricultureAvailability/AgricultureAvailabilityPage';
@@ -15,11 +14,6 @@ export default function AgriculturalAnalysisPage() {
 
   return (
     <div>
-      <ModuleHeader
-        moduleName="Agricultural Analysis"
-        title="🌾 Agricultural Analysis"
-        subtitle="Agricultural indicators, crop calendar and aggregated availability by region and time period."
-      />
       <div className="flex border-b border-border mb-6 overflow-x-auto">
         {subPages.map((tab) => {
           const isActive = location.pathname.includes(tab.path);
