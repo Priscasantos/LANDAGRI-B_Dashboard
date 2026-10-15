@@ -41,7 +41,7 @@ export default function EChartsBase({
       role="img"
       aria-label={ariaLabel}
       tabIndex={0}
-      className="w-full min-w-0 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      className="landagri-chart w-full min-w-0 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
     >
       <ReactEChartsCore
         echarts={echarts}

@@ -76,13 +76,13 @@ function buildTheme(theme: EChartsPilotTheme): Record<string, unknown> {
         lineStyle: { color: isDark ? '#334155' : 'rgba(148,163,184,0.3)' },
       },
       axisTick: { show: false },
-      axisLabel: { color: '#94a3b8', fontSize: 11 },
+      axisLabel: { color: isDark ? '#94a3b8' : '#64748b', fontSize: 12 },
       splitLine: { show: false },
     },
     valueAxis: {
       axisLine: { show: false },
       axisTick: { show: false },
-      axisLabel: { color: '#94a3b8', fontSize: 11 },
+      axisLabel: { color: isDark ? '#94a3b8' : '#64748b', fontSize: 12 },
       splitLine: {
         lineStyle: {
           color: isDark ? GRID_DIVIDER_DARK : GRID_DIVIDER_LIGHT,
@@ -90,7 +90,7 @@ function buildTheme(theme: EChartsPilotTheme): Record<string, unknown> {
       },
     },
     legend: {
-      textStyle: { color: isDark ? '#cbd5e1' : '#475569', fontSize: 11 },
+      textStyle: { color: isDark ? '#cbd5e1' : '#475569', fontSize: 12 },
     },
   };
 }

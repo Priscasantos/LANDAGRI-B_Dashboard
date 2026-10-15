@@ -463,3 +463,288 @@ describe('echarts-options builders (fatia 2c)', () => {
     expect(series[1].itemStyle.color).toBe('#22c55e');
   });
 });
+
+describe('echarts-options typographic pass (reversible)', () => {
+  const ax = (o: object, key: 'xAxis' | 'yAxis'): Record<string, unknown> =>
+    (o as Record<string, Record<string, unknown>>)[key] as Record<string, unknown>;
+  const axisLabel = (o: object, key: 'xAxis' | 'yAxis'): Record<string, unknown> =>
+    ax(o, key).axisLabel as Record<string, unknown>;
+
+  it('axis tick labels meet AA contrast per theme (light #64748b, dark #94a3b8)', () => {
+    const light = buildLineOption({
+      series: [{ name: 'A', x: [2020], y: [1] }],
+      theme: 'light',
+      locale: 'pt-BR',
+    });
+    const dark = buildLineOption({
+      series: [{ name: 'A', x: [2020], y: [1] }],
+      theme: 'dark',
+      locale: 'pt-BR',
+    });
+    expect(axisLabel(light, 'xAxis').color).toBe('#64748b');
+    expect(axisLabel(light, 'yAxis').color).toBe('#64748b');
+    expect(axisLabel(dark, 'xAxis').color).toBe('#94a3b8');
+    expect(axisLabel(dark, 'yAxis').color).toBe('#94a3b8');
+  });
+
+  it('axis ticks use Inter 12px with fontFamily + hideOverlap on categories', () => {
+    const option = buildLineOption({
+      series: [{ name: 'A', x: [2020, 2021], y: [1, 2] }],
+      theme: 'light',
+      locale: 'pt-BR',
+      fontFamily: 'Inter, sans-serif',
+    });
+    const label = axisLabel(option, 'xAxis');
+    expect(label.fontSize).toBe(12);
+    expect(label.fontFamily).toBe('Inter, sans-serif');
+    expect(label.hideOverlap).toBe(true);
+    expect(axisLabel(option, 'yAxis').fontSize).toBe(12);
+  });
+
+  it('legend wraps bottom in Inter 12px with spacing', () => {
+    const option = buildGroupedBarOption({
+      categories: ['A'],
+      series: [{ name: 'S', values: [1] }],
+      theme: 'light',
+      locale: 'pt-BR',
+      fontFamily: 'Inter, sans-serif',
+    });
+    const legend = option.legend as Record<string, unknown>;
+    const textStyle = legend.textStyle as Record<string, unknown>;
+    expect(textStyle.fontSize).toBe(12);
+    expect(textStyle.fontFamily).toBe('Inter, sans-serif');
+    expect(legend.bottom).toBe(0);
+  });
+
+  it('legend-heavy charts reserve grid bottom so wrapped rows never hit the axis', () => {
+    const many = Array.from({ length: 12 }, (_, i) => ({
+      name: `Initiative number ${i} with a long name`,
+      x: [2020],
+      y: [i],
+    }));
+    const crowded = buildLineOption({
+      series: many,
+      theme: 'light',
+      locale: 'pt-BR',
+    });
+    const roomy = buildLineOption({
+      series: [{ name: 'A', x: [2020], y: [1] }],
+      theme: 'light',
+      locale: 'pt-BR',
+    });
+    const gridCrowded = crowded.grid as Record<string, unknown>;
+    const gridRoomy = roomy.grid as Record<string, unknown>;
+    expect(gridCrowded.bottom as number).toBeGreaterThan(
+      gridRoomy.bottom as number,
+    );
+    expect(gridCrowded.bottom as number).toBeGreaterThanOrEqual(80);
+  });
+
+  it('grouped bar truncates very long category labels (full name stays in tooltip)', () => {
+    const long =
+      'PRODES Deforestation, Warnings and Vegetation for Brazilian Biomes (PRODES)';
+    const option = buildGroupedBarOption({
+      categories: [long, 2020],
+      series: [{ name: 'S', values: [1, 2] }],
+      theme: 'light',
+      locale: 'pt-BR',
+    });
+    const label = axisLabel(option, 'xAxis');
+    const fmt = label.formatter as (v: unknown) => string;
+    const truncated = fmt(long);
+    expect(truncated.length).toBeLessThan(long.length);
+    expect(truncated).toMatch(/…$/);
+    expect(fmt(2020)).toBe('2020');
+  });
+
+  it('heatmap thins crowded year axes but keeps short month axes intact', () => {
+    const years = Array.from({ length: 40 }, (_, i) => 1985 + i);
+    const crowded = buildHeatmapOption({
+      x: years,
+      y: ['A'],
+      z: [years.map(() => 1)],
+      theme: 'light',
+      locale: 'pt-BR',
+    });
+    const months2 = buildHeatmapOption({
+      x: ['Oct', 'Nov', 'Dec'],
+      y: ['A'],
+      z: [[1, 2, 3]],
+      theme: 'light',
+      locale: 'pt-BR',
+    });
+    const crowdedLabel = axisLabel(crowded, 'xAxis');
+    const monthsLabel = axisLabel(months2, 'xAxis');
+    expect(crowdedLabel.interval as number).toBeGreaterThan(0);
+    expect(monthsLabel.interval as number).toBe(0);
+  });
+
+  it('heatmap reserves room for rotated labels + visualMap (no collision)', () => {
+    const option = buildHeatmapOption({
+      x: ['Oct'],
+      y: ['A'],
+      z: [[1]],
+      theme: 'light',
+      locale: 'pt-BR',
+    });
+    const grid = option.grid as Record<string, unknown>;
+    const visualMap = option.visualMap as Record<string, unknown>;
+    expect(grid.bottom as number).toBeGreaterThanOrEqual(96);
+    expect(visualMap.bottom as number).toBeLessThanOrEqual(12);
+  });
+
+  it('pie hides overlapping slice labels instead of stacking them', () => {
+    const option = buildPieOption({
+      slices: [
+        { label: 'Big', value: 80 },
+        { label: 'Tiny a', value: 0.1 },
+        { label: 'Tiny b', value: 0.1 },
+      ],
+      theme: 'light',
+      locale: 'pt-BR',
+    });
+    const series = option.series as { labelLayout?: Record<string, unknown> }[];
+    expect(series[0].labelLayout).toMatchObject({ hideOverlap: true });
+  });
+
+  it('scatter hides overlapping point labels and reserves legend room', () => {
+    const option = buildScatterOption({
+      series: Array.from({ length: 12 }, (_, i) => ({
+        name: `Initiative ${i} with a long name`,
+        data: [[80 + i, 90]] as [number, number | null][],
+        labels: [`Initiative ${i} with a long name`],
+      })),
+      theme: 'light',
+      locale: 'pt-BR',
+    });
+    const series = option.series as {
+      label?: Record<string, unknown>;
+      labelLayout?: Record<string, unknown>;
+    }[];
+    expect(series[0].labelLayout).toMatchObject({ hideOverlap: true });
+    const grid = option.grid as Record<string, unknown>;
+    expect(grid.bottom as number).toBeGreaterThanOrEqual(80);
+  });
+
+  it('gantt x formatter never renders out-of-range duplicates', () => {
+    const option = buildGanttOption({
+      xLabels: ['Oct', 'Nov'],
+      bars: [{ y: 'A', start: 0, duration: 1 }],
+      theme: 'light',
+      locale: 'pt-BR',
+    });
+    const fmt = axisLabel(option, 'xAxis').formatter as (v: number) => string;
+    expect(fmt(-0.5)).toBe('');
+    expect(fmt(99)).toBe('');
+    expect(fmt(0.2)).toBe('');
+    expect(fmt(0)).toBe('Oct');
+    expect(fmt(1)).toBe('Nov');
+  });
+
+  it('timeline year axis stays integer with decade-snapped bounds', () => {
+    const option = buildTimelineOption({
+      items: [
+        { label: 'A', years: [2001, 2023] },
+        { label: 'B', years: [1985, 2000] },
+      ],
+      theme: 'light',
+      locale: 'pt-BR',
+    });
+    const x = ax(option, 'xAxis');
+    const fmt = axisLabel(option, 'xAxis').formatter as (v: number) => string;
+    expect(fmt(2000.5)).toBe('2001');
+    expect(fmt(2020)).toBe('2020');
+    expect(x.minInterval).toBe(1);
+    expect((x.min as number) % 5).toBe(0);
+    expect((x.max as number) % 5).toBe(0);
+    expect(x.min as number).toBeLessThanOrEqual(1985);
+    expect(x.max as number).toBeGreaterThanOrEqual(2023);
+  });
+
+  it('heatmap cell values stay legible on light cells (adaptive label color)', () => {
+    const option = buildHeatmapOption({
+      x: ['A', 'B'],
+      y: ['R'],
+      z: [[0, 1]],
+      min: -1,
+      max: 1,
+      showValues: true,
+      labelDarkRange: [-0.35, 0.35],
+      theme: 'light',
+      locale: 'pt-BR',
+    });
+    const series = option.series as {
+      label?: { color?: unknown };
+    }[];
+    const color = series[0].label?.color;
+    expect(typeof color).toBe('function');
+    const fn = color as (p: { value?: unknown }) => string;
+    expect(fn({ value: [0, 0, 0] })).toBe('#1e293b');
+    expect(fn({ value: [0, 0, 1] })).toBe('#ffffff');
+    expect(fn({ value: [0, 0, -1] })).toBe('#ffffff');
+  });
+});
+
+describe('echarts-options pie tiny-slice labels', () => {
+  it('hides outer labels for slices under 1% (legend + tooltip keep the data)', async () => {
+    const { buildPieOption } = await import(
+      '../../components/charts/echarts/echarts-options'
+    );
+    const option = buildPieOption({
+      slices: [
+        { label: 'Big', value: 98 },
+        { label: 'Sliver', value: 0.5 },
+      ],
+      theme: 'light',
+      locale: 'pt-BR',
+    });
+    const s = (option.series as Record<string, unknown>[])[0];
+    const fmt = (s.label as { formatter: (p: object) => string }).formatter;
+    expect(fmt({ name: 'Big', percent: 98 })).toContain('Big');
+    expect(fmt({ name: 'Sliver', percent: 0.5 })).toBe('');
+  });
+});
+
+describe('echarts-options scatter cross-series declutter', () => {
+  it('keeps isolated point labels, hides colliding cluster labels (tooltip keeps all)', async () => {
+    const { buildScatterOption } = await import(
+      '../../components/charts/echarts/echarts-options'
+    );
+    const cluster = Array.from({ length: 8 }, (_, i) => ({
+      name: `Cluster initiative ${i} with a very long name`,
+      data: [[90 + i * 0.2, 20 + (i % 3)]] as [number, number | null][],
+      labels: [`Cluster initiative ${i} with a very long name`],
+    }));
+    const option = buildScatterOption({
+      series: [
+        ...cluster,
+        {
+          name: 'Far away outlier with a long name',
+          data: [[10, 90]],
+          labels: ['Far away outlier with a long name'],
+        },
+      ],
+      theme: 'light',
+      locale: 'pt-BR',
+    });
+    const series = option.series as {
+      label?: Record<string, unknown>;
+      data: { value: [number, number]; label?: { show: boolean } }[];
+    }[];
+    // Outlier isolado mantém o rótulo.
+    const outlier = series[series.length - 1];
+    const outlierShown =
+      (outlier.label as { show?: boolean } | undefined)?.show !== false &&
+      outlier.data.every((d) => d.label?.show !== false);
+    expect(outlierShown).toBe(true);
+    // No aglomerado, a maioria perde o rótulo (sem blob ilegível).
+    const clusterHidden = cluster
+      .map((_, i) => series[i])
+      .filter(
+        (s) =>
+          (s.label as { show?: boolean } | undefined)?.show === false ||
+          s.data.some((d) => d.label?.show === false),
+      ).length;
+    expect(clusterHidden).toBeGreaterThan(0);
+  });
+});

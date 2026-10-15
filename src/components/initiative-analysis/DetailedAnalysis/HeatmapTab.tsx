@@ -107,6 +107,7 @@ export default function HeatmapTab({ selectedInitiatives }: HeatmapTabProps) {
         min={-1}
         max={1}
         showValues
+        labelDarkRange={[-0.35, 0.35]}
       />
     </div>
   );

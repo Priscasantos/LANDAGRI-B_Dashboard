@@ -272,6 +272,15 @@ h2 {
   text-wrap: balance;
 }
 
+/* H3 (títulos de cards de gráficos e seções): Sora com hierarquia por
+   tamanho/peso — mesma família display dos H1/H2, sem mudar layout. */
+h3 {
+  font-family: var(--font-display, var(--font-sans, var(--font-family-sans)));
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
 /* Mono — JetBrains Mono 500–600 com tabular-nums (números/código alinham
    em tabelas e KPIs; ver Google Fonts link no index.html + src/lib/fonts.ts). */
 code,
@@ -286,6 +295,12 @@ pre,
    rebuild); Plotly usa a string resolvida (`resolveChartFontFamily`). */
 .recharts-wrapper {
   font-family: inherit;
+}
+
+/* ECharts (renderer SVG): dígitos tabulares alinhados nos ticks e tooltips,
+   herdando a fonte ativa como o Recharts. */
+.landagri-chart svg text {
+  font-variant-numeric: tabular-nums;
 }
 
 p,

@@ -19,6 +19,8 @@ interface EChartsHeatmapProps {
   max?: number;
   /** Render values inside cells (Plotly `texttemplate` analogue). */
   showValues?: boolean;
+  /** Value range on light cells (dark label text; white elsewhere). */
+  labelDarkRange?: [number, number];
   height?: number;
 }
 
@@ -32,14 +34,15 @@ export default function EChartsHeatmap({
   min,
   max,
   showValues,
+  labelDarkRange,
 }: EChartsHeatmapProps): ReactElement {
   const theme = useEffectiveTheme();
   const fontFamily = useChartFontFamily();
   const { t, locale } = useT('charts');
 
   const option = useMemo(
-    () => buildHeatmapOption({ x, y, z, theme, locale, fontFamily, colors, min, max, showValues }),
-    [x, y, z, theme, locale, fontFamily, colors, min, max, showValues],
+    () => buildHeatmapOption({ x, y, z, theme, locale, fontFamily, colors, min, max, showValues, labelDarkRange }),
+    [x, y, z, theme, locale, fontFamily, colors, min, max, showValues, labelDarkRange],
   );
 
   const caption = captionKey !== undefined ? t(captionKey) : '';

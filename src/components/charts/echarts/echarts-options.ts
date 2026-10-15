@@ -54,6 +54,8 @@ function tooltipBase(
     backgroundColor: BERRY_TOOLTIP_BG[input.theme],
     borderColor: input.theme === 'dark' ? '#475569' : 'rgba(0,0,0,0.1)',
     borderWidth: 1,
+    confine: true,
+    padding: [8, 12],
     textStyle: { color: '#ffffff', fontSize: 12, fontFamily },
     valueFormatter: (value: number | string): string =>
       typeof value === 'number'
@@ -73,8 +75,9 @@ function legendBase(
     icon: 'rect',
     itemWidth: 8,
     itemHeight: 8,
+    itemGap: 12,
     textStyle: {
-      fontSize: 11,
+      fontSize: LEGEND_FONT_SIZE,
       color: theme === 'dark' ? '#cbd5e1' : '#475569',
       fontFamily,
     },
@@ -87,12 +90,67 @@ function axisCommon(theme: EChartsPilotTheme): {
 } {
   return {
     divider: theme === 'dark' ? GRID_DIVIDER_DARK : GRID_DIVIDER_LIGHT,
-    labelColor: '#94a3b8',
+    // Contraste AA nos dois temas: slate-500 no light (4.76:1 no branco),
+    // slate-400 no dark (~7:1 no canvas escuro).
+    labelColor: theme === 'dark' ? '#94a3b8' : '#64748b',
   };
 }
 
 function colorwayOf(theme: EChartsPilotTheme): string[] {
   return [...(theme === 'dark' ? LANDAGRI_COLORWAY_DARK : LANDAGRI_COLORWAY_LIGHT)];
+}
+
+/**
+ * Escala tipográfica dos charts (passada tipográfica, reversível):
+ * - ticks Inter 12px com margem de 8px do eixo;
+ * - legendas Inter 12px com wrap bottom;
+ * - rótulos de categoria longos truncados na exibição (nome completo no tooltip).
+ */
+const AXIS_TICK_FONT_SIZE = 12;
+const LEGEND_FONT_SIZE = 12;
+const AXIS_LABEL_MARGIN = 8;
+/** Comprimento máximo de rótulo de categoria exibido (tooltip mostra o nome cheio). */
+const MAX_CATEGORY_LABEL = 30;
+
+/** Rótulo de tick padrão: Inter 12px, cor AA do tema, margem do eixo. */
+function tickLabel(
+  theme: EChartsPilotTheme,
+  fontFamily: string,
+  extra: Record<string, unknown> = {},
+): Record<string, unknown> {
+  const { labelColor } = axisCommon(theme);
+  return {
+    color: labelColor,
+    fontSize: AXIS_TICK_FONT_SIZE,
+    fontFamily,
+    margin: AXIS_LABEL_MARGIN,
+    ...extra,
+  };
+}
+
+/** Trunca rótulos de exibição longos com elipse (tooltip preserva o texto cheio). */
+function truncateCategoryLabel(value: unknown, max: number = MAX_CATEGORY_LABEL): string {
+  const text = String(value);
+  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
+/**
+ * Desbasta eixos de categoria lotados (anos 1985–2024): mostra ~10 rótulos
+ * inteiros em vez de 40 sobrepostos. Eixos curtos (≤15 itens) intactos.
+ */
+function categoryInterval(length: number): number {
+  if (length <= 15) return 0;
+  return Math.ceil(length / 10) - 1;
+}
+
+/**
+ * Reserva espaço vertical para a legenda com wrap: 1 linha (56), 2 linhas
+ * (80) ou 3+ linhas (104) conforme o nº de séries — sem colidir com o eixo x.
+ */
+function legendGridBottom(seriesCount: number): number {
+  if (seriesCount > 8) return 104;
+  if (seriesCount > 4) return 80;
+  return 56;
 }
 
 export interface HorizontalBarInput extends BaseBuilderInput {
@@ -106,7 +164,7 @@ export interface HorizontalBarInput extends BaseBuilderInput {
 export function buildHorizontalBarOption(
   input: HorizontalBarInput,
 ): EChartsCoreOption {
-  const { divider, labelColor } = axisCommon(input.theme);
+  const { divider } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
   const colorway = colorwayOf(input.theme);
   return {
@@ -121,18 +179,16 @@ export function buildHorizontalBarOption(
     grid: { left: 8, right: 24, top: 16, bottom: 8, containLabel: true },
     xAxis: {
       type: 'value',
-      axisLabel: {
-        color: labelColor,
-        fontSize: 11,
+      axisLabel: tickLabel(input.theme, fontFamily, {
         formatter: (v: number): string =>
           formatEChartsNumber(v, input.locale),
-      },
+      }),
       splitLine: { lineStyle: { color: divider } },
     },
     yAxis: {
       type: 'category',
       data: input.labels,
-      axisLabel: { color: labelColor, fontSize: 11 },
+      axisLabel: tickLabel(input.theme, fontFamily),
       axisTick: { show: false },
       axisLine: { lineStyle: { color: 'rgba(148,163,184,0.3)' } },
     },
@@ -171,7 +227,7 @@ export interface GroupedBarInput extends BaseBuilderInput {
 export function buildGroupedBarOption(
   input: GroupedBarInput,
 ): EChartsCoreOption {
-  const { divider, labelColor } = axisCommon(input.theme);
+  const { divider } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
   const colorway = colorwayOf(input.theme);
   return {
@@ -183,26 +239,23 @@ export function buildGroupedBarOption(
       axisPointer: { type: 'shadow' },
     },
     legend: legendBase(input.theme, fontFamily),
-    grid: { left: 8, right: 24, top: 40, bottom: 48, containLabel: true },
+    grid: { left: 8, right: 24, top: 40, bottom: legendGridBottom(input.series.length), containLabel: true },
     xAxis: {
       type: 'category',
       data: input.categories,
-      axisLabel: {
-        color: labelColor,
-        fontSize: 11,
+      axisLabel: tickLabel(input.theme, fontFamily, {
         rotate: 45,
-      },
+        formatter: (v: unknown): string => truncateCategoryLabel(v),
+      }),
       axisTick: { show: false },
       axisLine: { lineStyle: { color: 'rgba(148,163,184,0.3)' } },
     },
     yAxis: {
       type: input.yAxisType ?? 'value',
-      axisLabel: {
-        color: labelColor,
-        fontSize: 11,
+      axisLabel: tickLabel(input.theme, fontFamily, {
         formatter: (v: number): string =>
           formatEChartsNumber(v, input.locale),
-      },
+      }),
       splitLine: { lineStyle: { color: divider } },
     },
     series: input.series.map((s, idx) => ({
@@ -255,6 +308,11 @@ export interface HeatmapInput extends BaseBuilderInput {
   max?: number;
   /** Render values inside cells (Plotly `texttemplate` analogue). */
   showValues?: boolean;
+  /**
+   * Value range rendered on light cells (label usa texto escuro legível;
+   * fora dela, branco). Default = 40% inferior (rampa âmbar clara embaixo).
+   */
+  labelDarkRange?: [number, number];
 }
 
 export function buildHeatmapOption(input: HeatmapInput): EChartsCoreOption {
@@ -270,6 +328,11 @@ export function buildHeatmapOption(input: HeatmapInput): EChartsCoreOption {
   const max = flat.length > 0 ? Math.max(...flat) : 0;
   const vMin = input.min ?? 0;
   const vMax = input.max ?? Math.max(max, 1);
+  // Faixa clara: texto escuro legível; demais células seguem brancas.
+  const [darkLo, darkHi] = input.labelDarkRange ?? [
+    vMin,
+    vMin + (vMax - vMin) * 0.4,
+  ];
   return {
     textStyle: { fontFamily },
     tooltip: {
@@ -283,18 +346,23 @@ export function buildHeatmapOption(input: HeatmapInput): EChartsCoreOption {
       },
     },
     legend: { show: false },
-    grid: { left: 8, right: 24, top: 16, bottom: 48, containLabel: true },
+    grid: { left: 8, right: 24, top: 16, bottom: 104, containLabel: true },
     xAxis: {
       type: 'category',
       data: input.x,
-      axisLabel: { color: labelColor, fontSize: 11, rotate: 45 },
+      axisLabel: tickLabel(input.theme, fontFamily, {
+        rotate: 45,
+        interval: categoryInterval(input.x.length),
+        hideOverlap: true,
+        formatter: (v: unknown): string => truncateCategoryLabel(v),
+      }),
       axisTick: { show: false },
       splitArea: { show: false },
     },
     yAxis: {
       type: 'category',
       data: input.y,
-      axisLabel: { color: labelColor, fontSize: 11 },
+      axisLabel: tickLabel(input.theme, fontFamily),
       axisTick: { show: false },
     },
     visualMap: {
@@ -303,11 +371,11 @@ export function buildHeatmapOption(input: HeatmapInput): EChartsCoreOption {
       calculable: true,
       orient: 'horizontal',
       left: 'center',
-      bottom: 0,
+      bottom: 8,
       inRange: {
         color: input.colors ?? ['#f3f4f6', '#fef3c7', '#f97316', '#dc2626', '#7f1d1d'],
       },
-      textStyle: { color: labelColor, fontFamily },
+      textStyle: { color: labelColor, fontFamily, fontSize: 11 },
     },
     series: [
       {
@@ -315,9 +383,13 @@ export function buildHeatmapOption(input: HeatmapInput): EChartsCoreOption {
         data,
         label: {
           show: input.showValues ?? false,
-          fontSize: 10,
+          fontSize: 11,
           fontFamily,
-          color: '#ffffff',
+          color: (params: { value?: unknown }): string => {
+            const v = Array.isArray(params.value) ? params.value[2] : params.value;
+            if (typeof v !== 'number') return '#ffffff';
+            return v >= darkLo && v <= darkHi ? '#1e293b' : '#ffffff';
+          },
           formatter: (params: { value?: unknown }): string => {
             const v = Array.isArray(params.value) ? params.value[2] : params.value;
             return typeof v === 'number' ? v.toFixed(2) : '';
@@ -353,7 +425,7 @@ export interface LineInput extends BaseBuilderInput {
 }
 
 export function buildLineOption(input: LineInput): EChartsCoreOption {
-  const { divider, labelColor } = axisCommon(input.theme);
+  const { divider } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
   const colorway = colorwayOf(input.theme);
   const showMarkers = input.showMarkers ?? true;
@@ -373,27 +445,26 @@ export function buildLineOption(input: LineInput): EChartsCoreOption {
       trigger: 'axis',
     },
     legend: legendBase(input.theme, fontFamily),
-    grid: { left: 8, right: 24, top: 40, bottom: 48, containLabel: true },
+    grid: { left: 8, right: 24, top: 40, bottom: legendGridBottom(input.series.length), containLabel: true },
     xAxis: {
       type: 'category',
       boundaryGap: false,
       data: xCats,
-      axisLabel: {
-        color: labelColor,
-        fontSize: 11,
+      axisLabel: tickLabel(input.theme, fontFamily, {
         rotate: 45,
-      },
+        interval: categoryInterval(xCats.length),
+        hideOverlap: true,
+        formatter: (v: unknown): string => truncateCategoryLabel(v),
+      }),
       axisTick: { show: false },
       axisLine: { lineStyle: { color: 'rgba(148,163,184,0.3)' } },
     },
     yAxis: {
       type: 'value',
-      axisLabel: {
-        color: labelColor,
-        fontSize: 11,
+      axisLabel: tickLabel(input.theme, fontFamily, {
         formatter: (v: number): string =>
           formatEChartsNumber(v, input.locale),
-      },
+      }),
       splitLine: { lineStyle: { color: divider } },
     },
     series: input.series.map((s, i) => {
@@ -432,7 +503,7 @@ export function buildLineOption(input: LineInput): EChartsCoreOption {
                 itemStyle: { color: s.markPoint.color ?? '#f59e0b' },
                 label: {
                   formatter: s.markPoint.label,
-                  fontSize: 10,
+                  fontSize: 11,
                   fontFamily,
                 },
                 data: [
@@ -484,11 +555,19 @@ export function buildPieOption(input: PieInput): EChartsCoreOption {
           itemStyle: { color: s.color ?? colorway[i % colorway.length] },
         })),
         label: {
-          formatter: '{b}: {d}%',
+          // Fatias <1%: sem rótulo externo (ilegível no arco mínimo);
+          // valor segue na legenda + tooltip Berry.
+          formatter: (params: { name?: string; percent?: number }): string => {
+            const percent = params.percent ?? 0;
+            if (percent < 1) return '';
+            return `${params.name ?? ''}: ${percent.toFixed(2)}%`;
+          },
           color: labelColor,
-          fontSize: 11,
+          fontSize: 12,
           fontFamily,
         },
+        // Fatias pequenas: espalha/esconde rótulos sobrepostos em vez de empilhar.
+        labelLayout: { hideOverlap: true, moveOverlap: 'shiftY' },
         labelLine: { lineStyle: { color: 'rgba(148,163,184,0.5)' } },
         itemStyle: { borderColor: '#fff', borderWidth: 2 },
         emphasis: {
@@ -516,10 +595,94 @@ export interface ScatterInput extends BaseBuilderInput {
   yAxisType?: 'value' | 'log';
 }
 
+/**
+ * Declutter de rótulos ENTRE séries (pairwise: 12 séries de 1 ponto com
+ * nomes longos): `labelLayout.hideOverlap` só atua dentro de cada série,
+ * então o aglomerado vira um blob ilegível. Mantém o rótulo só dos pontos
+ * isolados no espaço normalizado (largura estimada pelo texto real);
+ * tooltip + legenda preservam todas as identidades. Puro e testável.
+ */
+function niceCeil(v: number): number {
+  if (!(v > 0)) return 0;
+  const m = 10 ** Math.floor(Math.log10(v));
+  const f = v / m;
+  const nf = f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10;
+  return nf * m;
+}
+
+function declutterScatterLabels(
+  series: ScatterSeriesInput[],
+  yAxisType: 'value' | 'log' | undefined,
+): boolean[][] {
+  const ny = (y: number): number =>
+    yAxisType === 'log' ? Math.log10(Math.max(y, 1e-9)) : y;
+  const pts: { si: number; di: number; x: number; y: number; w: number }[] = [];
+  series.forEach((s, si) => {
+    if (s.labels === undefined) return;
+    s.data.forEach(([x, y], di) => {
+      if (typeof x !== 'number' || typeof y !== 'number') return;
+      const text = s.labels?.[di] ?? '';
+      pts.push({ si, di, x, y: ny(y), w: text.length });
+    });
+  });
+  const visible: boolean[][] = series.map((s) =>
+    s.data.map(() => true),
+  );
+  if (pts.length < 2) return visible;
+  const xs = pts.map((p) => p.x);
+  const ys = pts.map((p) => p.y);
+  // Normaliza pela EXTENSÃO DO EIXO (não pelos dados): eixo `value`
+  // inclui o 0 por padrão e arredonda o teto — é essa a densidade real
+  // dos rótulos na tela. Eixo log cobre as décadas dos dados.
+  const xLo = Math.min(0, Math.min(...xs));
+  let xHi = niceCeil(Math.max(...xs));
+  if (!(xHi > xLo)) xHi = xLo + 1;
+  let yLo: number;
+  let yHi: number;
+  if (yAxisType === 'log') {
+    yLo = Math.floor(Math.min(...ys));
+    yHi = Math.ceil(Math.max(...ys));
+    if (!(yHi > yLo)) yHi = yLo + 1;
+  } else {
+    yLo = Math.min(0, Math.min(...ys));
+    yHi = niceCeil(Math.max(...ys));
+    if (!(yHi > yLo)) yHi = yLo + 1;
+  }
+  // ~6px por caractere a 10px num plot de ~800px; altura do rótulo ~0.06.
+  const norm = pts.map((p) => ({
+    ...p,
+    nx: (p.x - xLo) / (xHi - xLo),
+    nyv: (p.y - yLo) / (yHi - yLo),
+    hw: ((p.w * 6) / 800 + 0.03) / 2,
+  }));
+  // Pontos mais isolados primeiro (maior distância mínima aos demais).
+  const order = norm
+    .map((p, i) => {
+      let d = Infinity;
+      norm.forEach((q, j) => {
+        if (i === j) return;
+        d = Math.min(d, Math.hypot(p.nx - q.nx, (p.nyv - q.nyv) * 2));
+      });
+      return { i, d };
+    })
+    .sort((a, b) => b.d - a.d);
+  const kept: typeof norm = [];
+  for (const { i } of order) {
+    const p = norm[i];
+    const collides = kept.some(
+      (k) => Math.abs(p.nx - k.nx) < p.hw + k.hw && Math.abs(p.nyv - k.nyv) < 0.06,
+    );
+    if (!collides) kept.push(p);
+    else visible[p.si][p.di] = false;
+  }
+  return visible;
+}
+
 export function buildScatterOption(input: ScatterInput): EChartsCoreOption {
   const { divider, labelColor } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
   const colorway = colorwayOf(input.theme);
+  const labelVisible = declutterScatterLabels(input.series, input.yAxisType);
   return {
     color: [...colorway],
     textStyle: { fontFamily },
@@ -528,33 +691,38 @@ export function buildScatterOption(input: ScatterInput): EChartsCoreOption {
       trigger: 'item',
     },
     legend: legendBase(input.theme, fontFamily),
-    grid: { left: 8, right: 24, top: 40, bottom: 48, containLabel: true },
+    grid: { left: 8, right: 24, top: 40, bottom: legendGridBottom(input.series.length), containLabel: true },
     xAxis: {
       type: 'value',
-      axisLabel: {
-        color: labelColor,
-        fontSize: 11,
+      axisLabel: tickLabel(input.theme, fontFamily, {
         formatter: (v: number): string =>
           formatEChartsNumber(v, input.locale),
-      },
+      }),
       splitLine: { lineStyle: { color: divider } },
     },
     yAxis: {
       type: input.yAxisType ?? 'value',
-      axisLabel: {
-        color: labelColor,
-        fontSize: 11,
+      axisLabel: tickLabel(input.theme, fontFamily, {
         formatter: (v: number): string =>
           formatEChartsNumber(v, input.locale),
-      },
+      }),
       splitLine: { lineStyle: { color: divider } },
     },
     series: input.series.map((s, i) => {
       const color = s.color ?? colorway[i % colorway.length];
+      // Rótulos com declutter cross-series: ponto colado vira datum com
+      // `label.show: false` (identidade segue no tooltip + legenda).
+      const data =
+        s.labels !== undefined
+          ? s.data.map(([x, y], di) => ({
+              value: [x, y] as [number | string, number | null],
+              label: { show: labelVisible[i]?.[di] ?? true },
+            }))
+          : s.data;
       return {
         type: 'scatter',
         name: s.name,
-        data: s.data,
+        data,
         symbolSize:
           s.sizes !== undefined
             ? (_value: unknown, params: { dataIndex: number }): number => {
@@ -562,13 +730,15 @@ export function buildScatterOption(input: ScatterInput): EChartsCoreOption {
                 return Math.max(8, Math.min(20, size ?? 10));
               }
             : 8,
+        // Rótulos colados (pairwise): esconde os sobrepostos, tooltip preserva.
+        labelLayout: { hideOverlap: true },
         label:
           s.labels !== undefined
             ? {
                 show: true,
                 position: 'top',
                 distance: 6,
-                fontSize: 9,
+                fontSize: 10,
                 color: labelColor,
                 fontFamily,
                 formatter: (params: { dataIndex: number }): string =>
@@ -604,7 +774,7 @@ export interface TimelineInput extends BaseBuilderInput {
  * initiative category axis (reversed, like the Plotly version).
  */
 export function buildTimelineOption(input: TimelineInput): EChartsCoreOption {
-  const { divider, labelColor } = axisCommon(input.theme);
+  const { divider } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
   const colorway = colorwayOf(input.theme);
   const labels = input.items.map((item) => item.label);
@@ -662,21 +832,21 @@ export function buildTimelineOption(input: TimelineInput): EChartsCoreOption {
     grid: { left: 8, right: 24, top: 16, bottom: 8, containLabel: true },
     xAxis: {
       type: 'value',
-      min: min - 1,
-      max: max + 1,
-      axisLabel: {
-        color: labelColor,
-        fontSize: 11,
+      // Anos inteiros com limites "redondos" (décadas): só geometria do eixo.
+      min: Math.floor((min - 1) / 5) * 5,
+      max: Math.ceil((max + 1) / 5) * 5,
+      minInterval: 1,
+      axisLabel: tickLabel(input.theme, fontFamily, {
         // Years are categories in time: never group digits ("2.000").
         formatter: (v: number): string => String(Math.round(v)),
-      },
+      }),
       splitLine: { lineStyle: { color: divider } },
     },
     yAxis: {
       type: 'category',
       data: labels,
       inverse: true,
-      axisLabel: { color: labelColor, fontSize: 11 },
+      axisLabel: tickLabel(input.theme, fontFamily),
       axisTick: { show: false },
       axisLine: { lineStyle: { color: 'rgba(148,163,184,0.3)' } },
     },
@@ -718,7 +888,7 @@ export function buildRadarOption(input: RadarInput): EChartsCoreOption {
         name,
         max: maxPerIndicator[i],
       })),
-      axisName: { color: labelColor, fontSize: 11, fontFamily },
+      axisName: { color: labelColor, fontSize: 12, fontFamily },
       splitLine: {
         lineStyle: {
           color:
@@ -773,7 +943,7 @@ export interface GanttInput extends BaseBuilderInput {
  * ECharts analogue of Plotly `bar.base`.
  */
 export function buildGanttOption(input: GanttInput): EChartsCoreOption {
-  const { divider, labelColor } = axisCommon(input.theme);
+  const { divider } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
   const colorway = colorwayOf(input.theme);
   const labels = input.bars.map((b) => b.y);
@@ -793,21 +963,21 @@ export function buildGanttOption(input: GanttInput): EChartsCoreOption {
       type: 'value',
       min: -0.5,
       max: Math.max(input.xLabels.length - 0.5, 0.5),
-      axisLabel: {
-        color: labelColor,
-        fontSize: 11,
+      axisLabel: tickLabel(input.theme, fontFamily, {
         formatter: (v: number): string => {
-          const label = input.xLabels[Math.round(v)];
+          // Só índices inteiros válidos — fora disso, vazio (sem "Oct" duplo).
+          if (!Number.isInteger(v)) return '';
+          const label = input.xLabels[v];
           return label === undefined ? '' : String(label);
         },
-      },
+      }),
       splitLine: { lineStyle: { color: divider } },
     },
     yAxis: {
       type: 'category',
       data: labels,
       inverse: true,
-      axisLabel: { color: labelColor, fontSize: 11 },
+      axisLabel: tickLabel(input.theme, fontFamily),
       axisTick: { show: false },
       axisLine: { lineStyle: { color: 'rgba(148,163,184,0.3)' } },
     },
@@ -854,7 +1024,6 @@ export interface PolarInput extends BaseBuilderInput {
  * coordinates — the ECharts analogue of Plotly `scatterpolar`.
  */
 export function buildPolarOption(input: PolarInput): EChartsCoreOption {
-  const { labelColor } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
   const colorway = colorwayOf(input.theme);
   return {
@@ -869,16 +1038,14 @@ export function buildPolarOption(input: PolarInput): EChartsCoreOption {
     angleAxis: {
       type: 'category',
       data: input.categories,
-      axisLabel: { color: labelColor, fontSize: 11, fontFamily },
+      axisLabel: tickLabel(input.theme, fontFamily),
       axisLine: { lineStyle: { color: 'rgba(148,163,184,0.3)' } },
     },
     radiusAxis: {
-      axisLabel: {
-        color: labelColor,
-        fontSize: 11,
+      axisLabel: tickLabel(input.theme, fontFamily, {
         formatter: (v: number): string =>
           formatEChartsNumber(v, input.locale),
-      },
+      }),
     },
     series: input.series.map((s, i) => {
       const color = s.color ?? colorway[i % colorway.length];
