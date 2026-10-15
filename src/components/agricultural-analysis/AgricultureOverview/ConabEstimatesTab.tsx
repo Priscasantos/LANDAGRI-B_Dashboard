@@ -8,6 +8,7 @@ import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
 import EChartsPie from '../../charts/echarts/EChartsPie';
 import { useT } from '../../../i18n/LanguageContext';
 import { translateActivity, translateCropName } from '../../../data/glossary';
+import { formatKpiArea, formatKpiProduction, formatProductivity } from '../../../lib/format';
 import conabAgriculturalData from '../../../data/processed/conab_agricultural_data.json';
 
 interface ProductionYear {
@@ -89,7 +90,6 @@ export default function ConabEstimatesTab() {
         name: translateActivity('Total Production (thousand tons)', locale),
         x: seasons,
         y: seasons.map(s => totalBySeason[s]),
-        color: '#EC9706',
       }],
     };
   }, [crops, locale]);
@@ -113,22 +113,21 @@ export default function ConabEstimatesTab() {
     if (!crops) return { series: [] };
     const seasons = ['2018/19', '2019/20', '2020/21', '2021/22', '2022/23', '2023/24'];
 
-    const series: { name: string; x: string[]; y: number[]; color?: string }[] = [];
+    const series: { name: string; x: string[]; y: number[] }[] = [];
 
-    const addCrop = (key: string, name: string, color: string) => {
+    const addCrop = (key: string, name: string) => {
       const crop = crops[key];
       if (crop?.production_data) {
         series.push({
           name,
           x: seasons,
           y: seasons.map(s => crop.production_data![s]?.productivity || 0),
-          color,
         });
       }
     };
 
-    addCrop('soybean', translateCropName('Soybean', locale), '#EC9706');
-    addCrop('corn_total', translateCropName('Corn (Total)', locale), '#626C01');
+    addCrop('soybean', translateCropName('Soybean', locale));
+    addCrop('corn_total', translateCropName('Corn (Total)', locale));
 
     return { series };
   }, [crops, locale]);
@@ -177,16 +176,14 @@ export default function ConabEstimatesTab() {
     );
   }
 
-  const unitProd = data?.metadata?.unit_production || 'thousand tons';
-  const unitArea = data?.metadata?.unit_area || 'thousand hectares';
 
   return (
     <div className="space-y-6">
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard icon={Package} label={tBody('metricTotalProduction')} value={`${metrics.totalProduction.toLocaleString()}k ${unitProd.split(' ')[0]}`} variant="accuracy" />
-        <MetricCard icon={Sprout} label={tBody('metricPlantedArea')} value={`${metrics.totalArea.toLocaleString()}k ha`} variant="resolution" />
-        <MetricCard icon={TrendingUp} label={tBody('metricAvgProductivity')} value={`${metrics.avgProductivity} kg/ha`} variant="classes" />
+        <MetricCard icon={Package} label={tBody('metricTotalProduction')} value={formatKpiProduction(metrics.totalProduction, locale)} help={tBody('kpiProductionUnit')} variant="accuracy" />
+        <MetricCard icon={Sprout} label={tBody('metricPlantedArea')} value={formatKpiArea(metrics.totalArea, locale)} help={tBody('kpiAreaUnit')} variant="resolution" />
+        <MetricCard icon={TrendingUp} label={tBody('metricAvgProductivity')} value={formatProductivity(metrics.avgProductivity, locale)} variant="classes" />
         <MetricCard icon={Wheat} label={tBody('metricCropsTracked')} value={metrics.cropCount} variant="frequency" />
       </div>
 
@@ -224,7 +221,7 @@ export default function ConabEstimatesTab() {
       {/* Planted Area Distribution + All Crops by Production */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card padding="lg" hover={false}>
-          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hPlantedAreaDist', { unit: unitArea })}</h3>
+          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hPlantedAreaDist', { unit: tBody('kpiAreaUnit') })}</h3>
           {plantedAreaDistribution.length > 0 ? (
             <EChartsPie
               data={plantedAreaDistribution}
@@ -244,7 +241,6 @@ export default function ConabEstimatesTab() {
               labels={allCropsProduction.labels}
               values={allCropsProduction.values}
               captionKey="production"
-              color="#EC9706"
               height={Math.max(250, allCropsProduction.labels.length * 40)}
             />
           ) : (
