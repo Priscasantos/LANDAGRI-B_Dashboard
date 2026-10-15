@@ -9,12 +9,12 @@ import ThemeCustomizer from '../ThemeCustomizer';
 import { CommandSearch, SearchTrigger } from './CommandSearch';
 
 const SUB_ROUTE_LABELS: Record<string, string> = {
-  temporal: 'Temporal Analysis',
-  comparative: 'Comparative Analysis',
-  detailed: 'Detailed Analysis',
-  overview: 'Agriculture Overview',
-  'crop-calendar': 'Crop Calendar',
-  availability: 'Agriculture Availability',
+  temporal: 'Análise Temporal',
+  comparative: 'Análise Comparativa',
+  detailed: 'Análise Detalhada',
+  overview: 'Panorama Agrícola',
+  'crop-calendar': 'Calendário de Culturas',
+  availability: 'Disponibilidade Agrícola',
 };
 
 const SECTION_LABELS: Record<string, { label: string; to: string }> = {

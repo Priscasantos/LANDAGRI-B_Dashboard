@@ -3,6 +3,7 @@ import Card from '../../ui/Card';
 import MetricCard from '../../ui/MetricCard';
 import GroupedBarChart from '../../charts/GroupedBarChart';
 import LineChart from '../../charts/LineChart';
+import { formatCropName } from '../../../lib/cropNames';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 import conabMappingData from '../../../data/processed/conab_mapping_data.json';
 
@@ -90,7 +91,7 @@ export default function ConabMappingTab() {
     return {
       categories: regions,
       series: crops.map(crop => ({
-        name: crop,
+        name: formatCropName(crop),
         values: regions.map(r => regionCounts[crop][r] || 0),
       })),
     };
@@ -101,9 +102,13 @@ export default function ConabMappingTab() {
     if (!cropsMapping) return { series: [] };
 
     const years = ['2020', '2021', '2022', '2023', '2024'];
+    // Numeric years (not date-like strings) so Plotly uses a linear axis;
+    // combined with `dtick: 1` + `tickformat: 'd'` below, ticks are always
+    // whole years — never fractional labels like "2020.5".
+    const numericYears = years.map(Number);
     const series = Object.entries(cropsMapping).map(([, crop]) => ({
       name: crop.name,
-      x: years,
+      x: numericYears,
       y: years.map(y => (crop.mapping_years?.includes(y) ? 1 : 0)),
     }));
 
@@ -159,6 +164,7 @@ export default function ConabMappingTab() {
             height={350}
             showMarkers={false}
             fill="tozeroy"
+            layout={{ xaxis: { tickmode: 'linear', dtick: 1, tickformat: 'd' } }}
           />
         ) : (
           <p className="text-fg-muted text-center py-8">No temporal coverage data available.</p>

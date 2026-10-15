@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { GanttChart, TrendingUp, Clock, TriangleAlert } from 'lucide-react';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import Tabs from '../../ui/Tabs';
 import TimelineTab from './TimelineTab';
@@ -34,22 +35,26 @@ export default function TemporalPage() {
   const tabs = [
     {
       id: 'timeline',
-      label: '📊 Timeline',
+      label: 'Timeline',
+      icon: GanttChart,
       content: <TimelineTab data={temporalData} />,
     },
     {
       id: 'evolution',
-      label: '📈 Evolution',
+      label: 'Evolution',
+      icon: TrendingUp,
       content: <EvolutionTab data={temporalData} />,
     },
     {
       id: 'coverage',
-      label: '⌚ Temporal Coverage',
+      label: 'Temporal Coverage',
+      icon: Clock,
       content: <CoverageTab data={temporalData} />,
     },
     {
       id: 'gaps',
-      label: '⚠️ Gap Analysis',
+      label: 'Gap Analysis',
+      icon: TriangleAlert,
       content: <GapAnalysisTab data={temporalData} />,
     },
   ];

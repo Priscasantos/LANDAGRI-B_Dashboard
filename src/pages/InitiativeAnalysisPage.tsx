@@ -1,4 +1,6 @@
 import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
+import { Clock, GitCompare, FileSearch } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import TemporalPage from '../components/initiative-analysis/TemporalAnalysis/TemporalPage';
 import ComparativePage from '../components/initiative-analysis/ComparativeAnalysis/ComparativePage';
 import DetailedPage from '../components/initiative-analysis/DetailedAnalysis/DetailedPage';
@@ -8,10 +10,10 @@ export default function InitiativeAnalysisPage() {
   const location = useLocation();
   const moduleTheme = MODULE_THEMES['Initiative Analysis'];
 
-  const subPages = [
-    { path: 'temporal', label: '⏳ Temporal Analysis' },
-    { path: 'comparative', label: '🔠 Comparative Analysis' },
-    { path: 'detailed', label: '◌ Detailed Analysis' },
+  const subPages: { path: string; label: string; icon: LucideIcon }[] = [
+    { path: 'temporal', label: 'Análise Temporal', icon: Clock },
+    { path: 'comparative', label: 'Análise Comparativa', icon: GitCompare },
+    { path: 'detailed', label: 'Análise Detalhada', icon: FileSearch },
   ];
 
   return (
@@ -31,7 +33,7 @@ export default function InitiativeAnalysisPage() {
             <Link
               key={tab.path}
               to={`/initiative-analysis/${tab.path}`}
-              className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200 ${
+              className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200 ${
                 isActive ? '' : 'text-fg-secondary'
               }`}
               style={{
@@ -39,6 +41,7 @@ export default function InitiativeAnalysisPage() {
                 color: isActive ? moduleTheme.primary : undefined,
               }}
             >
+              <tab.icon size={15} aria-hidden="true" className="shrink-0" />
               {tab.label}
             </Link>
           );

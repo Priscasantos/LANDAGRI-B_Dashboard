@@ -132,45 +132,45 @@ export interface CommandIndexEntry {
  * sub-pages are indexed in the same change that adds them.
  */
 export const commandIndex: CommandIndexEntry[] = [
-  { title: 'Visão Geral', url: '/overview', group: 'Overview' },
+  { title: 'Visão Geral', url: '/overview', group: 'Visão Geral' },
   {
     title: 'Análise de Iniciativas',
     url: '/initiative-analysis',
-    group: 'Initiative Analysis',
+    group: 'Análise de Iniciativas',
   },
-  { title: 'Temporal Analysis', url: '/initiative-analysis/temporal', group: 'Initiative Analysis' },
+  { title: 'Análise Temporal', url: '/initiative-analysis/temporal', group: 'Análise de Iniciativas' },
   {
-    title: 'Comparative Analysis',
+    title: 'Análise Comparativa',
     url: '/initiative-analysis/comparative',
-    group: 'Initiative Analysis',
+    group: 'Análise de Iniciativas',
   },
   {
-    title: 'Detailed Analysis',
+    title: 'Análise Detalhada',
     url: '/initiative-analysis/detailed',
-    group: 'Initiative Analysis',
+    group: 'Análise de Iniciativas',
   },
   {
     title: 'Análise Agrícola',
     url: '/agricultural-analysis',
-    group: 'Agricultural Analysis',
+    group: 'Análise Agrícola',
   },
   {
-    title: 'Agriculture Overview',
+    title: 'Panorama Agrícola',
     url: '/agricultural-analysis/overview',
-    group: 'Agricultural Analysis',
+    group: 'Análise Agrícola',
   },
   {
-    title: 'Crop Calendar',
+    title: 'Calendário de Culturas',
     url: '/agricultural-analysis/crop-calendar',
-    group: 'Agricultural Analysis',
+    group: 'Análise Agrícola',
   },
   {
-    title: 'Agriculture Availability',
+    title: 'Disponibilidade Agrícola',
     url: '/agricultural-analysis/availability',
-    group: 'Agricultural Analysis',
+    group: 'Análise Agrícola',
   },
-  { title: 'Simulador Preditivo', url: '/predictive', group: 'Predictive' },
-  { title: 'Referências', url: '/about', group: 'About' },
+  { title: 'Simulador Preditivo', url: '/predictive', group: 'Preditivo' },
+  { title: 'Referências', url: '/about', group: 'Sobre' },
 ];
 
 /** Session-storage key written by `public/404.html` on gh-pages deep links. */

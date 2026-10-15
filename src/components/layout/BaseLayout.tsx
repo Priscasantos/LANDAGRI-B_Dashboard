@@ -51,7 +51,7 @@ export default function BaseLayout({ children, title, description }: BaseLayoutP
           </main>
           <footer className="border-t border-border bg-muted py-6 text-center text-xs text-muted-foreground">
             <div className="mx-auto w-full max-w-(--content-max-width) px-4 sm:px-6 lg:px-8">
-              <p>© 2026 LANDAGRI-B Dashboard — Dados: MapBiomas & IBGE</p>
+              <p>© {new Date().getFullYear()} LANDAGRI-B Dashboard — Dados: MapBiomas & IBGE</p>
             </div>
           </footer>
         </div>

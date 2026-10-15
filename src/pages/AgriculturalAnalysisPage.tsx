@@ -1,15 +1,18 @@
 import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
+import { Sprout, CalendarDays, Package } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import AgricultureOverviewPage from '../components/agricultural-analysis/AgricultureOverview/AgricultureOverviewPage';
 import CropCalendarPage from '../components/agricultural-analysis/CropCalendar/CropCalendarPage';
 import AgricultureAvailabilityPage from '../components/agricultural-analysis/AgricultureAvailability/AgricultureAvailabilityPage';
 
+
 export default function AgriculturalAnalysisPage() {
   const location = useLocation();
 
-  const subPages = [
-    { path: 'overview', label: '🔎 Agriculture Overview' },
-    { path: 'crop-calendar', label: '📅 Crop Calendar' },
-    { path: 'availability', label: '⏳ Agriculture Availability' },
+  const subPages: { path: string; label: string; icon: LucideIcon }[] = [
+    { path: 'overview', label: 'Panorama Agrícola', icon: Sprout },
+    { path: 'crop-calendar', label: 'Calendário de Culturas', icon: CalendarDays },
+    { path: 'availability', label: 'Disponibilidade Agrícola', icon: Package },
   ];
 
   return (
@@ -21,10 +24,11 @@ export default function AgriculturalAnalysisPage() {
             <Link
               key={tab.path}
               to={`/agricultural-analysis/${tab.path}`}
-              className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200 ${
+              className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200 ${
                 isActive ? 'text-amber-700 border-amber-600 font-semibold' : 'text-fg-secondary border-transparent hover:text-fg hover:border-border'
               }`}
             >
+              <tab.icon size={15} aria-hidden="true" className="shrink-0" />
               {tab.label}
             </Link>
           );

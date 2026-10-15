@@ -38,49 +38,49 @@ interface SidebarNavGroup {
  */
 const navGroups: SidebarNavGroup[] = [
   {
-    label: 'Overview',
+    label: 'Visão Geral',
     items: [
       { title: 'Visão Geral', url: '/overview', icon: BarChart3 },
     ],
   },
   {
-    label: 'Initiative Analysis',
+    label: 'Análise de Iniciativas',
     items: [
       {
         title: 'Análise de Iniciativas',
         url: '/initiative-analysis',
         icon: Calendar,
         items: [
-          { title: 'Temporal Analysis', url: '/initiative-analysis/temporal' },
-          { title: 'Comparative Analysis', url: '/initiative-analysis/comparative' },
-          { title: 'Detailed Analysis', url: '/initiative-analysis/detailed' },
+          { title: 'Análise Temporal', url: '/initiative-analysis/temporal' },
+          { title: 'Análise Comparativa', url: '/initiative-analysis/comparative' },
+          { title: 'Análise Detalhada', url: '/initiative-analysis/detailed' },
         ],
       },
     ],
   },
   {
-    label: 'Agricultural Analysis',
+    label: 'Análise Agrícola',
     items: [
       {
         title: 'Análise Agrícola',
         url: '/agricultural-analysis',
         icon: Map,
         items: [
-          { title: 'Agriculture Overview', url: '/agricultural-analysis/overview' },
-          { title: 'Crop Calendar', url: '/agricultural-analysis/crop-calendar' },
-          { title: 'Agriculture Availability', url: '/agricultural-analysis/availability' },
+          { title: 'Panorama Agrícola', url: '/agricultural-analysis/overview' },
+          { title: 'Calendário de Culturas', url: '/agricultural-analysis/crop-calendar' },
+          { title: 'Disponibilidade Agrícola', url: '/agricultural-analysis/availability' },
         ],
       },
     ],
   },
   {
-    label: 'Predictive',
+    label: 'Preditivo',
     items: [
       { title: 'Simulador Preditivo', url: '/predictive', icon: BrainCircuit },
     ],
   },
   {
-    label: 'About',
+    label: 'Sobre',
     items: [
       { title: 'Referências', url: '/about', icon: BookOpen },
     ],

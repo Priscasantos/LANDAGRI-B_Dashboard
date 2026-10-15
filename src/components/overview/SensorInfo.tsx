@@ -1,4 +1,5 @@
 import Expandable from '../ui/Expandable';
+import { Satellite, Search, Rainbow } from 'lucide-react';
 import type { SensorMap, SensorMetadata } from '../../types/sensor';
 
 interface SensorInfoProps {
@@ -14,11 +15,12 @@ function SensorCard({ sensorKey, sensor }: { sensorKey: string; sensor: SensorMe
 
   return (
     <div className="mb-4 p-3 bg-surface rounded-lg border border-border">
-      <div className="font-semibold text-fg mb-2">
-        🛰️ {sensor.display_name || sensorKey}
+      <div className="font-semibold text-fg mb-2 flex items-center gap-1.5">
+        <Satellite size={15} aria-hidden="true" className="shrink-0" />
+        <span>{sensor.display_name || sensorKey}</span>
       </div>
 
-      <Expandable title="Sensor Specifications" icon="🔍" defaultExpanded={true}>
+      <Expandable title="Sensor Specifications" icon={<Search size={16} aria-hidden="true" />} defaultExpanded={true}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <div><span className="font-medium">Platform:</span> {sensor.platform_name || '-'}</div>
@@ -34,7 +36,7 @@ function SensorCard({ sensorKey, sensor }: { sensorKey: string; sensor: SensorMe
       </Expandable>
 
       {sensor.spectral_bands && Array.isArray(sensor.spectral_bands) && sensor.spectral_bands.length > 0 && (
-        <Expandable title="Spectral Bands" icon="🌈">
+        <Expandable title="Spectral Bands" icon={<Rainbow size={16} aria-hidden="true" />}>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>

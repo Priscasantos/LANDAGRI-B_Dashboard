@@ -5,7 +5,8 @@ interface ExpandableProps {
   title: string;
   children: ReactNode;
   defaultExpanded?: boolean;
-  icon?: string;
+  /** Optional Lucide icon element rendered before the title (decorative). */
+  icon?: ReactNode;
 }
 
 export default function Expandable({ title, children, defaultExpanded = false, icon }: ExpandableProps) {
@@ -26,7 +27,11 @@ export default function Expandable({ title, children, defaultExpanded = false, i
         }}
       >
         {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-        {icon && <span>{icon}</span>}
+        {icon && (
+          <span aria-hidden="true" className="inline-flex shrink-0 items-center">
+            {icon}
+          </span>
+        )}
         {title}
       </button>
       {expanded && (

@@ -42,14 +42,18 @@ export default function LineChart({
     hovertemplate: '<b>%{x}</b><br>' + s.name + ': %{y:,.1f}<extra></extra>',
   }));
 
+  const { xaxis: extraXAxis, yaxis: extraYAxis, ...restExtraLayout } = extraLayout ?? {};
+
   const layout: Partial<Layout> = {
     title: title ? { text: title, x: 0.5 } : undefined,
-    xaxis: { title: { text: xlabel }, tickangle: -45 },
-    yaxis: { title: { text: ylabel } },
+    // Deep-merge axes so a caller override (e.g. integer-year ticks) keeps
+    // the default title/tickangle instead of replacing the whole axis.
+    xaxis: { title: { text: xlabel }, tickangle: -45, ...extraXAxis },
+    yaxis: { title: { text: ylabel }, ...extraYAxis },
     showlegend: true,
     legend: { orientation: 'h', y: -0.3 },
     hovermode: 'x unified',
-    ...extraLayout,
+    ...restExtraLayout,
   };
 
   return <BaseChart data={data} layout={layout} height={height} />;

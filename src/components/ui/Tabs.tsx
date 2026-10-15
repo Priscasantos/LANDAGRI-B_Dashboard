@@ -1,8 +1,11 @@
 import { useState, type ReactNode } from 'react';
+import type { LucideIcon } from 'lucide-react';
 
 interface Tab {
   id: string;
   label: string;
+  /** Optional Lucide icon rendered before the label (decorative). */
+  icon?: LucideIcon;
   content: ReactNode;
 }
 
@@ -30,7 +33,7 @@ export default function Tabs({ tabs, defaultTab, onChange }: TabsProps) {
           <button
             key={tab.id}
             onClick={() => handleTabChange(tab.id)}
-            className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-all duration-200
+            className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-all duration-200
               border-b-2 -mb-px`}
             style={{
               borderBottomColor: activeTab === tab.id ? 'var(--color-primary)' : 'transparent',
@@ -50,6 +53,9 @@ export default function Tabs({ tabs, defaultTab, onChange }: TabsProps) {
               }
             }}
           >
+            {tab.icon ? (
+              <tab.icon size={15} aria-hidden="true" className="shrink-0" />
+            ) : null}
             {tab.label}
           </button>
         ))}

@@ -1,5 +1,6 @@
 import type { InitiativeRow } from '../../types/initiative';
 import Expandable from '../ui/Expandable';
+import { Building2, Microscope, History } from 'lucide-react';
 import { parseAvailableYears } from '../../lib/dataParser';
 
 interface TechnicalDetailsProps {
@@ -11,7 +12,7 @@ export default function TechnicalDetails({ data }: TechnicalDetailsProps) {
 
   return (
     <div className="space-y-3">
-      <Expandable title="Basic Information" icon="🏢" defaultExpanded={true}>
+      <Expandable title="Basic Information" icon={<Building2 size={16} aria-hidden="true" />} defaultExpanded={true}>
         <div className="space-y-2">
           <div><span className="font-medium text-fg">Provider:</span> {data.Provider || '-'}</div>
           <div><span className="font-medium text-fg">Source:</span> {data.Source || '-'}</div>
@@ -19,7 +20,7 @@ export default function TechnicalDetails({ data }: TechnicalDetailsProps) {
         </div>
       </Expandable>
 
-      <Expandable title="Technical Specifications" icon="🔬">
+      <Expandable title="Technical Specifications" icon={<Microscope size={16} aria-hidden="true" />}>
         <div className="space-y-2">
           <div><span className="font-medium text-fg">Methodology:</span> {data.Methodology || '-'}</div>
           <div><span className="font-medium text-fg">Algorithm:</span> {data.Algorithm || '-'}</div>
@@ -28,7 +29,7 @@ export default function TechnicalDetails({ data }: TechnicalDetailsProps) {
         </div>
       </Expandable>
 
-      <Expandable title="Temporal Information" icon="⏳">
+      <Expandable title="Temporal Information" icon={<History size={16} aria-hidden="true" />}>
         <div className="space-y-2">
           {years.length > 0 ? (
             <>

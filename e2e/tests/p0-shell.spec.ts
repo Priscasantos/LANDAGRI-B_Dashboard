@@ -61,7 +61,7 @@ test.describe('P0 - Shell SaaS (sidebar nav smoke)', () => {
 
     await page.getByRole('combobox', { name: 'Buscar páginas' }).fill('temporal');
     await page
-      .getByRole('option', { name: /Temporal Analysis/ })
+      .getByRole('option', { name: /Análise Temporal|Temporal Analysis/ })
       .first()
       .click();
     await bp.waitForNavigationComplete();
