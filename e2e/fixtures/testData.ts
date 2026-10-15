@@ -11,7 +11,7 @@ export const PAGE_TITLES: Record<string, RegExp> = {
   '/LANDAGRI-B_Dashboard/initiative-analysis/temporal': /Análise|Iniciativa|Initiative/,
   '/LANDAGRI-B_Dashboard/agricultural-analysis/overview': /Análise|Agrícola|Agricultural/,
   '/LANDAGRI-B_Dashboard/predictive': /Simulador|Preditivo|Predictive/,
-  '/LANDAGRI-B_Dashboard/about': /Referências|About/,
+  '/LANDAGRI-B_Dashboard/about': /Sobre o Dashboard|About the LANDAGRI/,
 };
 
 export const NAV_MENU_ITEMS = [
@@ -19,7 +19,7 @@ export const NAV_MENU_ITEMS = [
   { label: /Análise de Iniciativas|Initiative/, route: ROUTES.initiativeAnalysis },
   { label: /Análise Agrícola|Agricultural/, route: ROUTES.agriculturalAnalysis },
   { label: /Simulador Preditivo|Predictive/, route: ROUTES.predictive },
-  { label: /Referências|About/, route: ROUTES.about },
+  { label: /Sobre|About/, route: ROUTES.about },
 ];
 
 export const TIMEOUTS = {

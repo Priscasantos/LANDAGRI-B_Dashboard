@@ -37,8 +37,8 @@ const FIVE_ROUTES = [
   {
     slug: 'about',
     route: ROUTES.about,
-    ptH1: /Referências/,
-    enH1: /References/,
+    ptH1: /Sobre o Dashboard/,
+    enH1: /About the LANDAGRI/,
   },
 ] as const;
 
