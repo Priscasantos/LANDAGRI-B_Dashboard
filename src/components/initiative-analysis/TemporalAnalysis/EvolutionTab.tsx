@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Star } from 'lucide-react';
 import BaseChart from '../../charts/BaseChart';
 import type { Data } from 'plotly.js';
 
@@ -224,7 +225,7 @@ export default function EvolutionTab({ data }: EvolutionTabProps) {
         <h3 className="text-base font-semibold text-fg mb-2">Active Initiatives per Year</h3>
         <p className="text-sm text-fg-secondary mb-3">
           Number of active LULC initiatives with available data each year.
-          Peak year highlighted with ⭐ marker. Dashed line shows average.
+          Peak year highlighted with <Star size={12} aria-hidden="true" className="inline-block align-[-1px]" /> marker. Dashed line shows average.
         </p>
         <BaseChart
           data={[activeTrace, avgTrace]}

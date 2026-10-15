@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { BarChart3, Zap, Map, TrendingUp } from 'lucide-react';
 import Tabs from '../../ui/Tabs';
 import Card from '../../ui/Card';
 import HeatmapChart from '../../charts/HeatmapChart';
@@ -205,10 +206,10 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
   );
 
   const subTabs = [
-    { id: 'matrix', label: '📊 Intensity Matrix', content: intensityContent },
-    { id: 'peak', label: '⚡ Peak Activity', content: peakContent },
-    { id: 'density', label: '🗺️ Density Map', content: densityContent },
-    { id: 'concentration', label: '📈 Concentration Index', content: concentrationContent },
+    { id: 'matrix', label: 'Intensity Matrix', icon: BarChart3, content: intensityContent },
+    { id: 'peak', label: 'Peak Activity', icon: Zap, content: peakContent },
+    { id: 'density', label: 'Density Map', icon: Map, content: densityContent },
+    { id: 'concentration', label: 'Concentration Index', icon: TrendingUp, content: concentrationContent },
   ];
 
   return <Tabs tabs={subTabs} />;

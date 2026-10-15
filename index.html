@@ -8,6 +8,160 @@
     <meta name="description" content="LANDAGRI-B Dashboard — Análise Territorial de Uso e Cobertura da Terra. Dados do MapBiomas, IBGE e INPE para o território brasileiro." />
     <meta name="keywords" content="LANDAGRI-B, uso do solo, cobertura da terra, MapBiomas, IBGE, INPE, sensoriamento remoto, Brasil" />
     <meta name="theme-color" content="#1e40af" />
+    <!-- Tipografia via internet (sem binários no repo): Inter (corpo 400–700),
+         Sora (display 600–700), JetBrains Mono (números/código 500–600).
+         Refs: fonts.google.com/specimen/Inter · fontpair.co/all ·
+         smashingmagazine.com/2020/07/css-techniques-legibility/ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&family=JetBrains+Mono:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Anti-FOUC pré-paint: espelha ThemeProvider + useThemeManager
+         (landagri-theme + preset/density/radius/font). Aplica datasets e as
+         mesmas CSS vars do `applyToRoot` antes do hydrate para o primeiro
+         paint já sair no preset certo. Espelho manual de
+         `src/config/theme-presets.ts` + `src/lib/fonts.ts` + RADIUS_MAP:
+         ao trocar um hex/fonte lá, replicar aqui. Reversível: remover volta
+         ao default (flash claro + preset agro-v2 antes do hydrate). -->
+    <script>
+      (function () {
+        try {
+          var PRESETS = {
+            'default': {
+              light: { primary: '#3b82f6', hover: '#2563eb', light_: '#eff6ff', accent: '#eff6ff',
+                charts: ['#2563eb','#3b82f6','#60a5fa','#93c5fd','#1e40af','#0e7c86','#e6a817','#5c6bc0','#c2701d','#94a3b8'],
+                sbBg: '#ffffff', sbText: '#334155', sbActive: '#2563eb', sbActiveBg: '#eff6ff', sbHover: '#f1f5f9',
+                hOv: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)', hIn: 'linear-gradient(135deg, #1e3a8f 0%, #60a5fa 100%)',
+                hAg: 'linear-gradient(135deg, #1d4ed8 0%, #93c5fd 100%)', hAb: 'linear-gradient(135deg, #172554 0%, #3b82f6 100%)' },
+              dark: { primary: '#60a5fa', hover: '#3b82f6', light_: '#1e3a5f', accent: '#1e3a5f',
+                charts: ['#93c5fd','#60a5fa','#3b82f6','#bfdbfe','#2563eb','#4dd0e1','#ffca28','#9fa8da','#e8a04c','#cbd5e1'],
+                sbBg: '#0b1526', sbText: '#93a4bd', sbActive: '#93c5fd', sbActiveBg: '#1e3a5f', sbHover: '#111f36',
+                hOv: 'linear-gradient(135deg, #0c1a3a 0%, #1e40af 100%)', hIn: 'linear-gradient(135deg, #0f172a 0%, #1e3a8f 100%)',
+                hAg: 'linear-gradient(135deg, #172554 0%, #1d4ed8 100%)', hAb: 'linear-gradient(135deg, #020617 0%, #1e40af 100%)' }
+            },
+            'agro': {
+              light: { primary: '#626C01', hover: '#4d5601', light_: '#f7fee7', accent: '#f7fee7',
+                charts: ['#626C01','#7a8602','#a3b018','#c0ca33','#4d5601','#c2701d','#e6a817','#0e7c86','#5c6bc0','#94a3b8'],
+                sbBg: '#ffffff', sbText: '#3f5546', sbActive: '#4d5601', sbActiveBg: '#f7fee7', sbHover: '#f6f9f4',
+                hOv: 'linear-gradient(135deg, #4d5601 0%, #626C01 100%)', hIn: 'linear-gradient(135deg, #80400B 0%, #626C01 100%)',
+                hAg: 'linear-gradient(135deg, #92400e 0%, #a3b018 100%)', hAb: 'linear-gradient(135deg, #3f6212 0%, #626C01 100%)' },
+              dark: { primary: '#a3b018', hover: '#626C01', light_: '#1a2e05', accent: '#1a2e05',
+                charts: ['#c0ca33','#a3b018','#7a8602','#d9e021','#626C01','#e8a04c','#ffca28','#4dd0e1','#9fa8da','#cbd5e1'],
+                sbBg: '#0c1510', sbText: '#9db4a3', sbActive: '#c0ca33', sbActiveBg: '#1a2e05', sbHover: '#122019',
+                hOv: 'linear-gradient(135deg, #141a05 0%, #4d5601 100%)', hIn: 'linear-gradient(135deg, #292524 0%, #44403c 100%)',
+                hAg: 'linear-gradient(135deg, #1a2e05 0%, #292524 100%)', hAb: 'linear-gradient(135deg, #1c1917 0%, #292524 100%)' }
+            },
+            'agro-v2': {
+              light: { primary: '#2E7D32', hover: '#1B5E20', light_: '#E8F5E9', accent: '#E8F5E9',
+                charts: ['#2E7D32','#43A047','#7CB342','#AED581','#1B5E20','#C2701D','#E6A817','#0E7C86','#5C6BC0','#B0BEC5'],
+                sbBg: '#ffffff', sbText: '#3f5546', sbActive: '#1b5e20', sbActiveBg: '#e8f5e9', sbHover: '#f6f9f4',
+                hOv: 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)', hIn: 'linear-gradient(135deg, #80400b 0%, #626c01 100%)',
+                hAg: 'linear-gradient(135deg, #ec9706 0%, #626c01 100%)', hAb: 'linear-gradient(135deg, #918c00 0%, #626c01 100%)' },
+              dark: { primary: '#9CCC65', hover: '#AED581', light_: '#16241a', accent: '#16241A',
+                charts: ['#9CCC65','#7CB342','#C5E1A5','#43A047','#E8A04C','#FFCA28','#4DD0E1','#9FA8DA','#B0BEC5','#66BB6A'],
+                sbBg: '#0c1510', sbText: '#9db4a3', sbActive: '#9ccc65', sbActiveBg: '#16241a', sbHover: '#122019',
+                hOv: 'linear-gradient(135deg, #0c1510 0%, #1b5e20 100%)', hIn: 'linear-gradient(135deg, #44403c 0%, #292524 100%)',
+                hAg: 'linear-gradient(135deg, #451a03 0%, #292524 100%)', hAb: 'linear-gradient(135deg, #3f3f46 0%, #27272a 100%)' }
+            },
+            'terra': {
+              light: { primary: '#80400B', hover: '#653208', light_: '#fef3c7', accent: '#fef3c7',
+                charts: ['#80400B','#a0522d','#c2701d','#e6a817','#653208','#2e7d32','#0e7c86','#5c6bc0','#7cb342','#94a3b8'],
+                sbBg: '#ffffff', sbText: '#57534e', sbActive: '#653208', sbActiveBg: '#fef3c7', sbHover: '#fafaf9',
+                hOv: 'linear-gradient(135deg, #653208 0%, #80400B 100%)', hIn: 'linear-gradient(135deg, #451a03 0%, #a0522d 100%)',
+                hAg: 'linear-gradient(135deg, #92400e 0%, #c2701d 100%)', hAb: 'linear-gradient(135deg, #57534e 0%, #80400B 100%)' },
+              dark: { primary: '#d08a3e', hover: '#80400B', light_: '#451a03', accent: '#451a03',
+                charts: ['#e8a04c','#d08a3e','#c2701d','#f0b35c','#a0522d','#9ccc65','#4dd0e1','#9fa8da','#c5e1a5','#cbd5e1'],
+                sbBg: '#1a120a', sbText: '#b8a89a', sbActive: '#e8a04c', sbActiveBg: '#451a03', sbHover: '#241610',
+                hOv: 'linear-gradient(135deg, #241610 0%, #653208 100%)', hIn: 'linear-gradient(135deg, #292524 0%, #44403c 100%)',
+                hAg: 'linear-gradient(135deg, #451a03 0%, #292524 100%)', hAb: 'linear-gradient(135deg, #1c1917 0%, #292524 100%)' }
+            },
+            'ambar': {
+              light: { primary: '#EC9706', hover: '#c67d05', light_: '#ffedd5', accent: '#ffedd5',
+                charts: ['#EC9706','#f59e0b','#fbbf24','#fcd34d','#c67d05','#0e7c86','#2e7d32','#5c6bc0','#c2701d','#94a3b8'],
+                sbBg: '#ffffff', sbText: '#57534e', sbActive: '#c67d05', sbActiveBg: '#ffedd5', sbHover: '#fafaf9',
+                hOv: 'linear-gradient(135deg, #92400e 0%, #EC9706 100%)', hIn: 'linear-gradient(135deg, #78350f 0%, #f59e0b 100%)',
+                hAg: 'linear-gradient(135deg, #b45309 0%, #fbbf24 100%)', hAb: 'linear-gradient(135deg, #57534e 0%, #EC9706 100%)' },
+              dark: { primary: '#fbbf24', hover: '#EC9706', light_: '#451a03', accent: '#451a03',
+                charts: ['#fcd34d','#fbbf24','#f59e0b','#fde68a','#EC9706','#4dd0e1','#9ccc65','#9fa8da','#e8a04c','#cbd5e1'],
+                sbBg: '#1a120a', sbText: '#b8a89a', sbActive: '#fbbf24', sbActiveBg: '#451a03', sbHover: '#241610',
+                hOv: 'linear-gradient(135deg, #241610 0%, #92400e 100%)', hIn: 'linear-gradient(135deg, #292524 0%, #44403c 100%)',
+                hAg: 'linear-gradient(135deg, #451a03 0%, #292524 100%)', hAb: 'linear-gradient(135deg, #1c1917 0%, #292524 100%)' }
+            }
+          };
+          var FONTS = {
+            'default': { sans: '"Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+              display: '"Sora", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+              mono: '"JetBrains Mono", "Fira Code", ui-monospace, monospace' },
+            'mono': { sans: '"JetBrains Mono", "Fira Code", ui-monospace, monospace',
+              display: '"JetBrains Mono", "Fira Code", ui-monospace, monospace',
+              mono: '"JetBrains Mono", "Fira Code", ui-monospace, monospace' },
+            'system': { sans: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+              display: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+              mono: 'ui-monospace, SFMono-Regular, Menlo, monospace' }
+          };
+          var RADII = { sm: 8, md: 12, lg: 16 };
+          function pick(key, allowed, fallback) {
+            try {
+              var v = localStorage.getItem(key);
+              if (v && allowed.indexOf(v) !== -1) return v;
+            } catch (e) { /* sem storage — fallback */ }
+            return fallback;
+          }
+          var stored = localStorage.getItem('landagri-theme');
+          var dark =
+            stored === 'dark' ||
+            (stored !== 'light' &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var mode = dark ? 'dark' : 'light';
+          var presetKey = pick('landagri-preset', ['default', 'agro', 'agro-v2', 'terra', 'ambar'], 'agro-v2');
+          var density = pick('landagri-density', ['comfortable', 'compact'], 'comfortable');
+          var radiusKey = pick('landagri-radius', ['sm', 'md', 'lg'], 'md');
+          var fontKey = pick('landagri-font', ['default', 'mono', 'system'], 'default');
+          var root = document.documentElement;
+          root.classList.remove('light', 'dark');
+          root.classList.add(dark ? 'dark' : 'light');
+          root.style.colorScheme = dark ? 'dark' : 'light';
+          root.dataset.preset = presetKey;
+          root.dataset.density = density;
+          root.dataset.radius = radiusKey;
+          root.dataset.font = fontKey;
+          var base = RADII[radiusKey];
+          var toRem = function (px) { return (Math.round((px / 16) * 1000) / 1000) + 'rem'; };
+          root.style.setProperty('--radius', toRem(base));
+          root.style.setProperty('--card-radius', toRem(base));
+          root.style.setProperty('--radius-sm', toRem(base - 4));
+          root.style.setProperty('--radius-md', toRem(base - 2));
+          root.style.setProperty('--radius-lg', toRem(base));
+          root.style.setProperty('--radius-xl', toRem(base + 4));
+          root.style.setProperty('--radius-2xl', toRem(base + 8));
+          var font = FONTS[fontKey];
+          root.style.setProperty('--font-sans', font.sans);
+          root.style.setProperty('--font-display', font.display);
+          root.style.setProperty('--font-mono', font.mono);
+          var c = PRESETS[presetKey][mode];
+          root.style.setProperty('--color-primary', c.primary);
+          root.style.setProperty('--color-primary-hover', c.hover);
+          root.style.setProperty('--color-primary-light', c.light_);
+          root.style.setProperty('--color-accent', c.accent);
+          for (var i = 0; i < 10; i++) {
+            root.style.setProperty('--color-chart-' + (i + 1), c.charts[i]);
+          }
+          root.style.setProperty('--color-sidebar-bg', c.sbBg);
+          root.style.setProperty('--color-sidebar-text', c.sbText);
+          root.style.setProperty('--color-sidebar-text-active', c.sbActive);
+          root.style.setProperty('--color-sidebar-active-bg', c.sbActiveBg);
+          root.style.setProperty('--color-sidebar-hover-bg', c.sbHover);
+          root.style.setProperty('--color-header-overview', c.hOv);
+          root.style.setProperty('--color-header-initiative', c.hIn);
+          root.style.setProperty('--color-header-agricultural', c.hAg);
+          root.style.setProperty('--color-header-about', c.hAb);
+        } catch (e) {
+          /* armazenamento/matchMedia indisponível — segue o CSS default */
+        }
+      })();
+    </script>
     <meta property="og:title" content="LANDAGRI-B Dashboard" />
     <meta property="og:description" content="Análise Territorial de Uso e Cobertura da Terra — Brasil" />
     <meta property="og:type" content="website" />

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, type NavigateFunction } from 'react-router-dom';
 import { Suspense, useEffect } from 'react';
+import { TriangleAlert } from 'lucide-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './components/theme-provider';
 import { ToastProvider } from './contexts/ToastContext';
@@ -47,7 +48,7 @@ function AppContent(): React.JSX.Element {
     return (
       <div className="flex items-center justify-center min-h-screen bg-muted">
         <div className="text-center max-w-md">
-          <div className="text-4xl mb-4 text-error" role="img" aria-label="Aviso">⚠</div>
+          <div className="text-4xl mb-4 text-error" role="img" aria-label="Aviso"><TriangleAlert size={36} aria-hidden="true" className="inline-block" /></div>
           <h2 className="text-xl font-bold mb-2 text-foreground">Erro ao carregar dados</h2>
           <p className="text-muted-foreground">{error}</p>
         </div>

@@ -56,7 +56,10 @@ export function ThemeProvider({
   React.useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
-    root.classList.add(theme === 'system' ? resolveSystemTheme() : theme);
+    const resolved = theme === 'system' ? resolveSystemTheme() : theme;
+    root.classList.add(resolved);
+    // Espelha o script pré-paint do index.html (controles nativos/scrollbar).
+    root.style.colorScheme = resolved;
   }, [theme]);
 
   // Acompanha mudanças do SO enquanto estiver em `system`.
@@ -68,6 +71,7 @@ export function ThemeProvider({
       const root = window.document.documentElement;
       root.classList.remove('light', 'dark');
       root.classList.add(e.matches ? 'dark' : 'light');
+      root.style.colorScheme = e.matches ? 'dark' : 'light';
     };
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);

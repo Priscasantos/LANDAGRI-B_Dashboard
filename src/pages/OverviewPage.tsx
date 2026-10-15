@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Tags, Wrench, Satellite } from 'lucide-react';
 import { useDashboardStore } from '../stores/dashboardStore';
 import SummaryCards from '../components/overview/SummaryCards';
 import OverviewMap from '../components/overview/OverviewMap';
@@ -62,14 +63,14 @@ export default function OverviewPage() {
           {/* Two-column layout */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
-              <h3 className="text-lg font-bold text-fg mb-3">🏷️ Classification</h3>
+              <h3 className="flex items-center gap-1.5 text-lg font-bold text-fg mb-3"><Tags size={18} aria-hidden="true" className="shrink-0" /> Classification</h3>
               <LulcClasses classification={classificationJson} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-fg mb-3">🔧 Technical Details</h3>
+              <h3 className="flex items-center gap-1.5 text-lg font-bold text-fg mb-3"><Wrench size={18} aria-hidden="true" className="shrink-0" /> Technical Details</h3>
               <TechnicalDetails data={selectedData} />
 
-              <h3 className="text-lg font-bold text-fg mb-3 mt-6">🛰️ Sensor Information</h3>
+              <h3 className="flex items-center gap-1.5 text-lg font-bold text-fg mb-3 mt-6"><Satellite size={18} aria-hidden="true" className="shrink-0" /> Sensor Information</h3>
               <SensorInfo sensorKeys={selectedData.Sensors} sensors={sensors as SensorMap} />
             </div>
           </div>

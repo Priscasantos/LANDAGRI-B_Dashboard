@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { BarChart3, GanttChart as GanttChartIcon, Target } from 'lucide-react';
 import Tabs from '../../ui/Tabs';
 import Card from '../../ui/Card';
 import LineChart from '../../charts/LineChart';
@@ -169,9 +170,9 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
   );
 
   const subTabs = [
-    { id: 'monthly', label: '📊 Monthly & Seasonality', content: monthlyContent },
-    { id: 'gantt', label: '📋 Gantt Chart', content: ganttContent },
-    { id: 'polar', label: '🎯 Polar Seasonality', content: polarContent },
+    { id: 'monthly', label: 'Monthly & Seasonality', icon: BarChart3, content: monthlyContent },
+    { id: 'gantt', label: 'Gantt Chart', icon: GanttChartIcon, content: ganttContent },
+    { id: 'polar', label: 'Polar Seasonality', icon: Target, content: polarContent },
   ];
 
   return <Tabs tabs={subTabs} />;

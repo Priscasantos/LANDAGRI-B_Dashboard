@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Wheat } from 'lucide-react';
 import ChartContainer from '../charts/ChartContainer';
 import { RechartsLineChart } from '../charts/recharts/RechartsLineChart';
 import type { RechartsLineSeries } from '../charts/recharts/RechartsLineChart';
@@ -101,8 +102,8 @@ export default function AgriculturalCharts(): React.JSX.Element | null {
 
   return (
     <section className="space-y-6 mt-8 min-w-0" aria-labelledby="agri-charts-heading">
-      <h2 id="agri-charts-heading" className="text-xl font-bold text-fg">
-        🌾 Brazilian Agricultural Data
+      <h2 id="agri-charts-heading" className="flex items-center gap-1.5 text-xl font-bold text-fg">
+        <Wheat size={20} aria-hidden="true" className="shrink-0" /> Brazilian Agricultural Data
       </h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-w-0">
         <ChartContainer

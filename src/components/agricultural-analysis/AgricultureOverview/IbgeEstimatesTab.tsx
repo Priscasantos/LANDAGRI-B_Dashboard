@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Wheat, BarChart3, MapPin, TrendingUp, CalendarDays, ClipboardList, RefreshCw } from 'lucide-react';
 import Card from '../../ui/Card';
 import Tabs from '../../ui/Tabs';
 import DataTable from '../../ui/DataTable';
@@ -191,7 +192,7 @@ export default function IbgeEstimatesTab() {
           {REGIONS.map(region => (
             <div key={region} className="bg-amber-50 rounded-lg p-3 text-center border border-amber-200">
               <p className="text-xs text-amber-700 font-medium">{region}</p>
-              <p className="text-lg font-bold text-amber-900 mt-1">{'🌾'}</p>
+              <p className="text-lg font-bold text-amber-900 mt-1"><Wheat size={20} aria-hidden="true" className="mx-auto" /></p>
               <p className="text-xs text-amber-600">Major producer</p>
             </div>
           ))}
@@ -226,19 +227,19 @@ export default function IbgeEstimatesTab() {
   );
 
   const subTabs = [
-    { id: 'production', label: '📊 Production by Crop', content: productionByCropContent },
-    { id: 'regional', label: '📍 Regional Distribution', content: regionalContent },
-    { id: 'historical', label: '📈 Historical Series', content: historicalContent },
+    { id: 'production', label: 'Production by Crop', icon: BarChart3, content: productionByCropContent },
+    { id: 'regional', label: 'Regional Distribution', icon: MapPin, content: regionalContent },
+    { id: 'historical', label: 'Historical Series', icon: TrendingUp, content: historicalContent },
   ];
 
   return (
     <div className="space-y-6">
       {/* Metric cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard icon="📊" label="Crops Tracked" value={Object.keys(production).length} variant="accuracy" />
-        <MetricCard icon="📅" label="Period" value={data?.metadata?.period_range || years.join('-')} variant="frequency" />
-        <MetricCard icon="📋" label="Survey" value={data?.metadata?.survey?.split(' ')[0] || 'PAM'} variant="resolution" />
-        <MetricCard icon="🔄" label="Frequency" value={data?.metadata?.periodicity || 'Annual'} variant="classes" />
+        <MetricCard icon={BarChart3} label="Crops Tracked" value={Object.keys(production).length} variant="accuracy" />
+        <MetricCard icon={CalendarDays} label="Period" value={data?.metadata?.period_range || years.join('-')} variant="frequency" />
+        <MetricCard icon={ClipboardList} label="Survey" value={data?.metadata?.survey?.split(' ')[0] || 'PAM'} variant="resolution" />
+        <MetricCard icon={RefreshCw} label="Frequency" value={data?.metadata?.periodicity || 'Annual'} variant="classes" />
       </div>
 
       <Tabs tabs={subTabs} />

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Wheat, Map, MapPin, CalendarDays, Download } from 'lucide-react';
 import Card from '../../ui/Card';
 import MetricCard from '../../ui/MetricCard';
 import GroupedBarChart from '../../charts/GroupedBarChart';
@@ -131,10 +132,10 @@ export default function ConabMappingTab() {
     <div className="space-y-6">
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard icon="🌾" label="Total Crops" value={metrics.cropCount} variant="accuracy" />
-        <MetricCard icon="🗺️" label="States Covered" value={metrics.stateCount} variant="resolution" />
-        <MetricCard icon="📍" label="Regions" value={metrics.regionCount} variant="classes" />
-        <MetricCard icon="📅" label="Temporal Span" value={mappingYears} variant="frequency" />
+        <MetricCard icon={Wheat} label="Total Crops" value={metrics.cropCount} variant="accuracy" />
+        <MetricCard icon={Map} label="States Covered" value={metrics.stateCount} variant="resolution" />
+        <MetricCard icon={MapPin} label="Regions" value={metrics.regionCount} variant="classes" />
+        <MetricCard icon={CalendarDays} label="Temporal Span" value={mappingYears} variant="frequency" />
       </div>
 
       {/* Crop Regional Distribution */}
@@ -191,7 +192,7 @@ export default function ConabMappingTab() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors"
           >
-            <span>⬇</span>
+            <Download size={15} aria-hidden="true" className="shrink-0" />
             Download Data
           </a>
         </div>

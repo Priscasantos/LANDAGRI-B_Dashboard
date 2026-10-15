@@ -1,7 +1,8 @@
 import type { ReactElement } from 'react';
+import type { LucideIcon } from 'lucide-react';
 
 interface MetricCardProps {
-  icon: string;
+  icon: LucideIcon;
   label: string;
   value: string | number;
   help?: string;
@@ -24,7 +25,7 @@ const AVATAR_TINT: Record<NonNullable<MetricCardProps['variant']>, string> = {
   frequency: 'bg-primary/10 text-primary-hover dark:text-primary',
 };
 export default function MetricCard({
-  icon,
+  icon: Icon,
   label,
   value,
   help,
@@ -44,14 +45,14 @@ export default function MetricCard({
     >
       <div
         aria-hidden="true"
-        className={`mb-1 flex size-11 items-center justify-center rounded-lg text-xl ${AVATAR_TINT[variant]}`}
+        className={`mb-1 flex size-11 items-center justify-center rounded-lg ${AVATAR_TINT[variant]}`}
       >
-        {icon}
+        <Icon size={22} aria-hidden="true" className="shrink-0" />
       </div>
       <div id={labelId} className="text-sm font-semibold text-fg-secondary mb-0.5">
         {label}
       </div>
-      <div id={valueId} className="text-2xl font-bold text-fg">
+      <div id={valueId} className="text-2xl font-bold font-display tabular-nums text-fg">
         {value}
       </div>
       {help && (

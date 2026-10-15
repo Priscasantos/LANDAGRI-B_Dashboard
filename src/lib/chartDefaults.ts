@@ -1,4 +1,5 @@
 import type { Layout } from 'plotly.js';
+import { resolveChartFontFamily } from './fonts';
 
 /**
  * Build standard Plotly layout with modern styling.
@@ -10,17 +11,20 @@ import type { Layout } from 'plotly.js';
 
 /** Berry legend marker — quadrado 8px (aplicar no nível do trace). */
 export const BERRY_LEGEND_MARKER = { symbol: 'square', size: 8 } as const;
-export function buildStandardLayout(overrides: Partial<Layout> = {}): Partial<Layout> {
+export function buildStandardLayout(
+  overrides: Partial<Layout> = {},
+  fontFamily: string = resolveChartFontFamily(),
+): Partial<Layout> {
   return {
     title: {
       text: '',
       x: 0.5,
       xanchor: 'center',
-      font: { size: 16, color: '#1e293b', family: "Inter, system-ui, sans-serif", weight: 600 },
+      font: { size: 16, color: '#1e293b', family: fontFamily, weight: 600 },
     },
     plot_bgcolor: 'rgba(0,0,0,0)',
     paper_bgcolor: 'rgba(0,0,0,0)',
-    font: { family: "Inter, system-ui, sans-serif", size: 12, color: '#475569' },
+    font: { family: fontFamily, size: 12, color: '#475569' },
     legend: {
       orientation: 'h',
       y: -0.28,
@@ -43,13 +47,13 @@ export function buildStandardLayout(overrides: Partial<Layout> = {}): Partial<La
     modebar: { orientation: 'v' },
     hoverlabel: {
       bgcolor: '#1e293b',
-      font: { color: '#ffffff', size: 12, family: "Inter, system-ui, sans-serif" },
+      font: { color: '#ffffff', size: 12, family: fontFamily },
       bordercolor: 'rgba(0,0,0,0.1)',
       borderwidth: 1,
       namelength: 0,
     },
     xaxis: {
-      title: { font: { size: 13, color: '#475569', family: "Inter, system-ui, sans-serif" } },
+      title: { font: { size: 13, color: '#475569', family: fontFamily } },
       tickfont: { size: 11, color: '#94a3b8' },
       gridcolor: '#e3e8ef',
       linecolor: 'rgba(148,163,184,0.3)',
@@ -57,7 +61,7 @@ export function buildStandardLayout(overrides: Partial<Layout> = {}): Partial<La
       automargin: true,
     },
     yaxis: {
-      title: { font: { size: 13, color: '#475569', family: "Inter, system-ui, sans-serif" } },
+      title: { font: { size: 13, color: '#475569', family: fontFamily } },
       tickfont: { size: 11, color: '#94a3b8' },
       gridcolor: '#e3e8ef',
       linecolor: 'rgba(148,163,184,0.3)',
@@ -72,19 +76,22 @@ export function buildStandardLayout(overrides: Partial<Layout> = {}): Partial<La
 /**
  * Get theme-aware chart layout
  */
-export function getChartLayout(theme: 'light' | 'dark' = 'light'): Partial<Layout> {
+export function getChartLayout(
+  theme: 'light' | 'dark' = 'light',
+  fontFamily: string = resolveChartFontFamily(),
+): Partial<Layout> {
   const isDark = theme === 'dark';
   return {
     plot_bgcolor: 'transparent',
     paper_bgcolor: 'transparent',
     font: {
-      family: "Inter, system-ui, sans-serif",
+      family: fontFamily,
       size: 12,
       color: isDark ? '#e2e8f0' : '#475569',
     },
     hoverlabel: {
       bgcolor: isDark ? '#334155' : '#1e293b',
-      font: { color: '#ffffff', size: 12, family: "Inter, system-ui, sans-serif" },
+      font: { color: '#ffffff', size: 12, family: fontFamily },
       bordercolor: isDark ? '#475569' : 'rgba(0,0,0,0.1)',
     },
     xaxis: {

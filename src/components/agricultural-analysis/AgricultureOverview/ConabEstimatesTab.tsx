@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Package, Sprout, TrendingUp, Wheat } from 'lucide-react';
 import Card from '../../ui/Card';
 import MetricCard from '../../ui/MetricCard';
 import LineChart from '../../charts/LineChart';
@@ -180,10 +181,10 @@ export default function ConabEstimatesTab() {
     <div className="space-y-6">
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard icon="📦" label="Total Production" value={`${metrics.totalProduction.toLocaleString()}k ${unitProd.split(' ')[0]}`} variant="accuracy" />
-        <MetricCard icon="🌱" label="Planted Area" value={`${metrics.totalArea.toLocaleString()}k ha`} variant="resolution" />
-        <MetricCard icon="📈" label="Avg Productivity" value={`${metrics.avgProductivity} kg/ha`} variant="classes" />
-        <MetricCard icon="🌾" label="Crops Tracked" value={metrics.cropCount} variant="frequency" />
+        <MetricCard icon={Package} label="Total Production" value={`${metrics.totalProduction.toLocaleString()}k ${unitProd.split(' ')[0]}`} variant="accuracy" />
+        <MetricCard icon={Sprout} label="Planted Area" value={`${metrics.totalArea.toLocaleString()}k ha`} variant="resolution" />
+        <MetricCard icon={TrendingUp} label="Avg Productivity" value={`${metrics.avgProductivity} kg/ha`} variant="classes" />
+        <MetricCard icon={Wheat} label="Crops Tracked" value={metrics.cropCount} variant="frequency" />
       </div>
 
       {/* Production Evolution */}

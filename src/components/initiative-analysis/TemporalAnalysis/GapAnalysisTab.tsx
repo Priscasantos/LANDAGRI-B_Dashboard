@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Circle } from 'lucide-react';
 import BaseChart from '../../charts/BaseChart';
 import type { Data } from 'plotly.js';
 
@@ -104,10 +105,10 @@ export default function GapAnalysisTab({ data }: GapAnalysisTabProps) {
 
       {/* Color legend */}
       <div className="flex flex-wrap gap-4 justify-center text-xs text-fg-secondary">
-        <span>🟢 No gaps</span>
-        <span>🟡 Small (&le;2y)</span>
-        <span>🟠 Medium (3-5y)</span>
-        <span>🔴 Large (&gt;5y)</span>
+        <span className="inline-flex items-center gap-1"><Circle size={10} aria-hidden="true" className="fill-green-500 text-green-500" /> No gaps</span>
+        <span className="inline-flex items-center gap-1"><Circle size={10} aria-hidden="true" className="fill-yellow-400 text-yellow-400" /> Small (&le;2y)</span>
+        <span className="inline-flex items-center gap-1"><Circle size={10} aria-hidden="true" className="fill-orange-500 text-orange-500" /> Medium (3-5y)</span>
+        <span className="inline-flex items-center gap-1"><Circle size={10} aria-hidden="true" className="fill-red-500 text-red-500" /> Large (&gt;5y)</span>
       </div>
     </div>
   );

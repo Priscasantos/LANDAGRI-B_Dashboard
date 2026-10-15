@@ -1,3 +1,5 @@
+import { Wheat, MapPin } from 'lucide-react';
+
 interface CropCalendarFiltersProps {
   crops: string[];
   regions: string[];
@@ -46,7 +48,7 @@ export default function CropCalendarFilters({
         {/* Crop Filter */}
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold text-fg">🌾 Crops</span>
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-fg"><Wheat size={15} aria-hidden="true" className="shrink-0" /> Crops</span>
             <button
               onClick={toggleAllCrops}
               className="text-xs text-amber-700 hover:text-amber-800 font-medium"
@@ -74,7 +76,7 @@ export default function CropCalendarFilters({
         {/* Region Filter */}
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold text-fg">📍 Regions</span>
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-fg"><MapPin size={15} aria-hidden="true" className="shrink-0" /> Regions</span>
             <button
               onClick={toggleAllRegions}
               className="text-xs text-amber-700 hover:text-amber-800 font-medium"

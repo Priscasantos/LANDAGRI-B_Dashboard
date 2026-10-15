@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Map, Wheat, MapPin, BarChart3, Sprout } from 'lucide-react';
 import Tabs from '../../ui/Tabs';
 import Card from '../../ui/Card';
 import HorizontalBarChart from '../../charts/HorizontalBarChart';
@@ -156,9 +157,9 @@ export default function AgricultureAvailabilityPage() {
   const spatialContent = (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <MetricCard icon="🗺️" label="States/Avail." value={totalStates} variant="accuracy" />
-        <MetricCard icon="🌾" label="Crops Available" value={totalCrops} variant="resolution" />
-        <MetricCard icon="📍" label="Regions" value={totalRegions} variant="classes" />
+        <MetricCard icon={Map} label="States/Avail." value={totalStates} variant="accuracy" />
+        <MetricCard icon={Wheat} label="Crops Available" value={totalCrops} variant="resolution" />
+        <MetricCard icon={MapPin} label="Regions" value={totalRegions} variant="classes" />
       </div>
       <Card padding="lg" hover={false}>
         <h3 className="text-base font-semibold text-fg mb-3">CONAB Spatial Coverage by State</h3>
@@ -199,7 +200,8 @@ export default function AgricultureAvailabilityPage() {
   const regionalActivitySubTabs = [
     {
       id: 'comparison',
-      label: '📊 Activity Comparison',
+      label: 'Activity Comparison',
+      icon: BarChart3,
       content: (
         <Card padding="lg" hover={false}>
           <h3 className="text-base font-semibold text-fg mb-3">Regional Activity Comparison</h3>
@@ -219,7 +221,8 @@ export default function AgricultureAvailabilityPage() {
     },
     {
       id: 'heatmap',
-      label: '🗺️ Activity Heatmap',
+      label: 'Activity Heatmap',
+      icon: Map,
       content: (
         <Card padding="lg" hover={false}>
           <h3 className="text-base font-semibold text-fg mb-3">Regional Activity Heatmap</h3>
@@ -247,9 +250,9 @@ export default function AgricultureAvailabilityPage() {
   ];
 
   const tabs = [
-    { id: 'spatial', label: '🗺️ Spatial Coverage', content: spatialContent },
-    { id: 'diversity', label: '🌱 Crop Diversity', content: cropDiversityContent },
-    { id: 'regional', label: '🗺️ Regional Activity', content: <Tabs tabs={regionalActivitySubTabs} /> },
+    { id: 'spatial', label: 'Spatial Coverage', icon: Map, content: spatialContent },
+    { id: 'diversity', label: 'Crop Diversity', icon: Sprout, content: cropDiversityContent },
+    { id: 'regional', label: 'Regional Activity', icon: Map, content: <Tabs tabs={regionalActivitySubTabs} /> },
   ];
 
   return (

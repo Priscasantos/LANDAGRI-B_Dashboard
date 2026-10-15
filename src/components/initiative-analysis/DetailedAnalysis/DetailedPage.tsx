@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { BarChart3, Radar, Flame, ClipboardList, CalendarDays } from 'lucide-react';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import Tabs from '../../ui/Tabs';
 import BarChartTab from './BarChartTab';
@@ -30,11 +31,11 @@ export default function DetailedPage() {
   };
 
   const tabs = [
-    { id: 'bar', label: '📊 Bar Chart', content: <BarChartTab selectedInitiatives={selected} /> },
-    { id: 'radar', label: '🎯 Radar Chart', content: <RadarTab selectedInitiatives={selected} /> },
-    { id: 'heatmap', label: '🔥 Heatmap', content: <HeatmapTab selectedInitiatives={selected} /> },
-    { id: 'data', label: '📋 Data Details', content: <DataDetailsTab selectedInitiatives={selected} /> },
-    { id: 'coverage', label: '📅 Annual Coverage', content: <AnnualCoverageTab selectedInitiatives={selected} /> },
+    { id: 'bar', label: 'Bar Chart', icon: BarChart3, content: <BarChartTab selectedInitiatives={selected} /> },
+    { id: 'radar', label: 'Radar Chart', icon: Radar, content: <RadarTab selectedInitiatives={selected} /> },
+    { id: 'heatmap', label: 'Heatmap', icon: Flame, content: <HeatmapTab selectedInitiatives={selected} /> },
+    { id: 'data', label: 'Data Details', icon: ClipboardList, content: <DataDetailsTab selectedInitiatives={selected} /> },
+    { id: 'coverage', label: 'Annual Coverage', icon: CalendarDays, content: <AnnualCoverageTab selectedInitiatives={selected} /> },
   ];
 
   return (

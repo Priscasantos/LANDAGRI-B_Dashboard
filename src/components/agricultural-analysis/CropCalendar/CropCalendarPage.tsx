@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, startTransition } from 'react';
+import { CalendarDays, History, Map, Sun, BarChart3, TrendingUp, Zap } from 'lucide-react';
 import Tabs from '../../ui/Tabs';
 import CropCalendarFilters from './CropCalendarFilters';
 import CalendarHeatmapsTab from './CalendarHeatmapsTab';
@@ -47,37 +48,44 @@ export default function CropCalendarPage() {
   const calendarTabs = [
     {
       id: 'heatmaps',
-      label: '🗓️ Calendar Heatmaps',
+      label: 'Calendar Heatmaps',
+      icon: CalendarDays,
       content: <CalendarHeatmapsTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
     },
     {
       id: 'timeline',
-      label: '⏳ Activities Timeline',
+      label: 'Activities Timeline',
+      icon: History,
       content: <ActivitiesTimelineTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
     },
     {
       id: 'spatiotemporal',
-      label: '🗺️ Spatio-temporal Distribution',
+      label: 'Spatio-temporal Distribution',
+      icon: Map,
       content: <SpatioTemporalTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
     },
     {
       id: 'seasonal',
-      label: '🌞 Seasonal Overview',
+      label: 'Seasonal Overview',
+      icon: Sun,
       content: <SeasonalOverviewTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
     },
     {
       id: 'distribution',
-      label: '📊 Crop Distribution',
+      label: 'Crop Distribution',
+      icon: BarChart3,
       content: <CropDistributionTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
     },
     {
       id: 'intensity',
-      label: '📈 Monthly Intensity',
+      label: 'Monthly Intensity',
+      icon: TrendingUp,
       content: <MonthlyIntensityTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
     },
     {
       id: 'activity',
-      label: '⚡ Activity Intensity',
+      label: 'Activity Intensity',
+      icon: Zap,
       content: <ActivityIntensityTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
     },
   ];
