@@ -55,6 +55,16 @@ jobs:
       - run: npm ci
       - run: npm run test
 
+  data-drift:
+    # Fails when public/data copies drift from the src/ source of truth.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/copy-data.mjs --check
+
   e2e:
     name: 'E2E Tests (${{ matrix.shard }})'
     runs-on: ubuntu-latest
@@ -101,7 +111,7 @@ jobs:
           retention-days: 5
 
   build:
-    needs: [lint, typecheck, test, e2e]
+    needs: [lint, typecheck, test, data-drift, e2e]
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true

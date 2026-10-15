@@ -1,31 +1,41 @@
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
-import { useEffect, lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, useNavigate, type NavigateFunction } from 'react-router-dom';
+import { Suspense, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
-import Header from './components/Header';
+import { SidebarConfigProvider } from './contexts/sidebar-context';
 import ErrorBoundary from './components/ErrorBoundary';
 import DashboardSkeleton from './components/ui/DashboardSkeleton';
+import RootLayout from './layouts/RootLayout';
+import { appRoutes, getBasename } from './config/routes';
 import { useInitiatives } from './hooks/useInitiatives';
 
-const OverviewPage = lazy(() => import('./pages/OverviewPage'));
-const InitiativeAnalysisPage = lazy(() => import('./pages/InitiativeAnalysisPage'));
-const AgriculturalAnalysisPage = lazy(() => import('./pages/AgriculturalAnalysisPage'));
-const PredictivePage = lazy(() => import('./pages/PredictivePage'));
-const AboutPage = lazy(() => import('./pages/AboutPage'));
+/**
+ * Shared QueryClient with minimal sane defaults.
+ *
+ * NOTE (Fase 3): no hook currently uses react-query — data loading goes
+ * through `useInitiatives` (fetch + zustand store). The provider is kept
+ * mounted so future queries get these defaults instead of retry storms:
+ * no refetch on window focus, one retry, 60s stale time.
+ */
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
-const queryClient = new QueryClient();
+const basename = getBasename();
 
-function AppContent() {
+function AppContent(): React.JSX.Element {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const redirectPath = sessionStorage.getItem('redirectPath');
-    if (redirectPath && redirectPath !== '/') {
-      sessionStorage.removeItem('redirectPath');
-      navigate(redirectPath, { replace: true });
-    }
-  }, [navigate]);
+  // Restore path saved by the gh-pages SPA fallback (public/404.html).
+  // Runs before the data gate below so deep links survive the redirect.
+  useEffectRedirect(navigate);
 
   const { isLoading, error } = useInitiatives();
 
@@ -37,7 +47,7 @@ function AppContent() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-surface-alt">
         <div className="text-center max-w-md">
-          <div className="text-4xl mb-4" style={{ color: 'var(--color-error)' }}>⚠</div>
+          <div className="text-4xl mb-4 text-error" role="img" aria-label="Aviso">⚠</div>
           <h2 className="text-xl font-bold mb-2 text-fg">Erro ao carregar dados</h2>
           <p className="text-fg-secondary">{error}</p>
         </div>
@@ -46,41 +56,54 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-canvas">
-      <Header />
-      <main className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8"
-        style={{ maxWidth: '1600px' }}
-      >
-        <Suspense fallback={<DashboardSkeleton />}>
-          <Routes>
-            <Route path="/" element={<OverviewPage />} />
-            <Route path="/overview" element={<OverviewPage />} />
-            <Route path="/initiative-analysis/*" element={<InitiativeAnalysisPage />} />
-            <Route path="/agricultural-analysis/*" element={<AgriculturalAnalysisPage />} />
-            <Route path="/predictive" element={<PredictivePage />} />
-            <Route path="/about" element={<AboutPage />} />
-          </Routes>
-        </Suspense>
-      </main>
-
-      <footer className="border-t border-border py-6 mt-12 text-center text-xs text-fg-muted bg-surface-alt">
-        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8" style={{ maxWidth: '1600px' }}>
-          <p>© 2026 LANDAGRI-B Dashboard — Dados: MapBiomas & IBGE</p>
-        </div>
-      </footer>
-    </div>
+    <RootLayout>
+      <Routes>
+        {appRoutes.map(({ path, Component }) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <ErrorBoundary>
+                <Suspense fallback={<DashboardSkeleton />}>
+                  <Component />
+                </Suspense>
+              </ErrorBoundary>
+            }
+          />
+        ))}
+      </Routes>
+    </RootLayout>
   );
 }
 
-export default function App() {
+function useEffectRedirect(navigate: NavigateFunction): void {
+  useEffect(() => {
+    // Persist the active basename so public/404.html can redirect deep
+    // links back here even under a custom VITE_BASENAME (see 404.html).
+    try {
+      localStorage.setItem('landagri-basename', basename);
+    } catch {
+      /* private mode: deep-link restore still works via path heuristic */
+    }
+    const redirectPath = sessionStorage.getItem('redirectPath');
+    if (redirectPath && redirectPath.startsWith('/') && redirectPath !== '/') {
+      sessionStorage.removeItem('redirectPath');
+      navigate(redirectPath, { replace: true });
+    }
+  }, [navigate]);
+}
+
+export default function App(): React.JSX.Element {
   return (
     <ErrorBoundary>
       <ThemeProvider>
         <ToastProvider>
           <QueryClientProvider client={queryClient}>
-            <BrowserRouter basename="/LANDAGRI-B_Dashboard">
-              <AppContent />
-            </BrowserRouter>
+            <SidebarConfigProvider>
+              <BrowserRouter basename={basename}>
+                <AppContent />
+              </BrowserRouter>
+            </SidebarConfigProvider>
           </QueryClientProvider>
         </ToastProvider>
       </ThemeProvider>

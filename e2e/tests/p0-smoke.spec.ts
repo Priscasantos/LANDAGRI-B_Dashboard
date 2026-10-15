@@ -31,14 +31,13 @@ test.describe('P0 - Smoke Tests (Critical Path)', () => {
       const bp = new BasePage(page);
       await bp.navigate(ROUTES.overview);
 
-      await page.getByRole('button').filter({ hasText: item.label }).first().click();
+      await page.getByRole('link', { name: item.label }).first().click();
       await bp.waitForNavigationComplete();
       await expect(page).toHaveURL(item.route);
     });
   }
 
   test('No broken routes', async ({ page }) => {
-    const bp = new BasePage(page);
     const routes = Object.values(ROUTES);
 
     for (const route of routes) {
@@ -50,13 +49,20 @@ test.describe('P0 - Smoke Tests (Critical Path)', () => {
     }
   });
 
-  test('Plotly charts render on overview page', async ({ page }) => {
+  test('Overview renders charts without the plotly bundle', async ({ page }) => {
+    // Fase 3 architecture: Overview uses recharts; plotly loads lazily
+    // only on detail routes (see docs/data-pipeline.md).
+    const plotlyRequests: string[] = [];
+    page.on('request', (req) => {
+      if (req.url().toLowerCase().includes('plotly')) plotlyRequests.push(req.url());
+    });
     const bp = new BasePage(page);
     await bp.navigate(ROUTES.overview);
     await page.waitForTimeout(3000);
 
-    const chartCount = await bp.getPlotlyChartCount();
-    expect(chartCount).toBeGreaterThan(0);
+    const rechartsCount = await page.locator('.recharts-wrapper').count();
+    expect(rechartsCount).toBeGreaterThan(0);
+    expect(plotlyRequests).toEqual([]);
   });
 
   test('Page has a title', async ({ page }) => {

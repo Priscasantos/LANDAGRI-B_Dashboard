@@ -106,17 +106,23 @@ export default function PredictivePage() {
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm text-fg">
-                  <span className="font-semibold">Reflorestamento</span>
-                  <span className="font-bold" style={{ color: 'var(--color-primary)' }}>+{reforestationRate}% / ano</span>
+                  <label htmlFor="reforestation-rate" className="font-semibold">
+                    Reflorestamento
+                  </label>
+                  <span className="font-bold" style={{ color: 'var(--color-primary)' }}>
+                    +{reforestationRate}% / ano
+                  </span>
                 </div>
                 <input
+                  id="reforestation-rate"
                   type="range"
                   min="0"
                   max="4"
                   step="0.1"
                   value={reforestationRate}
+                  aria-valuetext={`+${reforestationRate}% por ano`}
                   onChange={(e) => setReforestationRate(parseFloat(e.target.value))}
-                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                   style={{ backgroundColor: 'var(--color-border)' }}
                 />
                 <p className="text-xs text-fg-muted">
@@ -126,17 +132,21 @@ export default function PredictivePage() {
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm text-fg">
-                  <span className="font-semibold">Expansão Agrícola</span>
+                  <label htmlFor="agri-expansion" className="font-semibold">
+                    Expansão Agrícola
+                  </label>
                   <span className="font-bold text-amber-500">+{agriExpansion}% / ano</span>
                 </div>
                 <input
+                  id="agri-expansion"
                   type="range"
                   min="0"
                   max="3"
                   step="0.1"
                   value={agriExpansion}
+                  aria-valuetext={`+${agriExpansion}% por ano`}
                   onChange={(e) => setAgriExpansion(parseFloat(e.target.value))}
-                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-amber-500 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:outline-none"
                   style={{ backgroundColor: 'var(--color-border)' }}
                 />
                 <p className="text-xs text-fg-muted">
@@ -146,17 +156,21 @@ export default function PredictivePage() {
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm text-fg">
-                  <span className="font-semibold">Adoção Sustentável</span>
+                  <label htmlFor="sustainable-adoption" className="font-semibold">
+                    Adoção Sustentável
+                  </label>
                   <span className="font-bold text-emerald-500">{sustainableAdoption}%</span>
                 </div>
                 <input
+                  id="sustainable-adoption"
                   type="range"
                   min="0"
                   max="100"
                   step="5"
                   value={sustainableAdoption}
+                  aria-valuetext={`${sustainableAdoption}%`}
                   onChange={(e) => setSustainableAdoption(parseInt(e.target.value))}
-                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none"
                   style={{ backgroundColor: 'var(--color-border)' }}
                 />
                 <p className="text-xs text-fg-muted">
@@ -201,7 +215,12 @@ export default function PredictivePage() {
                 Interação entre reflorestamento, expansão agrícola e emissões
               </p>
 
-              <div className="h-80">
+              <div
+                className="h-80 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                role="img"
+                tabIndex={0}
+                aria-label={`Projeção anual 2025–2035. Floresta ${result2035.forestryArea} Mha, agricultura ${result2035.agricultureArea} Mha, índice de emissão ${result2035.carbonEmissionIndex}.`}
+              >
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={simulatedData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />

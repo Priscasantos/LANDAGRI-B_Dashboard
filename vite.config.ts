@@ -1,10 +1,42 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-export default defineConfig({
+const srcDir = path.dirname(fileURLToPath(import.meta.url))
+
+/**
+ * Single source of truth for the deploy sub-path is `VITE_BASENAME`.
+ * - Explicit `VITE_BASENAME` always wins (dev and build).
+ * - Otherwise: `/` for `vite dev` (serve at root, no local 404),
+ *   `/LANDAGRI-B_Dashboard/` for `vite build` (gh-pages project page).
+ * Must stay in sync with `getBasename()` in `src/config/routes.tsx`.
+ */
+const DEFAULT_PROD_BASENAME = '/LANDAGRI-B_Dashboard';
+
+function normalizeBase(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed || trimmed === '/') return '/';
+  return `/${trimmed.replace(/^\/+|\/+$/g, '')}/`;
+}
+
+export default defineConfig(({ command }) => {
+  const envBasename = process.env.VITE_BASENAME;
+  const base =
+    envBasename && envBasename.trim()
+      ? normalizeBase(envBasename)
+      : command === 'build'
+        ? `${DEFAULT_PROD_BASENAME}/`
+        : '/';
+  return {
   plugins: [react(), tailwindcss()].flat(),
-  base: '/LANDAGRI-B_Dashboard/',
+  resolve: {
+    alias: {
+      '@': path.join(srcDir, 'src'),
+    },
+  },
+  base,
   build: {
     outDir: 'dist',
     sourcemap: false,
@@ -23,4 +55,5 @@ export default defineConfig({
       },
     },
   },
+  };
 })

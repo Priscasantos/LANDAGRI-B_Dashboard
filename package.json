@@ -7,7 +7,7 @@
     "dev": "vite",
     "prebuild": "node scripts/copy-data.mjs",
     "build": "tsc -b && vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --base \"${VITE_BASENAME:-/LANDAGRI-B_Dashboard/}\"",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "preprocess": "node scripts/preprocess-data.mjs",

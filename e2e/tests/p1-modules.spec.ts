@@ -9,24 +9,20 @@ test.describe('P1 - Module Tests', () => {
       await bp.navigate(ROUTES.overview);
       await page.waitForTimeout(TIMEOUTS.dataLoad);
 
-      const metricCards = page.locator('[data-testid="metric-card"]');
-      const count = await metricCards.count();
+      // SummaryCards renders accessible listitems (no testid hooks).
+      const metricItems = page.getByRole('listitem');
+      const count = await metricItems.count();
       expect(count).toBeGreaterThan(0);
     });
 
-    test('Charts have data in traces', async ({ page }) => {
+    test('Recharts render SVG content on overview (no plotly)', async ({ page }) => {
       const bp = new BasePage(page);
       await bp.navigate(ROUTES.overview);
       await page.waitForTimeout(3000);
 
-      const chartCount = await bp.getPlotlyChartCount();
-      expect(chartCount).toBeGreaterThan(0);
-
-      const data = await bp.getPlotlyData(0);
-      expect(data).not.toBeNull();
-      if (data) {
-        expect(data.traces).toBeGreaterThan(0);
-      }
+      const charts = page.locator('.recharts-wrapper svg');
+      expect(await charts.count()).toBeGreaterThan(0);
+      await expect(charts.first()).toBeVisible();
     });
   });
 

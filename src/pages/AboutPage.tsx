@@ -147,7 +147,8 @@ export default function AboutPage() {
                   </span>
                   <button
                     onClick={handleCopyBib}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-all border hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                    aria-label={copiedBib ? 'BibTeX copiado' : 'Copiar citação BibTeX'}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-all border hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                     style={{
                       backgroundColor: 'var(--color-canvas)',
                       borderColor: 'var(--color-border)',
@@ -159,7 +160,9 @@ export default function AboutPage() {
                   </button>
                 </div>
                 <pre
-                  className="p-4 rounded-xl overflow-x-auto text-xs leading-relaxed border text-fg-secondary"
+                  aria-label="Citação BibTeX"
+                  tabIndex={0}
+                  className="p-4 rounded-xl overflow-x-auto text-xs leading-relaxed border text-fg-secondary focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                   style={{
                     backgroundColor: 'var(--color-canvas)',
                     borderColor: 'var(--color-border)',
@@ -250,7 +253,8 @@ export default function AboutPage() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => handleDownload('csv')}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all border text-center hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                  aria-label="Exportar dados em CSV"
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all border text-center hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                   style={{
                     backgroundColor: 'var(--color-canvas)',
                     borderColor: 'var(--color-border)',
@@ -261,7 +265,8 @@ export default function AboutPage() {
                 </button>
                 <button
                   onClick={() => handleDownload('json')}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all border text-center hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                  aria-label="Exportar dados em JSON"
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all border text-center hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                   style={{
                     backgroundColor: 'var(--color-canvas)',
                     borderColor: 'var(--color-border)',
@@ -274,6 +279,8 @@ export default function AboutPage() {
 
               {downloadFormat && (
                 <div
+                  role="status"
+                  aria-live="polite"
                   className="mt-4 p-3 rounded-xl border text-xs text-center"
                   style={{
                     backgroundColor: 'var(--color-primary-light)',
