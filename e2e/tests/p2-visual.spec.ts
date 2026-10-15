@@ -36,7 +36,7 @@ test.describe('P2 - Visual Tests', () => {
     await bp.navigate(ROUTES.overview);
     await page.waitForTimeout(3000);
 
-    const charts = page.locator('.js-plotly-plot');
+    const charts = page.locator('figure div svg');
     const chartCount = await charts.count();
 
     for (let i = 0; i < Math.min(chartCount, 3); i++) {
@@ -80,7 +80,7 @@ test.describe('P2 - Visual matrix {pt,en}x{light,dark} (charts + mapa)', () => {
         const bp = new BasePage(page);
         await bp.navigate(ROUTES.overview);
         await expect(
-          page.locator('.recharts-wrapper svg').first(),
+          page.locator('figure div svg').first(),
         ).toBeVisible({ timeout: TIMEOUTS.pageLoad });
         await expect(page.locator('.leaflet-container')).toBeVisible({
           timeout: TIMEOUTS.pageLoad,
@@ -98,7 +98,7 @@ test.describe('P2 - Visual matrix {pt,en}x{light,dark} (charts + mapa)', () => {
         );
       });
 
-      test(`initiative plotly ${tag}/${theme}`, async ({ page }) => {
+      test(`initiative echarts ${tag}/${theme}`, async ({ page }) => {
         await page.setViewportSize({ width: 1280, height: 800 });
         await page.addInitScript(
           ({ lang, th }) => {
@@ -113,12 +113,12 @@ test.describe('P2 - Visual matrix {pt,en}x{light,dark} (charts + mapa)', () => {
         );
         const bp = new BasePage(page);
         await bp.navigate(ROUTES.initiativeAnalysis);
-        const count = await bp.getPlotlyChartCount();
+        const count = await bp.getEChartsChartCount();
         expect(count).toBeGreaterThan(0);
         await page.waitForTimeout(1200);
 
         await expect(page).toHaveScreenshot(
-          `p2-initiative-plotly-${tag}-${theme}.png`,
+          `p2-initiative-echarts-${tag}-${theme}.png`,
           {
             fullPage: true,
             animations: 'disabled',

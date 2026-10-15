@@ -372,7 +372,7 @@ export const en: EnDictionary = {
     emissionDown: 'Emission reduction',
     emissionUp: 'Emission increase',
     detailedTitle: 'Detailed Projection (2025 - 2035)',
-    detailedSub: 'Same simulation as interactive chart (zoom, PNG export)',
+    detailedSub: 'Same simulation as interactive chart',
     plotlyTitle: 'Detailed projection 2025–2035',
     axisYear: 'Year',
     axisMha: 'Mha / Index',

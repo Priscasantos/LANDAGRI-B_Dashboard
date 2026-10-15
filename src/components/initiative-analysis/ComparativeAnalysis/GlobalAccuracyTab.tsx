@@ -1,10 +1,14 @@
 import { useMemo } from 'react';
-import BaseChart from '../../charts/BaseChart';
-import type { Data } from 'plotly.js';
+import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
 import { useDashboardStore } from '../../../stores/dashboardStore';
-import { CATEGORICAL_COLORS } from '../../../types/theme';
 import { useT } from '../../../i18n/LanguageContext';
 
+/**
+ * Overall accuracy bars + average line — ECharts edition (Fase 2 fatia 2c).
+ * Replaces the Plotly `BaseChart` bar/avg-line (min–max range stays in the
+ * summary cards); sorting, i18n and chrome unchanged.
+ * Reversible: previous version in git history.
+ */
 export default function GlobalAccuracyTab() {
   const { t } = useT('charts');
   const { t: tBody } = useT('initiative');
@@ -26,59 +30,22 @@ export default function GlobalAccuracyTab() {
     return <div className="py-8 text-center text-fg-muted">{tBody('noAccuracyData')}</div>;
   }
 
-  const barTrace: Data = {
-    x: chartData.map((d) => d.name),
-    y: chartData.map((d) => d.accuracy),
-    type: 'bar',
-    marker: {
-      color: chartData.map(
-        (d, i) => CATEGORICAL_COLORS[i % CATEGORICAL_COLORS.length],
-      ),
-    },
-    text: chartData.map((d) => `${d.accuracy}%`),
-    textposition: 'outside',
-    hovertemplate:
-      `<b>%{x}</b><br>${t('accuracyLabel')}: %{y:.1f}%<br>${t('range')}: [%{customdata[0]:.1f}% – %{customdata[1]:.1f}%]<extra></extra>`,
-    customdata: chartData.map((d) => [d.accuracyMin || 0, d.accuracyMax || 0]),
-  };
-
   const avgAccuracy =
     chartData.reduce((s, d) => s + d.accuracy, 0) / chartData.length;
-
-  const avgTrace: Data = {
-    x: [chartData[0]?.name || '', chartData[chartData.length - 1]?.name || ''],
-    y: [avgAccuracy, avgAccuracy],
-    type: 'scatter',
-    mode: 'lines',
-    name: `${t('average')} (${avgAccuracy.toFixed(1)}%)`,
-    line: { color: '#ef4444', width: 2, dash: 'dash' },
-    hoverinfo: 'skip',
-  };
 
   return (
     <div className="space-y-4">
       <p className="text-sm text-fg-secondary">
         {tBody('accuracyIntro')}
       </p>
-      <BaseChart
-        data={[barTrace, avgTrace]}
-        layout={{
-          title: { text: t('overallAccuracyByInitiative'), x: 0 },
-          xaxis: { title: '' },
-          yaxis: { title: t('overallAccuracyPct'), range: [0, 105] },
-          height: 450,
-          margin: { l: 50, r: 20, t: 40, b: 120 },
-          shapes: [
-            {
-              type: 'line',
-              xref: 'paper',
-              x0: 0,
-              x1: 1,
-              y0: avgAccuracy,
-              y1: avgAccuracy,
-              line: { color: '#ef4444', width: 2, dash: 'dash' },
-            },
-          ],
+      <EChartsGroupedBar
+        categories={chartData.map((d) => d.name)}
+        series={[{ name: t('overallAccuracyPct'), values: chartData.map((d) => d.accuracy) }]}
+        captionKey="overallAccuracyByInitiative"
+        height={450}
+        referenceLine={{
+          value: avgAccuracy,
+          name: `${t('average')} (${avgAccuracy.toFixed(1)}%)`,
         }}
       />
 

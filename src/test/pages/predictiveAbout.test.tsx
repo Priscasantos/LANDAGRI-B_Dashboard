@@ -17,12 +17,15 @@ vi.mock('recharts', async (importOriginal) => {
 
 import PredictivePage from '../../pages/PredictivePage';
 import AboutPage from '../../pages/AboutPage';
+import { ThemeProvider } from '../../components/theme-provider';
 
 describe('PredictivePage (simulador 2025→2035)', () => {
   it('exposes labelled sliders operable by keyboard', () => {
     render(
       <MemoryRouter>
-        <PredictivePage />
+        <ThemeProvider>
+          <PredictivePage />
+        </ThemeProvider>
       </MemoryRouter>,
     );
     const reforestation = screen.getByLabelText(/reflorestamento/i);
@@ -37,7 +40,9 @@ describe('PredictivePage (simulador 2025→2035)', () => {
   it('reset button restores defaults', () => {
     render(
       <MemoryRouter>
-        <PredictivePage />
+        <ThemeProvider>
+          <PredictivePage />
+        </ThemeProvider>
       </MemoryRouter>,
     );
     const reforestation = screen.getByLabelText(/reflorestamento/i) as HTMLInputElement;

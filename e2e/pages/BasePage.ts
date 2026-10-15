@@ -44,23 +44,12 @@ export class BasePage {
     return errors;
   }
 
-  getPlotlyCharts() {
-    return this.page.locator('.js-plotly-plot');
+  getEChartsCharts() {
+    return this.page.locator('figure div svg');
   }
 
-  async getPlotlyChartCount() {
-    return (await this.getPlotlyCharts()).count();
-  }
-
-  async getPlotlyData(chartIndex: number = 0): Promise<any> {
-    return this.page.evaluate((idx: number) => {
-      const plots = document.querySelectorAll('.js-plotly-plot');
-      if (plots[idx]) {
-        const plot = plots[idx] as any;
-        return plot._fullData ? { traces: plot._fullData.length, labels: plot._fullData[0]?.name } : null;
-      }
-      return null;
-    }, chartIndex);
+  async getEChartsChartCount() {
+    return (await this.getEChartsCharts()).count();
   }
 
   async isMobileView() {

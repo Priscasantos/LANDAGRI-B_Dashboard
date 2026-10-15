@@ -50,8 +50,8 @@ test.describe('P0 - Smoke Tests (Critical Path)', () => {
   });
 
   test('Overview renders charts without the plotly bundle', async ({ page }) => {
-    // Fase 3 architecture: Overview uses recharts; plotly loads lazily
-    // only on detail routes (see docs/data-pipeline.md).
+    // Fase 2 fatia 2c: Overview uses ECharts (SVG); the plotly runtime is
+    // gone from package.json, so no plotly request can exist.
     const plotlyRequests: string[] = [];
     page.on('request', (req) => {
       if (req.url().toLowerCase().includes('plotly')) plotlyRequests.push(req.url());
@@ -60,8 +60,8 @@ test.describe('P0 - Smoke Tests (Critical Path)', () => {
     await bp.navigate(ROUTES.overview);
     await page.waitForTimeout(3000);
 
-    const rechartsCount = await page.locator('.recharts-wrapper').count();
-    expect(rechartsCount).toBeGreaterThan(0);
+    const echartsCount = await page.locator('figure div svg').count();
+    expect(echartsCount).toBeGreaterThan(0);
     expect(plotlyRequests).toEqual([]);
   });
 

@@ -7,11 +7,16 @@ import { LANGUAGE_STORAGE_KEY } from '../../i18n/types';
 import PredictivePage from '../../pages/PredictivePage';
 import AboutPage from '../../pages/AboutPage';
 import OverviewMap from '../../components/overview/OverviewMap';
+import { ThemeProvider } from '../../components/theme-provider';
 
 function renderEN(ui: React.ReactElement): void {
   window.localStorage.setItem(LANGUAGE_STORAGE_KEY, 'en');
   document.documentElement.lang = 'en';
-  render(<LanguageProvider>{ui}</LanguageProvider>);
+  render(
+    <LanguageProvider>
+      <ThemeProvider>{ui}</ThemeProvider>
+    </LanguageProvider>,
+  );
 }
 
 beforeEach(() => {

@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
-import BaseChart from '../../charts/BaseChart';
-import type { Data } from 'plotly.js';
+import EChartsTimeline from '../../charts/echarts/EChartsTimeline';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
 import { useT } from '../../../i18n/LanguageContext';
 
@@ -21,6 +20,11 @@ interface TimelineTabProps {
   data: TemporalData[];
 }
 
+/**
+ * Initiative timeline — ECharts edition (Fase 2 fatia 2c).
+ * Replaces the Plotly `BaseChart` scatter+line timeline; data, sorting,
+ * i18n and chrome unchanged. Reversible: previous version in git history.
+ */
 export default function TimelineTab({ data }: TimelineTabProps) {
   const { t } = useT('charts');
   const { t: tBody } = useT('initiative');
@@ -37,71 +41,27 @@ export default function TimelineTab({ data }: TimelineTabProps) {
 
   const height = Math.max(520, sortedData.length * 32);
 
-  const traces: Data[] = sortedData.map((item, idx) => {
-    const color = CATEGORICAL_COLORS[idx % CATEGORICAL_COLORS.length];
-    return {
-      x: item.years,
-      y: item.years.map(() => item.displayName),
-      mode: 'markers',
-      type: 'scatter',
-      name: item.displayName,
-      marker: {
-        size: 12,
-        color,
-        line: { width: 2, color: 'white' },
-        symbol: 'circle',
-      },
-      hovertemplate: `<b>${item.displayName}</b><br>${t('year')}: %{x}<br>${t('coverage')}: ${item.coverage}<br>${t('methodology')}: ${item.methodology}<extra></extra>`,
-    };
-  });
-
-  // Add connecting lines
-  const lineTraces: Data[] = sortedData.map((item, idx) => {
-    const color = CATEGORICAL_COLORS[idx % CATEGORICAL_COLORS.length];
-    return {
-      x: [item.firstYear, item.lastYear],
-      y: [item.displayName, item.displayName],
-      mode: 'lines',
-      type: 'scatter',
-      name: `${item.displayName} ${t('period').toLowerCase()}`,
-      line: { color, width: 3, opacity: 0.5 },
-      hoverinfo: 'skip',
-      showlegend: false,
-    };
-  });
-
-  const allYears = sortedData.flatMap((d) => d.years);
-  const yearMin = Math.min(...allYears);
-  const yearMax = Math.max(...allYears);
+  const items = useMemo(
+    () =>
+      sortedData.map((item, idx) => ({
+        label: item.displayName,
+        years: item.years,
+        color: CATEGORICAL_COLORS[idx % CATEGORICAL_COLORS.length],
+        tip: (year: number): string =>
+          `<b>${item.displayName}</b><br>${t('year')}: ${year}<br>${t('coverage')}: ${item.coverage}<br>${t('methodology')}: ${item.methodology}`,
+      })),
+    [sortedData, t],
+  );
 
   return (
     <div className="space-y-4 min-w-0">
       <p className="text-sm text-fg-secondary">
         {tBody('timelineIntro')}
       </p>
-      <BaseChart
-        data={[...lineTraces, ...traces]}
+      <EChartsTimeline
+        items={items}
+        captionKey="initiativeTimeline"
         height={height}
-        layout={{
-          title: { text: t('initiativeTimeline'), x: 0 },
-          xaxis: {
-            title: { text: t('year') },
-            range: [yearMin - 1, yearMax + 1],
-            dtick: yearMax - yearMin > 40 ? 5 : 1,
-            tickfont: { size: 11 },
-            automargin: true,
-          },
-          yaxis: {
-            title: { text: '' },
-            autorange: 'reversed',
-            tickfont: { size: 11 },
-            automargin: true,
-          },
-          margin: { l: 180, r: 60, t: 60, b: 80 },
-          height,
-          showlegend: false,
-          hovermode: 'closest',
-        }}
       />
     </div>
   );

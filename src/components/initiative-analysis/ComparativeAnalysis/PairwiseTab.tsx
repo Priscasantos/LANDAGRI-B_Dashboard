@@ -1,12 +1,17 @@
 import { useMemo } from 'react';
-import BaseChart from '../../charts/BaseChart';
-import type { Data } from 'plotly.js';
+import EChartsScatter from '../../charts/echarts/EChartsScatter';
+import type { ScatterSeriesInput } from '../../charts/echarts/echarts-options';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
 import { useT } from '../../../i18n/LanguageContext';
 
+/**
+ * Accuracy vs resolution bubble chart — ECharts edition (Fase 2 fatia 2c).
+ * Replaces the Plotly `BaseChart` bubble scatter (log resolution axis,
+ * bubble size = class count, initiative labels); store filter, i18n and
+ * chrome unchanged. Reversible: previous version in git history.
+ */
 export default function PairwiseTab() {
-  const { t } = useT('charts');
   const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
@@ -24,43 +29,32 @@ export default function PairwiseTab() {
     }));
   }, [initiatives]);
 
+  const series: ScatterSeriesInput[] = useMemo(
+    () =>
+      chartData.map((d, i) => ({
+        name: d.name,
+        data: [[d.accuracy, d.resolution]],
+        color: CATEGORICAL_COLORS[i % CATEGORICAL_COLORS.length],
+        sizes: [d.classes],
+        labels: [d.name],
+      })),
+    [chartData],
+  );
+
   if (chartData.length === 0) {
     return <div className="py-8 text-center text-fg-muted">{tBody('noPairwiseData')}</div>;
   }
-
-  const scatterTrace: Data = {
-    x: chartData.map((d) => d.accuracy),
-    y: chartData.map((d) => d.resolution),
-    text: chartData.map((d) => d.name),
-    type: 'scatter',
-    mode: 'markers+text',
-    marker: {
-      size: chartData.map((d) => Math.max(8, Math.min(20, d.classes))),
-      color: chartData.map((d, i) => CATEGORICAL_COLORS[i % CATEGORICAL_COLORS.length]),
-      line: { width: 2, color: 'white' },
-      opacity: 0.85,
-    },
-    textposition: 'top center',
-    textfont: { size: 9 },
-    hovertemplate:
-      `<b>%{text}</b><br>${t('accuracyLabel')}: %{x:.1f}%<br>${t('resolutionLabel')}: %{y}m<br>${t('classes')}: %{customdata}<extra></extra>`,
-    customdata: chartData.map((d) => d.classes),
-  };
 
   return (
     <div className="space-y-4">
       <p className="text-sm text-fg-secondary">
         {tBody('pairwiseIntro')}
       </p>
-      <BaseChart
-        data={[scatterTrace]}
-        layout={{
-          title: { text: t('accuracyVsResolution'), x: 0 },
-          xaxis: { title: t('overallAccuracyPct'), range: [50, 105] },
-          yaxis: { title: t('spatialResolution'), type: 'log' },
-          height: 500,
-          hovermode: 'closest',
-        }}
+      <EChartsScatter
+        series={series}
+        captionKey="accuracyVsResolution"
+        height={500}
+        yAxisType="log"
       />
     </div>
   );

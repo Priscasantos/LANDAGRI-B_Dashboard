@@ -372,7 +372,7 @@ export const pt = {
     emissionDown: 'Redução de emissões',
     emissionUp: 'Aumento de emissões',
     detailedTitle: 'Projeção Detalhada (2025 - 2035)',
-    detailedSub: 'Mesma simulação em gráfico interativo (zoom, exportação PNG)',
+    detailedSub: 'Mesma simulação em gráfico interativo',
     plotlyTitle: 'Projeção detalhada 2025–2035',
     axisYear: 'Ano',
     axisMha: 'Mha / Índice',

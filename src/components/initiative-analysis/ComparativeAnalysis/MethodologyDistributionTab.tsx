@@ -1,12 +1,15 @@
 import { useMemo } from 'react';
-import BaseChart from '../../charts/BaseChart';
-import type { Data } from 'plotly.js';
+import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
 import { useT } from '../../../i18n/LanguageContext';
 
+/**
+ * Methodology × coverage grouped bars — ECharts edition (Fase 2 fatia 2c).
+ * Replaces the Plotly `BaseChart` grouped bar; grouping, i18n and chrome
+ * unchanged. Reversible: previous version in git history.
+ */
 export default function MethodologyDistributionTab() {
-  const { t } = useT('charts');
   const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
@@ -35,29 +38,20 @@ export default function MethodologyDistributionTab() {
     return <div className="py-8 text-center text-fg-muted">{tBody('noMethodologyData')}</div>;
   }
 
-  const traces: Data[] = coverageTypes.map((cov, idx) => ({
-    name: cov,
-    x: methods,
-    y: methods.map((m) => groupedData[m]?.[cov] || 0),
-    type: 'bar',
-    marker: { color: CATEGORICAL_COLORS[idx % CATEGORICAL_COLORS.length] },
-    hovertemplate: `<b>%{x}</b><br>${cov}: %{y}<extra></extra>`,
-  }));
-
   return (
     <div className="space-y-4">
       <p className="text-sm text-fg-secondary">
         {tBody('methodologyDistIntro')}
       </p>
-      <BaseChart
-        data={traces}
-        layout={{
-          title: { text: t('methodologyCoverageDistribution'), x: 0 },
-          xaxis: { title: t('methodology') },
-          yaxis: { title: t('count'), dtick: 1 },
-          barmode: 'group',
-          height: 400,
-        }}
+      <EChartsGroupedBar
+        categories={methods}
+        series={coverageTypes.map((cov, idx) => ({
+          name: cov,
+          values: methods.map((m) => groupedData[m]?.[cov] || 0),
+          color: CATEGORICAL_COLORS[idx % CATEGORICAL_COLORS.length],
+        }))}
+        captionKey="methodologyCoverageDistribution"
+        height={400}
       />
     </div>
   );

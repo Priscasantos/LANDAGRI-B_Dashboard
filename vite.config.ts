@@ -52,8 +52,6 @@ export default defineConfig(({ command }) => {
             id.includes('node_modules/zrender/')
           )
             return 'echarts';
-          // Plotly - largest library, separate chunk
-          if (id.includes('plotly.js-dist-min')) return 'plotly'
           // React Router - often changes less
           if (id.includes('react-router')) return 'router'
           // Leaflet - only used on overview map

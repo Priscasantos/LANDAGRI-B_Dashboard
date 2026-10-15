@@ -16,14 +16,18 @@ import {
   Info,
 } from 'lucide-react';
 import AnimatedPage from '../components/AnimatedPage';
-import PlotlyLazyChart from '../components/charts/PlotlyLazyChart';
+import EChartsBase from '../components/charts/echarts/EChartsBase';
+import { buildLineOption } from '../components/charts/echarts/echarts-options';
+import { useEffectiveTheme } from '../hooks/use-theme';
+import { useChartFontFamily } from '../hooks/use-chart-font';
 import { themeDataColor } from '../lib/theme-data';
-import type { Data } from 'plotly.js';
 import { simulateProjections, getDefaultParams, BASELINE_2025 } from '../lib/landCoverSimulation';
 import { useT } from '../i18n/LanguageContext';
 
 export default function PredictivePage() {
-  const { t } = useT('predictive');
+  const { t, locale } = useT('predictive');
+  const theme = useEffectiveTheme();
+  const fontFamily = useChartFontFamily();
   const [reforestationRate, setReforestationRate] = useState(getDefaultParams().reforestationRate);
   const [agriExpansion, setAgriExpansion] = useState(getDefaultParams().agriExpansion);
   const [sustainableAdoption, setSustainableAdoption] = useState(getDefaultParams().sustainableAdoption);
@@ -39,29 +43,33 @@ export default function PredictivePage() {
   const carbonDelta = Math.round(result2035.carbonEmissionIndex - 100);
 
   const plotlyYears = simulatedData.map((d) => d.year);
-  const plotlyTraces: Data[] = [
-    {
-      type: 'scatter',
-      mode: 'lines',
-      name: t('seriesForest'),
-      x: plotlyYears,
-      y: simulatedData.map((d) => d.forestryArea),
-    },
-    {
-      type: 'scatter',
-      mode: 'lines',
-      name: t('seriesAgri'),
-      x: plotlyYears,
-      y: simulatedData.map((d) => d.agricultureArea),
-    },
-    {
-      type: 'scatter',
-      mode: 'lines',
-      name: t('seriesEmission'),
-      x: plotlyYears,
-      y: simulatedData.map((d) => d.carbonEmissionIndex),
-    },
-  ];
+  const detailOption = useMemo(
+    () =>
+      buildLineOption({
+        series: [
+          {
+            name: t('seriesForest'),
+            x: plotlyYears,
+            y: simulatedData.map((d) => d.forestryArea),
+          },
+          {
+            name: t('seriesAgri'),
+            x: plotlyYears,
+            y: simulatedData.map((d) => d.agricultureArea),
+          },
+          {
+            name: t('seriesEmission'),
+            x: plotlyYears,
+            y: simulatedData.map((d) => d.carbonEmissionIndex),
+          },
+        ],
+        theme,
+        locale,
+        fontFamily,
+        showMarkers: false,
+      }),
+    [simulatedData, plotlyYears, theme, locale, fontFamily, t],
+  );
 
   const handleReset = () => {
     const def = getDefaultParams();
@@ -373,7 +381,7 @@ export default function PredictivePage() {
           </div>
         </div>
 
-        {/* Plotly island (lazy, chunk separado) — projeção detalhada */}
+        {/* ECharts island — projeção detalhada (Fase 2 fatia 2c, sem plotly) */}
         <div className="rounded-2xl p-6 border bg-surface border-border">
           <h3 className="text-xs font-bold uppercase tracking-wider mb-1 text-fg-muted">
             {t('detailedTitle')}
@@ -381,13 +389,11 @@ export default function PredictivePage() {
           <p className="text-sm mb-4 text-fg-secondary">
             {t('detailedSub')}
           </p>
-          <PlotlyLazyChart
-            data={plotlyTraces}
-            layout={{
-              title: { text: t('plotlyTitle') },
-              xaxis: { title: { text: t('axisYear') } },
-              yaxis: { title: { text: t('axisMha') } },
-            }}
+          <EChartsBase
+            option={detailOption}
+            ariaLabel={t('plotlyTitle')}
+            caption={t('plotlyTitle')}
+            height={400}
           />
         </div>
       </div>

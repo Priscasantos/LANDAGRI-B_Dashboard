@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import BaseChart from '../../charts/BaseChart';
-import type { Data } from 'plotly.js';
+import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
+import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
 import { useT } from '../../../i18n/LanguageContext';
 
 interface TemporalData {
@@ -20,6 +20,11 @@ interface CoverageTabProps {
   data: TemporalData[];
 }
 
+/**
+ * Temporal coverage matrix + coverage bars — ECharts edition (Fase 2 fatia 2c).
+ * Replaces the Plotly `BaseChart` heatmap/bar; stats cards, sorting, i18n
+ * and chrome unchanged. Reversible: previous version in git history.
+ */
 export default function CoverageTab({ data }: CoverageTabProps) {
   // locale reativo: ordenação e chrome do gráfico acompanham o toggle PT↔EN.
   const { t, locale } = useT('charts');
@@ -73,35 +78,6 @@ export default function CoverageTab({ data }: CoverageTabProps) {
 
   const heatHeight = Math.max(400, sortedData.length * 25);
 
-  const heatData: Data = {
-    z: matrix,
-    x: yearLabels,
-    y: sortedData.map((d) => d.displayName),
-    type: 'heatmap',
-    colorscale: [
-      [0, 'rgba(239,239,239,0.8)'],
-      [1, 'rgba(76,175,80,0.8)'],
-    ],
-    showscale: false,
-    hovertemplate: `<b>%{y}</b><br>${t('year')}: %{x}<br>${t('available')}: %{z}<extra></extra>`,
-  };
-
-  const barTrace: Data = {
-    x: sortedData.map((d) => d.displayName),
-    y: sortedData.map((d) => d.coveragePct),
-    type: 'bar',
-    marker: {
-      color: sortedData.map((d) =>
-        d.coveragePct >= 80 ? 'rgba(76,175,80,0.8)' :
-        d.coveragePct >= 50 ? 'rgba(255,193,7,0.8)' :
-        'rgba(239,83,80,0.8)',
-      ),
-    },
-    text: sortedData.map((d) => `${d.coveragePct}%`),
-    textposition: 'outside',
-    hovertemplate: `<b>%{x}</b><br>${t('coverage')}: %{y}%<extra></extra>`,
-  };
-
   return (
     <div className="space-y-6">
       <p className="text-sm text-fg-secondary">
@@ -124,27 +100,23 @@ export default function CoverageTab({ data }: CoverageTabProps) {
       </div>
 
       {/* Coverage Heatmap */}
-      <BaseChart
-        data={[heatData]}
-        layout={{
-          title: { text: t('temporalCoverageMatrix'), x: 0 },
-          xaxis: { title: t('year'), dtick: Math.max(1, Math.floor((yearLabels.length) / 20)) },
-          yaxis: { title: '', autorange: 'reversed' },
-          height: heatHeight,
-          margin: { l: 150, r: 20, t: 40, b: 60 },
-        }}
+      <EChartsHeatmap
+        z={matrix}
+        x={yearLabels}
+        y={sortedData.map((d) => d.displayName)}
+        captionKey="temporalCoverageMatrix"
+        height={heatHeight}
+        colors={['rgba(239,239,239,0.9)', '#4caf50']}
+        min={0}
+        max={1}
       />
 
       {/* Coverage Percentage Bar Chart */}
-      <BaseChart
-        data={[barTrace]}
-        layout={{
-          title: { text: t('coverageByInitiative'), x: 0 },
-          xaxis: { title: '' },
-          yaxis: { title: t('coveragePct'), range: [0, 105] },
-          height: Math.max(350, sortedData.length * 30),
-          margin: { l: 50, r: 20, t: 40, b: 120 },
-        }}
+      <EChartsGroupedBar
+        categories={sortedData.map((d) => d.displayName)}
+        series={[{ name: t('coveragePct'), values: sortedData.map((d) => d.coveragePct) }]}
+        captionKey="coverageByInitiative"
+        height={Math.max(350, sortedData.length * 30)}
       />
     </div>
   );

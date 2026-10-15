@@ -1,24 +1,20 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
-vi.mock('recharts', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('recharts')>();
-  const React = await import('react');
-  return {
-    ...actual,
-    ResponsiveContainer: ({ children }: { children: React.ReactElement }) =>
-      React.cloneElement(
-        children as React.ReactElement<{ width?: number; height?: number }>,
-        { width: 600, height: 350 },
-      ),
-  };
-});
-
+import { ThemeProvider } from '../../components/theme-provider';
 import AgriculturalCharts from '../../components/overview/AgriculturalCharts';
 
-describe('AgriculturalCharts (recharts)', () => {
+function renderCharts(): void {
+  render(
+    <ThemeProvider>
+      <AgriculturalCharts />
+    </ThemeProvider>,
+  );
+}
+
+describe('AgriculturalCharts (echarts)', () => {
   it('renders IBGE/CONAB section heading and does not require plotly', async () => {
-    render(<AgriculturalCharts />);
+    renderCharts();
     expect(
       await screen.findByRole('heading', { name: /dados agrícolas brasileiros/i }),
     ).toBeInTheDocument();
@@ -28,14 +24,14 @@ describe('AgriculturalCharts (recharts)', () => {
   });
 
   it('charts are keyboard-focusable', async () => {
-    render(<AgriculturalCharts />);
+    renderCharts();
     const chart = await screen.findByRole('img', { name: /evolução da produção/i });
     chart.focus();
     expect(chart).toHaveFocus();
   });
 
   it('exposes data source note', async () => {
-    render(<AgriculturalCharts />);
+    renderCharts();
     expect(await screen.findByText(/fonte:/i)).toBeInTheDocument();
   });
 });

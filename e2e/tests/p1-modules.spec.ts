@@ -15,12 +15,12 @@ test.describe('P1 - Module Tests', () => {
       expect(count).toBeGreaterThan(0);
     });
 
-    test('Recharts render SVG content on overview (no plotly)', async ({ page }) => {
+    test('ECharts render SVG content on overview (no plotly)', async ({ page }) => {
       const bp = new BasePage(page);
       await bp.navigate(ROUTES.overview);
       await page.waitForTimeout(3000);
 
-      const charts = page.locator('.recharts-wrapper svg');
+      const charts = page.locator('figure div svg');
       expect(await charts.count()).toBeGreaterThan(0);
       await expect(charts.first()).toBeVisible();
     });
@@ -41,7 +41,7 @@ test.describe('P1 - Module Tests', () => {
       await bp.navigate(ROUTES.initiativeAnalysis);
       await page.waitForTimeout(3000);
 
-      const chartCount = await bp.getPlotlyChartCount();
+      const chartCount = await bp.getEChartsChartCount();
       expect(chartCount).toBeGreaterThan(0);
     });
   });
@@ -56,12 +56,12 @@ test.describe('P1 - Module Tests', () => {
       await expect(page).toHaveURL(ROUTES.agriculturalAnalysis);
     });
 
-    test('Charts render on agricultural page', async ({ page }) => {
+    test('Charts render on agricultural page (ECharts SVG)', async ({ page }) => {
       const bp = new BasePage(page);
       await bp.navigate(ROUTES.agriculturalAnalysis);
       await page.waitForTimeout(3000);
 
-      const chartCount = await bp.getPlotlyChartCount();
+      const chartCount = await bp.getEChartsChartCount();
       expect(chartCount).toBeGreaterThan(0);
     });
 

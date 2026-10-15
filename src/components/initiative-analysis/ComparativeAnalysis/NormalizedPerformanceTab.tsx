@@ -1,14 +1,20 @@
 import { useMemo } from 'react';
-import BaseChart from '../../charts/BaseChart';
-import type { Data } from 'plotly.js';
+import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
+import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
+import EChartsRadar from '../../charts/echarts/EChartsRadar';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
 import { minMaxNormalize } from '../../../lib/normalize';
-import { hoverTemplatesForLocale } from '../../../lib/chartDefaults';
 import { useT } from '../../../i18n/LanguageContext';
 
+/**
+ * Normalized performance (heatmap + avg bars + top-5 radar) — ECharts
+ * edition (Fase 2 fatia 2c). Replaces the Plotly `BaseChart` heatmap/bar/
+ * `scatterpolar`; min-max normalization, i18n and chrome unchanged.
+ * Reversible: previous version in git history.
+ */
 export default function NormalizedPerformanceTab() {
-  const { t, locale } = useT('charts');
+  const { t } = useT('charts');
   const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
@@ -51,7 +57,7 @@ export default function NormalizedPerformanceTab() {
     const radarInitiative = valid.slice(0, 5);
     const radarData = radarInitiative.map((i, idx) => ({
       name: i.Display_Name,
-      r: [
+      values: [
         i.Accuracy,
         i.Resolution > 0 ? 1 / i.Resolution : 0,
         i.Number_of_Classes,
@@ -78,44 +84,6 @@ export default function NormalizedPerformanceTab() {
     return <div className="py-8 text-center text-fg-muted">{tBody('noNormalizedData')}</div>;
   }
 
-  // Heatmap
-  const heatTrace: Data = {
-    z: heatmapData,
-    x: metricLabels,
-    y: initiativeLabels,
-    type: 'heatmap',
-    colorscale: 'Viridis',
-    zmin: 0,
-    zmax: 1,
-    hovertemplate: '<b>%{y}</b><br>%{x}: %{z:.2f}<extra></extra>',
-  };
-
-  // Metric comparison bar
-  const metricBar: Data = {
-    x: metricComparison.map((d) => d.label),
-    y: metricComparison.map((d) => d.avg),
-    type: 'bar',
-    marker: {
-      color: metricComparison.map((_, i) => CATEGORICAL_COLORS[i % CATEGORICAL_COLORS.length]),
-    },
-    text: metricComparison.map((d) => d.avg.toFixed(2)),
-    textposition: 'outside',
-    hovertemplate: `<b>%{x}</b><br>${t('avgNormalized')}: %{y:.2f}<extra></extra>`,
-  };
-
-  // Radar
-  const radarTraces: Data[] = radarData.map((d) => ({
-    name: d.name,
-    r: d.r,
-    theta: metricLabels,
-    type: 'scatterpolar',
-    fill: 'toself',
-    fillcolor: `${d.color}44`,
-    line: { color: d.color, width: 2 },
-    marker: { color: d.color, size: 6 },
-    hovertemplate: hoverTemplatesForLocale(locale).radar,
-  }));
-
   return (
     <div className="space-y-8">
       <div>
@@ -123,42 +91,35 @@ export default function NormalizedPerformanceTab() {
         <p className="text-sm text-fg-secondary mb-3">
           {tBody('normalizedIntro')}
         </p>
-        <BaseChart
-          data={[heatTrace]}
-          layout={{
-            title: { text: t('normalizedMetricsHeatmap'), x: 0 },
-            xaxis: { title: '' },
-            yaxis: { title: '', autorange: 'reversed' },
-            height: Math.max(400, initiativeLabels.length * 25),
-            margin: { l: 150, r: 20, t: 40, b: 80 },
-          }}
+        <EChartsHeatmap
+          z={heatmapData}
+          x={metricLabels}
+          y={initiativeLabels}
+          captionKey="normalizedMetricsHeatmap"
+          height={Math.max(400, initiativeLabels.length * 25)}
+          colors={['#440154', '#3b528b', '#21918c', '#5ec962', '#fde725']}
+          min={0}
+          max={1}
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <h3 className="text-base font-semibold text-fg mb-2">{tBody('hAvgNormalized')}</h3>
-          <BaseChart
-            data={[metricBar]}
-            layout={{
-              title: { text: t('avgNormalizedScoreByMetric'), x: 0 },
-              xaxis: { title: '' },
-              yaxis: { title: t('avg01') },
-              height: 350,
-            }}
+          <EChartsGroupedBar
+            categories={metricComparison.map((d) => d.label)}
+            series={[{ name: t('avg01'), values: metricComparison.map((d) => d.avg) }]}
+            captionKey="avgNormalizedScoreByMetric"
+            height={350}
           />
         </div>
         <div>
           <h3 className="text-base font-semibold text-fg mb-2">{tBody('hRadarTop5')}</h3>
-          <BaseChart
-            data={radarTraces}
-            layout={{
-              title: { text: t('multiMetricRadar'), x: 0 },
-              height: 400,
-              polar: {
-                radialaxis: { visible: true, range: [0, 1] },
-              },
-            }}
+          <EChartsRadar
+            indicators={metricLabels}
+            series={radarData}
+            captionKey="multiMetricRadar"
+            height={400}
           />
         </div>
       </div>

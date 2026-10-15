@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { Circle } from 'lucide-react';
-import BaseChart from '../../charts/BaseChart';
-import type { Data } from 'plotly.js';
+import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
 import { useT } from '../../../i18n/LanguageContext';
 
 interface TemporalData {
@@ -21,6 +20,11 @@ interface GapAnalysisTabProps {
   data: TemporalData[];
 }
 
+/**
+ * Largest temporal gap bars + average line — ECharts edition (Fase 2 fatia 2c).
+ * Replaces the Plotly `BaseChart` bar/avg-line; gap math, legend, i18n and
+ * chrome unchanged. Reversible: previous version in git history.
+ */
 export default function GapAnalysisTab({ data }: GapAnalysisTabProps) {
   const { t } = useT('charts');
   const { t: tBody } = useT('initiative');
@@ -46,13 +50,6 @@ export default function GapAnalysisTab({ data }: GapAnalysisTabProps) {
       .sort((a, b) => b.maxGap - a.maxGap);
   }, [data]);
 
-  const getGapColor = (gap: number) => {
-    if (gap === 0) return 'rgba(76,175,80,0.8)';
-    if (gap <= 2) return 'rgba(255,193,7,0.8)';
-    if (gap <= 5) return 'rgba(255,152,0,0.8)';
-    return 'rgba(244,67,54,0.8)';
-  };
-
   if (gapData.length === 0) {
     return (
       <div className="py-8 text-center text-fg-muted">
@@ -63,45 +60,21 @@ export default function GapAnalysisTab({ data }: GapAnalysisTabProps) {
 
   const avgGap = gapData.reduce((s, d) => s + d.maxGap, 0) / gapData.length;
 
-  const barTrace: Data = {
-    x: gapData.map((d) => d.name),
-    y: gapData.map((d) => d.maxGap),
-    type: 'bar',
-    marker: {
-      color: gapData.map((d) => getGapColor(d.maxGap)),
-      line: { width: 1, color: 'white' },
-    },
-    text: gapData.map((d) => `${d.maxGap} ${d.maxGap !== 1 ? t('yearsUnitLong') : t('yearSingular')}`),
-    textposition: 'outside',
-    hovertemplate: `<b>%{x}</b><br>${t('largestGap')}: %{y} ${t('yearsUnit')}<br>${t('coverage')}: %{customdata}%<extra></extra>`,
-    customdata: gapData.map((d) => d.coveragePct),
-  };
-
-  const avgGapTrace: Data = {
-    x: [gapData[0]?.name || '', gapData[gapData.length - 1]?.name || ''],
-    y: [avgGap, avgGap],
-    type: 'scatter',
-    mode: 'lines',
-    name: `${t('averageGap')} (${avgGap.toFixed(1)}${t('yearShort')})`,
-    line: { color: '#64748b', width: 2, dash: 'dash' },
-    hoverinfo: 'skip',
-  };
-
   return (
     <div className="space-y-4">
       <p className="text-sm text-fg-secondary">
         {tBody('gapIntro')}
       </p>
 
-      <BaseChart
-        data={[barTrace, avgGapTrace]}
-        layout={{
-          title: { text: t('largestTemporalGap'), x: 0 },
-          xaxis: { title: '' },
-          yaxis: { title: t('gapYears'), dtick: 1 },
-          height: 500,
-          margin: { l: 50, r: 20, t: 40, b: 120 },
-          hovermode: 'closest',
+      <EChartsGroupedBar
+        categories={gapData.map((d) => d.name)}
+        series={[{ name: t('largestGap'), values: gapData.map((d) => d.maxGap) }]}
+        captionKey="largestTemporalGap"
+        height={500}
+        referenceLine={{
+          value: avgGap,
+          name: `${t('averageGap')} (${avgGap.toFixed(1)}${t('yearShort')})`,
+          color: '#64748b',
         }}
       />
 

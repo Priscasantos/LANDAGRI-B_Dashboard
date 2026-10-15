@@ -19,9 +19,8 @@ function snapshot(): string {
  *
  * Lê o `data-font` vigente na raiz (gravado pelo customizer via
  * `useThemeManager`) e re-renderiza quando ele muda, via MutationObserver
- * no `<html>`. Assim o `BaseChart` refaz o layout Plotly com a fonte ativa
- * sem reload — o Recharts já acompanha via CSS (`font-family: inherit`).
- * Reversível: hook puro, sem estado global novo.
+ * no `<html>`. Assim os charts ECharts refazem a opção com a fonte ativa
+ * sem reload. Reversível: hook puro, sem estado global novo.
  */
 export function useChartFontFamily(): string {
   const fontValue = useSyncExternalStore(subscribe, snapshot, () => 'default');

@@ -1,10 +1,8 @@
 import { useMemo } from 'react';
-import BaseChart from '../../charts/BaseChart';
-import type { Data } from 'plotly.js';
+import EChartsRadar from '../../charts/echarts/EChartsRadar';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
 import { minMaxNormalize } from '../../../lib/normalize';
-import { hoverTemplatesForLocale } from '../../../lib/chartDefaults';
 import { translate } from '../../../i18n/index';
 import { useT } from '../../../i18n/LanguageContext';
 
@@ -12,12 +10,18 @@ interface RadarTabProps {
   selectedInitiatives: string[];
 }
 
+/**
+ * Multi-metric radar — ECharts edition (Fase 2 fatia 2c).
+ * Replaces the Plotly `scatterpolar`; min-max normalization, locale-reactive
+ * indicators, i18n and chrome unchanged.
+ * Reversible: previous version in git history.
+ */
 export default function RadarTab({ selectedInitiatives }: RadarTabProps) {
-  const { t, locale } = useT('charts');
+  const { locale } = useT('charts');
   const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
-  const { traces } = useMemo(() => {
+  const { indicators, radarSeries } = useMemo(() => {
     // `translate(locale, …)` direto (em vez do `t` do hook): o memo
     // depende só de `locale`, sem aviso de dep desnecessária no lint.
     const thetaLabels = [translate(locale, 'charts', 'overallAccuracyLabel'), translate(locale, 'charts', 'spatialResolutionLabel'), translate(locale, 'charts', 'totalClasses'), translate(locale, 'charts', 'agricultureClasses')];
@@ -26,7 +30,7 @@ export default function RadarTab({ selectedInitiatives }: RadarTabProps) {
       .filter((i) => i.Accuracy > 0 && i.Resolution > 0);
 
     if (filtered.length === 0) {
-      return { traces: [], theta: thetaLabels };
+      return { indicators: thetaLabels, radarSeries: [] };
     }
 
     // Extract raw values for normalization
@@ -40,28 +44,16 @@ export default function RadarTab({ selectedInitiatives }: RadarTabProps) {
     const normClasses = minMaxNormalize(rawClasses);
     const normAgriClasses = minMaxNormalize(rawAgriClasses);
 
-    const t = filtered.map((i, idx) => ({
+    const series = filtered.map((i, idx) => ({
       name: i.Display_Name,
-      r: [normAccuracy[idx], normResolution[idx], normClasses[idx], normAgriClasses[idx]],
+      values: [normAccuracy[idx], normResolution[idx], normClasses[idx], normAgriClasses[idx]],
       color: CATEGORICAL_COLORS[idx % CATEGORICAL_COLORS.length],
     }));
 
-    const traces: Data[] = t.map((d) => ({
-      name: d.name,
-      r: d.r,
-      theta: thetaLabels,
-      type: 'scatterpolar',
-      fill: 'toself',
-      fillcolor: `${d.color}44`,
-      line: { color: d.color, width: 2 },
-      marker: { color: d.color, size: 5 },
-      hovertemplate: hoverTemplatesForLocale(locale).radar,
-    }));
-
-    return { traces, theta: thetaLabels };
+    return { indicators: thetaLabels, radarSeries: series };
   }, [initiatives, selectedInitiatives, locale]);
 
-  if (traces.length === 0) {
+  if (radarSeries.length === 0) {
     return (
       <div className="py-8 text-center text-fg-muted">
         {tBody('noSelectionRadar')}
@@ -74,23 +66,11 @@ export default function RadarTab({ selectedInitiatives }: RadarTabProps) {
       <p className="text-sm text-fg-secondary">
         {tBody('radarIntro')}
       </p>
-      <BaseChart
-        data={traces}
-        layout={{
-          title: { text: t('multiMetricRadar'), x: 0 },
-          height: 500,
-          polar: {
-            radialaxis: {
-              visible: true,
-              range: [0, 1],
-              tickvals: [0, 0.25, 0.5, 0.75, 1],
-            },
-          },
-          legend: {
-            orientation: 'h',
-            y: -0.28,
-          },
-        }}
+      <EChartsRadar
+        indicators={indicators}
+        series={radarSeries}
+        captionKey="multiMetricRadar"
+        height={500}
       />
     </div>
   );

@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
-import BaseChart from '../../charts/BaseChart';
-import type { Data } from 'plotly.js';
+import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import { useT } from '../../../i18n/LanguageContext';
 
@@ -8,18 +7,24 @@ interface HeatmapTabProps {
   selectedInitiatives: string[];
 }
 
+/**
+ * Metric correlation matrix — ECharts edition (Fase 2 fatia 2c).
+ * Replaces the Plotly `BaseChart` heatmap (diverging −1…1 scale with cell
+ * values); Pearson computation, i18n and chrome unchanged.
+ * Reversible: previous version in git history.
+ */
 export default function HeatmapTab({ selectedInitiatives }: HeatmapTabProps) {
   const { t } = useT('charts');
   const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
-  const { zMatrix, metricLabels } = useMemo(() => {
+  const { zMatrix, metricLabels, selectionSize } = useMemo(() => {
     const filtered = initiatives
       .filter((i) => selectedInitiatives.includes(i.Name))
       .filter((i) => i.Accuracy > 0 && i.Resolution > 0);
 
     if (filtered.length === 0) {
-      return { zMatrix: [], metricLabels: [] };
+      return { zMatrix: [], metricLabels: [], selectionSize: 0 };
     }
 
     const metrics = [t('overallAccuracyPct'), t('spatialResolution'), t('numberOfClasses'), t('agricultureClasses'), t('availableYears')];
@@ -33,7 +38,7 @@ export default function HeatmapTab({ selectedInitiatives }: HeatmapTabProps) {
 
     const z = filtered.map((item) => metricGetters.map((getter) => getter(item)));
 
-    return { zMatrix: z, metricLabels: metrics };
+    return { zMatrix: z, metricLabels: metrics, selectionSize: filtered.length };
   }, [initiatives, selectedInitiatives, t]);
 
   // Compute correlation matrix between metrics (must be before conditional return for React hooks)
@@ -80,41 +85,28 @@ export default function HeatmapTab({ selectedInitiatives }: HeatmapTabProps) {
     return correlation;
   }, [zMatrix, metricLabels]);
 
-  const heatTrace: Data = {
-    z: correlationMatrix,
-    x: metricLabels,
-    y: metricLabels,
-    type: 'heatmap',
-    colorscale: 'Viridis',
-    zmin: -1,
-    zmax: 1,
-    text: correlationMatrix.map((row) => row.map((v: number) => v.toFixed(2))),
-    texttemplate: '%{text}',
-    textfont: { size: 10, color: 'white' },
-    hovertemplate: `<b>%{x}</b> vs <b>%{y}</b><br>${t('correlation')}: %{z:.2f}<extra></extra>`,
-  };
-
   return (
     <div className="space-y-4">
       <p className="text-sm text-fg-secondary">
         {tBody('heatmapIntro')}
       </p>
 
-      {zMatrix.length < 2 && (
+      {selectionSize < 2 && (
         <div className="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-2 rounded text-sm">
           {tBody('needTwo')}
         </div>
       )}
 
-      <BaseChart
-        data={[heatTrace]}
-        layout={{
-          title: { text: t('metricCorrelationMatrix'), x: 0 },
-          xaxis: { title: '' },
-          yaxis: { title: '' },
-          height: 450,
-          margin: { l: 120, b: 80 },
-        }}
+      <EChartsHeatmap
+        z={correlationMatrix}
+        x={metricLabels}
+        y={metricLabels}
+        captionKey="metricCorrelationMatrix"
+        height={450}
+        colors={['#2166ac', '#f7f7f7', '#b2182b']}
+        min={-1}
+        max={1}
+        showValues
       />
     </div>
   );

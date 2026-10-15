@@ -1,12 +1,17 @@
 import { useMemo } from 'react';
-import BaseChart from '../../charts/BaseChart';
-import type { Data } from 'plotly.js';
+import EChartsPie from '../../charts/echarts/EChartsPie';
+import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
+import EChartsLine from '../../charts/echarts/EChartsLine';
 import { useDashboardStore } from '../../../stores/dashboardStore';
-import { CATEGORICAL_COLORS } from '../../../types/theme';
 import { useT } from '../../../i18n/LanguageContext';
 
+/**
+ * Methodology deep-dive — ECharts edition (Fase 2 fatia 2c).
+ * Replaces the three Plotly `BaseChart` charts (pie, horizontal accuracy
+ * bar, per-methodology accuracy markers); aggregates, summary table, i18n
+ * and chrome unchanged. Reversible: previous version in git history.
+ */
 export default function MethodologyDeepDiveTab() {
-  const { t } = useT('charts');
   const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
@@ -43,69 +48,25 @@ export default function MethodologyDeepDiveTab() {
     return <div className="py-8 text-center text-fg-muted">{tBody('noMethodologyData')}</div>;
   }
 
-  // Pie: methodology distribution
-  const pieTrace: Data = {
-    labels: methodData.map((d) => d.method),
-    values: methodData.map((d) => d.count),
-    type: 'pie',
-    marker: { colors: CATEGORICAL_COLORS.slice(0, methodData.length) },
-    textinfo: 'label+percent',
-    hovertemplate: `<b>%{label}</b><br>${t('count')}: %{value}<extra></extra>`,
-  };
-
-  // Horizontal bar: accuracy by methodology
-  const hbarTrace: Data = {
-    y: methodAccuracy.map((d) => d.method),
-    x: methodAccuracy.map((d) => d.avgAccuracy),
-    type: 'bar',
-    orientation: 'h',
-    marker: {
-      color: methodAccuracy.map((_, i) => CATEGORICAL_COLORS[i % CATEGORICAL_COLORS.length]),
-    },
-    text: methodAccuracy.map((d) => `${d.avgAccuracy}%`),
-    textposition: 'outside',
-    hovertemplate: `<b>%{y}</b><br>${t('avgAccuracy')}: %{x}%<extra></extra>`,
-  };
-
-  // Line trend: accuracy trends by methodology over time (simplified - show method vs avg accuracy)
-  const lineTraces: Data[] = methodAccuracy.map((d, i) => ({
-    name: d.method,
-    x: [d.method],
-    y: [d.avgAccuracy],
-    type: 'scatter',
-    mode: 'markers',
-    marker: {
-      size: 16,
-      color: CATEGORICAL_COLORS[i % CATEGORICAL_COLORS.length],
-      line: { width: 2, color: 'white' },
-    },
-    hovertemplate: `<b>%{x}</b><br>${t('avgAccuracy')}: %{y:.1f}%<extra></extra>`,
-  }));
-
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <h3 className="text-base font-semibold text-fg mb-2">{tBody('hMethodologyDist')}</h3>
-          <BaseChart
-            data={[pieTrace]}
-            layout={{
-              title: { text: t('methodologyBreakdown'), x: 0 },
-              height: 350,
-            }}
+          <EChartsPie
+            data={methodData.map((d) => ({ label: d.method, value: d.count }))}
+            captionKey="methodologyBreakdown"
+            height={350}
+            donut
           />
         </div>
         <div>
           <h3 className="text-base font-semibold text-fg mb-2">{tBody('hAvgByMethod')}</h3>
-          <BaseChart
-            data={[hbarTrace]}
-            layout={{
-              title: { text: t('accuracyByMethodology'), x: 0 },
-              xaxis: { title: t('avgAccuracyPct') },
-              yaxis: { title: '' },
-              height: Math.max(250, methods.length * 50),
-              margin: { l: 150, r: 40, t: 40, b: 50 },
-            }}
+          <EChartsHorizontalBar
+            labels={methodAccuracy.map((d) => d.method)}
+            values={methodAccuracy.map((d) => d.avgAccuracy)}
+            captionKey="accuracyByMethodology"
+            height={Math.max(250, methods.length * 50)}
           />
         </div>
       </div>
@@ -116,15 +77,14 @@ export default function MethodologyDeepDiveTab() {
         <p className="text-sm text-fg-secondary mb-3">
           {tBody('trendsIntro')}
         </p>
-        <BaseChart
-          data={lineTraces}
-          layout={{
-            title: { text: t('methodologyAccuracyComparison'), x: 0 },
-            xaxis: { title: t('methodology') },
-            yaxis: { title: t('avgAccuracyPct'), range: [0, 105] },
-            height: 400,
-            showlegend: true,
-          }}
+        <EChartsLine
+          series={methodAccuracy.map((d) => ({
+            name: d.method,
+            x: [d.method],
+            y: [d.avgAccuracy],
+          }))}
+          captionKey="methodologyAccuracyComparison"
+          height={400}
         />
       </div>
 

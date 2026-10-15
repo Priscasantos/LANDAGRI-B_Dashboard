@@ -34,11 +34,9 @@
     "leaflet": "^1.9.4",
     "lucide-react": "^0.400.0",
     "papaparse": "^5.5.3",
-    "plotly.js-dist-min": "^2.35.3",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-leaflet": "^5.0.0",
-    "react-plotly.js": "^2.6.0",
     "react-router-dom": "^7.15.1",
     "recharts": "^3.8.1",
     "zustand": "^5.0.13"

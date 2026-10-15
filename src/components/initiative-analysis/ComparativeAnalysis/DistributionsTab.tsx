@@ -1,10 +1,16 @@
 import { useMemo } from 'react';
-import BaseChart from '../../charts/BaseChart';
-import type { Data } from 'plotly.js';
+import EChartsPie from '../../charts/echarts/EChartsPie';
+import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
+import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
 import { useDashboardStore } from '../../../stores/dashboardStore';
-import { CATEGORICAL_COLORS } from '../../../types/theme';
 import { useT } from '../../../i18n/LanguageContext';
 
+/**
+ * Methodology / resolution / temporal distributions — ECharts edition
+ * (Fase 2 fatia 2c). Replaces the three Plotly `BaseChart` charts
+ * (pie + log-scale bar + horizontal duration bar); computations, i18n and
+ * chrome unchanged. Reversible: previous version in git history.
+ */
 export default function DistributionsTab() {
   const { t } = useT('charts');
   const { t: tBody } = useT('initiative');
@@ -47,88 +53,39 @@ export default function DistributionsTab() {
     return <div className="py-8 text-center text-fg-muted">{tBody('noDistributionData')}</div>;
   }
 
-  // Methodology pie
-  const pieTrace: Data = {
-    labels: methodologyCounts.map((d) => d.method),
-    values: methodologyCounts.map((d) => d.count),
-    type: 'pie',
-    marker: { colors: CATEGORICAL_COLORS.slice(0, methodologyCounts.length) },
-    textinfo: 'label+percent',
-    hovertemplate: `<b>%{label}</b><br>${t('count')}: %{value}<extra></extra>`,
-  };
-
-  // Resolution bars
-  const resTrace: Data = {
-    x: resolutionBars.map((d) => d.name),
-    y: resolutionBars.map((d) => d.resolution),
-    type: 'bar',
-    marker: {
-      color: resolutionBars.map(
-        (_, i) => CATEGORICAL_COLORS[i % CATEGORICAL_COLORS.length],
-      ),
-    },
-    text: resolutionBars.map((d) => `${d.resolution}m`),
-    textposition: 'outside',
-    hovertemplate: `<b>%{x}</b><br>${t('resolutionLabel')}: %{y}m<extra></extra>`,
-  };
-
-  // Temporal coverage horizontal bars
-  const tempTrace: Data = {
-    y: tempCoverageBars.map((d) => d.name),
-    x: tempCoverageBars.map((d) => d.duration),
-    type: 'bar',
-    orientation: 'h',
-    marker: {
-      color: tempCoverageBars.map(
-        (_, i) => CATEGORICAL_COLORS[i % CATEGORICAL_COLORS.length],
-      ),
-    },
-    text: tempCoverageBars.map((d) => `${d.duration}y`),
-    textposition: 'outside',
-    hovertemplate: `<b>%{y}</b><br>${t('duration')}: %{x} ${t('yearsUnitLong')}<extra></extra>`,
-  };
-
   return (
     <div className="space-y-8">
       {/* Methodology Distribution Pie */}
       <div>
         <h3 className="text-base font-semibold text-fg mb-2">{tBody('hMethodologyDist')}</h3>
-        <BaseChart
-          data={[pieTrace]}
-          layout={{
-            title: { text: t('initiativesByMethodology'), x: 0 },
-            height: 350,
-          }}
+        <EChartsPie
+          data={methodologyCounts.map((d) => ({ label: d.method, value: d.count }))}
+          captionKey="initiativesByMethodology"
+          height={350}
+          donut
         />
       </div>
 
       {/* Resolution Comparison */}
       <div>
         <h3 className="text-base font-semibold text-fg mb-2">{tBody('hSpatialRes')}</h3>
-        <BaseChart
-          data={[resTrace]}
-          layout={{
-            title: { text: t('spatialResolutionByInitiative'), x: 0 },
-            xaxis: { title: '' },
-            yaxis: { title: t('resolutionM'), type: 'log' },
-            height: 400,
-            margin: { l: 50, r: 20, t: 40, b: 120 },
-          }}
+        <EChartsGroupedBar
+          categories={resolutionBars.map((d) => d.name)}
+          series={[{ name: t('resolutionM'), values: resolutionBars.map((d) => d.resolution) }]}
+          captionKey="spatialResolutionByInitiative"
+          height={400}
+          yAxisType="log"
         />
       </div>
 
       {/* Temporal Coverage */}
       <div>
         <h3 className="text-base font-semibold text-fg mb-2">{tBody('hTempDuration')}</h3>
-        <BaseChart
-          data={[tempTrace]}
-          layout={{
-            title: { text: t('temporalCoverageByInitiativeYears'), x: 0 },
-            xaxis: { title: t('durationYears') },
-            yaxis: { title: '', autorange: 'reversed' },
-            height: Math.max(350, tempCoverageBars.length * 30),
-            margin: { l: 150, r: 40, t: 40, b: 50 },
-          }}
+        <EChartsHorizontalBar
+          labels={tempCoverageBars.map((d) => d.name)}
+          values={tempCoverageBars.map((d) => d.duration)}
+          captionKey="temporalCoverageByInitiativeYears"
+          height={Math.max(350, tempCoverageBars.length * 30)}
         />
       </div>
     </div>

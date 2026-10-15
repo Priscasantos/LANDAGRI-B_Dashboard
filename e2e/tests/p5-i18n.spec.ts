@@ -11,7 +11,7 @@ import { ROUTES, TIMEOUTS } from '../fixtures/testData';
  * pins `landagri-lang` / `landagri-theme`.
  *
  * Desvios pinados (não mexer): CARTO dark_matter descartado (API KEY
- * REQUIRED) — OSM+filter CSS é o estado final; legenda Plotly y:-0.28.
+ * REQUIRED) — OSM+filter CSS é o estado final; legenda ECharts bottom.
  */
 
 const FIVE_ROUTES = [
@@ -181,7 +181,7 @@ test.describe('P5 - i18n toggle PT↔EN nas 5 rotas', () => {
     const bp = new BasePage(page);
     for (const { route } of FIVE_ROUTES) {
       await bp.navigate(route);
-      // Dá tempo dos charts (recharts/plotly) medirem o container.
+      // Dá tempo dos charts (ECharts SVG) medirem o container.
       await page.waitForTimeout(1000);
     }
     await switchLocale(page, 'en');
