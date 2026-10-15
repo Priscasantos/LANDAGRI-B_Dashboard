@@ -9,22 +9,24 @@
     "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     sans-serif;
   --font-family-mono: "JetBrains Mono", "Fira Code", monospace;
-  --sidebar-width: 280px;
+  --sidebar-width: 260px;
+  --sidebar-rail-width: 72px;
   --content-max-width: 1600px;
   --transition-theme: 0.3s ease;
   --transition-all: 0.2s ease;
 
   /* Text colors (renamed to avoid Tailwind conflicts) */
-  --color-fg: #1e293b;
-  --color-fg-secondary: #64748b;
-  --color-fg-muted: #94a3b8;
-  --color-fg-inverse: #f1f5f9;
+  --color-fg: #1a2b1e;
+  --color-fg-secondary: #4a6350;
+  --color-fg-muted: #617a68;
+  --color-fg-inverse: #f6f9f4;
 
-  /* Surface colors */
+  /* Surface colors — canvas usa o neutro Berry grey.100 (só neutro/geometria;
+     primary Verde Agro v2 preservado nos tokens de marca abaixo). */
   --color-surface: #ffffff;
-  --color-surface-hover: #f8fafc;
-  --color-surface-alt: #f1f5f9;
-  --color-canvas: #f8fafc;
+  --color-surface-hover: #f6f9f4;
+  --color-surface-alt: #e8f5e9;
+  --color-canvas: #eef2f6;
 
   /*
    * Fase 3 — sistema único de tokens (nomes canônicos shadcn).
@@ -52,20 +54,25 @@
   /* Radius canônico (customizer sobrescreve via inline `--radius`). */
   --radius: 0.75rem;
 
-  /* Brand colors */
-  --color-primary: #3b82f6;
-  --color-primary-hover: #2563eb;
-  --color-primary-light: #dbeafe;
+  /* Brand colors — Verde Agro v2 */
+  --color-primary: #2e7d32;
+  --color-primary-hover: #1b5e20;
+  --color-primary-light: #e8f5e9;
+
+  /* Terra accent (texto/fill/borda) */
+  --color-terra-text: #9a3412;
+  --color-terra-fill: #c2701d;
+  --color-terra-border: #e7c48a;
 
   /* Borders */
-  --color-border: #e2e8f0;
-  --color-border-light: #f1f5f9;
+  --color-border: #d7e2d8;
+  --color-border-light: #e9f1ea;
 
   /* Status colors */
-  --color-success: #10b981;
+  --color-success: #2e7d32;
   --color-error: #ef4444;
   --color-warning: #f59e0b;
-  --color-info: #3b82f6;
+  --color-info: #0e7c86;
 
   /* Shadows */
   --color-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -73,32 +80,32 @@
   --color-shadow-lg: 0 8px 30px rgba(15, 23, 42, 0.15);
   --color-overlay: rgba(0, 0, 0, 0.3);
 
-  /* Chart colors */
-  --color-chart-grid: #f3f4f6;
+  /* Chart colors — grid usa o divider neutro Berry #e3e8ef (light). */
+  --color-chart-grid: #e3e8ef;
   --color-chart-bg: transparent;
-  --color-chart-text: #1f2937;
+  --color-chart-text: #1a2b1e;
 
-  /* Categorical chart palette (Fase 2 theme-data tokens) */
-  --color-chart-1: #3b82f6;
-  --color-chart-2: #10b981;
-  --color-chart-3: #f59e0b;
-  --color-chart-4: #ef4444;
-  --color-chart-5: #8b5cf6;
-  --color-chart-6: #06b6d4;
-  --color-chart-7: #84cc16;
-  --color-chart-8: #ec4899;
-  --color-chart-9: #f97316;
-  --color-chart-10: #6366f1;
+  /* Categorical chart palette (Fase 2 theme-data tokens) — Verde Agro v2 */
+  --color-chart-1: #2e7d32;
+  --color-chart-2: #43a047;
+  --color-chart-3: #7cb342;
+  --color-chart-4: #aed581;
+  --color-chart-5: #1b5e20;
+  --color-chart-6: #c2701d;
+  --color-chart-7: #e6a817;
+  --color-chart-8: #0e7c86;
+  --color-chart-9: #5c6bc0;
+  --color-chart-10: #b0bec5;
 
   /* Sidebar */
   --color-sidebar-bg: #ffffff;
-  --color-sidebar-text: #475569;
-  --color-sidebar-text-active: #1d4ed8;
-  --color-sidebar-active-bg: #eff6ff;
-  --color-sidebar-hover-bg: #f8fafc;
+  --color-sidebar-text: #3f5546;
+  --color-sidebar-text-active: #1b5e20;
+  --color-sidebar-active-bg: #e8f5e9;
+  --color-sidebar-hover-bg: #f6f9f4;
 
   /* Module header gradients */
-  --color-header-overview: linear-gradient(135deg, #636b2f 0%, #626c01 100%);
+  --color-header-overview: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
   --color-header-initiative: linear-gradient(135deg, #80400b 0%, #626c01 100%);
   --color-header-agricultural: linear-gradient(
     135deg,
@@ -107,11 +114,11 @@
   );
   --color-header-about: linear-gradient(135deg, #918c00 0%, #626c01 100%);
 
-  /* Metric card gradients */
-  --gradient-accuracy: linear-gradient(135deg, #fef9c3 0%, #fde68a 100%);
-  --gradient-resolution: linear-gradient(135deg, #d1fae5 0%, #6ee7b7 100%);
-  --gradient-classes: linear-gradient(135deg, #fce7f3 0%, #f9a8d4 100%);
-  --gradient-frequency: linear-gradient(135deg, #e0f2fe 0%, #7dd3fc 100%);
+  /* Metric card gradients — monocromo verde + 1 terra (Verde Agro v2) */
+  --gradient-accuracy: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  --gradient-resolution: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  --gradient-classes: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  --gradient-frequency: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
 
   /* Fluid type scale */
   --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
@@ -125,54 +132,58 @@
 
 /* ===== Dark Theme ===== */
 .dark {
-  --color-fg: #f1f5f9;
-  --color-fg-secondary: #94a3b8;
-  --color-fg-muted: #64748b;
-  --color-fg-inverse: #1e293b;
+  --color-fg: #eaf3ec;
+  --color-fg-secondary: #9db4a3;
+  --color-fg-muted: #7e9a86;
+  --color-fg-inverse: #0c1510;
 
-  --color-surface: #1e293b;
-  --color-surface-hover: #334155;
-  --color-surface-alt: #1e293b;
-  --color-canvas: #0f172a;
+  --color-surface: #122019;
+  --color-surface-hover: #16241a;
+  --color-surface-alt: #16241a;
+  --color-canvas: #0c1510;
 
-  --color-primary: #60a5fa;
-  --color-primary-hover: #3b82f6;
-  --color-primary-light: #1e3a5f;
+  --color-primary: #9ccc65;
+  --color-primary-hover: #aed581;
+  --color-primary-light: #16241a;
 
-  --color-border: #334155;
-  --color-border-light: #1e293b;
+  --color-terra-text: #e8a04c;
+  --color-terra-fill: #e8a04c;
+  --color-terra-border: #24382b;
+
+  --color-border: #24382b;
+  --color-border-light: #122019;
 
   --color-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --color-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   --color-shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.5);
   --color-overlay: rgba(0, 0, 0, 0.5);
 
-  --color-chart-grid: #334155;
+  --color-chart-grid: #24382b;
   --color-chart-bg: transparent;
-  --color-chart-text: #e2e8f0;
+  --color-chart-text: #eaf3ec;
 
-  /* Categorical chart palette — dark theme (brighter variants) */
-  --color-chart-1: #60a5fa;
-  --color-chart-2: #34d399;
-  --color-chart-3: #fbbf24;
-  --color-chart-4: #f87171;
-  --color-chart-5: #a78bfa;
-  --color-chart-6: #22d3ee;
-  --color-chart-7: #a3e635;
-  --color-chart-8: #f472b6;
-  --color-chart-9: #fb923c;
-  --color-chart-10: #818cf8;
+  /* Categorical chart palette — dark theme (Verde Agro v2) */
+  --color-chart-1: #9ccc65;
+  --color-chart-2: #7cb342;
+  --color-chart-3: #c5e1a5;
+  --color-chart-4: #43a047;
+  --color-chart-5: #e8a04c;
+  --color-chart-6: #ffca28;
+  --color-chart-7: #4dd0e1;
+  --color-chart-8: #9fa8da;
+  --color-chart-9: #b0bec5;
+  --color-chart-10: #66bb6a;
 
-  --color-sidebar-bg: #0f172a;
-  --color-sidebar-text: #94a3b8;
-  --color-sidebar-text-active: #60a5fa;
-  --color-sidebar-active-bg: #1e3a5f;
-  --color-sidebar-hover-bg: #1e293b;
+  --color-sidebar-bg: #0c1510;
+  --color-sidebar-text: #9db4a3;
+  --color-sidebar-text-active: #9ccc65;
+  --color-sidebar-active-bg: #16241a;
+  --color-sidebar-hover-bg: #122019;
 
   /* Fase 3: aliases canônicos acompanham o dark (fonte única acima). */
-  --color-primary-foreground: #0f172a;
+  --color-primary-foreground: #0c1510;
 
-  --color-header-overview: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+  --color-header-overview: linear-gradient(135deg, #0c1510 0%, #1b5e20 100%);
   --color-header-initiative: linear-gradient(135deg, #44403c 0%, #292524 100%);
   --color-header-agricultural: linear-gradient(
     135deg,
@@ -182,9 +193,9 @@
   --color-header-about: linear-gradient(135deg, #3f3f46 0%, #27272a 100%);
 
   --gradient-accuracy: linear-gradient(135deg, #422006 0%, #713f12 100%);
-  --gradient-resolution: linear-gradient(135deg, #052e16 0%, #14532d 100%);
-  --gradient-classes: linear-gradient(135deg, #500724 0%, #831843 100%);
-  --gradient-frequency: linear-gradient(135deg, #0c4a6e 0%, #075985 100%);
+  --gradient-resolution: linear-gradient(135deg, #16241a 0%, #1b5e20 100%);
+  --gradient-classes: linear-gradient(135deg, #16241a 0%, #1b5e20 100%);
+  --gradient-frequency: linear-gradient(135deg, #16241a 0%, #1b5e20 100%);
 }
 
 /* ===== Fase 3: customizer (densidade + raio) ===== */
@@ -199,11 +210,13 @@ html[data-density="compact"] #main-content {
 }
 
 /* ===== Base Styles ===== */
+/* NOTA: sem reset global de margin/padding aqui — o preflight do Tailwind
+ * (camada base) já normaliza espaçamentos. Um `* { margin: 0; padding: 0 }`
+ * fora de camada tem precedência sobre os utilitários em `@layer utilities`
+ * e quebra `mx-auto` (centralização do BaseLayout), `p-*`, `space-y-*`, etc. */
 *,
 *::before,
 *::after {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
@@ -242,6 +255,40 @@ body {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ===== Berry KPI decor (reversível: só ::before/::after decorativos) ===== */
+/* Substitui gradiente chapado: 2 círculos warning.dark em baixa opacidade. */
+.kpi-decor {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.kpi-decor::before,
+.kpi-decor::after {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 0;
+  background: color-mix(in srgb, var(--color-warning) 16%, transparent);
+}
+.kpi-decor::before {
+  width: 96px;
+  height: 96px;
+  top: -48px;
+  right: -32px;
+}
+.kpi-decor::after {
+  width: 56px;
+  height: 56px;
+  bottom: -28px;
+  left: -20px;
+  background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+}
+.kpi-decor > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* ===== Toast Animations ===== */

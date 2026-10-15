@@ -33,6 +33,12 @@ export const THEME_PRESETS: readonly ThemePreset[] = [
     dark: { primary: '#a3b018', primaryHover: '#626C01', accent: '#1a2e05' },
   },
   {
+    value: 'agro-v2',
+    label: 'Verde Agro v2',
+    light: { primary: '#2E7D32', primaryHover: '#1B5E20', accent: '#E8F5E9' },
+    dark: { primary: '#9CCC65', primaryHover: '#AED581', accent: '#16241A' },
+  },
+  {
     value: 'terra',
     label: 'Terra',
     light: { primary: '#80400B', primaryHover: '#653208', accent: '#fef3c7' },
@@ -46,7 +52,7 @@ export const THEME_PRESETS: readonly ThemePreset[] = [
   },
 ];
 
-export const DEFAULT_PRESET = 'default';
+export const DEFAULT_PRESET = 'agro-v2';
 
 export function getThemePreset(value: string): ThemePreset {
   return THEME_PRESETS.find((p) => p.value === value) ?? THEME_PRESETS[0];

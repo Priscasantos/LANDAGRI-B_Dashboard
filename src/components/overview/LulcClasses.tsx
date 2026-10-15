@@ -14,6 +14,23 @@ function getColorForClass(className: string): string {
   return '#94a3b8'; // default gray
 }
 
+/**
+ * Classification badges nos tokens canônicos (`bg-muted`/`border-border`):
+ * a cor da classe vira um dot decorativo (`aria-hidden`), não fundo
+ * chapado — legível em light/dark e com wrap limpo (`flex-wrap`).
+ */
+function ClassBadge({ name }: { name: string }): React.JSX.Element {
+  return (
+    <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-foreground">
+      <span
+        aria-hidden="true"
+        className="size-2 shrink-0 rounded-full"
+        style={{ backgroundColor: getColorForClass(name) }}
+      />
+      <span className="truncate">{name}</span>
+    </span>
+  );
+}
 function parseClassLegend(legend: string): string[] {
   try {
     const parsed = JSON.parse(legend);
@@ -33,7 +50,7 @@ export default function LulcClasses({ classification }: LulcClassesProps) {
           <div key={idx} className="p-3 bg-surface-alt rounded-lg border border-border">
             <div className="flex justify-between items-center mb-2">
               <span className="font-semibold text-fg">{product.product_name}</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+              <span className="text-xs px-2 py-0.5 rounded-full border border-border bg-muted text-muted-foreground">
                 {product.product_type}
               </span>
             </div>
@@ -42,13 +59,7 @@ export default function LulcClasses({ classification }: LulcClassesProps) {
             )}
             <div className="flex flex-wrap gap-1.5">
               {parseClassLegend(product.class_legend).map((cls, i) => (
-                <span
-                  key={i}
-                  className="px-2 py-0.5 rounded-full text-xs font-medium text-white"
-                  style={{ backgroundColor: getColorForClass(cls) }}
-                >
-                  {cls}
-                </span>
+                <ClassBadge key={i} name={cls} />
               ))}
             </div>
           </div>
@@ -68,10 +79,14 @@ export default function LulcClasses({ classification }: LulcClassesProps) {
         {classes.map((cls, idx) => (
           <span
             key={idx}
-            className="px-3 py-1 rounded-full text-sm font-medium text-white shadow-sm"
-            style={{ backgroundColor: getColorForClass(cls) }}
+            className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1 text-sm font-medium text-foreground"
           >
-            {cls}
+            <span
+              aria-hidden="true"
+              className="size-2.5 shrink-0 rounded-full"
+              style={{ backgroundColor: getColorForClass(cls) }}
+            />
+            <span className="truncate">{cls}</span>
           </span>
         ))}
       </div>

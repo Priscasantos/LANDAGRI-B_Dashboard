@@ -72,24 +72,30 @@ export default function TimelineTab({ data }: TimelineTabProps) {
   const yearMax = Math.max(...allYears);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 min-w-0">
       <p className="text-sm text-fg-secondary">
         Timeline showing available years for each initiative. Each dot represents a year with data.
         Initiatives are sorted by coverage type (Global first), then by start year.
       </p>
       <BaseChart
         data={[...lineTraces, ...traces]}
+        height={height}
         layout={{
           title: { text: 'Initiative Timeline', x: 0 },
           xaxis: {
-            title: 'Year',
+            title: { text: 'Year' },
             range: [yearMin - 1, yearMax + 1],
             dtick: yearMax - yearMin > 40 ? 5 : 1,
+            tickfont: { size: 11 },
+            automargin: true,
           },
           yaxis: {
-            title: '',
+            title: { text: '' },
             autorange: 'reversed',
+            tickfont: { size: 11 },
+            automargin: true,
           },
+          margin: { l: 180, r: 60, t: 60, b: 80 },
           height,
           showlegend: false,
           hovermode: 'closest',

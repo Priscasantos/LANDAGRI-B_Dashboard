@@ -14,6 +14,7 @@ interface ChartContainerProps {
  * ChartContainer — Fase 2 chart shell (shadcn-style).
  * Wraps the existing recharts wrappers with a titled `Card`; colors come
  * from the `theme-data` palette (CSS vars), never hardcoded hex here.
+ * Berry chrome (reversível): Divider sob o header.
  * Reversible: pure layout wrapper, no chart logic.
  */
 export default function ChartContainer({
@@ -27,14 +28,15 @@ export default function ChartContainer({
     <Card
       title={title}
       titleAsHeading={false}
-      className={`focus-within:ring-2 focus-within:ring-blue-500 ${className}`}
+      className={`min-w-0 overflow-hidden focus-within:ring-2 focus-within:ring-primary ${className}`}
     >
-      <section aria-labelledby={headingId}>
+      <section aria-labelledby={headingId} className="min-w-0">
         <h3 id={headingId} className="text-base font-semibold text-fg mb-1">
           {title}
         </h3>
         {description ? <p className="text-xs text-fg-muted mb-3">{description}</p> : null}
-        {children}
+        <div aria-hidden="true" className="mb-3 border-b border-border" />
+        <div className="min-w-0">{children}</div>
       </section>
     </Card>
   );

@@ -3,34 +3,36 @@
  * Uses LANDAGRI-B CSS variables with hex fallbacks so charts follow
  * light/dark theme without hardcoded colors. Reversible: pure constants.
  */
-export const CHART_GRID_STROKE = 'var(--color-chart-grid, #f3f4f6)';
+export const CHART_GRID_STROKE = 'var(--color-chart-grid, #e3e8ef)';
 
 export const CHART_TICK_FILL = 'var(--color-chart-text, #1f2937)';
 
+/** Berry tooltip escuro (ambos os temas) — série primária segue Verde Agro. */
 export const CHART_TOOLTIP_STYLE: React.CSSProperties = {
-  backgroundColor: 'var(--color-canvas, #ffffff)',
-  border: '1px solid var(--color-border, #e2e8f0)',
-  borderRadius: '12px',
+  backgroundColor: '#1e293b',
+  border: '1px solid rgba(0,0,0,0.1)',
+  borderRadius: '8px',
   fontSize: '12px',
+  color: '#ffffff',
 };
 
 export const CHART_TOOLTIP_LABEL_STYLE: React.CSSProperties = {
-  color: 'var(--color-fg, #1e293b)',
+  color: '#ffffff',
   fontWeight: 'bold',
 };
 
-/** Categorical palette — mirrors `CATEGORICAL_COLORS` in types/theme. */
+/** Categorical palette — Verde Agro v2 (mirrors `--color-chart-1..10` in index.css + CATEGORICAL_COLORS). */
 export const RECHARTS_PALETTE: readonly string[] = [
-  '#3b82f6',
-  '#10b981',
-  '#f59e0b',
-  '#ef4444',
-  '#8b5cf6',
-  '#06b6d4',
-  '#84cc16',
-  '#ec4899',
-  '#f97316',
-  '#6366f1',
+  'var(--color-chart-1, #2E7D32)',
+  'var(--color-chart-2, #43A047)',
+  'var(--color-chart-3, #7CB342)',
+  'var(--color-chart-4, #AED581)',
+  'var(--color-chart-5, #1B5E20)',
+  'var(--color-chart-6, #C2701D)',
+  'var(--color-chart-7, #E6A817)',
+  'var(--color-chart-8, #0E7C86)',
+  'var(--color-chart-9, #5C6BC0)',
+  'var(--color-chart-10, #B0BEC5)',
 ];
 
 export function paletteColor(index: number, override?: string): string {

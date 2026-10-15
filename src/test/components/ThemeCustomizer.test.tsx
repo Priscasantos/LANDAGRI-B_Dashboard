@@ -74,7 +74,7 @@ describe('ThemeCustomizer (preset + layout)', () => {
   it('applies a preset and persists its key', () => {
     renderCustomizer();
     openPanel();
-    const preset = screen.getByRole('radio', { name: /verde agro/i });
+    const preset = screen.getByRole('radio', { name: /^verde agro$/i });
     fireEvent.click(preset);
     expect(preset).toBeChecked();
     expect(localStorage.getItem('landagri-preset')).toBe('agro');

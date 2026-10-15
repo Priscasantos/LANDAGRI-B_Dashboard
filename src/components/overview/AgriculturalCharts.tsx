@@ -100,14 +100,15 @@ export default function AgriculturalCharts(): React.JSX.Element | null {
   if (lineSeries.length === 0) return null;
 
   return (
-    <section className="space-y-6 mt-8" aria-labelledby="agri-charts-heading">
+    <section className="space-y-6 mt-8 min-w-0" aria-labelledby="agri-charts-heading">
       <h2 id="agri-charts-heading" className="text-xl font-bold text-fg">
         🌾 Brazilian Agricultural Data
       </h2>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-w-0">
         <ChartContainer
           title="Agricultural Production Evolution (thousands of tons)"
           description="IBGE PAM/PPM e CONAB"
+          className="min-w-0"
         >
           <RechartsLineChart
             title="Agricultural Production Evolution (thousands of tons)"
@@ -119,6 +120,7 @@ export default function AgriculturalCharts(): React.JSX.Element | null {
         <ChartContainer
           title={`Production Distribution${latestYear ? ` (${latestYear})` : ' (Latest Year)'}`}
           description="IBGE PAM/PPM e CONAB"
+          className="min-w-0"
         >
           <RechartsPieChart
             title={`Production Distribution${latestYear ? ` (${latestYear})` : ' (Latest Year)'}`}
@@ -129,6 +131,7 @@ export default function AgriculturalCharts(): React.JSX.Element | null {
       <ChartContainer
         title="Average Area Harvested (thousands of hectares)"
         description="IBGE PAM/PPM e CONAB"
+        className="min-w-0"
       >
         <RechartsBarChart
           title="Average Area Harvested (thousands of hectares)"

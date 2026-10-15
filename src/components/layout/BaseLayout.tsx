@@ -28,12 +28,12 @@ export default function BaseLayout({ children, title, description }: BaseLayoutP
           Pular para o conteúdo
         </a>
         <AppSidebar />
-        <div className="flex min-w-0 min-h-screen flex-1 flex-col">
+        <div className="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-clip">
           <SiteHeader />
           <main
             id="main-content"
             tabIndex={-1}
-            className="mx-auto w-full max-w-(--content-max-width) flex-1 px-4 py-6 sm:px-6 md:py-8 lg:px-8"
+            className="mx-auto w-full max-w-(--content-max-width) flex-1 px-4 py-4 sm:px-5 sm:py-5 md:py-5 lg:px-5"
           >
             {title && (
               <div className="mb-6">

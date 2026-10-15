@@ -89,7 +89,7 @@ export function useThemeManager() {
     readStored(
       PRESET_KEY,
       DEFAULT_PRESET,
-      ['default', 'agro', 'terra', 'ambar'] as const,
+      ['default', 'agro', 'agro-v2', 'terra', 'ambar'] as const,
     ),
   );
   const [radius, setRadius] = React.useState<Radius>(() =>

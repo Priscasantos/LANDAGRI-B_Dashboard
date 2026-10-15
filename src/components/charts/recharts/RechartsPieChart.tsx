@@ -34,16 +34,22 @@ export function RechartsPieChart({
       role="img"
       aria-label={title}
       tabIndex={0}
-      className="w-full rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      className="w-full min-w-0 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
     >
       <figcaption className="sr-only">
         {title}. {data.map((d) => `${d.label}: ${d.value}`).join('; ')}.
       </figcaption>
-      <div style={{ width: '100%', height }} aria-hidden="true">
-        <ResponsiveContainer width="100%" height="100%">
+      <div style={{ width: '100%', minWidth: 0, height }} aria-hidden="true" className="min-w-0">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
           <RcPieChart>
             <Tooltip contentStyle={CHART_TOOLTIP_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} />
-            <Legend iconType="circle" wrapperStyle={{ fontSize: '11px' }} />
+            <Legend
+              iconType="square"
+              iconSize={8}
+              align="center"
+              verticalAlign="bottom"
+              wrapperStyle={{ fontSize: '11px', maxWidth: '100%', lineHeight: '16px', gap: '8px 15px' }}
+            />
             <Pie
               data={data}
               dataKey="value"

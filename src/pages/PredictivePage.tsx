@@ -120,8 +120,8 @@ export default function PredictivePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-4 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-w-0">
+          <div className="lg:col-span-4 space-y-6 min-w-0">
             <div
               className="rounded-2xl p-6 border space-y-6 bg-surface border-border"
             >
@@ -230,9 +230,9 @@ export default function PredictivePage() {
             </div>
           </div>
 
-          <div className="lg:col-span-8 space-y-6">
+          <div className="lg:col-span-8 space-y-6 min-w-0">
             <div
-              className="rounded-2xl p-6 border bg-surface border-border"
+              className="rounded-2xl p-6 border bg-surface border-border min-w-0"
             >
               <h3
                 className="text-xs font-bold uppercase tracking-wider mb-1 text-fg-muted"
@@ -244,20 +244,28 @@ export default function PredictivePage() {
               </p>
 
               <div
-                className="h-80 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="h-80 min-w-0 w-full rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 role="img"
                 tabIndex={0}
                 aria-label={`Projeção anual 2025–2035. Floresta ${result2035.forestryArea} Mha, agricultura ${result2035.agricultureArea} Mha, índice de emissão ${result2035.carbonEmissionIndex}.`}
+                style={{ minWidth: 0 }}
               >
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={simulatedData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                  <LineChart data={simulatedData} margin={{ top: 10, right: 24, left: 8, bottom: 8 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
                     <XAxis
                       dataKey="year"
                       tick={{ fontSize: 11, fill: 'var(--color-fg-muted)' }}
                       tickLine={false}
+                      tickMargin={4}
                     />
-                    <YAxis tick={{ fontSize: 11, fill: 'var(--color-fg-muted)' }} tickLine={false} axisLine={false} />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: 'var(--color-fg-muted)' }}
+                      tickLine={false}
+                      axisLine={false}
+                      width={52}
+                      tickMargin={4}
+                    />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: 'var(--color-canvas)',
@@ -269,7 +277,9 @@ export default function PredictivePage() {
                     />
                     <Legend
                       iconType="circle"
-                      wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
+                      align="center"
+                      verticalAlign="bottom"
+                      wrapperStyle={{ fontSize: '11px', paddingTop: '10px', maxWidth: '100%', lineHeight: '16px' }}
                     />
                     <Line
                       type="monotone"
@@ -310,7 +320,7 @@ export default function PredictivePage() {
             </div>
 
             <div
-              className="grid grid-cols-3 gap-4"
+              className="grid grid-cols-1 sm:grid-cols-3 gap-4 min-w-0"
             >
               <div
                 className="rounded-2xl p-5 border text-center bg-surface border-border"

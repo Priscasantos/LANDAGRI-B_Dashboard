@@ -35,11 +35,11 @@ export default function ThemeToggle(): React.JSX.Element {
       onClick={() => setTheme(NEXT[current])}
       aria-label={label}
       title={`Tema atual: ${current} (${effective}) — ${baseLabel}`}
-      className="flex items-center justify-center w-9 h-9 rounded-lg
-        bg-transparent hover:bg-surface-hover
+      className="flex items-center justify-center size-[34px] rounded-full
+        bg-transparent hover:bg-primary hover:text-primary-foreground
         text-fg-secondary
         transition-all duration-200
-        focus:outline-none focus:ring-2 focus:ring-blue-500"
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
     >
       <Icon
         size={18}

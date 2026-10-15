@@ -12,8 +12,7 @@ export default function LeafletMapInner(): ReactElement {
     <div
       role="img"
       aria-label="Mapa das iniciativas LANDAGRI-B (Brasil)"
-      className="w-full overflow-hidden rounded-xl border border-border"
-      style={{ height: 320 }}
+      className="w-full overflow-hidden rounded-xl border border-border h-[420px] md:h-[480px]"
     >
       <MapContainer
         center={[-14.235, -51.925]}

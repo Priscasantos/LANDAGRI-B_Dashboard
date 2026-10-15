@@ -106,13 +106,13 @@ function SidebarNavContent({ onNavigate }: { onNavigate: () => void }): React.JS
           </span>
         </Link>
       </div>
-      <nav aria-label="Módulos do dashboard" className="flex-1 overflow-y-auto px-2 pb-4">
+      <nav aria-label="Módulos do dashboard" className="flex-1 overflow-y-auto px-3 pb-4">
         {navGroups.map((group) => (
-          <div key={group.label} className="mt-1 first:mt-0">
-            <p className="px-3 pt-4 pb-1 text-[11px] font-semibold tracking-wider text-fg-muted uppercase first:pt-1">
+          <div key={group.label} className="mt-2 first:mt-0">
+            <p className="px-3 pt-5 pb-1.5 text-[11px] font-semibold tracking-wider text-fg-muted uppercase first:pt-1">
               {group.label}
             </p>
-            <ul className="space-y-0.5">
+            <ul className="space-y-1">
               {group.items.map((item) => (
                 <li key={item.title}>
                   <NavLink
@@ -120,9 +120,9 @@ function SidebarNavContent({ onNavigate }: { onNavigate: () => void }): React.JS
                     end={item.items === undefined}
                     onClick={onNavigate}
                     className={({ isActive }: { isActive: boolean }) =>
-                      `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                      `relative flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                         isActive
-                          ? 'bg-sidebar-active-bg text-sidebar-text-active'
+                          ? 'bg-sidebar-active-bg font-semibold text-sidebar-text-active before:absolute before:inset-y-1.5 before:left-0 before:w-1 before:rounded-full before:bg-primary'
                           : 'text-sidebar-text hover:bg-sidebar-hover-bg hover:text-fg'
                       }`
                     }
@@ -131,17 +131,17 @@ function SidebarNavContent({ onNavigate }: { onNavigate: () => void }): React.JS
                     <span className="truncate">{item.title}</span>
                   </NavLink>
                   {item.items && (
-                    <ul aria-label={`Subpáginas de ${item.title}`} className="mt-0.5 mb-1 ml-9 space-y-0.5 border-l border-border pl-3">
+                    <ul aria-label={`Subpáginas de ${item.title}`} className="mt-1 mb-1 ml-9 space-y-1 border-l-2 border-border pl-3">
                       {item.items.map((sub) => (
                         <li key={sub.url}>
                           <NavLink
                             to={sub.url}
                             onClick={onNavigate}
                             className={({ isActive }: { isActive: boolean }) =>
-                              `block truncate rounded-md px-2 py-1.5 text-[13px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                              `block truncate rounded-md px-2.5 py-2 text-[13px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                                 isActive
-                                  ? 'font-semibold text-sidebar-text-active'
-                                  : 'text-fg-secondary hover:text-fg'
+                                  ? 'bg-sidebar-active-bg font-semibold text-sidebar-text-active'
+                                  : 'text-fg-secondary hover:bg-sidebar-hover-bg hover:text-fg'
                               }`
                             }
                           >
@@ -173,11 +173,21 @@ export default function AppSidebar(): React.JSX.Element {
   const { mobileOpen, setMobileOpen } = useSidebar();
   const close = (): void => setMobileOpen(false);
   // Escape fecha o drawer móvel e devolve o foco ao botão de menu (p3-hardening).
+  // Inclui trava de scroll do body + foco inicial no botão fechar.
   useEffect(() => {
     if (!mobileOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const closeBtn = document.querySelector<HTMLButtonElement>(
+      '[data-testid="app-sidebar-mobile"] button[aria-label="Fechar menu de navegação"]',
+    );
+    closeBtn?.focus();
     const onKey = (e: KeyboardEvent): void => { if (e.key === 'Escape') { setMobileOpen(false); requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('button[aria-label="Abrir menu de navegação"]')?.focus()); } };
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', onKey);
+    };
   }, [mobileOpen, setMobileOpen]);
 
   return (
@@ -186,7 +196,7 @@ export default function AppSidebar(): React.JSX.Element {
       <aside
         data-testid="app-sidebar"
         aria-label="Navegação principal"
-        className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-border bg-sidebar-bg lg:block"
+        className="sticky top-0 hidden h-screen w-[var(--sidebar-width,260px)] shrink-0 flex-col border-r border-border bg-sidebar-bg lg:flex"
       >
         <SidebarNavContent onNavigate={() => undefined} />
       </aside>
@@ -205,7 +215,7 @@ export default function AppSidebar(): React.JSX.Element {
             aria-label="Menu de navegação"
             role="dialog"
             aria-modal="true"
-            className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r border-border bg-sidebar-bg shadow-lg"
+            className="absolute inset-y-0 left-0 flex w-[var(--sidebar-width,260px)] max-w-[85vw] flex-col border-r border-border bg-sidebar-bg shadow-lg"
           >
             <button
               type="button"

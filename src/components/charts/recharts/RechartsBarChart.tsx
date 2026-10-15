@@ -47,28 +47,40 @@ export function RechartsBarChart({
       role="img"
       aria-label={title}
       tabIndex={0}
-      className="w-full rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      className="w-full min-w-0 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
     >
       <figcaption className="sr-only">
         {title}. {data.map((d) => `${d.category}: ${d.value}`).join('; ')}.
       </figcaption>
-      <div style={{ width: '100%', height }} aria-hidden="true">
-        <ResponsiveContainer width="100%" height="100%">
+      <div style={{ width: '100%', minWidth: 0, height }} aria-hidden="true" className="min-w-0">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
           <RcBarChart
             data={data}
             layout={layout === 'vertical' ? 'vertical' : 'horizontal'}
-            margin={{ top: 10, right: 20, left: 0, bottom: 60 }}
+            margin={{ top: 10, right: 24, left: 8, bottom: 60 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} vertical={false} />
             {layout === 'vertical' ? (
               <>
-                <XAxis type="number" tick={{ fontSize: 11, fill: CHART_TICK_FILL }} />
-                <YAxis type="category" dataKey="category" tick={{ fontSize: 11, fill: CHART_TICK_FILL }} width={110} />
+                <XAxis type="number" tick={{ fontSize: 11, fill: CHART_TICK_FILL }} tickMargin={4} />
+                <YAxis
+                  type="category"
+                  dataKey="category"
+                  tick={{ fontSize: 11, fill: CHART_TICK_FILL }}
+                  width={120}
+                  tickMargin={4}
+                />
               </>
             ) : (
               <>
-                <XAxis dataKey="category" tick={{ fontSize: 11, fill: CHART_TICK_FILL }} angle={-45} textAnchor="end" height={70} interval={0} />
-                <YAxis tick={{ fontSize: 11, fill: CHART_TICK_FILL }} tickLine={false} axisLine={false} />
+                <XAxis dataKey="category" tick={{ fontSize: 11, fill: CHART_TICK_FILL }} angle={-45} textAnchor="end" height={70} interval={0} tickMargin={4} />
+                <YAxis
+                  tick={{ fontSize: 11, fill: CHART_TICK_FILL }}
+                  tickLine={false}
+                  axisLine={false}
+                  width={52}
+                  tickMargin={4}
+                />
               </>
             )}
             <Tooltip contentStyle={CHART_TOOLTIP_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} />

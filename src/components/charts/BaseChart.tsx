@@ -91,7 +91,7 @@ export default function BaseChart({
   }, [data, finalLayout, config]);
 
   return (
-    <div className="w-full rounded-xl p-3 bg-surface border border-border">
+    <div className="w-full min-w-0 overflow-hidden rounded-xl p-3 bg-surface border border-border">
       {loadError ? (
         <p role="alert" className="text-sm text-fg-secondary p-4 text-center">
           Não foi possível carregar o gráfico interativo. Tente recarregar a página.
@@ -101,8 +101,8 @@ export default function BaseChart({
           ref={containerRef}
           role="img"
           aria-label={typeof layout?.title === 'object' ? layout.title.text : 'Gráfico interativo'}
-          className={`w-full ${className}`}
-          style={{ width: '100%', height: '100%', minHeight: '350px' }}
+          className={`w-full min-w-0 ${className}`}
+          style={{ width: '100%', minWidth: 0, height, minHeight: Math.min(height, 350) }}
         />
       )}
     </div>

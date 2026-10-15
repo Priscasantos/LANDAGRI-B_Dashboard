@@ -47,15 +47,15 @@ export interface ThemeColors {
 
 export const MODULE_THEMES: Record<ModuleName, ThemeColors> = {
   Overview: {
-    primary: '#3b82f6',
-    secondary: '#1d4ed8',
-    accent: ['#636B2F', '#626C01'],
-    background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+    primary: '#2e7d32',
+    secondary: '#1b5e20',
+    accent: ['#1B5E20', '#2E7D32'],
+    background: 'linear-gradient(135deg, #f6f9f4 0%, #e8f5e9 100%)',
     card: '#ffffff',
-    text: '#1e293b',
-    textSecondary: '#64748b',
-    border: 'rgba(148, 163, 184, 0.1)',
-    headerGradient: 'linear-gradient(135deg, #636B2F 0%, #626C01 100%)',
+    text: '#1a2b1e',
+    textSecondary: '#4a6350',
+    border: 'rgba(46, 125, 50, 0.12)',
+    headerGradient: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)',
     headerTextColor: '#ffffff',
     headerSubtitleColor: '#fdebd6',
   },
@@ -101,9 +101,10 @@ export const MODULE_THEMES: Record<ModuleName, ThemeColors> = {
 };
 
 // Chart color palettes (ported from modern_themes.py / modern_color_palettes.py)
+// Categorical base = Verde Agro v2 (tokens `--color-chart-1..10` em index.css).
 export const CATEGORICAL_COLORS = [
-  '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
-  '#06b6d4', '#84cc16', '#ec4899', '#f97316', '#6366f1',
+  '#2E7D32', '#43A047', '#7CB342', '#AED581', '#1B5E20',
+  '#C2701D', '#E6A817', '#0E7C86', '#5C6BC0', '#B0BEC5',
   '#22c55e', '#14b8a6',
 ];
 

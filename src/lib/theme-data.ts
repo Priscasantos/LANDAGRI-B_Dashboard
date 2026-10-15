@@ -6,18 +6,18 @@
  * without hardcoding hex inside components. Reversible: pure constants.
  */
 
-/** Categorical palette — mirrors `CATEGORICAL_COLORS` in types/theme. */
+/** Categorical palette — mirrors `CATEGORICAL_COLORS` in types/theme (Verde Agro v2). */
 export const THEME_DATA_PALETTE: readonly string[] = [
-  'var(--color-chart-1, #3b82f6)',
-  'var(--color-chart-2, #10b981)',
-  'var(--color-chart-3, #f59e0b)',
-  'var(--color-chart-4, #ef4444)',
-  'var(--color-chart-5, #8b5cf6)',
-  'var(--color-chart-6, #06b6d4)',
-  'var(--color-chart-7, #84cc16)',
-  'var(--color-chart-8, #ec4899)',
-  'var(--color-chart-9, #f97316)',
-  'var(--color-chart-10, #6366f1)',
+  'var(--color-chart-1, #2E7D32)',
+  'var(--color-chart-2, #43A047)',
+  'var(--color-chart-3, #7CB342)',
+  'var(--color-chart-4, #AED581)',
+  'var(--color-chart-5, #1B5E20)',
+  'var(--color-chart-6, #C2701D)',
+  'var(--color-chart-7, #E6A817)',
+  'var(--color-chart-8, #0E7C86)',
+  'var(--color-chart-9, #5C6BC0)',
+  'var(--color-chart-10, #B0BEC5)',
 ];
 
 /** Diverging scale — mirrors `DIVERGING_COLORS` in types/theme. */

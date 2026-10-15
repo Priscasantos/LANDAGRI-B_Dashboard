@@ -144,7 +144,7 @@ export function SearchTrigger({ onClick }: SearchTriggerProps): React.JSX.Elemen
       type="button"
       onClick={onClick}
       aria-label="Buscar páginas (Ctrl+K)"
-      className="relative flex h-9 w-full items-center gap-2 rounded-lg border border-border bg-surface px-3 text-sm font-normal text-fg-muted transition-colors hover:bg-surface-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:pr-12 md:w-44 lg:w-60"
+      className="relative flex h-9 w-9 items-center justify-center gap-2 rounded-full border border-border bg-surface px-0 text-sm font-normal text-fg-muted shadow-sm transition-colors hover:bg-surface-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-full sm:justify-start sm:px-3 md:w-44 lg:w-60"
     >
       <Search size={15} aria-hidden="true" />
       <span className="hidden sm:inline">Buscar…</span>

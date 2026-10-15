@@ -48,11 +48,8 @@ export default function OverviewPage() {
 
       {selectedData && (
         <>
-          {/* Initiative header */}
-          <div
-            className="rounded-xl px-5 py-4 mb-5 text-center text-white font-bold text-xl shadow-md"
-            style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, #1e40af 100%)' }}
-          >
+          {/* Initiative header — superfície canônica, sem faixa chapada */}
+          <div className="rounded-xl border border-border bg-card px-5 py-4 mb-5 text-center text-card-foreground font-bold text-xl shadow-sm">
             {selectedData.Name} ({selectedData.Acronym})
           </div>
 

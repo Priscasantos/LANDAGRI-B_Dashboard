@@ -73,10 +73,9 @@ export default function SiteHeader(): React.JSX.Element {
           >
             <Menu size={19} aria-hidden="true" />
           </button>
-          <div className="hidden min-w-0 flex-1 md:block">
+          <div className="min-w-0 flex-1">
             <Breadcrumb segments={segmentsForPath(location.pathname)} />
           </div>
-          <div className="min-w-0 flex-1 md:hidden" />
           <div className="flex items-center gap-2">
             <SearchTrigger onClick={() => setSearchOpen(true)} />
             <ThemeToggle />
