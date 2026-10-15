@@ -118,8 +118,8 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
     return {
       monthlyActivity: {
         series: [
-          { name: translateActivity('Planting', locale), x: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)), y: plantCount, color: '#22c55e' },
-          { name: translateActivity('Harvest', locale), x: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)), y: harvestCount, color: '#f97316' },
+          { name: translateActivity('Planting', locale), x: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)), y: plantCount },
+          { name: translateActivity('Harvest', locale), x: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)), y: harvestCount },
         ],
       },
       ganttBars: ganttEntries.slice(0, 100),

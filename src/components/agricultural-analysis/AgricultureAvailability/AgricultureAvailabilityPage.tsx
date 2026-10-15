@@ -175,7 +175,6 @@ export default function AgricultureAvailabilityPage(): ReactElement {
             labels={stateCoverage.labels}
             values={stateCoverage.values}
             captionKey="cropsAvailable"
-            color="#EC9706"
             height={Math.max(300, stateCoverage.labels.length * 25)}
           />
         ) : (
@@ -194,7 +193,6 @@ export default function AgricultureAvailabilityPage(): ReactElement {
             labels={cropDiversity.labels}
             values={cropDiversity.values}
             captionKey="statesCount"
-            color="#626C01"
             height={Math.max(300, cropDiversity.labels.length * 35)}
           />
         ) : (

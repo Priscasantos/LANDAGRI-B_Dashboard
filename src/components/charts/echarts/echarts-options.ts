@@ -19,6 +19,8 @@ import {
   LANDAGRI_COLORWAY_DARK,
   LANDAGRI_COLORWAY_LIGHT,
   formatEChartsNumber,
+  heatmapVisualColors,
+  type EChartsPalette,
   type EChartsPilotTheme,
 } from '../../../lib/echarts-theme';
 
@@ -31,6 +33,14 @@ interface BaseBuilderInput {
    * `CHART_FONT_FAMILY` (pure/test use).
    */
   fontFamily?: string;
+  /**
+   * Explicit palette (default `'theme'`). Categorical builders always use
+   * the colorway of the active theme and intentionally ignore `'divergent'`
+   * (sign-encoding hues would mislead counts/magnitudes); only
+   * `buildHeatmapOption` varies output by palette — `'divergent'` solely
+   * for correlation-style −1…1 data.
+   */
+  palette?: EChartsPalette;
 }
 
 function fontOf(input: BaseBuilderInput): string {
@@ -227,7 +237,7 @@ export interface GroupedBarInput extends BaseBuilderInput {
 export function buildGroupedBarOption(
   input: GroupedBarInput,
 ): EChartsCoreOption {
-  const { divider } = axisCommon(input.theme);
+  const { divider, labelColor } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
   const colorway = colorwayOf(input.theme);
   return {
@@ -272,7 +282,9 @@ export function buildGroupedBarOption(
               silent: true,
               symbol: 'none',
               lineStyle: {
-                color: input.referenceLine.color ?? '#ef4444',
+                // Linha de referência neutra do tema (AA nos dois temas);
+                // override explícito continua vencendo.
+                color: input.referenceLine.color ?? labelColor,
                 width: 2,
                 type: 'dashed',
               },
@@ -300,7 +312,9 @@ export interface HeatmapInput extends BaseBuilderInput {
   z: (number | null)[][];
   /**
    * visualMap `inRange` colors (Plotly `colorscale` analogue).
-   * Defaults to the amber intensity ramp.
+   * Default: rampa do tema ativo (`palette: 'theme'`); `'divergent'`
+   * resolve a paleta divergente verde↔terra/vermelho (correlação −1…1).
+   * Override explícito continua vencendo (ex. categorias plantio/colheita).
    */
   colors?: string[];
   /** visualMap bounds (Plotly `zmin`/`zmax` analogue). */
@@ -310,9 +324,68 @@ export interface HeatmapInput extends BaseBuilderInput {
   showValues?: boolean;
   /**
    * Value range rendered on light cells (label usa texto escuro legível;
-   * fora dela, branco). Default = 40% inferior (rampa âmbar clara embaixo).
+   * fora dela, branco). Quando omitido, a cor do rótulo é automática por
+   * contraste máximo contra a rampa resolvida (AA nos dois temas).
    */
   labelDarkRange?: [number, number];
+}
+
+/** Parse `#rgb`/`#rrggbb` → [r, g, b] (0–255); null quando não-hex. */
+function parseHexColor(color: string): [number, number, number] | null {
+  const m = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.exec(color.trim());
+  if (!m) return null;
+  const h = m[1].length === 3 ? m[1].split('').map((c) => c + c).join('') : m[1];
+  const n = parseInt(h, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function relativeLuminance([r, g, b]: [number, number, number]): number {
+  const lin = (c: number): number => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+}
+
+function contrastRatio(l1: number, l2: number): number {
+  const [hi, lo] = l1 >= l2 ? [l1, l2] : [l2, l1];
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+function mixRgb(
+  a: [number, number, number],
+  b: [number, number, number],
+  t: number,
+): [number, number, number] {
+  return [
+    Math.round(a[0] + (b[0] - a[0]) * t),
+    Math.round(a[1] + (b[1] - a[1]) * t),
+    Math.round(a[2] + (b[2] - a[2]) * t),
+  ];
+}
+
+/**
+ * Cor do rótulo da célula com contraste máximo (branco Berry `#ffffff`
+ * vs. texto escuro `#1e293b`) contra a rampa resolvida na posição do
+ * valor. Garante a melhor legibilidade disponível nos dois temas, seja
+ * rampa sequencial ou divergente.
+ */
+function autoCellLabelColor(
+  value: number,
+  vMin: number,
+  vMax: number,
+  ramp: string[],
+): string {
+  const t = vMax > vMin ? Math.max(0, Math.min(1, (value - vMin) / (vMax - vMin))) : 0;
+  const stops = ramp.map(parseHexColor).filter((c): c is [number, number, number] => c !== null);
+  if (stops.length === 0) return '#ffffff';
+  const pos = t * (stops.length - 1);
+  const i = Math.min(Math.floor(pos), stops.length - 1);
+  const j = Math.min(i + 1, stops.length - 1);
+  const bg = relativeLuminance(mixRgb(stops[i], stops[j], pos - i));
+  const white = contrastRatio(bg, 1);
+  const dark = contrastRatio(bg, relativeLuminance([30, 41, 59]));
+  return dark >= white ? '#1e293b' : '#ffffff';
 }
 
 export function buildHeatmapOption(input: HeatmapInput): EChartsCoreOption {
@@ -328,11 +401,11 @@ export function buildHeatmapOption(input: HeatmapInput): EChartsCoreOption {
   const max = flat.length > 0 ? Math.max(...flat) : 0;
   const vMin = input.min ?? 0;
   const vMax = input.max ?? Math.max(max, 1);
-  // Faixa clara: texto escuro legível; demais células seguem brancas.
-  const [darkLo, darkHi] = input.labelDarkRange ?? [
-    vMin,
-    vMin + (vMax - vMin) * 0.4,
-  ];
+  // Rampa do tema ativo por paleta (override explícito vence); rótulo
+  // automático por contraste quando `labelDarkRange` é omitido.
+  const ramp = input.colors ?? heatmapVisualColors(input.theme, input.palette ?? 'theme');
+  const darkRange = input.labelDarkRange;
+  const [darkLo, darkHi] = darkRange ?? [vMin, vMin + (vMax - vMin) * 0.4];
   return {
     textStyle: { fontFamily },
     tooltip: {
@@ -373,7 +446,7 @@ export function buildHeatmapOption(input: HeatmapInput): EChartsCoreOption {
       left: 'center',
       bottom: 8,
       inRange: {
-        color: input.colors ?? ['#f3f4f6', '#fef3c7', '#f97316', '#dc2626', '#7f1d1d'],
+        color: ramp,
       },
       textStyle: { color: labelColor, fontFamily, fontSize: 11 },
     },
@@ -385,10 +458,16 @@ export function buildHeatmapOption(input: HeatmapInput): EChartsCoreOption {
           show: input.showValues ?? false,
           fontSize: 11,
           fontFamily,
+          // Halo estático do tema: realça o glifo na faixa de transição da
+          // rampa (onde nem branco nem Berry atingem 4.5:1 sozinhos); nos
+          // stops o contraste ≥4.5:1 já vem da cor automática (ver teste).
+          textBorderWidth: 2,
+          textBorderColor: input.theme === 'dark' ? 'rgba(255,255,255,0.85)' : 'rgba(30,41,59,0.85)',
           color: (params: { value?: unknown }): string => {
             const v = Array.isArray(params.value) ? params.value[2] : params.value;
             if (typeof v !== 'number') return '#ffffff';
-            return v >= darkLo && v <= darkHi ? '#1e293b' : '#ffffff';
+            if (darkRange !== undefined) return v >= darkLo && v <= darkHi ? '#1e293b' : '#ffffff';
+            return autoCellLabelColor(v, vMin, vMax, ramp);
           },
           formatter: (params: { value?: unknown }): string => {
             const v = Array.isArray(params.value) ? params.value[2] : params.value;
@@ -500,7 +579,8 @@ export function buildLineOption(input: LineInput): EChartsCoreOption {
               markPoint: {
                 symbol: 'pin',
                 symbolSize: 36,
-                itemStyle: { color: s.markPoint.color ?? '#f59e0b' },
+                // Destaque âmbar agro do tema ativo (colorway[6]), não hex fixo.
+                itemStyle: { color: s.markPoint.color ?? colorway[6] },
                 label: {
                   formatter: s.markPoint.label,
                   fontSize: 11,

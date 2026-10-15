@@ -1,6 +1,7 @@
 import { useMemo, type ReactElement } from 'react';
 import DataTable from '../ui/DataTable';
 import { useDashboardStore } from '../../stores/dashboardStore';
+import { getInitiativeShortName } from '../../data/glossary';
 import { useT } from '../../i18n/LanguageContext';
 
 interface InitiativesTableProps {
@@ -19,13 +20,13 @@ interface InitiativesTableProps {
  * lands on stable v8. Reversible: pure wrapper.
  */
 export default function InitiativesTable({ className = '' }: InitiativesTableProps): ReactElement {
-  const { t } = useT('overview');
+  const { t, locale } = useT('overview');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const data = useMemo(
     () =>
       initiatives.map((i) => ({
-        iniciativa: i.Display_Name,
+        iniciativa: getInitiativeShortName(i.Display_Name, locale),
         cobertura: i.Coverage,
         inicio: i.Year_Start,
         fim: i.Year_End,
@@ -34,7 +35,7 @@ export default function InitiativesTable({ className = '' }: InitiativesTablePro
         resolucao: i.Resolution,
         acuracia: i.Accuracy,
       })),
-    [initiatives],
+    [initiatives, locale],
   );
 
   const columns = useMemo(

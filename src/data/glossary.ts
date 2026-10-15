@@ -242,8 +242,129 @@ export function translateTerm(
  * `useInitiativeDisplayName` resolve no render a partir do locale ativo.
  */
 export function getInitiativeDisplayName(name: string, locale: Locale): string {
-  void locale; // nomes próprios invariantes por locale (documentado acima)
-  return name;
+  return translateInitiativeName(name, locale);
+}
+
+/**
+ * Nome de iniciativa para exibição por locale (só display; bruto intacto).
+ * Nomes próprios ficam como estão (MapBiomas, PRODES…), exceto o topônimo:
+ * em PT usa-se "Brasil"/"Biomas Brasileiros" ("Brazil"/"Brazilian" só em
+ * EN). Desconhecido volta intacto — nunca some.
+ */
+export function translateInitiativeName(name: string, locale: Locale): string {
+  if (locale === 'en') return name;
+  return name
+    .replace(/\bBrazilian Biomes\b/g, 'Biomas Brasileiros')
+    .replace(/\bBrazil\b/g, 'Brasil');
+}
+
+/**
+ * Correções de typos em methodology names vindos dos dados (só display;
+ * JSON bruto intacto):
+ * - "Bhattacharya" → "Bhattacharyya" (distância de Bhattacharyya);
+ * - "U-Net Deep learning" → "U-Net Deep Learning" (caixa consistente).
+ * Cai para o enum de metodologia traduzido e, por fim, passthrough.
+ */
+const METHODOLOGY_FIX: Record<string, LocalizedTerm> = {
+  'Visual Interpretation, Supervised Bhattacharya Classification, and Deep Learning': {
+    'pt-BR':
+      'Interpretação Visual, Classificação Supervisionada Bhattacharyya e Aprendizado Profundo',
+    en: 'Visual Interpretation, Supervised Bhattacharyya Classification, and Deep Learning',
+  },
+  'Supervised Random Forest and U-Net Deep learning algorithms applied to Landsat series data': {
+    'pt-BR':
+      'Floresta Aleatória Supervisionada e algoritmos U-Net de Aprendizado Profundo aplicados a séries Landsat',
+    en: 'Supervised Random Forest and U-Net Deep Learning algorithms applied to Landsat series data',
+  },
+};
+
+/** Metodologia para exibição (typos corrigidos + tradução PT). */
+export function translateMethodology(value: string, locale: Locale): string {
+  const fixed = METHODOLOGY_FIX[value]?.[locale];
+  if (fixed) return fixed;
+  return TABLES.methodology[value]?.[locale] ?? value;
+}
+
+/**
+ * Nome curto por iniciativa — sigla + nome curto traduzido (só display;
+ * bruto intacto). Uso: cards, legendas, tooltips, eixos e tabela; o nome
+ * completo (via `translateInitiativeName`) fica só no detalhe/popup.
+ * Iniciativa fora da tabela volta intacta — nunca some.
+ */
+const INITIATIVE_SHORT: Record<string, { acronym: string; short: LocalizedTerm }> = {
+  'Copernicus Global Land Cover Service Dynamic Land Cover': {
+    acronym: 'CGLS',
+    short: { 'pt-BR': 'Solo dinâmico Copernicus', en: 'Copernicus dynamic land' },
+  },
+  'Google Dynamic World V1': {
+    acronym: 'GDW',
+    short: { 'pt-BR': 'Mundo dinâmico Google', en: 'Google dynamic world' },
+  },
+  'ESRI-10m Annual LULC': {
+    acronym: 'ESRI-10m LULC',
+    short: { 'pt-BR': 'Uso do solo anual ESRI', en: 'ESRI annual LULC' },
+  },
+  'Global LULC change 2000 and 2020': {
+    acronym: 'UMD-GLC',
+    short: { 'pt-BR': 'Mudança global do solo', en: 'Global LULC change' },
+  },
+  'Global Pasture Watch (GPW)': {
+    acronym: 'GPW',
+    short: { 'pt-BR': 'Pastagens globais', en: 'Global pastures' },
+  },
+  'South America Soybean Maps': {
+    acronym: 'UMD-SASM',
+    short: { 'pt-BR': 'Soja na América do Sul', en: 'South American soybean' },
+  },
+  'WorldCover 10m 2021': {
+    acronym: 'ESA-WC',
+    short: { 'pt-BR': 'Cobertura global 2021', en: 'Global cover 2021' },
+  },
+  WorldCereal: {
+    acronym: 'WorldCereal',
+    short: { 'pt-BR': 'Cereais no mundo', en: 'World cereals' },
+  },
+  'PRODES Deforestation, Warnings and Vegetation for Brazilian Biomes': {
+    acronym: 'PRODES',
+    short: { 'pt-BR': 'Desmatamento e vegetação', en: 'Deforestation and vegetation' },
+  },
+  'DETER Deforestation, Warnings and Vegetation for Brazilian Biomes': {
+    acronym: 'DETER',
+    short: { 'pt-BR': 'Alertas de desmatamento', en: 'Deforestation warnings' },
+  },
+  'TerraClass Amazonia': {
+    acronym: 'TerraClass Amazon',
+    short: { 'pt-BR': 'Uso do solo na Amazônia', en: 'Amazon land use' },
+  },
+  'TerraClass Cerrado': {
+    acronym: 'TerraClass Cerrado',
+    short: { 'pt-BR': 'Uso do solo no Cerrado', en: 'Cerrado land use' },
+  },
+  MapBiomas: {
+    acronym: 'MapBiomas',
+    short: { 'pt-BR': 'Mapeamento anual do Brasil', en: 'Annual mapping of Brazil' },
+  },
+  'IBGE Monitoring Land Cover and Land Use': {
+    acronym: 'IBGE-MLCU',
+    short: { 'pt-BR': 'Cobertura e uso do solo IBGE', en: 'IBGE land cover and use' },
+  },
+  'National Supply Company Agricultural Mapping': {
+    acronym: 'CONAB-AM',
+    short: { 'pt-BR': 'Mapeamento agrícola CONAB', en: 'CONAB agricultural mapping' },
+  },
+};
+
+/** Rótulo curto "SIGLA · nome curto" para cards/legendas/tooltips/tabela. */
+export function getInitiativeShortName(name: string, locale: Locale): string {
+  const direct = INITIATIVE_SHORT[name];
+  if (direct) return `${direct.acronym} · ${direct.short[locale]}`;
+  // `Display_Name` compõe "Nome (SIGLA)" (ver `dataParser`); resolve pela
+  // base para a forma composta também encurtar (ex. "TerraClass Amazonia
+  // (TerraClass Amazon)" → "TerraClass Amazon · Uso do solo na Amazônia").
+  const base = name.replace(/\s*\([^()]*\)\s*$/, '');
+  const entry = base !== name ? INITIATIVE_SHORT[base] : undefined;
+  if (entry) return `${entry.acronym} · ${entry.short[locale]}`;
+  return translateInitiativeName(name, locale);
 }
 
 /**

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
 import { useDashboardStore } from '../../../stores/dashboardStore';
-import { CATEGORICAL_COLORS } from '../../../types/theme';
+import { getInitiativeShortName } from '../../../data/glossary';
 import { useT } from '../../../i18n/LanguageContext';
 import Select from '../../ui/Select';
 
@@ -16,7 +16,7 @@ interface BarChartTabProps {
  * Reversible: previous version in git history.
  */
 export default function BarChartTab({ selectedInitiatives }: BarChartTabProps) {
-  const { t } = useT('charts');
+  const { t, locale } = useT('charts');
   const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
@@ -46,12 +46,12 @@ export default function BarChartTab({ selectedInitiatives }: BarChartTabProps) {
     return initiatives
       .filter((i) => selectedInitiatives.includes(i.Name))
       .map((i) => ({
-        name: i.Display_Name,
+        name: getInitiativeShortName(i.Display_Name, locale),
         metric1: getValue(i, metric1),
         metric2: getValue(i, metric2),
         metric3: getValue(i, metric3),
       }));
-  }, [initiatives, selectedInitiatives, metric1, metric2, metric3]);
+  }, [initiatives, selectedInitiatives, metric1, metric2, metric3, locale]);
 
   if (filteredData.length === 0) {
     return (
@@ -102,7 +102,6 @@ export default function BarChartTab({ selectedInitiatives }: BarChartTabProps) {
         series={metricLabels.map((label, idx) => ({
           name: label,
           values: metricValues[idx],
-          color: CATEGORICAL_COLORS[idx % CATEGORICAL_COLORS.length],
         }))}
         captionKey="multiMetricComparison"
         height={450}

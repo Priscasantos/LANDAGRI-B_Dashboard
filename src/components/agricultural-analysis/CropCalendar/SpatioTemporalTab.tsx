@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import Card from '../../ui/Card';
 import EChartsGantt from '../../charts/echarts/EChartsGantt';
-import { CATEGORICAL_COLORS } from '../../../types/theme';
+import { LANDAGRI_COLORWAY_DARK, LANDAGRI_COLORWAY_LIGHT } from '../../../lib/echarts-theme';
+import { useEffectiveTheme } from '../../../hooks/use-theme';
 import { useT } from '../../../i18n/LanguageContext';
 import { translateCropName, translateMonthShort } from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
@@ -37,6 +38,7 @@ interface SpatioTemporalTabProps {
 export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: SpatioTemporalTabProps) {
   const { t } = useT('charts');
   const { t: tBody, locale } = useT('agricultural');
+  const theme = useEffectiveTheme();
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
@@ -75,16 +77,18 @@ export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: Sp
     }
 
     // One Gantt bar per state: active period tinted by dominant crop
+    // (same crop → same slot of the active theme colorway, light/dark aware).
+    const way = theme === 'dark' ? LANDAGRI_COLORWAY_DARK : LANDAGRI_COLORWAY_LIGHT;
     const bars: { label: string; start: number; end: number; color: string; tip: string }[] = [];
     const stateNames = Object.keys(stateCropMonths).sort();
 
-    stateNames.forEach((state, idx) => {
+    stateNames.forEach((state) => {
       const monthsSet = new Set<number>();
       const cropColors = new Map<string, string>();
 
       for (const [crop, mSet] of Object.entries(stateCropMonths[state])) {
         mSet.forEach(m => monthsSet.add(m));
-        cropColors.set(crop, CATEGORICAL_COLORS[selectedCrops.indexOf(crop) % CATEGORICAL_COLORS.length]);
+        cropColors.set(crop, way[selectedCrops.indexOf(crop) % way.length]);
       }
 
       if (monthsSet.size === 0) return;
@@ -94,7 +98,7 @@ export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: Sp
       const lastMonth = sortedMonths[sortedMonths.length - 1];
       const dominantCrop = [...cropColors.entries()]
         .sort((a, b) => stateCropMonths[state][b[0]]?.size || 0 - (stateCropMonths[state][a[0]]?.size || 0))[0]?.[0] || '';
-      const color = cropColors.get(dominantCrop) || CATEGORICAL_COLORS[idx % CATEGORICAL_COLORS.length];
+      const color = cropColors.get(dominantCrop) ?? way[0];
 
       bars.push({
         label: state,
@@ -106,7 +110,7 @@ export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: Sp
     });
 
     return bars;
-  }, [rawData, selectedCrops, selectedRegions, statesMap, t, locale]);
+  }, [rawData, selectedCrops, selectedRegions, statesMap, t, locale, theme]);
 
   return (
     <Card padding="lg" hover={false}>

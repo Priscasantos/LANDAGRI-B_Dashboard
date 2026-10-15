@@ -3,7 +3,7 @@ import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
 import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
 import EChartsRadar from '../../charts/echarts/EChartsRadar';
 import { useDashboardStore } from '../../../stores/dashboardStore';
-import { CATEGORICAL_COLORS } from '../../../types/theme';
+import { getInitiativeShortName } from '../../../data/glossary';
 import { minMaxNormalize } from '../../../lib/normalize';
 import { useT } from '../../../i18n/LanguageContext';
 
@@ -14,7 +14,7 @@ import { useT } from '../../../i18n/LanguageContext';
  * Reversible: previous version in git history.
  */
 export default function NormalizedPerformanceTab() {
-  const { t } = useT('charts');
+  const { t, locale } = useT('charts');
   const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
@@ -27,7 +27,7 @@ export default function NormalizedPerformanceTab() {
       return { heatmapData: [], metricLabels: [], initiativeLabels: [], metricComparison: [], radarData: [] };
     }
 
-    const names = valid.map((i) => i.Display_Name);
+    const names = valid.map((i) => getInitiativeShortName(i.Display_Name, locale));
     const metrics = [t('accuracyLabel'), t('resolutionInv'), t('totalClasses'), t('agricultureClasses')];
 
     // Build raw matrix [initiatives][metrics]
@@ -53,10 +53,10 @@ export default function NormalizedPerformanceTab() {
       avg: normalizedMatrix[idx].reduce((s, v) => s + v, 0) / normalizedMatrix[idx].length,
     }));
 
-    // Radar data (first 5 initiatives)
+    // Radar data (first 5 initiatives; colors follow the active theme colorway)
     const radarInitiative = valid.slice(0, 5);
-    const radarData = radarInitiative.map((i, idx) => ({
-      name: i.Display_Name,
+    const radarData = radarInitiative.map((i) => ({
+      name: getInitiativeShortName(i.Display_Name, locale),
       values: [
         i.Accuracy,
         i.Resolution > 0 ? 1 / i.Resolution : 0,
@@ -68,7 +68,6 @@ export default function NormalizedPerformanceTab() {
         const max = Math.max(...col);
         return max > min ? (v - min) / (max - min) : 0.5;
       }),
-      color: CATEGORICAL_COLORS[idx % CATEGORICAL_COLORS.length],
     }));
 
     return {
@@ -78,7 +77,7 @@ export default function NormalizedPerformanceTab() {
       metricComparison,
       radarData,
     };
-  }, [initiatives, t]);
+  }, [initiatives, t, locale]);
 
   if (heatmapData.length === 0) {
     return <div className="py-8 text-center text-fg-muted">{tBody('noNormalizedData')}</div>;
@@ -97,7 +96,6 @@ export default function NormalizedPerformanceTab() {
           y={initiativeLabels}
           captionKey="normalizedMetricsHeatmap"
           height={Math.max(400, initiativeLabels.length * 25)}
-          colors={['#440154', '#3b528b', '#21918c', '#5ec962', '#fde725']}
           min={0}
           max={1}
         />

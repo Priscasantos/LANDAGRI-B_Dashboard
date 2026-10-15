@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import DataTable from '../../ui/DataTable';
 import { useDashboardStore } from '../../../stores/dashboardStore';
+import { translateMethodology } from '../../../data/glossary';
 import { useT } from '../../../i18n/LanguageContext';
 
 interface DataDetailsTabProps {
@@ -8,7 +9,7 @@ interface DataDetailsTabProps {
 }
 
 export default function DataDetailsTab({ selectedInitiatives }: DataDetailsTabProps) {
-  const { t } = useT('initiative');
+  const { t, locale } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const tableData = useMemo(
@@ -21,7 +22,7 @@ export default function DataDetailsTab({ selectedInitiatives }: DataDetailsTabPr
           provider: i.Provider,
           source: i.Source,
           coverage: i.Coverage,
-          methodology: i.Methodology,
+          methodology: translateMethodology(i.Methodology, locale),
           accuracy: i.Accuracy > 0 ? i.Accuracy.toFixed(1) : '-',
           accuracyMin: i.Accuracy_Min > 0 ? i.Accuracy_Min.toFixed(1) : '-',
           accuracyMax: i.Accuracy_Max > 0 ? i.Accuracy_Max.toFixed(1) : '-',
@@ -35,10 +36,10 @@ export default function DataDetailsTab({ selectedInitiatives }: DataDetailsTabPr
           endYear: String(i.Year_End),
           years: String(i.Available_Years.length),
           frequency: i.Temporal_Frequency,
-          algorithm: i.Algorithm,
-          classificationMethod: i.Classification_Method,
+          algorithm: translateMethodology(i.Algorithm, locale),
+          classificationMethod: translateMethodology(i.Classification_Method, locale),
         })),
-    [initiatives, selectedInitiatives],
+    [initiatives, selectedInitiatives, locale],
   );
 
   const columns = [

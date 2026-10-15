@@ -3,6 +3,7 @@ import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
 import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
 import EChartsPie from '../../charts/echarts/EChartsPie';
 import { useDashboardStore } from '../../../stores/dashboardStore';
+import { getInitiativeShortName } from '../../../data/glossary';
 import { useT } from '../../../i18n/LanguageContext';
 
 /**
@@ -12,7 +13,7 @@ import { useT } from '../../../i18n/LanguageContext';
  * Reversible: previous version in git history.
  */
 export default function ClassDetailsTab() {
-  const { t } = useT('charts');
+  const { t, locale } = useT('charts');
   const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
@@ -20,7 +21,7 @@ export default function ClassDetailsTab() {
     return initiatives
       .filter((i) => i.Number_of_Classes > 0)
       .map((i) => ({
-        name: i.Display_Name,
+        name: getInitiativeShortName(i.Display_Name, locale),
         totalClasses: i.Number_of_Classes,
         agriClasses: i.Number_of_Agriculture_Classes,
         agriFocus:
@@ -30,7 +31,7 @@ export default function ClassDetailsTab() {
         capabilities: i.Agricultural_Capabilities || 'N/A',
       }))
       .sort((a, b) => b.totalClasses - a.totalClasses);
-  }, [initiatives]);
+  }, [initiatives, locale]);
 
   const { totalAgri, totalNonAgri, capEntries } = useMemo(() => {
     const totalAgri = chartData.reduce((s, d) => s + d.agriClasses, 0);
@@ -69,8 +70,8 @@ export default function ClassDetailsTab() {
           <h3 className="text-base font-semibold text-fg mb-2">{tBody('hAgriVsOther')}</h3>
           <EChartsPie
             data={[
-              { label: t('agricultureClasses'), value: totalAgri, color: '#22c55e' },
-              { label: t('otherClasses'), value: totalNonAgri, color: '#94a3b8' },
+              { label: t('agricultureClasses'), value: totalAgri },
+              { label: t('otherClasses'), value: totalNonAgri },
             ]}
             captionKey="agricultureFocus"
             height={300}
@@ -96,12 +97,10 @@ export default function ClassDetailsTab() {
               {
                 name: t('totalClasses'),
                 values: chartData.map((d) => d.totalClasses),
-                color: '#3b82f6',
               },
               {
                 name: t('agricultureClasses'),
                 values: chartData.map((d) => d.agriClasses),
-                color: '#22c55e',
               },
             ]}
             captionKey="classComparison"
@@ -116,12 +115,10 @@ export default function ClassDetailsTab() {
               {
                 name: t('agriculture'),
                 values: chartData.map((d) => d.agriFocus),
-                color: '#22c55e',
               },
               {
                 name: t('other'),
                 values: chartData.map((d) => 100 - d.agriFocus),
-                color: '#e2e8f0',
               },
             ]}
             captionKey="agricultureFocusPercentage"

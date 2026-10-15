@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
 import { useDashboardStore } from '../../../stores/dashboardStore';
+import { getInitiativeShortName } from '../../../data/glossary';
 import { useT } from '../../../i18n/LanguageContext';
 
 /**
@@ -10,7 +11,7 @@ import { useT } from '../../../i18n/LanguageContext';
  * Reversible: previous version in git history.
  */
 export default function GlobalAccuracyTab() {
-  const { t } = useT('charts');
+  const { t, locale } = useT('charts');
   const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
@@ -18,13 +19,13 @@ export default function GlobalAccuracyTab() {
     return initiatives
       .filter((i) => i.Accuracy > 0)
       .map((i) => ({
-        name: i.Display_Name,
+        name: getInitiativeShortName(i.Display_Name, locale),
         accuracy: i.Accuracy,
         accuracyMin: i.Accuracy_Min,
         accuracyMax: i.Accuracy_Max,
       }))
       .sort((a, b) => b.accuracy - a.accuracy);
-  }, [initiatives]);
+  }, [initiatives, locale]);
 
   if (chartData.length === 0) {
     return <div className="py-8 text-center text-fg-muted">{tBody('noAccuracyData')}</div>;

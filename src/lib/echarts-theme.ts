@@ -46,6 +46,79 @@ export const BERRY_TOOLTIP_BG: Record<EChartsPilotTheme, string> = {
   dark: '#334155',
 };
 
+/**
+ * Paleta explícita dos builders ECharts (`HeatmapInput.palette`).
+ * - `theme` (default): rampas derivadas do colorway Verde Agro do tema
+ *   ativo — séries categóricas e heatmaps de intensidade/magnitude.
+ * - `divergent`: SÓ onde o sinal tem sentido analítico (heatmap de
+ *   correlação −1…1). O matiz codifica o sinal; a claridade, a magnitude.
+ */
+export type EChartsPalette = 'theme' | 'divergent';
+
+/** Rampa sequencial do tema — intensidade/magnitude (neutro → Verde Agro). */
+export const LANDAGRI_SEQUENTIAL_LIGHT: readonly string[] = [
+  '#f1f5f1',
+  '#c5e1a5',
+  '#7cb342',
+  '#2e7d32',
+  '#1b5e20',
+];
+
+/** Rampa sequencial do tema adaptada ao canvas escuro (base slate → verde claro). */
+export const LANDAGRI_SEQUENTIAL_DARK: readonly string[] = [
+  '#233042',
+  '#2f4a2c',
+  // Mid-stop afinado para AA: `#357a38` dá 5.26:1 com rótulo branco
+  // (`#43a047` ficava em 4.43:1 — ver teste de contraste em
+  // `src/test/charts/echartsOptions.test.ts`).
+  '#357a38',
+  '#7cb342',
+  '#9ccc65',
+];
+
+/**
+ * Paleta divergente própria — verde Agro ↔ terra/vermelho.
+ *
+ * Justificativa: correlação −1…1 precisa de dois matizes (o colorway
+ * categórico e a rampa sequencial codificam só magnitude/categoria, sem
+ * ponto neutro). Verde (`#1b5e20`/`#9ccc65`) = associação positiva
+ * (semântica agro: crescimento); terra/vermelho (`#b2182b`/`#c94a4a`) =
+ * associação negativa; centro neutro (`#f7f4ec`/`#3a4556`) = ~0.
+ * Endpoints saturados nos dois temas para manter rótulos brancos com
+ * contraste AA; o centro claro (light) usa texto escuro Berry.
+ */
+export const LANDAGRI_DIVERGENT_LIGHT: readonly string[] = [
+  '#b2182b',
+  '#e8a04c',
+  '#f7f4ec',
+  '#7cb342',
+  '#1b5e20',
+];
+
+/** Variante escura da divergente (endpoints saturados → texto branco AA). */
+export const LANDAGRI_DIVERGENT_DARK: readonly string[] = [
+  '#c94a4a',
+  '#e8a04c',
+  '#3a4556',
+  '#7cb342',
+  '#9ccc65',
+];
+
+/** Resolve a rampa do visualMap para o tema + paleta ativos. */
+export function heatmapVisualColors(
+  theme: EChartsPilotTheme,
+  palette: EChartsPalette = 'theme',
+): string[] {
+  if (palette === 'divergent') {
+    return [...(theme === 'dark' ? LANDAGRI_DIVERGENT_DARK : LANDAGRI_DIVERGENT_LIGHT)];
+  }
+  return [...(theme === 'dark' ? LANDAGRI_SEQUENTIAL_DARK : LANDAGRI_SEQUENTIAL_LIGHT)];
+}
+
+/** Célula vazia de heatmap categórico (0=ausente) por tema — neutro AA. */
+export const HEATMAP_EMPTY_CELL_LIGHT = '#f3f4f6';
+export const HEATMAP_EMPTY_CELL_DARK = '#263242';
+
 /** Divider grid color (light; dark usa slate translúcido). */
 export const GRID_DIVIDER_LIGHT = '#e3e8ef';
 export const GRID_DIVIDER_DARK = 'rgba(51,65,85,0.5)';

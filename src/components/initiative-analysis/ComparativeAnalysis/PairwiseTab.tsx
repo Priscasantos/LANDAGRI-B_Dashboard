@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import EChartsScatter from '../../charts/echarts/EChartsScatter';
 import type { ScatterSeriesInput } from '../../charts/echarts/echarts-options';
 import { useDashboardStore } from '../../../stores/dashboardStore';
-import { CATEGORICAL_COLORS } from '../../../types/theme';
+import { getInitiativeShortName } from '../../../data/glossary';
 import { useT } from '../../../i18n/LanguageContext';
 
 /**
@@ -12,7 +12,7 @@ import { useT } from '../../../i18n/LanguageContext';
  * chrome unchanged. Reversible: previous version in git history.
  */
 export default function PairwiseTab() {
-  const { t: tBody } = useT('initiative');
+  const { t: tBody, locale } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const chartData = useMemo(() => {
@@ -20,21 +20,20 @@ export default function PairwiseTab() {
       (i) => i.Accuracy > 0 && i.Resolution > 0 && i.Number_of_Classes > 0,
     );
     return valid.map((i) => ({
-      name: i.Display_Name,
+      name: getInitiativeShortName(i.Display_Name, locale),
       accuracy: i.Accuracy,
       resolution: i.Resolution,
       classes: i.Number_of_Classes,
       coverage: i.Coverage,
       methodology: i.Methodology,
     }));
-  }, [initiatives]);
+  }, [initiatives, locale]);
 
   const series: ScatterSeriesInput[] = useMemo(
     () =>
-      chartData.map((d, i) => ({
+      chartData.map((d) => ({
         name: d.name,
         data: [[d.accuracy, d.resolution]],
-        color: CATEGORICAL_COLORS[i % CATEGORICAL_COLORS.length],
         sizes: [d.classes],
         labels: [d.name],
       })),

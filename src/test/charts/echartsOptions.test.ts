@@ -11,7 +11,43 @@ import {
   buildPolarOption,
   buildTimelineOption,
 } from '../../components/charts/echarts/echarts-options';
+import type { EChartsCoreOption } from 'echarts/core';
 import { CHART_FONT_FAMILY } from '../../lib/fonts';
+import {
+  LANDAGRI_COLORWAY_DARK,
+  LANDAGRI_COLORWAY_LIGHT,
+  LANDAGRI_DIVERGENT_DARK,
+  LANDAGRI_DIVERGENT_LIGHT,
+  LANDAGRI_SEQUENTIAL_DARK,
+  LANDAGRI_SEQUENTIAL_LIGHT,
+  type EChartsPalette,
+  type EChartsPilotTheme,
+} from '../../lib/echarts-theme';
+
+/** WCAG relative luminance + contrast ratio (test-local, mirrors builder). */
+function lum(hex: string): number {
+  const n = parseInt(hex.replace('#', ''), 16);
+  const lin = (c: number): number => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
+}
+function ratio(a: string, b: string): number {
+  const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+function rampAt(ramp: string[], t: number): string {
+  const pos = Math.max(0, Math.min(1, t)) * (ramp.length - 1);
+  const i = Math.min(Math.floor(pos), ramp.length - 1);
+  const j = Math.min(i + 1, ramp.length - 1);
+  const f = pos - i;
+  const pa = parseInt(ramp[i].replace('#', ''), 16);
+  const pb = parseInt(ramp[j].replace('#', ''), 16);
+  const mix = (shift: number): number =>
+    Math.round(((pa >> shift) & 255) + ((((pb >> shift) & 255) - ((pa >> shift) & 255)) * f));
+  return `#${((mix(16) << 16) | (mix(8) << 8) | mix(0)).toString(16).padStart(6, '0')}`;
+}
 
 describe('echarts-options builders (pilot)', () => {
   it('horizontal bar: Berry tooltip, bottom rect legend, divider grid, chart font', () => {
@@ -746,5 +782,169 @@ describe('echarts-options scatter cross-series declutter', () => {
           s.data.some((d) => d.label?.show === false),
       ).length;
     expect(clusterHidden).toBeGreaterThan(0);
+  });
+});
+
+describe('echarts-options palette (theme | divergent)', () => {
+  const heatBase: {
+    x: (string | number)[];
+    y: (string | number)[];
+    z: (number | null)[][];
+    locale: string;
+  } = {
+    x: ['A', 'B'],
+    y: ['R'],
+    z: [[0, 1]],
+    locale: 'pt-BR',
+  };
+
+  function visualColors(option: EChartsCoreOption): string[] {
+    const vm = option.visualMap as unknown as { inRange: { color: string[] } };
+    return vm.inRange.color;
+  }
+
+  function cellLabelFn(option: EChartsCoreOption): (p: { value?: unknown }) => string {
+    const series = option.series as { label: { color: unknown } }[];
+    return series[0].label.color as (p: { value?: unknown }) => string;
+  }
+
+  it('heatmap default palette is theme sequential (light/dark differ)', () => {
+    const light = buildHeatmapOption({ ...heatBase, theme: 'light' });
+    const dark = buildHeatmapOption({ ...heatBase, theme: 'dark' });
+    expect(visualColors(light)).toEqual([...LANDAGRI_SEQUENTIAL_LIGHT]);
+    expect(visualColors(dark)).toEqual([...LANDAGRI_SEQUENTIAL_DARK]);
+    expect(visualColors(light)).not.toEqual(visualColors(dark));
+  });
+
+  it("heatmap palette 'divergent' resolves the documented green↔earth/red scale", () => {
+    const light = buildHeatmapOption({ ...heatBase, theme: 'light', palette: 'divergent' });
+    const dark = buildHeatmapOption({ ...heatBase, theme: 'dark', palette: 'divergent' });
+    expect(visualColors(light)).toEqual([...LANDAGRI_DIVERGENT_LIGHT]);
+    expect(visualColors(dark)).toEqual([...LANDAGRI_DIVERGENT_DARK]);
+    // Divergent differs from the sequential theme ramp in both themes.
+    expect(visualColors(light)).not.toEqual([...LANDAGRI_SEQUENTIAL_LIGHT]);
+    expect(visualColors(dark)).not.toEqual([...LANDAGRI_SEQUENTIAL_DARK]);
+  });
+
+  it('explicit heatmap colors override any palette (reversible escape hatch)', () => {
+    const custom = ['#f3f4f6', '#22c55e', '#f97316', '#3b82f6'];
+    const option = buildHeatmapOption({
+      ...heatBase,
+      theme: 'light',
+      palette: 'divergent',
+      colors: custom,
+      min: 0,
+      max: 3,
+    });
+    expect(visualColors(option)).toEqual(custom);
+  });
+
+  it('categorical builders stay on the theme colorway even with divergent (ignored by design)', () => {
+    const bars = buildGroupedBarOption({
+      categories: ['A'],
+      series: [{ name: 'S', values: [1] }],
+      theme: 'light',
+      locale: 'pt-BR',
+      palette: 'divergent',
+    });
+    expect(bars.color).toEqual([...LANDAGRI_COLORWAY_LIGHT]);
+    const darkLine = buildLineOption({
+      series: [{ name: 'S', x: [2020], y: [1] }],
+      theme: 'dark',
+      locale: 'pt-BR',
+      palette: 'divergent',
+    });
+    expect(darkLine.color).toEqual([...LANDAGRI_COLORWAY_DARK]);
+  });
+
+  it('heatmap cell labels pick max-contrast text automatically (AA, both themes)', () => {
+    const light = buildHeatmapOption({ ...heatBase, theme: 'light', min: 0, max: 1, showValues: true });
+    const dark = buildHeatmapOption({ ...heatBase, theme: 'dark', min: 0, max: 1, showValues: true });
+    // Light sequential: pale bottom → dark Berry text; saturated top → white.
+    expect(cellLabelFn(light)({ value: [0, 0, 0] })).toBe('#1e293b');
+    expect(cellLabelFn(light)({ value: [0, 0, 1] })).toBe('#ffffff');
+    // Dark sequential: dark slate bottom → white; bright green top → dark text.
+    expect(cellLabelFn(dark)({ value: [0, 0, 0] })).toBe('#ffffff');
+    expect(cellLabelFn(dark)({ value: [0, 0, 1] })).toBe('#1e293b');
+    // Divergent correlation: saturated endpoints → white in both themes.
+    const divLight = buildHeatmapOption({
+      ...heatBase,
+      z: [[-1, 1]],
+      theme: 'light',
+      palette: 'divergent',
+      min: -1,
+      max: 1,
+      showValues: true,
+    });
+    expect(cellLabelFn(divLight)({ value: [0, 0, -1] })).toBe('#ffffff');
+    expect(cellLabelFn(divLight)({ value: [0, 0, 1] })).toBe('#ffffff');
+  });
+
+  it('heatmap ramps keep >=4.5:1 label contrast at sampled stops (AA, both themes/palettes)', () => {
+    const combos: [EChartsPalette, EChartsPilotTheme][] = [
+      ['theme', 'light'],
+      ['theme', 'dark'],
+      ['divergent', 'light'],
+      ['divergent', 'dark'],
+    ];
+    for (const [palette, theme] of combos) {
+      const option = buildHeatmapOption({
+        ...heatBase,
+        theme,
+        palette,
+        min: 0,
+        max: 1,
+        showValues: true,
+      });
+      const ramp = visualColors(option);
+      const labelCfg = (option.series as { label: { textBorderWidth: number; textBorderColor: string } }[])[0].label;
+      expect(labelCfg.textBorderWidth).toBe(2);
+      expect(labelCfg.textBorderColor).toBe(
+        theme === 'dark' ? 'rgba(255,255,255,0.85)' : 'rgba(30,41,59,0.85)',
+      );
+      for (const t of [0, 0.25, 0.5, 0.75, 1]) {
+        const label = cellLabelFn(option)({ value: [0, 0, t] });
+        expect(
+          ratio(rampAt(ramp, t), label),
+          `${palette}/${theme} @${t}`,
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
+
+  it('reference line defaults to the theme neutral; markPoint to theme amber', () => {
+    const bars = buildGroupedBarOption({
+      categories: ['A'],
+      series: [{ name: 'S', values: [1] }],
+      referenceLine: { value: 1, name: 'avg' },
+      theme: 'light',
+      locale: 'pt-BR',
+    });
+    const first = (bars.series as { markLine: { lineStyle: { color: string } } }[])[0];
+    expect(first.markLine.lineStyle.color).toBe('#64748b');
+    const darkBars = buildGroupedBarOption({
+      categories: ['A'],
+      series: [{ name: 'S', values: [1] }],
+      referenceLine: { value: 1, name: 'avg' },
+      theme: 'dark',
+      locale: 'pt-BR',
+    });
+    const darkFirst = (darkBars.series as { markLine: { lineStyle: { color: string } } }[])[0];
+    expect(darkFirst.markLine.lineStyle.color).toBe('#94a3b8');
+
+    const line = buildLineOption({
+      series: [{ name: 'S', x: [2020], y: [1], markPoint: { x: 2020, label: 'peak' } }],
+      theme: 'light',
+      locale: 'pt-BR',
+    });
+    const ls = line.series as { markPoint: { itemStyle: { color: string } } }[];
+    expect(ls[0].markPoint.itemStyle.color).toBe(LANDAGRI_COLORWAY_LIGHT[6]);
+    const darkLine = buildLineOption({
+      series: [{ name: 'S', x: [2020], y: [1], markPoint: { x: 2020, label: 'peak' } }],
+      theme: 'dark',
+      locale: 'pt-BR',
+    });
+    const dls = darkLine.series as { markPoint: { itemStyle: { color: string } } }[];
+    expect(dls[0].markPoint.itemStyle.color).toBe(LANDAGRI_COLORWAY_DARK[6]);
   });
 });

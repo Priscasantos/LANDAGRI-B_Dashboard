@@ -99,7 +99,6 @@ export default function MonthlyIntensityTab({ selectedCrops, selectedRegions }: 
           name: translateActivity('Activity Intensity', locale),
           x: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)),
           y: totalIntensity,
-          color: '#EC9706',
         }],
       },
     };
@@ -120,7 +119,6 @@ export default function MonthlyIntensityTab({ selectedCrops, selectedRegions }: 
             y={heatmapZ.crops}
             captionKey="activityIntensityCropsMonths"
             height={Math.max(300, heatmapZ.crops.length * 40 + 100)}
-            colors={['#f3f4f6', '#fef3c7', '#f97316', '#dc2626']}
           />
         )}
       </Card>

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
 import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
+import { getInitiativeShortName } from '../../../data/glossary';
 import { useT } from '../../../i18n/LanguageContext';
 
 interface TemporalData {
@@ -99,21 +100,20 @@ export default function CoverageTab({ data }: CoverageTabProps) {
         ))}
       </div>
 
-      {/* Coverage Heatmap */}
+      {/* Coverage Heatmap (0/1 binário; rampa sequencial do tema ativo) */}
       <EChartsHeatmap
         z={matrix}
         x={yearLabels}
-        y={sortedData.map((d) => d.displayName)}
+        y={sortedData.map((d) => getInitiativeShortName(d.displayName, locale))}
         captionKey="temporalCoverageMatrix"
         height={heatHeight}
-        colors={['rgba(239,239,239,0.9)', '#4caf50']}
         min={0}
         max={1}
       />
 
       {/* Coverage Percentage Bar Chart */}
       <EChartsGroupedBar
-        categories={sortedData.map((d) => d.displayName)}
+        categories={sortedData.map((d) => getInitiativeShortName(d.displayName, locale))}
         series={[{ name: t('coveragePct'), values: sortedData.map((d) => d.coveragePct) }]}
         captionKey="coverageByInitiative"
         height={Math.max(350, sortedData.length * 30)}

@@ -103,11 +103,12 @@ export default function HeatmapTab({ selectedInitiatives }: HeatmapTabProps) {
         y={metricLabels}
         captionKey="metricCorrelationMatrix"
         height={450}
-        colors={['#2166ac', '#f7f7f7', '#b2182b']}
+        // Correlação −1…1: paleta divergente verde↔terra/vermelho (o sinal
+        // tem sentido analítico; rótulos com contraste automático).
+        palette="divergent"
         min={-1}
         max={1}
         showValues
-        labelDarkRange={[-0.35, 0.35]}
       />
     </div>
   );

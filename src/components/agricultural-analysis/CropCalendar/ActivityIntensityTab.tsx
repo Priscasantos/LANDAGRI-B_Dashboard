@@ -150,7 +150,6 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
           y={intensityMatrix.states}
           captionKey="activityIntensity"
           height={Math.max(400, intensityMatrix.states.length * 25 + 100)}
-          colors={['#f3f4f6', '#fef3c7', '#f97316', '#dc2626']}
         />
       )}
     </Card>
@@ -182,7 +181,6 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
           labels={densityByRegion.labels}
           values={densityByRegion.values}
           captionKey="totalActivity"
-          color="#EC9706"
           height={Math.max(250, densityByRegion.labels.length * 40)}
         />
       )}
@@ -199,7 +197,6 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
           labels={concentrationIndex.labels}
           values={concentrationIndex.values}
           captionKey="totalActivityScore"
-          color="#626C01"
           height={Math.max(300, concentrationIndex.labels.length * 25)}
         />
       )}

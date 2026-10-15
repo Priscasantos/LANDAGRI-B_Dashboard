@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 import DataTable from '../../ui/DataTable';
 import { useDashboardStore } from '../../../stores/dashboardStore';
+import { translateMethodology } from '../../../data/glossary';
 import { useT } from '../../../i18n/LanguageContext';
 
 export default function DetailedTableTab() {
-  const { t } = useT('initiative');
+  const { t, locale } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const tableData = useMemo(
@@ -14,7 +15,7 @@ export default function DetailedTableTab() {
         acronym: i.Acronym,
         provider: i.Provider,
         coverage: i.Coverage,
-        methodology: i.Methodology,
+        methodology: translateMethodology(i.Methodology, locale),
         accuracy: i.Accuracy > 0 ? `${i.Accuracy.toFixed(1)}%` : '-',
         resolution: i.Resolution > 0 ? `${i.Resolution}m` : '-',
         classes: i.Number_of_Classes,
@@ -23,7 +24,7 @@ export default function DetailedTableTab() {
         period: `${i.Year_Start}–${i.Year_End}`,
         frequency: i.Temporal_Frequency,
       })),
-    [initiatives],
+    [initiatives, locale],
   );
 
   const columns = [

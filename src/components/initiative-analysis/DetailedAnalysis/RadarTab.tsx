@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import EChartsRadar from '../../charts/echarts/EChartsRadar';
 import { useDashboardStore } from '../../../stores/dashboardStore';
-import { CATEGORICAL_COLORS } from '../../../types/theme';
 import { minMaxNormalize } from '../../../lib/normalize';
+import { getInitiativeShortName } from '../../../data/glossary';
 import { translate } from '../../../i18n/index';
 import { useT } from '../../../i18n/LanguageContext';
 
@@ -45,9 +45,8 @@ export default function RadarTab({ selectedInitiatives }: RadarTabProps) {
     const normAgriClasses = minMaxNormalize(rawAgriClasses);
 
     const series = filtered.map((i, idx) => ({
-      name: i.Display_Name,
+      name: getInitiativeShortName(i.Display_Name, locale),
       values: [normAccuracy[idx], normResolution[idx], normClasses[idx], normAgriClasses[idx]],
-      color: CATEGORICAL_COLORS[idx % CATEGORICAL_COLORS.length],
     }));
 
     return { indicators: thetaLabels, radarSeries: series };

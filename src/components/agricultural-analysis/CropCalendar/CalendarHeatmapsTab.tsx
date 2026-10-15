@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import Card from '../../ui/Card';
 import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
+import { HEATMAP_EMPTY_CELL_DARK, HEATMAP_EMPTY_CELL_LIGHT, LANDAGRI_COLORWAY_DARK, LANDAGRI_COLORWAY_LIGHT } from '../../../lib/echarts-theme';
+import { useEffectiveTheme } from '../../../hooks/use-theme';
 import { useT } from '../../../i18n/LanguageContext';
 import { translateCropName, translateMonth } from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
@@ -40,6 +42,7 @@ function parseActivityValue(val: string): number {
 export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: CalendarHeatmapsTabProps) {
   const { t } = useT('charts');
   const { t: tBody, locale } = useT('agricultural');
+  const theme = useEffectiveTheme();
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
@@ -104,7 +107,16 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
     return { z: nationalZ, crops: cropLabels, months: MONTHS.map((m) => translateMonth(m, locale)) };
   }, [rawData, selectedCrops, selectedRegions, statesMap, locale]);
 
-  const colorscale = ['#f3f4f6', '#22c55e', '#f97316', '#3b82f6'];
+  // Cores por categoria a partir do colorway do tema ativo (0=ausente neutro,
+  // 1=plantio verde, 2=colheita terra, 3=ambos teal) — semântica preservada
+  // nos dois temas em vez do hex fixo herdado.
+  const way = theme === 'dark' ? LANDAGRI_COLORWAY_DARK : LANDAGRI_COLORWAY_LIGHT;
+  const colorscale = [
+    theme === 'dark' ? HEATMAP_EMPTY_CELL_DARK : HEATMAP_EMPTY_CELL_LIGHT,
+    way[0],
+    way[5],
+    way[7],
+  ];
 
   if (matrix.crops.length === 0) {
     return (

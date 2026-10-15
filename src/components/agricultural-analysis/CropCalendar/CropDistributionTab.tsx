@@ -110,7 +110,6 @@ export default function CropDistributionTab({ selectedCrops, selectedRegions }: 
             labels={stateCropCounts.labels}
             values={stateCropCounts.values}
             captionKey="cropsCount"
-            color="#EC9706"
             height={Math.max(300, stateCropCounts.labels.length * 30)}
           />
         )}
@@ -123,7 +122,6 @@ export default function CropDistributionTab({ selectedCrops, selectedRegions }: 
             labels={topCropsByStates.labels}
             values={topCropsByStates.values}
             captionKey="statesCount"
-            color="#626C01"
             height={Math.max(250, topCropsByStates.labels.length * 35)}
           />
         ) : (

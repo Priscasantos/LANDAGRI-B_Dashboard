@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Circle } from 'lucide-react';
 import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
+import { getInitiativeShortName } from '../../../data/glossary';
 import { useT } from '../../../i18n/LanguageContext';
 
 interface TemporalData {
@@ -26,7 +27,7 @@ interface GapAnalysisTabProps {
  * chrome unchanged. Reversible: previous version in git history.
  */
 export default function GapAnalysisTab({ data }: GapAnalysisTabProps) {
-  const { t } = useT('charts');
+  const { t, locale } = useT('charts');
   const { t: tBody } = useT('initiative');
   const gapData = useMemo(() => {
     if (data.length === 0) return [];
@@ -67,14 +68,13 @@ export default function GapAnalysisTab({ data }: GapAnalysisTabProps) {
       </p>
 
       <EChartsGroupedBar
-        categories={gapData.map((d) => d.name)}
+        categories={gapData.map((d) => getInitiativeShortName(d.name, locale))}
         series={[{ name: t('largestGap'), values: gapData.map((d) => d.maxGap) }]}
         captionKey="largestTemporalGap"
         height={500}
         referenceLine={{
           value: avgGap,
           name: `${t('averageGap')} (${avgGap.toFixed(1)}${t('yearShort')})`,
-          color: '#64748b',
         }}
       />
 

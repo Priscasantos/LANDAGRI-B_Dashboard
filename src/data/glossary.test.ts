@@ -185,3 +185,60 @@ describe('glossary Fase 2 — valores de DADOS exibidos (só display, bruto inta
     expect(translateTerm('activity', 'Fallowing', 'pt-BR')).toBe('Fallowing');
   });
 });
+
+describe('glossary Fase 3 — iniciativas: Brasil/Brazil, typos de metodologia, shortName', () => {
+  it('usa "Brasil" em PT e mantém "Brazil"/"Brazilian" em EN', async () => {
+    const { translateInitiativeName } = await import('./glossary');
+    expect(
+      translateInitiativeName(
+        'PRODES Deforestation, Warnings and Vegetation for Brazilian Biomes',
+        'pt-BR',
+      ),
+    ).toBe('PRODES Deforestation, Warnings and Vegetation for Biomas Brasileiros');
+    expect(
+      translateInitiativeName(
+        'PRODES Deforestation, Warnings and Vegetation for Brazilian Biomes',
+        'en',
+      ),
+    ).toBe('PRODES Deforestation, Warnings and Vegetation for Brazilian Biomes');
+    expect(translateInitiativeName('MapBiomas', 'pt-BR')).toBe('MapBiomas');
+  });
+
+  it('corrige typos de methodology names no display (bruto intacto)', async () => {
+    const { translateMethodology } = await import('./glossary');
+    expect(
+      translateMethodology(
+        'Visual Interpretation, Supervised Bhattacharya Classification, and Deep Learning',
+        'en',
+      ),
+    ).toBe('Visual Interpretation, Supervised Bhattacharyya Classification, and Deep Learning');
+    expect(
+      translateMethodology(
+        'Supervised Random Forest and U-Net Deep learning algorithms applied to Landsat series data',
+        'en',
+      ),
+    ).toBe(
+      'Supervised Random Forest and U-Net Deep Learning algorithms applied to Landsat series data',
+    );
+    expect(translateMethodology('Hybrid', 'pt-BR')).toBe('Híbrida');
+    expect(translateMethodology('Something New', 'pt-BR')).toBe('Something New');
+  });
+
+  it('expõe shortName (sigla + nome curto traduzido) para todas as iniciativas', async () => {
+    const { getInitiativeShortName } = await import('./glossary');
+    expect(getInitiativeShortName('MapBiomas', 'pt-BR')).toBe('MapBiomas · Mapeamento anual do Brasil');
+    expect(getInitiativeShortName('MapBiomas', 'en')).toBe('MapBiomas · Annual mapping of Brazil');
+    expect(getInitiativeShortName('TerraClass Amazonia', 'pt-BR')).toBe(
+      'TerraClass Amazon · Uso do solo na Amazônia',
+    );
+    // Forma composta "Nome (SIGLA)" do Display_Name também encurta
+    expect(getInitiativeShortName('TerraClass Amazonia (TerraClass Amazon)', 'en')).toBe(
+      'TerraClass Amazon · Amazon land use',
+    );
+    expect(getInitiativeShortName('MapBiomas (MapBiomas)', 'pt-BR')).toBe(
+      'MapBiomas · Mapeamento anual do Brasil',
+    );
+    // Desconhecida volta intacta (nunca some)
+    expect(getInitiativeShortName('Quinoa Initiative', 'pt-BR')).toBe('Quinoa Initiative');
+  });
+});

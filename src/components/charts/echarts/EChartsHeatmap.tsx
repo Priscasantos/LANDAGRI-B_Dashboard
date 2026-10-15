@@ -1,6 +1,7 @@
 import { useMemo, type ReactElement } from 'react';
 import EChartsBase from './EChartsBase';
 import { buildHeatmapOption } from './echarts-options';
+import type { EChartsPalette } from '../../../lib/echarts-theme';
 import { useEffectiveTheme } from '../../../hooks/use-theme';
 import { useChartFontFamily } from '../../../hooks/use-chart-font';
 import { useT } from '../../../i18n/LanguageContext';
@@ -14,6 +15,11 @@ interface EChartsHeatmapProps {
   captionKey?: TKey<'charts'>;
   /** visualMap colors (Plotly `colorscale` analogue). */
   colors?: string[];
+  /**
+   * Explicit palette (default `'theme'`). Use `'divergent'` only where the
+   * sign carries meaning (correlation −1…1); explicit `colors` wins.
+   */
+  palette?: EChartsPalette;
   /** visualMap bounds (Plotly `zmin`/`zmax` analogue). */
   min?: number;
   max?: number;
@@ -31,6 +37,7 @@ export default function EChartsHeatmap({
   captionKey,
   height = 450,
   colors,
+  palette,
   min,
   max,
   showValues,
@@ -41,8 +48,8 @@ export default function EChartsHeatmap({
   const { t, locale } = useT('charts');
 
   const option = useMemo(
-    () => buildHeatmapOption({ x, y, z, theme, locale, fontFamily, colors, min, max, showValues, labelDarkRange }),
-    [x, y, z, theme, locale, fontFamily, colors, min, max, showValues, labelDarkRange],
+    () => buildHeatmapOption({ x, y, z, theme, locale, fontFamily, colors, palette, min, max, showValues, labelDarkRange }),
+    [x, y, z, theme, locale, fontFamily, colors, palette, min, max, showValues, labelDarkRange],
   );
 
   const caption = captionKey !== undefined ? t(captionKey) : '';

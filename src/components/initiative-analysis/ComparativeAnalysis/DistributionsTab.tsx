@@ -3,6 +3,7 @@ import EChartsPie from '../../charts/echarts/EChartsPie';
 import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
 import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
 import { useDashboardStore } from '../../../stores/dashboardStore';
+import { getInitiativeShortName, translateMethodology } from '../../../data/glossary';
 import { useT } from '../../../i18n/LanguageContext';
 
 /**
@@ -12,7 +13,7 @@ import { useT } from '../../../i18n/LanguageContext';
  * chrome unchanged. Reversible: previous version in git history.
  */
 export default function DistributionsTab() {
-  const { t } = useT('charts');
+  const { t, locale } = useT('charts');
   const { t: tBody } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
@@ -25,7 +26,7 @@ export default function DistributionsTab() {
     const resBars = initiatives
       .filter((i) => i.Resolution > 0)
       .map((i) => ({
-        name: i.Display_Name,
+        name: getInitiativeShortName(i.Display_Name, locale),
         resolution: i.Resolution,
       }))
       .sort((a, b) => a.resolution - b.resolution);
@@ -33,7 +34,7 @@ export default function DistributionsTab() {
     const tempBars = initiatives
       .filter((i) => i.Available_Years.length > 0)
       .map((i) => ({
-        name: i.Display_Name,
+        name: getInitiativeShortName(i.Display_Name, locale),
         start: i.Year_Start,
         end: i.Year_End,
         duration: i.Year_End - i.Year_Start + 1,
@@ -47,7 +48,7 @@ export default function DistributionsTab() {
       resolutionBars: resBars,
       tempCoverageBars: tempBars,
     };
-  }, [initiatives]);
+  }, [initiatives, locale]);
 
   if (initiatives.length === 0) {
     return <div className="py-8 text-center text-fg-muted">{tBody('noDistributionData')}</div>;
@@ -59,7 +60,7 @@ export default function DistributionsTab() {
       <div>
         <h3 className="text-base font-semibold text-fg mb-2">{tBody('hMethodologyDist')}</h3>
         <EChartsPie
-          data={methodologyCounts.map((d) => ({ label: d.method, value: d.count }))}
+          data={methodologyCounts.map((d) => ({ label: translateMethodology(d.method, locale), value: d.count }))}
           captionKey="initiativesByMethodology"
           height={350}
           donut

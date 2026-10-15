@@ -3,6 +3,7 @@ import EChartsPie from '../../charts/echarts/EChartsPie';
 import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
 import EChartsLine from '../../charts/echarts/EChartsLine';
 import { useDashboardStore } from '../../../stores/dashboardStore';
+import { translateMethodology } from '../../../data/glossary';
 import { useT } from '../../../i18n/LanguageContext';
 
 /**
@@ -12,7 +13,7 @@ import { useT } from '../../../i18n/LanguageContext';
  * and chrome unchanged. Reversible: previous version in git history.
  */
 export default function MethodologyDeepDiveTab() {
-  const { t: tBody } = useT('initiative');
+  const { t: tBody, locale } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const { methods, methodData, methodAccuracy } = useMemo(() => {
@@ -54,7 +55,7 @@ export default function MethodologyDeepDiveTab() {
         <div>
           <h3 className="text-base font-semibold text-fg mb-2">{tBody('hMethodologyDist')}</h3>
           <EChartsPie
-            data={methodData.map((d) => ({ label: d.method, value: d.count }))}
+            data={methodData.map((d) => ({ label: translateMethodology(d.method, locale), value: d.count }))}
             captionKey="methodologyBreakdown"
             height={350}
             donut
@@ -63,7 +64,7 @@ export default function MethodologyDeepDiveTab() {
         <div>
           <h3 className="text-base font-semibold text-fg mb-2">{tBody('hAvgByMethod')}</h3>
           <EChartsHorizontalBar
-            labels={methodAccuracy.map((d) => d.method)}
+            labels={methodAccuracy.map((d) => translateMethodology(d.method, locale))}
             values={methodAccuracy.map((d) => d.avgAccuracy)}
             captionKey="accuracyByMethodology"
             height={Math.max(250, methods.length * 50)}
@@ -79,7 +80,7 @@ export default function MethodologyDeepDiveTab() {
         </p>
         <EChartsLine
           series={methodAccuracy.map((d) => ({
-            name: d.method,
+            name: translateMethodology(d.method, locale),
             x: [d.method],
             y: [d.avgAccuracy],
           }))}
@@ -103,7 +104,7 @@ export default function MethodologyDeepDiveTab() {
               const acc = methodAccuracy.find((a) => a.method === d.method);
               return (
                 <tr key={d.method} className={`border-b border-border ${idx % 2 === 0 ? 'bg-surface' : 'bg-surface-alt'}`}>
-                  <td className="px-4 py-2 text-fg">{d.method}</td>
+                  <td className="px-4 py-2 text-fg">{translateMethodology(d.method, locale)}</td>
                   <td className="px-4 py-2 text-right text-fg">{d.count}</td>
                   <td className="px-4 py-2 text-right text-fg">{acc?.avgAccuracy ?? '-'}%</td>
                 </tr>

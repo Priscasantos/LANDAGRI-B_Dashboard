@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import EChartsTimeline from '../../charts/echarts/EChartsTimeline';
-import { CATEGORICAL_COLORS } from '../../../types/theme';
+import { getInitiativeShortName, translateMethodology, translateTerm } from '../../../data/glossary';
 import { useT } from '../../../i18n/LanguageContext';
 
 interface TemporalData {
@@ -26,7 +26,7 @@ interface TimelineTabProps {
  * i18n and chrome unchanged. Reversible: previous version in git history.
  */
 export default function TimelineTab({ data }: TimelineTabProps) {
-  const { t } = useT('charts');
+  const { t, locale } = useT('charts');
   const { t: tBody } = useT('initiative');
   const sortedData = useMemo(
     () => [...data].sort((a, b) => {
@@ -43,14 +43,13 @@ export default function TimelineTab({ data }: TimelineTabProps) {
 
   const items = useMemo(
     () =>
-      sortedData.map((item, idx) => ({
-        label: item.displayName,
+      sortedData.map((item) => ({
+        label: getInitiativeShortName(item.displayName, locale),
         years: item.years,
-        color: CATEGORICAL_COLORS[idx % CATEGORICAL_COLORS.length],
         tip: (year: number): string =>
-          `<b>${item.displayName}</b><br>${t('year')}: ${year}<br>${t('coverage')}: ${item.coverage}<br>${t('methodology')}: ${item.methodology}`,
+          `<b>${getInitiativeShortName(item.displayName, locale)}</b><br>${t('year')}: ${year}<br>${t('coverage')}: ${translateTerm('coverage', item.coverage, locale)}<br>${t('methodology')}: ${translateMethodology(item.methodology, locale)}`,
       })),
-    [sortedData, t],
+    [sortedData, t, locale],
   );
 
   return (

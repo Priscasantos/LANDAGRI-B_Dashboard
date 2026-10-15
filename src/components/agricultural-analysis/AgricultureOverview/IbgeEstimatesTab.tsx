@@ -97,7 +97,6 @@ export default function IbgeEstimatesTab() {
         name: translateActivity('Total Production (tonnes)', bodyLocale),
         x: years,
         y: years.map(y => totals[y] || 0),
-        color: '#EC9706',
       }],
     };
   }, [production, years, bodyLocale]);
@@ -120,7 +119,6 @@ export default function IbgeEstimatesTab() {
         name: translateActivity('Harvested Area (hectares)', bodyLocale),
         x: years,
         y: years.map(y => totals[y] || 0),
-        color: '#626C01',
       }],
     };
   }, [production, years, bodyLocale]);
@@ -176,7 +174,6 @@ export default function IbgeEstimatesTab() {
               labels={topCrops.map(c => c.name)}
               values={topCrops.map(c => c.production / 1000000)}
               captionKey="production"
-              color="#EC9706"
               height={Math.max(300, topCrops.length * 35)}
             />
           ) : (
