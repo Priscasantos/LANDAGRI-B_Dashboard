@@ -4,8 +4,8 @@ import Card from '../../ui/Card';
 import Tabs from '../../ui/Tabs';
 import DataTable from '../../ui/DataTable';
 import MetricCard from '../../ui/MetricCard';
-import HorizontalBarChart from '../../charts/HorizontalBarChart';
-import LineChart from '../../charts/LineChart';
+import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
+import EChartsLine from '../../charts/echarts/EChartsLine';
 import { useT } from '../../../i18n/LanguageContext';
 import ibgeData from '../../../data/processed/brazilian_ibge_agricultural_data.json';
 
@@ -166,10 +166,10 @@ export default function IbgeEstimatesTab() {
         <Card padding="lg" hover={false}>
           <h3 className="text-base font-semibold text-fg mb-3">{tBody('hTop10')}</h3>
           {topCrops.length > 0 ? (
-            <HorizontalBarChart
-              y={topCrops.map(c => c.name)}
-              x={topCrops.map(c => c.production / 1000000)}
-              xlabel={`${t('production')} (${t('millionTonnes')})`}
+            <EChartsHorizontalBar
+              labels={topCrops.map(c => c.name)}
+              values={topCrops.map(c => c.production / 1000000)}
+              captionKey="production"
               color="#EC9706"
               height={Math.max(300, topCrops.length * 35)}
             />
@@ -211,19 +211,31 @@ export default function IbgeEstimatesTab() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card padding="lg" hover={false}>
           <h3 className="text-base font-semibold text-fg mb-3">{tBody('hTotalProdEvolution')}</h3>
-          <LineChart series={totalProductionEvolution.series} xlabel={t('year')} ylabel={`${t('production')} (${t('tonnes')})`} height={350} />
+          <EChartsLine
+            series={totalProductionEvolution.series}
+            captionKey="production"
+            height={350}
+          />
         </Card>
 
         <Card padding="lg" hover={false}>
           <h3 className="text-base font-semibold text-fg mb-3">{tBody('hHarvestedArea')}</h3>
-          <LineChart series={areaEvolution.series} xlabel={t('year')} ylabel={`${t('area')} (${t('hectares')})`} height={350} />
+          <EChartsLine
+            series={areaEvolution.series}
+            captionKey="harvestedArea"
+            height={350}
+          />
         </Card>
       </div>
 
       <Card padding="lg" hover={false}>
         <h3 className="text-base font-semibold text-fg mb-3">{tBody('hTop5')}</h3>
         {top5Evolution.series.length > 0 ? (
-          <LineChart series={top5Evolution.series} xlabel={t('year')} ylabel={`${t('production')} (${t('tonnes')})`} height={400} />
+          <EChartsLine
+            series={top5Evolution.series}
+            captionKey="production"
+            height={400}
+          />
         ) : (
           <p className="text-fg-muted text-center py-8">{tBody('noData')}</p>
         )}

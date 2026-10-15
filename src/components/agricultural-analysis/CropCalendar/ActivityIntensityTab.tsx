@@ -2,9 +2,9 @@ import { useMemo } from 'react';
 import { BarChart3, Zap, Map, TrendingUp } from 'lucide-react';
 import Tabs from '../../ui/Tabs';
 import Card from '../../ui/Card';
-import HeatmapChart from '../../charts/HeatmapChart';
-import GroupedBarChart from '../../charts/GroupedBarChart';
-import HorizontalBarChart from '../../charts/HorizontalBarChart';
+import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
+import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
+import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
 import { useT } from '../../../i18n/LanguageContext';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
@@ -39,7 +39,6 @@ interface ActivityIntensityTabProps {
 }
 
 export default function ActivityIntensityTab({ selectedCrops, selectedRegions }: ActivityIntensityTabProps) {
-  const { t } = useT('charts');
   const { t: tBody } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
@@ -140,18 +139,13 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
       {noData ? (
         <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
       ) : (
-        <HeatmapChart
+        <EChartsHeatmap
           z={intensityMatrix.z}
           x={intensityMatrix.months}
           y={intensityMatrix.states}
-          title={t('activityIntensity')}
+          captionKey="activityIntensity"
           height={Math.max(400, intensityMatrix.states.length * 25 + 100)}
-          colorscale={[
-            [0, '#f3f4f6'],
-            [0.33, '#fef3c7'],
-            [0.66, '#f97316'],
-            [1, '#dc2626'],
-          ]}
+          colors={['#f3f4f6', '#fef3c7', '#f97316', '#dc2626']}
         />
       )}
     </Card>
@@ -163,11 +157,10 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
       {noData ? (
         <p className="text-fg-muted text-center py-8">{tBody('noData')}</p>
       ) : (
-        <GroupedBarChart
+        <EChartsGroupedBar
           categories={peakActivity.categories}
           series={peakActivity.series}
-          xlabel={t('state')}
-          ylabel={t('peakIntensity')}
+          captionKey="peakIntensity"
           height={Math.max(300, peakActivity.categories.length * 20 + 100)}
         />
       )}
@@ -180,10 +173,10 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
       {densityByRegion.values.length === 0 || densityByRegion.values.every(v => v === 0) ? (
         <p className="text-fg-muted text-center py-8">{tBody('noData')}</p>
       ) : (
-        <HorizontalBarChart
-          y={densityByRegion.labels}
-          x={densityByRegion.values}
-          xlabel={t('totalActivity')}
+        <EChartsHorizontalBar
+          labels={densityByRegion.labels}
+          values={densityByRegion.values}
+          captionKey="totalActivity"
           color="#EC9706"
           height={Math.max(250, densityByRegion.labels.length * 40)}
         />
@@ -197,10 +190,10 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
       {concentrationIndex.values.length === 0 || concentrationIndex.values.every(v => v === 0) ? (
         <p className="text-fg-muted text-center py-8">{tBody('noData')}</p>
       ) : (
-        <HorizontalBarChart
-          y={concentrationIndex.labels}
-          x={concentrationIndex.values}
-          xlabel={t('totalActivityScore')}
+        <EChartsHorizontalBar
+          labels={concentrationIndex.labels}
+          values={concentrationIndex.values}
+          captionKey="totalActivityScore"
           color="#626C01"
           height={Math.max(300, concentrationIndex.labels.length * 25)}
         />

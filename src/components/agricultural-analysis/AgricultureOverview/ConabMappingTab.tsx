@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import { Wheat, Map, MapPin, CalendarDays, Download } from 'lucide-react';
 import Card from '../../ui/Card';
 import MetricCard from '../../ui/MetricCard';
-import GroupedBarChart from '../../charts/GroupedBarChart';
-import LineChart from '../../charts/LineChart';
+import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
+import EChartsLine from '../../charts/echarts/EChartsLine';
 import { useT } from '../../../i18n/LanguageContext';
 import { formatCropName } from '../../../lib/cropNames';
 import conabMapping from '../../../data/processed/conab_mapping.json';
@@ -145,11 +145,10 @@ export default function ConabMappingTab() {
       <Card title={t('cropRegionalDistribution')} padding="lg" hover={false}>
         <h3 className="text-base font-semibold text-fg mb-3">{tBody('hCropRegionalDist')}</h3>
         {cropRegionData.series.length > 0 ? (
-          <GroupedBarChart
+          <EChartsGroupedBar
             categories={cropRegionData.categories}
             series={cropRegionData.series}
-            xlabel={t('region')}
-            ylabel={t('statesCount')}
+            captionKey="cropRegionalDistribution"
             height={400}
           />
         ) : (
@@ -161,14 +160,12 @@ export default function ConabMappingTab() {
       <Card padding="lg" hover={false}>
         <h3 className="text-base font-semibold text-fg mb-3">{tBody('hTemporalEvolution')}</h3>
         {temporalData.series.length > 0 ? (
-          <LineChart
+          <EChartsLine
             series={temporalData.series}
-            xlabel={t('year')}
-            ylabel={t('activeMapping')}
+            captionKey="activeMapping"
             height={350}
             showMarkers={false}
-            fill="tozeroy"
-            layout={{ xaxis: { tickmode: 'linear', dtick: 1, tickformat: 'd' } }}
+            areaFill
           />
         ) : (
           <p className="text-fg-muted text-center py-8">{tBody('noTemporalData')}</p>

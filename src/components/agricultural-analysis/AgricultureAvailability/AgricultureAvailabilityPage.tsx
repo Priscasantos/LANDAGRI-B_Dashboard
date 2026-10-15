@@ -1,15 +1,15 @@
-import { useMemo } from 'react';
+import { useMemo, type ReactElement } from 'react';
 import { Map, Wheat, MapPin, BarChart3, Sprout } from 'lucide-react';
 import Tabs from '../../ui/Tabs';
 import Card from '../../ui/Card';
-import HorizontalBarChart from '../../charts/HorizontalBarChart';
-import GroupedBarChart from '../../charts/GroupedBarChart';
-import HeatmapChart from '../../charts/HeatmapChart';
-import { useT } from '../../../i18n/LanguageContext';
 import MetricCard from '../../ui/MetricCard';
+import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
+import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
+import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
 import conabAvailability from '../../../data/processed/conab_availability.json';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
+import { useT } from '../../../i18n/LanguageContext';
 
 const MONTHS_SHORT = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
 
@@ -37,22 +37,24 @@ function parseActivityValue(val: string): number {
   return 0;
 }
 
-export default function AgricultureAvailabilityPage() {
-  const { t } = useT('charts');
+/**
+ * ECharts pilot of the Availability page (1 route, reversible).
+ * Same JSONs, headings and i18n as `AgricultureAvailabilityPage` —
+ * only the chart renderer changes (Plotly → ECharts SVG).
+ */
+export default function AgricultureAvailabilityPage(): ReactElement {
   const { t: tBody } = useT('agricultural');
   const availData = conabAvailability as AvailabilityRow[];
   const calendarData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
-  const statesMap = mappingData?.states || {};
-
-  // Parse availability data
+  // Same parsing as the Plotly original.
   const { stateCoverage, cropDiversity, regionalActivity, activityHeatmap } = useMemo(() => {
+    const statesMap: Record<string, StateInfo> = mappingData?.states || {};
     const stateRegions: Record<string, string> = {};
     for (const [code, info] of Object.entries(statesMap)) {
       stateRegions[code] = info.region;
     }
 
-    // Parse availability: count states per crop
     const cropStates: Record<string, Set<string>> = {};
     const stateYears: Record<string, Set<string>> = {};
     const stateCrops: Record<string, Set<string>> = {};
@@ -85,7 +87,6 @@ export default function AgricultureAvailabilityPage() {
       }
     }
 
-    // Spatial coverage: states sorted by number of crops available
     const stateCoverageData = Object.entries(stateCrops)
       .map(([state, crops]) => ({
         name: `${state}${stateRegions[state] ? ` (${stateRegions[state]})` : ''}`,
@@ -93,12 +94,10 @@ export default function AgricultureAvailabilityPage() {
       }))
       .sort((a, b) => b.value - a.value);
 
-    // Crop diversity: crops sorted by number of states
     const cropDiversityData = Object.entries(cropStates)
       .map(([crop, states]) => ({ name: crop, value: states.size }))
       .sort((a, b) => b.value - a.value);
 
-    // Regional activity from calendar data
     const regionMonthActivity: Record<string, number[]> = {};
 
     for (const row of calendarData) {
@@ -129,7 +128,6 @@ export default function AgricultureAvailabilityPage() {
       values: regionMonthActivity[region],
     }));
 
-    // Activity heatmap: regions × months
     const heatmapZ: number[][] = regionLabels.map(r => regionMonthActivity[r]);
 
     return {
@@ -151,7 +149,7 @@ export default function AgricultureAvailabilityPage() {
         months: MONTHS_SHORT,
       },
     };
-  }, [availData, calendarData, statesMap]);
+  }, [availData, calendarData, mappingData]);
 
   const totalStates = stateCoverage.labels.length;
   const totalCrops = cropDiversity.labels.length;
@@ -167,10 +165,10 @@ export default function AgricultureAvailabilityPage() {
       <Card padding="lg" hover={false}>
         <h3 className="text-base font-semibold text-fg mb-3">{tBody('hSpatialCoverage')}</h3>
         {stateCoverage.values.length > 0 ? (
-          <HorizontalBarChart
-            y={stateCoverage.labels}
-            x={stateCoverage.values}
-            xlabel={t('cropsAvailable')}
+          <EChartsHorizontalBar
+            labels={stateCoverage.labels}
+            values={stateCoverage.values}
+            captionKey="cropsAvailable"
             color="#EC9706"
             height={Math.max(300, stateCoverage.labels.length * 25)}
           />
@@ -186,10 +184,10 @@ export default function AgricultureAvailabilityPage() {
       <Card padding="lg" hover={false}>
         <h3 className="text-base font-semibold text-fg mb-3">{tBody('hCropDiversity')}</h3>
         {cropDiversity.values.length > 0 ? (
-          <HorizontalBarChart
-            y={cropDiversity.labels}
-            x={cropDiversity.values}
-            xlabel={t('statesCount')}
+          <EChartsHorizontalBar
+            labels={cropDiversity.labels}
+            values={cropDiversity.values}
+            captionKey="statesCount"
             color="#626C01"
             height={Math.max(300, cropDiversity.labels.length * 35)}
           />
@@ -209,11 +207,10 @@ export default function AgricultureAvailabilityPage() {
         <Card padding="lg" hover={false}>
           <h3 className="text-base font-semibold text-fg mb-3">{tBody('hRegionalComparison')}</h3>
           {regionalActivity.series.length > 0 ? (
-            <GroupedBarChart
+            <EChartsGroupedBar
               categories={regionalActivity.categories}
               series={regionalActivity.series}
-              xlabel={t('month')}
-              ylabel={t('activityCount')}
+              captionKey="activityCount"
               height={400}
             />
           ) : (
@@ -230,19 +227,12 @@ export default function AgricultureAvailabilityPage() {
         <Card padding="lg" hover={false}>
           <h3 className="text-base font-semibold text-fg mb-3">{tBody('hRegionalHeatmap')}</h3>
           {activityHeatmap.regions.length > 0 ? (
-            <HeatmapChart
+            <EChartsHeatmap
               z={activityHeatmap.z}
               x={activityHeatmap.months}
               y={activityHeatmap.regions}
-              title={t('activityIntensityByRegionMonth')}
+              captionKey="activityIntensityByRegionMonth"
               height={Math.max(300, activityHeatmap.regions.length * 60 + 100)}
-              colorscale={[
-                [0, '#f3f4f6'],
-                [0.25, '#fef3c7'],
-                [0.5, '#f97316'],
-                [0.75, '#dc2626'],
-                [1, '#7f1d1d'],
-              ]}
             />
           ) : (
             <p className="text-fg-muted text-center py-8">{tBody('noHeatmapData')}</p>

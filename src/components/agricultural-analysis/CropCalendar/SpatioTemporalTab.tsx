@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
 import Card from '../../ui/Card';
-import BaseChart from '../../charts/BaseChart';
-import type { Data, Layout } from 'plotly.js';
-import conabCalendar from '../../../data/processed/conab_calendar.json';
-import conabMapping from '../../../data/processed/conab_mapping.json';
+import EChartsGantt from '../../charts/echarts/EChartsGantt';
 import { CATEGORICAL_COLORS } from '../../../types/theme';
 import { useT } from '../../../i18n/LanguageContext';
+import conabCalendar from '../../../data/processed/conab_calendar.json';
+import conabMapping from '../../../data/processed/conab_mapping.json';
+
+const MONTHS_SHORT = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
 
 interface CalendarRow {
   'Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September': string;
@@ -72,8 +73,8 @@ export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: Sp
       });
     }
 
-    // Create gantt-like scatter traces: one per state, thick line from min to max month
-    const traces: Data[] = [];
+    // One Gantt bar per state: active period tinted by dominant crop
+    const bars: { label: string; start: number; end: number; color: string; tip: string }[] = [];
     const stateNames = Object.keys(stateCropMonths).sort();
 
     stateNames.forEach((state, idx) => {
@@ -92,51 +93,30 @@ export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: Sp
       const lastMonth = sortedMonths[sortedMonths.length - 1];
       const dominantCrop = [...cropColors.entries()]
         .sort((a, b) => stateCropMonths[state][b[0]]?.size || 0 - (stateCropMonths[state][a[0]]?.size || 0))[0]?.[0] || '';
+      const color = cropColors.get(dominantCrop) || CATEGORICAL_COLORS[idx % CATEGORICAL_COLORS.length];
 
-      traces.push({
-        type: 'scatter',
-        mode: 'lines+markers',
-        x: [firstMonth, lastMonth],
-        y: [state, state],
-        name: `${state} - ${dominantCrop}`,
-        line: {
-          color: cropColors.get(dominantCrop) || CATEGORICAL_COLORS[idx % CATEGORICAL_COLORS.length],
-          width: 15,
-          shape: 'linear',
-        },
-        marker: {
-          size: 8,
-          color: cropColors.get(dominantCrop) || CATEGORICAL_COLORS[idx % CATEGORICAL_COLORS.length],
-          symbol: 'circle',
-        },
-        hovertemplate: `<b>${state}</b><br>${t('period')}: ${firstMonth}-${lastMonth}<br>${t('crop')}: ${dominantCrop}<extra></extra>`,
+      bars.push({
+        label: state,
+        start: firstMonth,
+        end: lastMonth + 1,
+        color,
+        tip: `<b>${state}</b><br>${t('period')}: ${firstMonth}-${lastMonth}<br>${t('crop')}: ${dominantCrop}`,
       });
     });
 
-    return traces;
+    return bars;
   }, [rawData, selectedCrops, selectedRegions, statesMap, t]);
-
-  const layout: Partial<Layout> = {
-    title: { text: t('spatioTemporalDistribution'), x: 0.5 },
-    xaxis: {
-      title: t('monthAxisNote'),
-      tickmode: 'array',
-      tickvals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-      ticktext: ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-    },
-    yaxis: {
-      title: t('state'),
-      automargin: true,
-    },
-    showlegend: false,
-    height: Math.max(400, chartData.length * 25 + 100),
-  };
 
   return (
     <Card padding="lg" hover={false}>
       <h3 className="text-base font-semibold text-fg mb-3">{tBody('hSpatioTemporal')}</h3>
       {chartData.length > 0 ? (
-        <BaseChart data={chartData} layout={layout} />
+        <EChartsGantt
+          bars={chartData}
+          xLabels={MONTHS_SHORT}
+          captionKey="spatioTemporalDistribution"
+          height={Math.max(400, chartData.length * 25 + 100)}
+        />
       ) : (
         <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
       )}

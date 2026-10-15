@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import Card from '../../ui/Card';
-import GroupedBarChart from '../../charts/GroupedBarChart';
+import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
 import { useT } from '../../../i18n/LanguageContext';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
@@ -24,7 +24,6 @@ interface SeasonalOverviewTabProps {
 }
 
 export default function SeasonalOverviewTab({ selectedCrops, selectedRegions }: SeasonalOverviewTabProps) {
-  const { t } = useT('charts');
   const { t: tBody } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
@@ -95,11 +94,10 @@ export default function SeasonalOverviewTab({ selectedCrops, selectedRegions }: 
       {noData ? (
         <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
       ) : (
-        <GroupedBarChart
+        <EChartsGroupedBar
           categories={seasonalData.categories}
           series={seasonalData.series}
-          xlabel={t('season')}
-          ylabel={t('activityCount')}
+          captionKey="activityCount"
           height={400}
         />
       )}

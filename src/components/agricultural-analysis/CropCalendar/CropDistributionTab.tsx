@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import Card from '../../ui/Card';
-import HorizontalBarChart from '../../charts/HorizontalBarChart';
+import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
 import { useT } from '../../../i18n/LanguageContext';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
@@ -24,7 +24,6 @@ interface CropDistributionTabProps {
 }
 
 export default function CropDistributionTab({ selectedCrops, selectedRegions }: CropDistributionTabProps) {
-  const { t } = useT('charts');
   const { t: tBody } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
@@ -106,10 +105,10 @@ export default function CropDistributionTab({ selectedCrops, selectedRegions }: 
         {noStateData ? (
           <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
         ) : (
-          <HorizontalBarChart
-            y={stateCropCounts.labels}
-            x={stateCropCounts.values}
-            xlabel={t('cropsCount')}
+          <EChartsHorizontalBar
+            labels={stateCropCounts.labels}
+            values={stateCropCounts.values}
+            captionKey="cropsCount"
             color="#EC9706"
             height={Math.max(300, stateCropCounts.labels.length * 30)}
           />
@@ -119,10 +118,10 @@ export default function CropDistributionTab({ selectedCrops, selectedRegions }: 
       <Card padding="lg" hover={false}>
         <h3 className="text-base font-semibold text-fg mb-3">{tBody('hTopCropsStates')}</h3>
         {topCropsByStates.values.length > 0 ? (
-          <HorizontalBarChart
-            y={topCropsByStates.labels}
-            x={topCropsByStates.values}
-            xlabel={t('statesCount')}
+          <EChartsHorizontalBar
+            labels={topCropsByStates.labels}
+            values={topCropsByStates.values}
+            captionKey="statesCount"
             color="#626C01"
             height={Math.max(250, topCropsByStates.labels.length * 35)}
           />

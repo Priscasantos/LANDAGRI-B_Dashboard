@@ -2,6 +2,7 @@ import { useMemo, type ReactElement } from 'react';
 import EChartsBase from './EChartsBase';
 import { buildHorizontalBarOption } from './echarts-options';
 import { useEffectiveTheme } from '../../../hooks/use-theme';
+import { useChartFontFamily } from '../../../hooks/use-chart-font';
 import { useT } from '../../../i18n/LanguageContext';
 import type { TKey } from '../../../i18n/types';
 
@@ -24,6 +25,7 @@ export default function EChartsHorizontalBar({
   height,
 }: EChartsHorizontalBarProps): ReactElement {
   const theme = useEffectiveTheme();
+  const fontFamily = useChartFontFamily();
   const { t, locale } = useT('charts');
 
   const option = useMemo(
@@ -33,10 +35,11 @@ export default function EChartsHorizontalBar({
         values,
         theme,
         locale,
+        fontFamily,
         color,
         name,
       }),
-    [labels, values, theme, locale, color, name],
+    [labels, values, theme, locale, fontFamily, color, name],
   );
 
   const caption = captionKey !== undefined ? t(captionKey) : '';

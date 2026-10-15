@@ -18,7 +18,9 @@ interface EChartsBaseProps {
 
 /**
  * ECharts shell (pilot): SVG renderer, theme via `useEffectiveTheme`,
- * `role="img"` + `aria-label` + `<figcaption>` for a11y.
+ * `role="img"` + `aria-label` + `<figcaption>` for a11y. The figure is
+ * keyboard-focusable with a visible ring (same contract as the retired
+ * recharts wrappers).
  */
 export default function EChartsBase({
   option,
@@ -30,12 +32,17 @@ export default function EChartsBase({
   const effective: EChartsPilotTheme = useEffectiveTheme();
   const themeName = echartsThemeName(effective);
   const merged = useMemo<EChartsCoreOption>(
-    () => ({ ...option } as EChartsCoreOption),
+    () => ({ ...option }) as EChartsCoreOption,
     [option],
   );
 
   return (
-    <figure className="w-full min-w-0">
+    <figure
+      role="img"
+      aria-label={ariaLabel}
+      tabIndex={0}
+      className="w-full min-w-0 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+    >
       <ReactEChartsCore
         echarts={echarts}
         option={merged}
@@ -43,8 +50,6 @@ export default function EChartsBase({
         style={{ width: '100%', height, minHeight: Math.min(height, 350) }}
         className={`w-full min-w-0 ${className}`}
         opts={{ renderer: 'svg' }}
-        aria-label={ariaLabel}
-        role="img"
       />
       {caption !== undefined && caption !== '' ? (
         <figcaption className="sr-only">{caption}</figcaption>

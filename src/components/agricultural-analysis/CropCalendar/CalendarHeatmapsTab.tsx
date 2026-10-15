@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import Card from '../../ui/Card';
-import HeatmapChart from '../../charts/HeatmapChart';
+import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
 import { useT } from '../../../i18n/LanguageContext';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
@@ -103,12 +103,7 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
     return { z: nationalZ, crops: cropLabels, months: MONTHS };
   }, [rawData, selectedCrops, selectedRegions, statesMap]);
 
-  const colorscale = [
-    [0, '#f3f4f6'],
-    [0.33, '#22c55e'],
-    [0.66, '#f97316'],
-    [1, '#3b82f6'],
-  ];
+  const colorscale = ['#f3f4f6', '#22c55e', '#f97316', '#3b82f6'];
 
   if (matrix.crops.length === 0) {
     return (
@@ -127,15 +122,15 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
         <p className="text-xs text-fg-secondary mb-4">
           {tBody('matrixLegend')}
         </p>
-        <HeatmapChart
+        <EChartsHeatmap
           z={matrix.z}
           x={matrix.months}
           y={matrix.crops}
-          title={t('cropCalendarActivity')}
+          captionKey="cropCalendarActivity"
           height={Math.max(300, matrix.crops.length * 50 + 100)}
-          colorscale={colorscale}
-          zmin={0}
-          zmax={3}
+          colors={colorscale}
+          min={0}
+          max={3}
         />
       </Card>
 

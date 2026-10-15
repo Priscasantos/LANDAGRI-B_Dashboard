@@ -2,9 +2,9 @@ import { useMemo } from 'react';
 import { BarChart3, GanttChart as GanttChartIcon, Target } from 'lucide-react';
 import Tabs from '../../ui/Tabs';
 import Card from '../../ui/Card';
-import LineChart from '../../charts/LineChart';
-import GanttChart from '../../charts/GanttChart';
-import PolarChart from '../../charts/PolarChart';
+import EChartsLine from '../../charts/echarts/EChartsLine';
+import EChartsGantt from '../../charts/echarts/EChartsGantt';
+import EChartsPolar from '../../charts/echarts/EChartsPolar';
 import { useT } from '../../../i18n/LanguageContext';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
@@ -41,7 +41,6 @@ interface ActivitiesTimelineTabProps {
 }
 
 export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }: ActivitiesTimelineTabProps) {
-  const { t } = useT('charts');
   const { t: tBody } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
@@ -133,10 +132,9 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
   const monthlyContent = (
     <Card padding="lg" hover={false}>
       <h3 className="text-base font-semibold text-fg mb-3">{tBody('hMonthlySeasonality')}</h3>
-      <LineChart
+      <EChartsLine
         series={monthlyActivity.series}
-        xlabel={t('month')}
-        ylabel={t('activityCount')}
+        captionKey="activityCount"
         height={400}
       />
     </Card>
@@ -146,9 +144,10 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
     <Card padding="lg" hover={false}>
       <h3 className="text-base font-semibold text-fg mb-3">{tBody('hPlantingHarvest')}</h3>
       {ganttBars.length > 0 ? (
-        <GanttChart
+        <EChartsGantt
           bars={ganttBars}
-          xlabel={t('monthAxisNote')}
+          xLabels={MONTHS_SHORT}
+          captionKey="monthAxisNote"
           height={Math.min(600, Math.max(300, ganttBars.length * 12))}
         />
       ) : (
@@ -161,9 +160,10 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
     <Card padding="lg" hover={false}>
       <h3 className="text-base font-semibold text-fg mb-3">{tBody('hPolarSeasonality')}</h3>
       {polarData.series[0].r.some(v => v > 0) ? (
-        <PolarChart
+        <EChartsPolar
           series={polarData.series}
-          title={t('seasonalActivityDistribution')}
+          categories={MONTHS_SHORT}
+          captionKey="seasonalActivityDistribution"
           height={500}
         />
       ) : (

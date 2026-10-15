@@ -1,17 +1,27 @@
 /**
- * ECharts tree-shaking entry (pilot, reversible).
+ * ECharts tree-shaking entry (Fase 2 fatia 2a/2b — reversible).
  *
- * Imports only what the pilot uses: BarChart + HeatmapChart, Grid +
- * Tooltip + Legend + VisualMap components, SVGRenderer. Nothing else from
- * `echarts` enters the `echarts` chunk.
+ * Imports only what migrated routes use: BarChart + HeatmapChart +
+ * LineChart + PieChart + ScatterChart + RadarChart, Grid + Tooltip +
+ * Legend + VisualMap + Radar + Polar components, SVGRenderer. Nothing else from
+ * `echarts` enters the `echarts` chunk — never `echarts/all`.
  */
 import * as echarts from 'echarts/core';
-import { BarChart, HeatmapChart } from 'echarts/charts';
+import {
+  BarChart,
+  HeatmapChart,
+  LineChart,
+  PieChart,
+  ScatterChart,
+  RadarChart,
+} from 'echarts/charts';
 import {
   GridComponent,
   TooltipComponent,
   LegendComponent,
   VisualMapComponent,
+  RadarComponent,
+  PolarComponent,
 } from 'echarts/components';
 import { SVGRenderer } from 'echarts/renderers';
 import { registerLandAgriThemes } from '../../../lib/echarts-theme';
@@ -19,10 +29,16 @@ import { registerLandAgriThemes } from '../../../lib/echarts-theme';
 echarts.use([
   BarChart,
   HeatmapChart,
+  LineChart,
+  PieChart,
+  ScatterChart,
+  RadarChart,
   GridComponent,
   TooltipComponent,
   LegendComponent,
   VisualMapComponent,
+  RadarComponent,
+  PolarComponent,
   SVGRenderer,
 ]);
 

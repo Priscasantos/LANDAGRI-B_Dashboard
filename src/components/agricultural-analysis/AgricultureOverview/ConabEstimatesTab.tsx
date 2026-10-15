@@ -2,10 +2,10 @@ import { useMemo } from 'react';
 import { Package, Sprout, TrendingUp, Wheat } from 'lucide-react';
 import Card from '../../ui/Card';
 import MetricCard from '../../ui/MetricCard';
-import LineChart from '../../charts/LineChart';
-import GroupedBarChart from '../../charts/GroupedBarChart';
-import HorizontalBarChart from '../../charts/HorizontalBarChart';
-import PieChart from '../../charts/PieChart';
+import EChartsLine from '../../charts/echarts/EChartsLine';
+import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
+import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
+import EChartsPie from '../../charts/echarts/EChartsPie';
 import { useT } from '../../../i18n/LanguageContext';
 import conabAgriculturalData from '../../../data/processed/conab_agricultural_data.json';
 
@@ -34,7 +34,6 @@ interface ConabAgriData {
 }
 
 export default function ConabEstimatesTab() {
-  const { t } = useT('charts');
   const { t: tBody } = useT('agricultural');
   const data = conabAgriculturalData as ConabAgriData;
   const crops = data?.crops;
@@ -193,17 +192,20 @@ export default function ConabEstimatesTab() {
       {/* Production Evolution */}
       <Card padding="lg" hover={false}>
         <h3 className="text-base font-semibold text-fg mb-3">{tBody('hProductionEvolution')}</h3>
-        <LineChart series={productionEvolution.series} xlabel={t('season')} ylabel={`${t('production')} (${unitProd})`} height={350} />
+        <EChartsLine
+          series={productionEvolution.series}
+          captionKey="agriProductionEvolution"
+          height={350}
+        />
       </Card>
 
       {/* Crop Comparison */}
       <Card padding="lg" hover={false}>
         <h3 className="text-base font-semibold text-fg mb-3">{tBody('hCropComparison')}</h3>
-        <GroupedBarChart
+        <EChartsGroupedBar
           categories={cropComparison.categories}
           series={cropComparison.series}
-          xlabel={t('season')}
-          ylabel={`${t('production')} (${unitProd})`}
+          captionKey="production"
           height={400}
         />
       </Card>
@@ -211,7 +213,11 @@ export default function ConabEstimatesTab() {
       {/* Soybean & Corn Productivity */}
       <Card padding="lg" hover={false}>
         <h3 className="text-base font-semibold text-fg mb-3">{tBody('hSoybeanCorn')}</h3>
-        <LineChart series={soybeanCornProductivity.series} xlabel={t('season')} ylabel={`${t('productivity')} (kg/ha)`} height={350} />
+        <EChartsLine
+          series={soybeanCornProductivity.series}
+          captionKey="productivity"
+          height={350}
+        />
       </Card>
 
       {/* Planted Area Distribution + All Crops by Production */}
@@ -219,7 +225,12 @@ export default function ConabEstimatesTab() {
         <Card padding="lg" hover={false}>
           <h3 className="text-base font-semibold text-fg mb-3">{tBody('hPlantedAreaDist', { unit: unitArea })}</h3>
           {plantedAreaDistribution.length > 0 ? (
-            <PieChart data={plantedAreaDistribution} height={350} donut />
+            <EChartsPie
+              data={plantedAreaDistribution}
+              captionKey="plantedArea"
+              height={350}
+              donut
+            />
           ) : (
             <p className="text-fg-muted text-center py-8">{tBody('noAreaData')}</p>
           )}
@@ -228,10 +239,10 @@ export default function ConabEstimatesTab() {
         <Card padding="lg" hover={false}>
           <h3 className="text-base font-semibold text-fg mb-3">{tBody('hAllCrops')}</h3>
           {allCropsProduction.values.length > 0 ? (
-            <HorizontalBarChart
-              y={allCropsProduction.labels}
-              x={allCropsProduction.values}
-              xlabel={`${t('production')} (${unitProd})`}
+            <EChartsHorizontalBar
+              labels={allCropsProduction.labels}
+              values={allCropsProduction.values}
+              captionKey="production"
               color="#EC9706"
               height={Math.max(250, allCropsProduction.labels.length * 40)}
             />

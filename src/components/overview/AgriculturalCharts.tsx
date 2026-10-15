@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 import { Wheat } from 'lucide-react';
-import ChartContainer from '../charts/ChartContainer';
-import { RechartsLineChart } from '../charts/recharts/RechartsLineChart';
+import Card from '../ui/Card';
+import EChartsLine from '../charts/echarts/EChartsLine';
+import EChartsGroupedBar from '../charts/echarts/EChartsGroupedBar';
+import EChartsBase from '../charts/echarts/EChartsBase';
+import { buildPieOption } from '../charts/echarts/echarts-options';
+import { useEffectiveTheme } from '../../hooks/use-theme';
+import { useChartFontFamily } from '../../hooks/use-chart-font';
 import { useT } from '../../i18n/LanguageContext';
-import type { RechartsLineSeries } from '../charts/recharts/RechartsLineChart';
-import { RechartsPieChart } from '../charts/recharts/RechartsPieChart';
-import type { RechartsPieSlice } from '../charts/recharts/RechartsPieChart';
-import { RechartsBarChart } from '../charts/recharts/RechartsBarChart';
-import type { RechartsBarDatum } from '../charts/recharts/RechartsBarChart';
 import brazilianAgriData from '../../data/processed/brazilian_agricultural_data.json';
 
 interface ProductEntry {
@@ -17,10 +17,30 @@ interface ProductEntry {
   area_colhida_hectares?: Record<string, number>;
 }
 
+interface LinePoint {
+  x: number;
+  y: number;
+}
+
+interface LineSeries {
+  name: string;
+  data: LinePoint[];
+}
+
+interface PieSlice {
+  label: string;
+  value: number;
+}
+
+interface BarDatum {
+  category: string;
+  value: number;
+}
+
 interface AgriChartsData {
-  lineSeries: RechartsLineSeries[];
-  pieSlices: RechartsPieSlice[];
-  barData: RechartsBarDatum[];
+  lineSeries: LineSeries[];
+  pieSlices: PieSlice[];
+  barData: BarDatum[];
   latestYear: number | null;
 }
 
@@ -51,20 +71,20 @@ function buildAgriChartsData(): AgriChartsData {
     });
 
     const sortedYears = Array.from(years).sort((a, b) => a - b);
-    const lineSeries: RechartsLineSeries[] = series.map((s) => ({
+    const lineSeries: LineSeries[] = series.map((s) => ({
       name: s.name,
       data: sortedYears.map((y) => ({ x: y, y: Math.round(((s.values[y] ?? 0) / 1000) * 10) / 10 })),
     }));
 
     const latestYear = sortedYears.length > 0 ? sortedYears[sortedYears.length - 1] : null;
-    const pieSlices: RechartsPieSlice[] = latestYear
+    const pieSlices: PieSlice[] = latestYear
       ? series
           .map((s) => ({ label: s.name, value: s.values[latestYear] || 0 }))
           .sort((a, b) => b.value - a.value)
           .slice(0, 10)
       : [];
 
-    const barData: RechartsBarDatum[] = productKeys
+    const barData: BarDatum[] = productKeys
       .map((productKey) => {
         const prod = producao[productKey];
         const areaByYear = prod.area_colhida_hectares ?? {};
@@ -91,15 +111,29 @@ function buildAgriChartsData(): AgriChartsData {
 }
 
 /**
- * Brazilian agricultural charts (IBGE/CONAB/MapBiomas) — recharts edition (Fase 2).
- * Replaces the plotly `BaseChart` version so the Overview route no longer
- * pulls the ~3MB plotly bundle; remaining plotly charts load lazily via
- * `PlotlyLazyChart`. Reversible: previous version kept in git history.
+ * Brazilian agricultural charts (IBGE/CONAB/MapBiomas) — ECharts edition
+ * (Fase 2 fatia 2c). Replaces the recharts wrappers so the Overview route
+ * no longer pulls recharts wrappers; data shaping, i18n and chrome
+ * unchanged. Reversible: previous version kept in git history.
  */
 export default function AgriculturalCharts(): React.JSX.Element | null {
   const { lineSeries, pieSlices, barData, latestYear } = useMemo(() => buildAgriChartsData(), []);
-  const { t } = useT('charts');
+  const { t, locale } = useT('charts');
   const { t: tBody } = useT('agricultural');
+  const theme = useEffectiveTheme();
+  const fontFamily = useChartFontFamily();
+
+  const pieOption = useMemo(
+    () =>
+      buildPieOption({
+        slices: pieSlices,
+        theme,
+        locale,
+        fontFamily,
+        donut: true,
+      }),
+    [pieSlices, theme, locale, fontFamily],
+  );
 
   if (lineSeries.length === 0) return null;
 
@@ -114,41 +148,40 @@ export default function AgriculturalCharts(): React.JSX.Element | null {
         <Wheat size={20} aria-hidden="true" className="shrink-0" /> {tBody('hAgriData')}
       </h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-w-0">
-        <ChartContainer
-          title={t('agriProductionEvolution')}
-          description={tBody('sourceAttribution')}
-          className="min-w-0"
-        >
-          <RechartsLineChart
-            title={t('agriProductionEvolution')}
-            series={lineSeries}
-            xlabel={t('year')}
-            ylabel={t('productionKtons')}
+        <Card padding="lg" hover={false} className="min-w-0">
+          <h3 className="text-base font-semibold text-fg mb-1">{t('agriProductionEvolution')}</h3>
+          <p className="text-xs text-fg-muted mb-3">{tBody('sourceAttribution')}</p>
+          <EChartsLine
+            series={lineSeries.map((s) => ({
+              name: s.name,
+              x: s.data.map((p) => p.x),
+              y: s.data.map((p) => p.y),
+            }))}
+            captionKey="agriProductionEvolution"
+            height={350}
           />
-        </ChartContainer>
-        <ChartContainer
-          title={distributionTitle}
-          description="IBGE PAM/PPM e CONAB"
-          className="min-w-0"
-        >
-          <RechartsPieChart
-            title={distributionTitle}
-            data={pieSlices}
+        </Card>
+        <Card padding="lg" hover={false} className="min-w-0">
+          <h3 className="text-base font-semibold text-fg mb-1">{distributionTitle}</h3>
+          <p className="text-xs text-fg-muted mb-3">IBGE PAM/PPM e CONAB</p>
+          <EChartsBase
+            option={pieOption}
+            ariaLabel={distributionTitle}
+            caption={distributionTitle}
+            height={350}
           />
-        </ChartContainer>
+        </Card>
       </div>
-      <ChartContainer
-        title={t('agriAvgArea')}
-        description="IBGE PAM/PPM e CONAB"
-        className="min-w-0"
-      >
-        <RechartsBarChart
-          title={t('agriAvgArea')}
-          data={barData}
-          xlabel={t('product')}
-          ylabel={t('areaKha')}
+      <Card padding="lg" hover={false} className="min-w-0">
+        <h3 className="text-base font-semibold text-fg mb-1">{t('agriAvgArea')}</h3>
+        <p className="text-xs text-fg-muted mb-3">IBGE PAM/PPM e CONAB</p>
+        <EChartsGroupedBar
+          categories={barData.map((d) => d.category)}
+          series={[{ name: t('areaKha'), values: barData.map((d) => d.value) }]}
+          captionKey="agriAvgArea"
+          height={350}
         />
-      </ChartContainer>
+      </Card>
       <p className="text-xs text-fg-muted">
         {tBody('sourceNote')}
       </p>

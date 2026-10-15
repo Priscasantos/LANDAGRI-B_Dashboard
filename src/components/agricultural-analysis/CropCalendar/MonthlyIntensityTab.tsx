@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import Card from '../../ui/Card';
-import HeatmapChart from '../../charts/HeatmapChart';
-import LineChart from '../../charts/LineChart';
+import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
+import EChartsLine from '../../charts/echarts/EChartsLine';
 import { useT } from '../../../i18n/LanguageContext';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
@@ -36,7 +36,6 @@ interface MonthlyIntensityTabProps {
 }
 
 export default function MonthlyIntensityTab({ selectedCrops, selectedRegions }: MonthlyIntensityTabProps) {
-  const { t } = useT('charts');
   const { t: tBody } = useT('agricultural');
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
@@ -110,18 +109,13 @@ export default function MonthlyIntensityTab({ selectedCrops, selectedRegions }: 
         {noData ? (
           <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
         ) : (
-          <HeatmapChart
+          <EChartsHeatmap
             z={heatmapZ.z}
             x={heatmapZ.months}
             y={heatmapZ.crops}
-            title={t('activityIntensityCropsMonths')}
+            captionKey="activityIntensityCropsMonths"
             height={Math.max(300, heatmapZ.crops.length * 40 + 100)}
-            colorscale={[
-              [0, '#f3f4f6'],
-              [0.33, '#fef3c7'],
-              [0.66, '#f97316'],
-              [1, '#dc2626'],
-            ]}
+            colors={['#f3f4f6', '#fef3c7', '#f97316', '#dc2626']}
           />
         )}
       </Card>
@@ -131,10 +125,9 @@ export default function MonthlyIntensityTab({ selectedCrops, selectedRegions }: 
         {noData ? (
           <p className="text-fg-muted text-center py-8">{tBody('noData')}</p>
         ) : (
-          <LineChart
+          <EChartsLine
             series={intensitySeries.series}
-            xlabel={t('month')}
-            ylabel={t('totalActivityCount')}
+            captionKey="totalActivityCount"
             height={350}
           />
         )}
