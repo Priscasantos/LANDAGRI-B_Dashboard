@@ -902,6 +902,48 @@ export interface TimelineItemInput {
 
 export interface TimelineInput extends BaseBuilderInput {
   items: TimelineItemInput[];
+  /**
+   * Expansão #4 (reversível): animated frames via the native `timeline`
+   * component (play 1985→present, Verde Agro checkpoint). Omitted →
+   * static chart, byte-identical to the fatia 2c output.
+   */
+  animation?: TimelineAnimation;
+}
+
+/** First frame of the animated timeline (task: play 1985→present). */
+export const TIMELINE_ANIMATION_START = 1985;
+/** Default ms per frame of the animated timeline. */
+export const TIMELINE_ANIMATION_PLAY_INTERVAL = 1500;
+
+/**
+ * Animated playback config for `buildTimelineOption` (Expansão #4).
+ * Frames are whole years; per-frame series reuse the static builder
+ * filtered to `year <= frame` (existing series, no new chart type).
+ */
+export interface TimelineAnimation {
+  /** First frame year (default `TIMELINE_ANIMATION_START` = 1985). */
+  from?: number;
+  /** Last frame year (default: current year). */
+  to?: number;
+  /** ms per frame (default `TIMELINE_ANIMATION_PLAY_INTERVAL`). */
+  playInterval?: number;
+  /**
+   * Start playing immediately (default true). `EChartsTimeline` forces
+   * `false` under `prefers-reduced-motion` (no autoplay in that case).
+   */
+  autoPlay?: boolean;
+}
+
+/** Whole-year frames for the animation, normalized to ascending order. */
+export function timelineAnimationYears(
+  animation: TimelineAnimation | undefined,
+): number[] {
+  const fallbackTo = new Date().getFullYear();
+  const lo = Math.min(animation?.from ?? TIMELINE_ANIMATION_START, animation?.to ?? fallbackTo);
+  const hi = Math.max(animation?.from ?? TIMELINE_ANIMATION_START, animation?.to ?? fallbackTo);
+  const years: number[] = [];
+  for (let y = lo; y <= hi; y++) years.push(y);
+  return years;
 }
 
 /**
@@ -919,38 +961,8 @@ export function buildTimelineOption(input: TimelineInput): EChartsCoreOption {
   const min = allYears.length > 0 ? Math.min(...allYears) : 2000;
   const max = allYears.length > 0 ? Math.max(...allYears) : 2025;
   const tips = new Map<string, string>();
-  const series: unknown[] = [];
-  input.items.forEach((item, i) => {
-    const color = item.color ?? colorway[i % colorway.length];
-    const sorted = [...item.years].sort((a, b) => a - b);
-    sorted.forEach((year) => {
-      tips.set(
-        `${item.label}||${year}`,
-        item.tip !== undefined ? item.tip(year) : `<b>${item.label}</b><br>${year}`,
-      );
-    });
-    series.push({
-      type: 'line',
-      silent: true,
-      data:
-        sorted.length > 0
-          ? [
-              [sorted[0], item.label],
-              [sorted[sorted.length - 1], item.label],
-            ]
-          : [],
-      lineStyle: { color, width: 3, opacity: 0.5 },
-      symbol: 'none',
-    });
-    series.push({
-      type: 'scatter',
-      name: item.label,
-      data: sorted.map((year) => [year, item.label]),
-      symbolSize: 10,
-      itemStyle: { color, borderColor: '#fff', borderWidth: 2 },
-    });
-  });
-  return {
+  const series: unknown[] = buildTimelineSeries(input.items, colorway, tips);
+  const base = {
     color: [...colorway],
     textStyle: { fontFamily },
     toolbox: buildChartToolbox(input.locale, input.exportName, input.theme),
@@ -989,7 +1001,113 @@ export function buildTimelineOption(input: TimelineInput): EChartsCoreOption {
       axisLine: { lineStyle: { color: 'rgba(148,163,184,0.3)' } },
     },
     series,
+  };
+  if (input.animation === undefined) return base as EChartsCoreOption;
+  return {
+    ...base,
+    grid: { left: 8, right: 24, top: 16, bottom: 64, containLabel: true },
+    timeline: buildTimelineAnimation(
+      input.theme,
+      fontFamily,
+      input.animation,
+      timelineAnimationYears(input.animation),
+    ),
+    options: timelineAnimationYears(input.animation).map((year) => ({
+      series: buildTimelineSeries(input.items, colorway, tips, year),
+    })),
   } as EChartsCoreOption;
+}
+
+/**
+ * Native `timeline` component (Expansão #4): year labels, autoplay with
+ * `playInterval`, checkpoint in the theme's Verde Agro lead color.
+ */
+function buildTimelineAnimation(
+  theme: BaseBuilderInput['theme'],
+  fontFamily: string,
+  animation: TimelineAnimation,
+  years: number[],
+): Record<string, unknown> {
+  const { divider, labelColor } = axisCommon(theme);
+  const checkpoint = colorwayOf(theme)[0];
+  return {
+    axisType: 'category',
+    data: years.map(String),
+    autoPlay: animation.autoPlay ?? true,
+    playInterval: animation.playInterval ?? TIMELINE_ANIMATION_PLAY_INTERVAL,
+    loop: true,
+    left: 8,
+    right: 8,
+    bottom: 0,
+    lineStyle: { color: divider },
+    label: { color: labelColor, fontSize: 12, fontFamily, formatter: '{value}' },
+    itemStyle: { color: labelColor },
+    checkpointStyle: {
+      color: checkpoint,
+      borderColor: '#fff',
+      borderWidth: 2,
+    },
+    controlStyle: {
+      showPlayBtn: true,
+      showPrevBtn: true,
+      showNextBtn: true,
+      color: labelColor,
+      borderColor: labelColor,
+    },
+    progress: {
+      lineStyle: { color: checkpoint },
+      itemStyle: { color: checkpoint },
+      label: { color: labelColor, fontSize: 12, fontFamily, formatter: '{value}' },
+    },
+  };
+}
+
+/**
+ * Static series builder shared by both modes: one faint connecting line
+ * (first→last year) plus one scatter series of year markers per
+ * initiative. `uptoYear` filters markers to `year <= frame` for the
+ * animated frames (existing series, no new chart type).
+ */
+function buildTimelineSeries(
+  items: TimelineItemInput[],
+  colorway: string[],
+  tips: Map<string, string>,
+  uptoYear?: number,
+): unknown[] {
+  const series: unknown[] = [];
+  items.forEach((item, i) => {
+    const color = item.color ?? colorway[i % colorway.length];
+    const sorted = [...item.years].sort((a, b) => a - b);
+    sorted.forEach((year) => {
+      tips.set(
+        `${item.label}||${year}`,
+        item.tip !== undefined ? item.tip(year) : `<b>${item.label}</b><br>${year}`,
+      );
+    });
+    const visible =
+      uptoYear === undefined ? sorted : sorted.filter((year) => year <= uptoYear);
+    series.push({
+      type: 'line',
+      silent: true,
+      data:
+        visible.length > 0
+          ? [
+              [visible[0], item.label],
+              [visible[visible.length - 1], item.label],
+            ]
+          : [],
+      lineStyle: { color, width: 3, opacity: 0.5 },
+      symbol: 'none',
+    });
+    series.push({
+      type: 'scatter',
+      name: item.label,
+      data: visible.map((year) => [year, item.label]),
+      symbolSize: 10,
+      itemStyle: { color, borderColor: '#fff', borderWidth: 2 },
+    });
+  });
+  return series;
 }
 
 export interface RadarSeriesInput {

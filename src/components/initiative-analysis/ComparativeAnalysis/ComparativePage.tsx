@@ -1,5 +1,5 @@
 import Tabs from '../../ui/Tabs';
-import { GitCompare, LineChart, Target, Calculator, Tags, Microscope, Flame, ClipboardList } from 'lucide-react';
+import { GitCompare, LineChart, Target, Calculator, Tags, Microscope, Flame, ClipboardList, Columns2 } from 'lucide-react';
 import { useT } from '../../../i18n/LanguageContext';
 import PairwiseTab from './PairwiseTab';
 import DistributionsTab from './DistributionsTab';
@@ -9,11 +9,13 @@ import ClassDetailsTab from './ClassDetailsTab';
 import MethodologyDeepDiveTab from './MethodologyDeepDiveTab';
 import NormalizedPerformanceTab from './NormalizedPerformanceTab';
 import DetailedTableTab from './DetailedTableTab';
+import SplitCompareTab from './SplitCompareTab';
 
 export default function ComparativePage() {
   const { t } = useT('initiative');
   const tabs = [
     { id: 'pairwise', label: t('tabPairwise'), icon: GitCompare, content: <PairwiseTab /> },
+    { id: 'split', label: t('tabSplit'), icon: Columns2, content: <SplitCompareTab /> },
     { id: 'distributions', label: t('tabDistributions'), icon: LineChart, content: <DistributionsTab /> },
     { id: 'accuracy', label: t('tabGlobalAccuracy'), icon: Target, content: <GlobalAccuracyTab /> },
     { id: 'methodology', label: t('tabMethodologyDist'), icon: Calculator, content: <MethodologyDistributionTab /> },

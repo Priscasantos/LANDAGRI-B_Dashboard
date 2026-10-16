@@ -3,7 +3,7 @@
  *
  * Imports only what migrated routes use: BarChart + HeatmapChart +
  * LineChart + PieChart + ScatterChart + RadarChart, Grid + Tooltip +
- * Legend + VisualMap + Radar + Polar components, SVGRenderer. Nothing else from
+ * Legend + VisualMap + Radar + Polar + Timeline components, SVGRenderer. Nothing else from
  * `echarts` enters the `echarts` chunk — never `echarts/all`.
  */
 import * as echarts from 'echarts/core';
@@ -23,6 +23,7 @@ import {
   VisualMapComponent,
   RadarComponent,
   PolarComponent,
+  TimelineComponent,
 } from 'echarts/components';
 import { SVGRenderer } from 'echarts/renderers';
 import { registerLandAgriThemes } from '../../../lib/echarts-theme';
@@ -41,6 +42,7 @@ echarts.use([
   VisualMapComponent,
   RadarComponent,
   PolarComponent,
+  TimelineComponent,
   SVGRenderer,
 ]);
 

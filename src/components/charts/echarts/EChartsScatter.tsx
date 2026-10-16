@@ -13,6 +13,8 @@ interface EChartsScatterProps {
   height?: number;
   /** Y axis scale (Plotly `type: 'log'` analogue). */
   yAxisType?: 'value' | 'log';
+  /** ECharts group id for synced tooltip/zoom (Expansão #4 split-view). */
+  group?: string;
 }
 
 export default function EChartsScatter({
@@ -20,6 +22,7 @@ export default function EChartsScatter({
   captionKey,
   height,
   yAxisType,
+  group,
 }: EChartsScatterProps): ReactElement {
   const theme = useEffectiveTheme();
   const fontFamily = useChartFontFamily();
@@ -37,6 +40,7 @@ export default function EChartsScatter({
       ariaLabel={caption === '' ? t('interactiveChart') : caption}
       caption={caption}
       height={height}
+      group={group}
     />
   );
 }

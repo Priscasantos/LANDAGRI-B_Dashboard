@@ -62,6 +62,15 @@ export default function TimelineTab({ data }: TimelineTabProps) {
         captionKey="initiativeTimeline"
         height={height}
       />
+      <p className="text-sm text-fg-secondary">
+        {tBody('timelineAnimatedIntro')}
+      </p>
+      <EChartsTimeline
+        items={items}
+        captionKey="initiativeTimeline"
+        height={height}
+        animated
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
-import { useMemo, type ReactElement } from 'react';
+import { useCallback, useEffect, useMemo, type ReactElement } from 'react';
 import ReactEChartsCore from 'echarts-for-react/esm/core';
-import type { EChartsCoreOption } from 'echarts/core';
+import type { ECharts, EChartsCoreOption } from 'echarts/core';
 import { Download } from 'lucide-react';
 import { echarts } from './echarts-setup';
 import { echartsThemeName, type EChartsPilotTheme } from '../../../lib/echarts-theme';
@@ -27,6 +27,12 @@ interface EChartsBaseProps {
    * (the builder toolbox still offers PNG + data view).
    */
   exportRows?: ChartRow[];
+  /**
+   * ECharts group id (Expansão #4 split-view): charts sharing the same
+   * group synchronize tooltip/axis-pointer/zoom via `echarts.connect`.
+   * Omitted → standalone chart (unchanged behavior).
+   */
+  group?: string;
 }
 
 /**
@@ -49,6 +55,7 @@ export default function EChartsBase({
   route,
   initiative,
   exportRows,
+  group,
 }: EChartsBaseProps): ReactElement {
   const effective: EChartsPilotTheme = useEffectiveTheme();
   const themeName = echartsThemeName(effective);
@@ -57,6 +64,20 @@ export default function EChartsBase({
     route,
     initiative,
   });
+  const handleReady = useCallback(
+    (instance: ECharts) => {
+      if (group === undefined) return;
+      instance.group = group;
+      echarts.connect(group);
+    },
+    [group],
+  );
+  useEffect(() => {
+    if (group === undefined) return;
+    return () => {
+      echarts.disconnect(group);
+    };
+  }, [group]);
   const merged = useMemo<EChartsCoreOption>(() => {
     const next = { ...(option as Record<string, unknown>) };
     const toolbox = next.toolbox as Record<string, unknown> | undefined;
@@ -87,6 +108,7 @@ export default function EChartsBase({
           style={{ width: '100%', height, minHeight: Math.min(height, 350) }}
           className={`w-full min-w-0 ${className}`}
           opts={{ renderer: 'svg' }}
+          onChartReady={handleReady}
         />
         {caption !== undefined && caption !== '' ? (
           <figcaption className="sr-only">{caption}</figcaption>
