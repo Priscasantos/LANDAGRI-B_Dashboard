@@ -59,4 +59,16 @@ describe('CalendarAvailability schema (Fase 1)', () => {
     ];
     expect(normalizeCalendarRows(rows)).toHaveLength(0);
   });
+
+  it('propaga areaSharePct finito; omite ausente/infinito (fallback uf honesto)', () => {
+    const rows: ConabCalendarRow[] = [
+      { crop: 'Cotton', uf: 'MT', months: Array(12).fill('P'), areaSharePct: 70.16 },
+      { crop: 'Cotton', uf: 'RO', months: Array(12).fill('P') },
+      { crop: 'Cotton', uf: 'BA', months: Array(12).fill('P'), areaSharePct: Number.NaN },
+    ];
+    const out = normalizeCalendarRows(rows, { vintage: 'test.csv', updatedAt: '2026-10-16' });
+    expect(out.find((r) => r.region === 'MT')?.areaSharePct).toBe(70.16);
+    expect('areaSharePct' in (out.find((r) => r.region === 'RO') as object)).toBe(false);
+    expect('areaSharePct' in (out.find((r) => r.region === 'BA') as object)).toBe(false);
+  });
 });

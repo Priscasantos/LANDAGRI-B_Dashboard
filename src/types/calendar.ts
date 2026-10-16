@@ -32,6 +32,13 @@ export interface ConabCalendarRow {
   crop: string;
   uf: string;
   months: string[];
+  /**
+   * Share of the crop's national area in this UF (%, 0–100) — populated by
+   * `scripts/preprocess-data.mjs` from the closed CONAB safra bulletin
+   * per-UF sheets (`conab_area_shares.json`). Absent when the crop has no
+   * UF-level area source (never estimated — see `attachAreaShares` gaps).
+   */
+  areaSharePct?: number;
 }
 
 /** Typed CONAB availability row as emitted by `scripts/preprocess-data.mjs`. */
@@ -137,12 +144,19 @@ export function normalizeCalendarRows(
     if (!Array.isArray(row.months) || row.months.length < 12) continue;
     row.months.slice(0, 12).forEach((code, i) => {
       const { plantingPct, harvestPct } = activityFromCode(code);
+      // Propagate the preprocessed area weight when it is a finite number;
+      // otherwise omit it so `resolveShareMode` honestly falls back to 'uf'.
+      const areaSharePct =
+        typeof row.areaSharePct === 'number' && Number.isFinite(row.areaSharePct)
+          ? row.areaSharePct
+          : undefined;
       out.push({
         cropId,
         month: bulletinIndexToMonth(i),
         region,
         plantingPct,
         harvestPct,
+        ...(areaSharePct !== undefined ? { areaSharePct } : {}),
         source,
         vintage,
         updatedAt,

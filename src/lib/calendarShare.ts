@@ -15,6 +15,7 @@ import {
   type ConabCalendarRow,
   type NormalizeCalendarOptions,
 } from '../types/calendar';
+import { escapeHtml } from './escapeHtml';
 
 export type ShareMode = 'uf' | 'area';
 
@@ -146,7 +147,15 @@ function buildMonthShare(month: number, records: CalendarAvailability[], mode: S
  * meses sem registro viram 0% explícito, nunca lacuna silenciosa).
  */
 export function aggregateShares(records: CalendarAvailability[]): MonthShare[] {
-  const mode = resolveShareMode(records);
+  return aggregateSharesAs(records, resolveShareMode(records));
+}
+
+/**
+ * Agrega registros num modo explícito (`ShareModeToggle`, Gaia).
+ * `'area'` só pondera quando TODOS trazem `areaSharePct`; sem área por UF
+ * cai para `'uf'` (fallback rotulado no UI — nunca inventa área).
+ */
+export function aggregateSharesAs(records: CalendarAvailability[], mode: ShareMode): MonthShare[] {
   const byMonth = new Map<number, CalendarAvailability[]>();
   for (const r of records) {
     const list = byMonth.get(r.month) ?? [];
@@ -156,10 +165,26 @@ export function aggregateShares(records: CalendarAvailability[]): MonthShare[] {
   return Array.from({ length: 12 }, (_, i) => buildMonthShare(i + 1, byMonth.get(i + 1) ?? [], mode));
 }
 
+export interface SharesWithMode {
+  shares: MonthShare[];
+  /** Modo efetivo após fallback (UI rotula `uf` quando sem área). */
+  effective: ShareMode;
+  /** `true` quando há `areaSharePct` em todos os registros. */
+  hasArea: boolean;
+}
+
+/** Resolve pedido do toggle: default área quando disponível, senão UFs rotulado. */
+export function aggregateSharesWithMode(records: CalendarAvailability[], mode: ShareMode): SharesWithMode {
+  const hasArea = resolveShareMode(records) === 'area';
+  const effective: ShareMode = mode === 'area' && hasArea ? 'area' : 'uf';
+  return { shares: aggregateSharesAs(records, effective), effective, hasArea };
+}
+
 /** Agrega por grupo (cultura, região, UF…) → 12 `MonthShare` por chave. */
 export function aggregateSharesByGroup(
   records: CalendarAvailability[],
   groupKey: (record: CalendarAvailability) => string,
+  mode?: ShareMode,
 ): Map<string, MonthShare[]> {
   const groups = new Map<string, CalendarAvailability[]>();
   for (const r of records) {
@@ -169,7 +194,7 @@ export function aggregateSharesByGroup(
     groups.set(key, list);
   }
   const out = new Map<string, MonthShare[]>();
-  for (const [key, list] of groups) out.set(key, aggregateShares(list));
+  for (const [key, list] of groups) out.set(key, aggregateSharesAs(list, mode ?? resolveShareMode(list)));
   return out;
 }
 
@@ -211,11 +236,12 @@ export function formatShareTip(
 ): string {
   const formatList = (list: string[]): string => {
     const { top, overflow } = topUfsWithOverflow(list, topN);
-    const base = top.join(', ') || '–';
+    // Root cause: siglas/listas vêm de dados — escape antes do HTML.
+    const base = top.map((uf) => escapeHtml(uf)).join(', ') || '–';
     return overflow > 0 ? `${base} ${labels.more(overflow)}` : base;
   };
   return (
-    `<b>${title}</b><br>` +
+    `<b>${escapeHtml(title)}</b><br>` +
     `${labels.activeUfs}: ${Math.round(share.pctActive)}% (${share.activeUfs}/${share.totalUfs})<br>` +
     `${labels.planting}: ${formatList(share.plantingList)}<br>` +
     `${labels.harvest}: ${formatList(share.harvestList)}`
@@ -296,7 +322,7 @@ export function formatBreakdownTip(
 ): string {
   const formatList = (list: string[]): string => {
     const { top, overflow } = topUfsWithOverflow(list, topN);
-    const base = top.join(', ') || '–';
+    const base = top.map((uf) => escapeHtml(uf)).join(', ') || '–';
     return overflow > 0 ? `${base} ${labels.more(overflow)}` : base;
   };
   const plantingLine =
@@ -305,5 +331,5 @@ export function formatBreakdownTip(
     `${labels.harvest}: ${Math.round(breakdown.pctHarvest)}% (${formatList(breakdown.harvestUfs)})`;
   const body =
     slice === 'planting' ? plantingLine : slice === 'harvest' ? harvestLine : `${plantingLine}<br>${harvestLine}`;
-  return `<b>${title}</b><br>${body}`;
+  return `<b>${escapeHtml(title)}</b><br>${body}`;
 }
