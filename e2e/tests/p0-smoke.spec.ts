@@ -49,9 +49,12 @@ test.describe('P0 - Smoke Tests (Critical Path)', () => {
     }
   });
 
-  test('Overview renders charts without the plotly bundle', async ({ page }) => {
+  test('Overview renders map without the plotly bundle', async ({ page }) => {
     // Fase 2 fatia 2c: Overview uses ECharts (SVG); the plotly runtime is
     // gone from package.json, so no plotly request can exist.
+    // P2a remodel (8195eea): overview is LULC-only — AgriculturalCharts was
+    // intentionally removed, so assert the Leaflet island instead of ECharts
+    // SVG here. ECharts coverage lives on initiative/agricultural routes.
     const plotlyRequests: string[] = [];
     page.on('request', (req) => {
       if (req.url().toLowerCase().includes('plotly')) plotlyRequests.push(req.url());
@@ -60,8 +63,9 @@ test.describe('P0 - Smoke Tests (Critical Path)', () => {
     await bp.navigate(ROUTES.overview);
     await page.waitForTimeout(3000);
 
-    const echartsCount = await page.locator('figure div svg').count();
-    expect(echartsCount).toBeGreaterThan(0);
+    const mapCount = await page.locator('.leaflet-container').count();
+    expect(mapCount).toBeGreaterThan(0);
+    await expect(page.locator('.leaflet-container').first()).toBeVisible();
     expect(plotlyRequests).toEqual([]);
   });
 

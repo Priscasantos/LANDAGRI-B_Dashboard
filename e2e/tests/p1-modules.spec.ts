@@ -15,14 +15,18 @@ test.describe('P1 - Module Tests', () => {
       expect(count).toBeGreaterThan(0);
     });
 
-    test('ECharts render SVG content on overview (no plotly)', async ({ page }) => {
+    test('Overview renders Leaflet map + metrics (no plotly, no ECharts)', async ({ page }) => {
+      // P2a remodel (8195eea): overview is LULC-only — AgriculturalCharts was
+      // intentionally removed, so there is no ECharts SVG here. Assert the
+      // Leaflet island instead; ECharts SVG is covered on the
+      // initiative/agricultural routes below.
       const bp = new BasePage(page);
       await bp.navigate(ROUTES.overview);
       await page.waitForTimeout(3000);
 
-      const charts = page.locator('figure div svg');
-      expect(await charts.count()).toBeGreaterThan(0);
-      await expect(charts.first()).toBeVisible();
+      const map = page.locator('.leaflet-container');
+      expect(await map.count()).toBeGreaterThan(0);
+      await expect(map.first()).toBeVisible();
     });
   });
 

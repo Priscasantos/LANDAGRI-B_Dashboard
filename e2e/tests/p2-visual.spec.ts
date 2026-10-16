@@ -31,9 +31,11 @@ test.describe('P2 - Visual Tests', () => {
   });
 
   test('Charts have proper dimensions on desktop', async ({ page }) => {
+    // P2a remodel: overview has no ECharts — check dimensions on the
+    // initiative temporal route (ECharts SVG present).
     await page.setViewportSize({ width: 1280, height: 800 });
     const bp = new BasePage(page);
-    await bp.navigate(ROUTES.overview);
+    await bp.navigate(ROUTES.initiativeAnalysis);
     await page.waitForTimeout(3000);
 
     const charts = page.locator('figure div svg');
@@ -54,6 +56,8 @@ test.describe('P2 - Visual Tests', () => {
  * Fase 4 — matriz visual {pt,en}×{light,dark} nos charts e no mapa.
  * Tiles de rede são mascarados (`.leaflet-tile-pane`) para a comparação
  * ser determinística; tolerância via `maxDiffPixelRatio`.
+ * P2a remodel (8195eea): overview é LULC puro (mapa Leaflet, sem ECharts) —
+ * o teste de overview ancora no `.leaflet-container`.
  */
 test.describe('P2 - Visual matrix {pt,en}x{light,dark} (charts + mapa)', () => {
   const LOCALES = [
@@ -64,7 +68,7 @@ test.describe('P2 - Visual matrix {pt,en}x{light,dark} (charts + mapa)', () => {
 
   for (const { seed, tag } of LOCALES) {
     for (const theme of THEMES) {
-      test(`overview charts+mapa ${tag}/${theme}`, async ({ page }) => {
+      test(`overview mapa ${tag}/${theme}`, async ({ page }) => {
         await page.setViewportSize({ width: 1280, height: 800 });
         await page.addInitScript(
           ({ lang, th }) => {
@@ -79,9 +83,7 @@ test.describe('P2 - Visual matrix {pt,en}x{light,dark} (charts + mapa)', () => {
         );
         const bp = new BasePage(page);
         await bp.navigate(ROUTES.overview);
-        await expect(
-          page.locator('figure div svg').first(),
-        ).toBeVisible({ timeout: TIMEOUTS.pageLoad });
+        // Overview LULC puro: sem ECharts SVG — ancora no mapa Leaflet.
         await expect(page.locator('.leaflet-container')).toBeVisible({
           timeout: TIMEOUTS.pageLoad,
         });
