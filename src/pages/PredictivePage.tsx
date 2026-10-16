@@ -19,14 +19,15 @@ import AnimatedPage from '../components/AnimatedPage';
 import EChartsBase from '../components/charts/echarts/EChartsBase';
 import { buildLineOption } from '../components/charts/echarts/echarts-options';
 import { useEffectiveTheme } from '../hooks/use-theme';
+import { useChartColorway } from '../hooks/use-chart-colorway';
 import { useChartFontFamily } from '../hooks/use-chart-font';
-import { themeDataColor } from '../lib/theme-data';
 import { simulateProjections, getDefaultParams, BASELINE_2025 } from '../lib/landCoverSimulation';
 import { useT } from '../i18n/LanguageContext';
 
 export default function PredictivePage() {
   const { t, locale } = useT('predictive');
   const theme = useEffectiveTheme();
+  const { colorway, preset: presetValue } = useChartColorway();
   const fontFamily = useChartFontFamily();
   const [reforestationRate, setReforestationRate] = useState(getDefaultParams().reforestationRate);
   const [agriExpansion, setAgriExpansion] = useState(getDefaultParams().agriExpansion);
@@ -64,11 +65,13 @@ export default function PredictivePage() {
           },
         ],
         theme,
+        colorway,
+        preset: presetValue,
         locale,
         fontFamily,
         showMarkers: false,
       }),
-    [simulatedData, plotlyYears, theme, locale, fontFamily, t],
+    [simulatedData, plotlyYears, theme, colorway, presetValue, locale, fontFamily, t],
   );
 
   const handleReset = () => {
@@ -293,7 +296,7 @@ export default function PredictivePage() {
                       type="monotone"
                       name={t('seriesForest')}
                       dataKey="forestryArea"
-                      stroke={themeDataColor(0)}
+                      stroke={colorway[0]}
                       strokeWidth={3}
                       dot={false}
                     />
@@ -301,7 +304,7 @@ export default function PredictivePage() {
                       type="monotone"
                       name={t('seriesPasture')}
                       dataKey="pastureArea"
-                      stroke={themeDataColor(1)}
+                      stroke={colorway[1]}
                       strokeWidth={2}
                       dot={false}
                       strokeDasharray="4 4"
@@ -310,7 +313,7 @@ export default function PredictivePage() {
                       type="monotone"
                       name={t('seriesAgri')}
                       dataKey="agricultureArea"
-                      stroke={themeDataColor(2)}
+                      stroke={colorway[2]}
                       strokeWidth={3}
                       dot={false}
                     />
@@ -318,7 +321,7 @@ export default function PredictivePage() {
                       type="monotone"
                       name={t('seriesEmission')}
                       dataKey="carbonEmissionIndex"
-                      stroke={themeDataColor(3)}
+                      stroke={colorway[3]}
                       strokeWidth={2}
                       dot={false}
                     />
