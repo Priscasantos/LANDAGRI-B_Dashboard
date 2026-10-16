@@ -181,7 +181,7 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
 
   const polarContent = (
     <Card padding="lg" hover={false}>
-      <h3 className="text-base font-semibold text-fg mb-3">{tBody('hPolarSeasonality')}</h3>
+      <h3 className="text-base font-semibold text-fg mb-3">{tBody('tabPolar')}</h3>
       {polarData.series[0].r.some(v => (v ?? 0) > 0) ? (
         <EChartsPolar
           series={polarData.series}

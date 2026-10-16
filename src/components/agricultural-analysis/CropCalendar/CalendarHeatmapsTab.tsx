@@ -168,7 +168,7 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
       </Card>
 
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hMonthlySeasonality')}</h3>
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hMonthlyStacked')}</h3>
         <EChartsGroupedBar
           categories={monthLabels}
           series={[
