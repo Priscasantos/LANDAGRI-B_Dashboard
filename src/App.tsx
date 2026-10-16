@@ -8,7 +8,7 @@ import { SidebarConfigProvider } from './contexts/sidebar-context';
 import ErrorBoundary from './components/ErrorBoundary';
 import DashboardSkeleton from './components/ui/DashboardSkeleton';
 import BaseLayout from './components/layout/BaseLayout';
-import { appRoutes, getBasename, getRedirectPath, type AppRoute } from './config/routes';
+import { appRoutes, getBasename, getRedirectPath, legacyRedirects, type AppRoute } from './config/routes';
 import { useInitiatives } from './hooks/useInitiatives';
 import { LanguageProvider, useT } from './i18n/LanguageContext';
 
@@ -84,6 +84,10 @@ function AppContent(): React.JSX.Element {
           path={route.path}
           element={<LocalizedRoute route={route} />}
         />
+      ))}
+      {/* Fase 3 IA enxuta: aliases de rotas antigas (alias, não 404). */}
+      {legacyRedirects.map((alias) => (
+        <Route key={alias.from} path={alias.from} element={<Navigate to={alias.to} replace />} />
       ))}
     </Routes>
   );

@@ -3,6 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { commandIndex } from '../../config/routes';
 import { useT } from '../../i18n/LanguageContext';
+import { pt } from '../../i18n/dictionaries/pt';
+import { en } from '../../i18n/dictionaries/en';
+import {
+  filterCommandEntries,
+  loadRecents,
+  orderWithRecents,
+  recordRecent,
+  type PaletteEntry,
+} from '../../lib/commandSearch';
 
 interface CommandSearchProps {
   open: boolean;
@@ -14,7 +23,9 @@ interface CommandSearchProps {
  * Indexes the 5 module routes + initiative/agricultural sub-routes
  * (`commandIndex` in `src/config/routes.tsx`). Dependency-free:
  * a fixed dialog with listbox semantics and full keyboard support.
- * Fase 1 i18n: rótulos via chaves `nav`; a busca casa PT + EN + url.
+ * Fase 1 i18n: rótulos via chaves `nav`.
+ * Fase 3 IA enxuta: busca casa PT + EN + url + sinônimos (`keywords`,
+ * insensível a acentos) e sugere recentes primeiro com query vazia.
  */
 export function CommandSearch({ open, onOpenChange }: CommandSearchProps): React.JSX.Element | null {
   const navigate = useNavigate();
@@ -22,31 +33,43 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps): React
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
+  const recentHeadingId = useId();
   const { t: tNav } = useT('nav');
   const { t } = useT('common');
 
-  const entries = useMemo(
+  const entries: PaletteEntry[] = useMemo(
     () =>
       commandIndex.map((entry) => ({
         url: entry.url,
         title: tNav(entry.titleKey),
         group: tNav(entry.groupKey),
-        fallbackTitle: entry.title,
+        ptTitle: pt.nav[entry.titleKey] ?? entry.title,
+        enTitle: en.nav[entry.titleKey] ?? entry.title,
+        enGroup: en.nav[entry.groupKey] ?? entry.group,
+        keywords: entry.keywords,
       })),
     [tNav],
   );
 
+  const recentUrls = useMemo(() => {
+    if (!open) return [];
+    try {
+      return loadRecents(localStorage);
+    } catch {
+      return [];
+    }
+  }, [open ]);
+
   const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return entries;
-    return entries.filter(
-      (entry) =>
-        entry.title.toLowerCase().includes(q) ||
-        entry.fallbackTitle.toLowerCase().includes(q) ||
-        entry.group.toLowerCase().includes(q) ||
-        entry.url.toLowerCase().includes(q),
-    );
-  }, [query, entries]);
+    const filtered = filterCommandEntries(entries, query);
+    if (query.trim()) return filtered;
+    return orderWithRecents(filtered, recentUrls);
+  }, [query, entries, recentUrls]);
+
+  const showRecents = query.trim() === '' && recentUrls.length > 0 && results.length > 0;
+  const recentCount = showRecents
+    ? results.filter((entry) => recentUrls.includes(entry.url)).length
+    : 0;
 
   useEffect(() => {
     // Focus after paint so the dialog exists in the DOM.
@@ -62,6 +85,11 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps): React
   if (!open) return null;
 
   const go = (url: string): void => {
+    try {
+      recordRecent(localStorage, url);
+    } catch {
+      /* private mode: segue sem persistir */
+    }
     onOpenChange(false);
     navigate(url);
   };
@@ -116,6 +144,11 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps): React
             esc
           </kbd>
         </div>
+        {showRecents && (
+          <p id={recentHeadingId} className="px-4 pt-3 pb-1 text-[11px] font-semibold tracking-wider text-fg-muted uppercase">
+            {t('recentTitle')}
+          </p>
+        )}
         <ul
           id={listId}
           role="listbox"
@@ -140,6 +173,11 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps): React
                 <span className="min-w-0 flex-1 truncate font-medium text-fg">
                   {entry.title}
                 </span>
+                {showRecents && index < recentCount && (
+                  <span className="shrink-0 rounded-full bg-surface-alt px-2 py-0.5 text-[11px] text-fg-muted">
+                    {t('recentTitle')}
+                  </span>
+                )}
                 <span className="shrink-0 text-xs text-fg-muted">{entry.group}</span>
               </button>
             </li>

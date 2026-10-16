@@ -19,20 +19,20 @@ const FIVE_ROUTES = [
   {
     slug: 'initiative',
     route: ROUTES.initiativeAnalysis,
-    ptH1: /Análise de Iniciativas/,
-    enH1: /Initiative Analysis/,
+    ptH1: /Iniciativas/,
+    enH1: /Initiatives/,
   },
   {
     slug: 'agricultural',
     route: ROUTES.agriculturalAnalysis,
-    ptH1: /Análise Agrícola/,
-    enH1: /Agricultural Analysis/,
+    ptH1: /Agricultura/,
+    enH1: /Agriculture/,
   },
   {
     slug: 'predictive',
     route: ROUTES.predictive,
-    ptH1: /Simulador Preditivo/,
-    enH1: /Predictive Simulator/,
+    ptH1: /Simulador/,
+    enH1: /Simulator/,
   },
   {
     slug: 'about',

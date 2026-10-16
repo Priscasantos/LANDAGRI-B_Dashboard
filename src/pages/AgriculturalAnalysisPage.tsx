@@ -1,41 +1,27 @@
-import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Sprout, CalendarDays, Package } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import { useT } from '../i18n/LanguageContext';
+import FilterBar from '../components/ui/FilterBar';
 import AgricultureOverviewPage from '../components/agricultural-analysis/AgricultureOverview/AgricultureOverviewPage';
 import CropCalendarPage from '../components/agricultural-analysis/CropCalendar/CropCalendarPage';
 import AgricultureAvailabilityPage from '../components/agricultural-analysis/AgricultureAvailability/AgricultureAvailabilityPage';
 
 
-export default function AgriculturalAnalysisPage() {
+export default function AgriculturalAnalysisPage(): React.JSX.Element {
   const { t } = useT('nav');
   const location = useLocation();
 
-  const subPages: { path: string; label: string; icon: LucideIcon }[] = [
-    { path: 'overview', label: t('agriOverview'), icon: Sprout },
-    { path: 'crop-calendar', label: t('cropCalendar'), icon: CalendarDays },
-    { path: 'availability', label: t('availability'), icon: Package },
+  const options = [
+    { value: 'overview', label: t('agriOverview'), to: '/agricultural-analysis/overview', icon: Sprout },
+    { value: 'crop-calendar', label: t('cropCalendar'), to: '/agricultural-analysis/crop-calendar', icon: CalendarDays },
+    { value: 'availability', label: t('availability'), to: '/agricultural-analysis/availability', icon: Package },
   ];
+  const active = options.find((opt) => location.pathname.endsWith(`/${opt.value}`))?.value ?? 'overview';
 
   return (
     <div>
-      <div className="flex border-b border-border mb-6 overflow-x-auto">
-        {subPages.map((tab) => {
-          const isActive = location.pathname.includes(tab.path);
-          return (
-            <Link
-              key={tab.path}
-              to={`/agricultural-analysis/${tab.path}`}
-              className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200 ${
-                isActive ? 'text-amber-700 border-amber-600 font-semibold' : 'text-fg-secondary border-transparent hover:text-fg hover:border-border'
-              }`}
-            >
-              <tab.icon size={15} aria-hidden="true" className="shrink-0" />
-              {tab.label}
-            </Link>
-          );
-        })}
-      </div>
+      {/* Fase 3: sub-navegação como barra de filtros route-backed (mesmos `to=`, deep-link preservado) */}
+      <FilterBar label={t('agriculturalAnalysis')} options={options} value={active} />
       <Routes>
         <Route index element={<Navigate to="overview" replace />} />
         <Route path="overview" element={<AgricultureOverviewPage />} />

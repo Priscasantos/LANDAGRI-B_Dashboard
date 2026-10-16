@@ -1,12 +1,13 @@
-import { useEffect } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { NavLink, Link, useLocation } from 'react-router-dom';
 import {
   BarChart3,
-  Calendar,
   Map,
+  Calendar,
   BrainCircuit,
   BookOpen,
   Sprout,
+  ChevronDown,
   X,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -35,8 +36,9 @@ interface SidebarNavGroup {
  * LANDAGRI-B section map (adapted from the shadcn-dashboard reference
  * `app-sidebar.tsx`). Demo groups (mail/tasks/chat/calendar/users/faqs/
  * pricing, auth pages, errors, settings) are intentionally dropped —
- * only the 5 product modules remain. Rótulos via chaves `nav` (Fase 1
- * i18n) — PT estático preservado em `routes.tsx` para os testes legados.
+ * only the 5 product modules remain in 4 groups. Rótulos via chaves
+ * `nav` (Fase 1 i18n) — PT estático preservado em `routes.tsx` para os
+ * testes legados. Regra Fase 3: no máximo 2 níveis (item + subitem).
  */
 const navGroups: SidebarNavGroup[] = [
   {
@@ -84,9 +86,29 @@ const navGroups: SidebarNavGroup[] = [
   },
 ];
 
+/** Grupo contém a rota ativa (item ou subitem casa por prefixo exato). */
+function groupContainsPath(group: SidebarNavGroup, pathname: string): boolean {
+  return group.items.some(
+    (item) =>
+      pathname === item.url ||
+      pathname.startsWith(`${item.url}/`) ||
+      (item.items ?? []).some((sub) => pathname === sub.url),
+  );
+}
+
 function SidebarNavContent({ onNavigate }: { onNavigate: () => void }): React.JSX.Element {
   const { t: tNav } = useT('nav');
   const { t: tCommon } = useT('common');
+  const { pathname } = useLocation();
+  // Fase 3: grupos colapsáveis — todos abertos por padrão; o grupo ativo
+  // fica aberto durante a rota (links e2e seguem visíveis). `userToggles`
+  // guarda só o override explícito (derivado no render, sem efeito).
+  const [userToggles, setUserToggles] = useState<Record<string, boolean>>({});
+
+  function toggleGroup(labelKey: string, fallbackOpen: boolean): void {
+    setUserToggles((prev) => ({ ...prev, [labelKey]: !fallbackOpen }));
+  }
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2.5 px-4 pt-5 pb-4">
@@ -106,55 +128,78 @@ function SidebarNavContent({ onNavigate }: { onNavigate: () => void }): React.JS
         </Link>
       </div>
       <nav aria-label={tNav('mainNav')} className="flex-1 overflow-y-auto px-3 pb-4">
-        {navGroups.map((group) => (
-          <div key={group.labelKey} className="mt-2 first:mt-0">
-            <p className="px-3 pt-5 pb-1.5 text-[11px] font-semibold tracking-wider text-fg-muted uppercase first:pt-1">
-              {tNav(group.labelKey)}
-            </p>
-            <ul className="space-y-1">
-              {group.items.map((item) => (
-                <li key={item.url}>
-                  <NavLink
-                    to={item.url}
-                    end={item.items === undefined}
-                    onClick={onNavigate}
-                    className={({ isActive }: { isActive: boolean }) =>
-                      `relative flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                        isActive
-                          ? 'bg-sidebar-active-bg font-semibold text-sidebar-text-active before:absolute before:inset-y-1.5 before:left-0 before:w-1 before:rounded-full before:bg-primary'
-                          : 'text-sidebar-text hover:bg-sidebar-hover-bg hover:text-fg'
-                      }`
-                    }
-                  >
-                    <item.icon size={17} aria-hidden="true" className="shrink-0" />
-                    <span className="truncate">{tNav(item.titleKey)}</span>
-                  </NavLink>
-                  {item.items && (
-                    <ul aria-label={tNav('subpagesOf', { title: tNav(item.titleKey) })} className="mt-1 mb-1 ml-9 space-y-1 border-l-2 border-border pl-3">
-                      {item.items.map((sub) => (
-                        <li key={sub.url}>
-                          <NavLink
-                            to={sub.url}
-                            onClick={onNavigate}
-                            className={({ isActive }: { isActive: boolean }) =>
-                              `block truncate rounded-md px-2.5 py-2 text-[13px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                                isActive
-                                  ? 'bg-sidebar-active-bg font-semibold text-sidebar-text-active'
-                                  : 'text-fg-secondary hover:bg-sidebar-hover-bg hover:text-fg'
-                              }`
-                            }
-                          >
-                            {tNav(sub.titleKey)}
-                          </NavLink>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        {navGroups.map((group) => {
+          const panelId = `sidebar-group-${group.labelKey}`;
+          const isActiveGroup = groupContainsPath(group, pathname);
+          const isOpen = (userToggles[group.labelKey] ?? true) || isActiveGroup;
+          return (
+            <div key={group.labelKey} className="mt-2 first:mt-0">
+              <button
+                type="button"
+                onClick={() => toggleGroup(group.labelKey, isOpen)}
+                aria-expanded={isOpen}
+                aria-controls={panelId}
+                className="flex w-full items-center justify-between rounded-lg px-3 pt-5 pb-1.5 text-[11px] font-semibold tracking-wider text-fg-muted uppercase transition-colors first:pt-1 hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              >
+                <span className="truncate">{tNav(group.labelKey)}</span>
+                <ChevronDown
+                  size={14}
+                  aria-hidden="true"
+                  className={`shrink-0 transition-transform ${isOpen ? '' : '-rotate-90'}`}
+                />
+              </button>
+              {isOpen && (
+                <ul
+                  id={panelId}
+                  aria-label={tNav(group.labelKey)}
+                  data-active-group={isActiveGroup ? 'true' : undefined}
+                  className="space-y-1"
+                >
+                  {group.items.map((item) => (
+                    <li key={item.url}>
+                      <NavLink
+                        to={item.url}
+                        end={item.items === undefined}
+                        onClick={onNavigate}
+                        className={({ isActive }: { isActive: boolean }) =>
+                          `relative flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                            isActive
+                              ? 'bg-sidebar-active-bg font-semibold text-sidebar-text-active before:absolute before:inset-y-1.5 before:left-0 before:w-1 before:rounded-full before:bg-primary'
+                              : 'text-sidebar-text hover:bg-sidebar-hover-bg hover:text-fg'
+                          }`
+                        }
+                      >
+                        <item.icon size={17} aria-hidden="true" className="shrink-0" />
+                        <span className="truncate">{tNav(item.titleKey)}</span>
+                      </NavLink>
+                      {item.items && (
+                        <ul aria-label={tNav('subpagesOf', { title: tNav(item.titleKey) })} className="mt-1 mb-1 ml-9 space-y-1 border-l-2 border-border pl-3">
+                          {item.items.map((sub) => (
+                            <li key={sub.url}>
+                              <NavLink
+                                to={sub.url}
+                                onClick={onNavigate}
+                                className={({ isActive }: { isActive: boolean }) =>
+                                  `block truncate rounded-md px-2.5 py-2 text-[13px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                                    isActive
+                                      ? 'bg-sidebar-active-bg font-semibold text-sidebar-text-active'
+                                      : 'text-fg-secondary hover:bg-sidebar-hover-bg hover:text-fg'
+                                  }`
+                                }
+                              >
+                                {tNav(sub.titleKey)}
+                              </NavLink>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        })}
       </nav>
       <div className="border-t border-border px-4 py-3">
         <p className="text-[11px] text-fg-muted">{tNav('sidebarFooter')}</p>

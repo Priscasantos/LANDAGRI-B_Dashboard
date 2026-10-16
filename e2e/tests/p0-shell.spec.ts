@@ -45,7 +45,7 @@ test.describe('P0 - Shell SaaS (sidebar nav smoke)', () => {
 
     await expect(page.getByLabel('breadcrumb')).toBeVisible();
     await expect(
-      page.locator('main h1', { hasText: /Simulador Preditivo/ }),
+      page.locator('main h1', { hasText: /Simulador|Simulator/ }),
     ).toBeVisible({ timeout: TIMEOUTS.pageLoad });
   });
 

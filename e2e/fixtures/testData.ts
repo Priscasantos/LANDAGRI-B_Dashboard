@@ -8,17 +8,17 @@ export const ROUTES = {
 
 export const PAGE_TITLES: Record<string, RegExp> = {
   '/LANDAGRI-B_Dashboard/overview': /Visão Geral|Overview|Dashboard|LANDAGRI/,
-  '/LANDAGRI-B_Dashboard/initiative-analysis/temporal': /Análise|Iniciativa|Initiative/,
-  '/LANDAGRI-B_Dashboard/agricultural-analysis/overview': /Análise|Agrícola|Agricultural/,
-  '/LANDAGRI-B_Dashboard/predictive': /Simulador|Preditivo|Predictive/,
+  '/LANDAGRI-B_Dashboard/initiative-analysis/temporal': /Iniciativas|Initiatives|Initiative/,
+  '/LANDAGRI-B_Dashboard/agricultural-analysis/overview': /Agricultura|Agriculture/,
+  '/LANDAGRI-B_Dashboard/predictive': /Simulador|Simulator|Predictive/,
   '/LANDAGRI-B_Dashboard/about': /Sobre o Dashboard|About the LANDAGRI/,
 };
 
 export const NAV_MENU_ITEMS = [
   { label: /Visão Geral|Overview/, route: ROUTES.overview },
-  { label: /Análise de Iniciativas|Initiative/, route: ROUTES.initiativeAnalysis },
-  { label: /Análise Agrícola|Agricultural/, route: ROUTES.agriculturalAnalysis },
-  { label: /Simulador Preditivo|Predictive/, route: ROUTES.predictive },
+  { label: /Iniciativas|Initiatives/, route: ROUTES.initiativeAnalysis },
+  { label: /Agricultura|Agriculture/, route: ROUTES.agriculturalAnalysis },
+  { label: /Simulador|Simulator/, route: ROUTES.predictive },
   { label: /Sobre|About/, route: ROUTES.about },
 ];
 

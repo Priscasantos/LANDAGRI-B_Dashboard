@@ -97,7 +97,7 @@ export const appRoutes: AppRoute[] = [
   {
     path: '/initiative-analysis/*',
     Component: InitiativeAnalysisPage,
-    title: 'Análise de Iniciativas',
+    title: 'Iniciativas',
     description:
       'Análise espaço-temporal das iniciativas de Uso e Cobertura da Terra (LULC).',
     titleKey: 'initiativeAnalysis',
@@ -106,7 +106,7 @@ export const appRoutes: AppRoute[] = [
   {
     path: '/agricultural-analysis/*',
     Component: AgriculturalAnalysisPage,
-    title: 'Análise Agrícola',
+    title: 'Agricultura',
     description:
       'Indicadores agrícolas, calendário de culturas e disponibilidade agregada por região e período.',
     titleKey: 'agriculturalAnalysis',
@@ -115,7 +115,7 @@ export const appRoutes: AppRoute[] = [
   {
     path: '/predictive',
     Component: PredictivePage,
-    title: 'Simulador Preditivo',
+    title: 'Simulador',
     description:
       'Projeções de uso da terra sob cenários de reflorestamento, expansão agrícola e adoção sustentável.',
     titleKey: 'predictive',
@@ -154,68 +154,117 @@ export interface CommandIndexEntry {
    */
   titleKey: TKey<'nav'>;
   groupKey: TKey<'nav'>;
+  /**
+   * Fase 3 IA enxuta: sinônimos PT+EN + tokens de url para a busca da
+   * paleta casar ("temporal", "calendar", "simulador", …) independente
+   * do locale ativo. Espaço-separado, minúsculas, sem acento duplicado
+   * quando o termo canônico já cobre.
+   */
+  keywords: string;
 }
 
 /**
  * Command-palette index: the 5 modules + initiative/agricultural sub-routes.
  * Consumed by `CommandSearch`; kept next to the route table so new
  * sub-pages are indexed in the same change that adds them.
+ *
+ * Fase 3 IA enxuta: títulos curtos (~14 chars, espelham o dicionário `nav`
+ * PT); `keywords` carrega os sinônimos longos PT+EN para a busca não
+ * perder recall ("análise temporal", "crop calendar", …).
  */
 export const commandIndex: CommandIndexEntry[] = [
-  { title: 'Visão Geral', url: '/overview', group: 'Visão Geral', titleKey: 'overview', groupKey: 'groupOverview' },
+  { title: 'Visão Geral', url: '/overview', group: 'Visão Geral', titleKey: 'overview', groupKey: 'groupOverview', keywords: 'overview dashboard home inicio start geral' },
   {
-    title: 'Análise de Iniciativas',
+    title: 'Iniciativas',
     url: '/initiative-analysis',
-    group: 'Análise de Iniciativas',
+    group: 'Território',
     titleKey: 'initiativeAnalysis',
     groupKey: 'groupInitiative',
+    keywords: 'analise iniciativas initiatives territory territorio analise-de-iniciativas initiative-analysis',
   },
-  { title: 'Análise Temporal', url: '/initiative-analysis/temporal', group: 'Análise de Iniciativas', titleKey: 'temporal', groupKey: 'groupInitiative' },
+  { title: 'Evolução', url: '/initiative-analysis/temporal', group: 'Território', titleKey: 'temporal', groupKey: 'groupInitiative', keywords: 'temporal evolucao evolution serie series tempo time historico history analise-temporal' },
   {
-    title: 'Análise Comparativa',
+    title: 'Comparar',
     url: '/initiative-analysis/comparative',
-    group: 'Análise de Iniciativas',
+    group: 'Território',
     titleKey: 'comparative',
     groupKey: 'groupInitiative',
+    keywords: 'comparar comparativo comparativa compare comparison pairwise par analise-comparativa',
   },
   {
-    title: 'Análise Detalhada',
+    title: 'Ficha',
     url: '/initiative-analysis/detailed',
-    group: 'Análise de Iniciativas',
+    group: 'Território',
     titleKey: 'detailed',
     groupKey: 'groupInitiative',
+    keywords: 'ficha detalhada detalhe detail details fact-sheet tecnica analise-detalhada',
   },
   {
-    title: 'Análise Agrícola',
+    title: 'Agricultura',
     url: '/agricultural-analysis',
-    group: 'Análise Agrícola',
+    group: 'Agricultura',
     titleKey: 'agriculturalAnalysis',
     groupKey: 'groupAgricultural',
+    keywords: 'agricultura agriculture agricola agricultural analise-agricola agricultural-analysis',
   },
   {
-    title: 'Panorama Agrícola',
+    title: 'Panorama',
     url: '/agricultural-analysis/overview',
-    group: 'Análise Agrícola',
+    group: 'Agricultura',
     titleKey: 'agriOverview',
     groupKey: 'groupAgricultural',
+    keywords: 'panorama overview snapshot geral farms panorama-agricola',
   },
   {
-    title: 'Calendário de Culturas',
+    title: 'Calendário',
     url: '/agricultural-analysis/crop-calendar',
-    group: 'Análise Agrícola',
+    group: 'Agricultura',
     titleKey: 'cropCalendar',
     groupKey: 'groupAgricultural',
+    keywords: 'calendario calendar crop culturas safras plantio colheita crop-calendar',
   },
   {
-    title: 'Disponibilidade Agrícola',
+    title: 'Disponibilidade',
     url: '/agricultural-analysis/availability',
-    group: 'Análise Agrícola',
+    group: 'Agricultura',
     titleKey: 'availability',
     groupKey: 'groupAgricultural',
+    keywords: 'disponibilidade availability estoque supply agricola',
   },
-  { title: 'Simulador Preditivo', url: '/predictive', group: 'Preditivo', titleKey: 'predictive', groupKey: 'groupPredictive' },
-  { title: 'Sobre', url: '/about', group: 'Sobre', titleKey: 'about', groupKey: 'groupAbout' },
+  { title: 'Simulador', url: '/predictive', group: 'Mais', titleKey: 'predictive', groupKey: 'groupPredictive', keywords: 'simulador simulator preditivo predictive projecao projection cenario scenario' },
+  { title: 'Sobre', url: '/about', group: 'Mais', titleKey: 'about', groupKey: 'groupAbout', keywords: 'sobre about ajuda help info dashboard' },
 ];
+
+/**
+ * Fase 3 IA enxuta: aliases de rotas antigas/prováveis (não 404).
+ * O catch-all `*` já redireciona para `/`, mas o alias preserva a
+ * intenção de navegação. `App.tsx` renderiza cada alias como
+ * `<Navigate to={to} replace />`. Tabela intencionalmente pequena —
+ * adicione entradas só com evidência de uso (YAGNI).
+ */
+export interface LegacyRedirect {
+  from: string;
+  to: string;
+}
+
+export const legacyRedirects: LegacyRedirect[] = [
+  { from: '/home', to: '/overview' },
+  { from: '/dashboard', to: '/overview' },
+  { from: '/initiatives', to: '/initiative-analysis' },
+  { from: '/agriculture', to: '/agricultural-analysis' },
+  { from: '/simulator', to: '/predictive' },
+  { from: '/sobre', to: '/about' },
+];
+
+/**
+ * Resolve um alias legado para o destino canônico, ou `null` quando o
+ * pathname não é alias. Lookup exato (sem normalização) — os aliases
+ * são literais curtos e case-sensitive como as rotas do router.
+ */
+export function resolveLegacyRedirect(pathname: string): string | null {
+  const hit = legacyRedirects.find((alias) => alias.from === pathname);
+  return hit ? hit.to : null;
+}
 
 /** Session-storage key written by `public/404.html` on gh-pages deep links. */
 export const REDIRECT_STORAGE_KEY = 'redirectPath';

@@ -1,23 +1,24 @@
-import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Clock, GitCompare, FileSearch } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import TemporalPage from '../components/initiative-analysis/TemporalAnalysis/TemporalPage';
 import ComparativePage from '../components/initiative-analysis/ComparativeAnalysis/ComparativePage';
 import DetailedPage from '../components/initiative-analysis/DetailedAnalysis/DetailedPage';
+import SegmentedControl from '../components/ui/SegmentedControl';
 import { MODULE_THEMES } from '../types/theme';
 import { useT } from '../i18n/LanguageContext';
 
-export default function InitiativeAnalysisPage() {
+export default function InitiativeAnalysisPage(): React.JSX.Element {
   const { t } = useT('nav');
   const { t: tBody } = useT('initiative');
   const location = useLocation();
   const moduleTheme = MODULE_THEMES['Initiative Analysis'];
 
-  const subPages: { path: string; label: string; icon: LucideIcon }[] = [
-    { path: 'temporal', label: t('temporal'), icon: Clock },
-    { path: 'comparative', label: t('comparative'), icon: GitCompare },
-    { path: 'detailed', label: t('detailed'), icon: FileSearch },
+  const options = [
+    { value: 'temporal', label: t('temporal'), to: '/initiative-analysis/temporal', icon: Clock },
+    { value: 'comparative', label: t('comparative'), to: '/initiative-analysis/comparative', icon: GitCompare },
+    { value: 'detailed', label: t('detailed'), to: '/initiative-analysis/detailed', icon: FileSearch },
   ];
+  const active = options.find((opt) => location.pathname.endsWith(`/${opt.value}`))?.value ?? 'temporal';
 
   return (
     <div>
@@ -28,27 +29,9 @@ export default function InitiativeAnalysisPage() {
         </a>
       </p>
 
-      {/* Sub-page navigation tabs */}
-      <div className="flex border-b border-border mb-6 overflow-x-auto">
-        {subPages.map((tab) => {
-          const isActive = location.pathname.includes(tab.path);
-          return (
-            <Link
-              key={tab.path}
-              to={`/initiative-analysis/${tab.path}`}
-              className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200 ${
-                isActive ? '' : 'text-fg-secondary'
-              }`}
-              style={{
-                borderColor: isActive ? moduleTheme.primary : 'transparent',
-                color: isActive ? moduleTheme.primary : undefined,
-              }}
-            >
-              <tab.icon size={15} aria-hidden="true" className="shrink-0" />
-              {tab.label}
-            </Link>
-          );
-        })}
+      {/* Fase 3: sub-navegação como segmented control route-backed (mesmos `to=`, deep-link preservado) */}
+      <div className="mt-4">
+        <SegmentedControl label={t('initiativeAnalysis')} options={options} value={active} />
       </div>
 
       <Routes>
