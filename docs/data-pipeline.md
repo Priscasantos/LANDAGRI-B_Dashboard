@@ -115,3 +115,15 @@ harvestPct, areaSharePct?, source, vintage, updatedAt}` +
 - **Naming:** initiative `coverage: "National"`, dictionary `Country →
 Nacional/National` (glossary `REGION.National`); `Brazil`/`Brasil` remain
   only in territory metadata strings.
+- **Area shares cultura×UF (Gaia, 2026-10-16):** heatmaps de calendário
+  ponderavam por nº de UFs (`mode: 'uf'`) por falta de área por UF.
+  `scripts/preprocess-data.mjs → buildAreaShares()` deriva
+  `areaSharePct` (% da área nacional da cultura na UF) das abas por UF de
+  `data/conab_safra_2024_25.xlsx` (safra 2024/25 fechada, Jul/2025; matriz
+  completa em `src/data/processed/conab_area_shares.json`, 10/10 culturas
+  do calendário, soma-UFs == total nacional com diff 0%) e
+  `attachAreaShares()` grava o campo em `conab_calendar.json`
+  (`src/types/calendar.ts → normalizeCalendarRows` propaga só nº finito;
+  cultura sem fonte UF fica sem o campo e o UI mantém o fallback `uf`
+  rotulado). PAM do repo é nacional-agregada (`territory_level: Nacional`)
+  e **não** fornece UF — lacuna documentada, nada estimado.

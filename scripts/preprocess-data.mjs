@@ -226,10 +226,158 @@ export function parseAvailabilityTable(rows) {
 }
 
 /**
- * Read CSV file and output typed JSON. `parser` is parseCalendarTable |
- * parseAvailabilityTable.
+ * ─── Area shares por cultura×UF (Gaia: ponderação honesta dos heatmaps) ───
+ *
+ * Os heatmaps de calendário ponderavam por nº de UFs (Roraima = MT) porque
+ * faltava área por UF. O schema já prevê `mode: 'area'` via `areaSharePct`
+ * (`src/lib/calendarShare.ts`); este bloco popula esse campo.
+ *
+ * Fonte: abas por UF de `data/conab_safra_2024_25.xlsx` (boletim CONAB safra
+ * 2024/25 fechada — "Nota: Estimativa em julho/2025"), coluna de área da
+ * safra 24/25. Método: participação da UF na área nacional da cultura
+ * (soma das UFs; cruzada com a aba "Brasil - Total por Produto").
+ *
+ * Por que NÃO PAM: `data/brazilian_agricultural_data.json` (+ contraparte
+ * EN) traz `territory_level: "Nacional (Brasil)"` — só agregados nacionais,
+ * sem dimensão UF. Não há área PAM por UF em nenhuma fonte do repo, então
+ * nada é derivado da PAM aqui (ver `gaps` em `buildAreaShares`).
+ *
+ * Regra de honestidade: cultura do calendário sem linha agregada
+ * correspondente na safra NÃO recebe `areaSharePct` (campo ausente, nunca
+ * zero inventado nem rateio) — `resolveShareMode` mantém `mode: 'uf'` e o
+ * UI rotula o fallback. Exportado para testes unitários.
  */
-function processCsv(srcFile, outputName, parser) {
+export const AREA_SHARE_SEASON = '24/25';
+export const AREA_SHARE_VINTAGE = 'conab_safra_2024_25.xlsx';
+
+/** Coluna de área da safra fechada 24/25 (a coluna sem safra é a 23/24). */
+export const AREA_SHARE_COLUMN_RE = /safra\s*24\/25/i;
+
+/** Cultura do calendário → linha agregada de PRODUTO na safra por UF. */
+export const CALENDAR_CROP_TO_SAFRA = {
+  Cotton: 'ALGODÃO - CAROÇO (1)',
+  Rice: 'ARROZ',
+  'Beans (1st harvest)': 'FEIJÃO 1ª SAFRA',
+  'Beans (2nd harvest)': 'FEIJÃO 2ª SAFRA',
+  'Beans (3th harvest)': 'FEIJÃO 3ª SAFRA',
+  'Corn (1st harvest)': 'Milho 1ª Safra',
+  'Corn (2nd harvest)': 'Milho 2ª Safra',
+  'Corn (3th harvest)': 'Milho 3ª Safra',
+  Soybean: 'SOJA',
+  Wheat: 'TRIGO',
+};
+
+/** Abas do workbook que são UFs (siglas de 2 letras). */
+export function safraUfSheets(workbook) {
+  return Object.keys(workbook || {}).filter((k) => /^[A-Z]{2}$/.test(k));
+}
+
+/** Localiza a coluna de área da safra-alvo; null quando ausente (sem adivinhar). */
+export function findAreaColumn(sampleRow) {
+  const keys = Object.keys(sampleRow || {});
+  const areaKeys = keys.filter((k) => k.startsWith('ÁREA'));
+  const hit = areaKeys.find((k) => AREA_SHARE_COLUMN_RE.test(k));
+  return hit || null;
+}
+
+/**
+ * Constrói `{ shares, coverage, gaps, metadata }` a partir do workbook da
+ * safra 24/25 já parseado (`processXlsx`). `shares[crop][UF]` = % da área
+ * nacional da cultura na UF (4 casas). `gaps` lista culturas sem linha na
+ * safra e divergências UF-soma × total nacional (>0,5%) — nunca estimadas.
+ */
+export function buildAreaShares(safraWorkbook) {
+  const gaps = [];
+  const shares = {};
+  const coverage = {};
+  const ufSheets = safraUfSheets(safraWorkbook);
+  if (ufSheets.length === 0) {
+    gaps.push({ reason: 'no-uf-sheets', detail: `Workbook ${AREA_SHARE_VINTAGE} sem abas por UF` });
+    return { metadata: areaSharesMetadata(null), shares, coverage, gaps };
+  }
+  const probe = (safraWorkbook[ufSheets[0]] || []).find((r) => r && typeof r.PRODUTO === 'string');
+  const areaColumn = findAreaColumn(probe);
+  if (!areaColumn) {
+    gaps.push({ reason: 'no-area-column', detail: `Coluna de área ${AREA_SHARE_SEASON} ausente em ${AREA_SHARE_VINTAGE}` });
+    return { metadata: areaSharesMetadata(null), shares, coverage, gaps };
+  }
+  const nationalRows = safraWorkbook['Brasil - Total por Produto'] || [];
+  const nationalByProduto = new Map(nationalRows.map((r) => [r.PRODUTO, r[areaColumn]]));
+
+  for (const [crop, produto] of Object.entries(CALENDAR_CROP_TO_SAFRA)) {
+    const areas = {};
+    for (const uf of ufSheets) {
+      const row = (safraWorkbook[uf] || []).find((r) => r.PRODUTO === produto);
+      const v = row ? row[areaColumn] : 0;
+      areas[uf] = typeof v === 'number' && Number.isFinite(v) ? v : 0;
+    }
+    const total = Object.values(areas).reduce((s, v) => s + v, 0);
+    if (total <= 0) {
+      gaps.push({ crop, produto, reason: 'no-area', detail: `Sem área UF para ${produto} na safra ${AREA_SHARE_SEASON}` });
+      continue;
+    }
+    const cropShares = {};
+    for (const [uf, a] of Object.entries(areas)) cropShares[uf] = Math.round((a / total) * 100 * 1e4) / 1e4;
+    shares[crop] = cropShares;
+    const ufsWithArea = Object.values(areas).filter((a) => a > 0).length;
+    coverage[crop] = {
+      produto,
+      ufs: ufSheets.length,
+      ufsWithArea,
+      nationalTotalThousandHa: Math.round(total * 10) / 10,
+    };
+    const national = nationalByProduto.get(produto);
+    if (typeof national === 'number' && national > 0) {
+      const diffPct = Math.abs(total - national) / national;
+      coverage[crop].nationalCrossCheckDiffPct = Math.round(diffPct * 100 * 1e4) / 1e4;
+      if (diffPct > 0.005) {
+        gaps.push({ crop, produto, reason: 'cross-check', detail: `Soma UFs (${total}) diverge do total nacional (${national})` });
+      }
+    }
+  }
+  // Culturas do calendário fora do mapa (se o CSV ganhar culturas novas).
+  return { metadata: areaSharesMetadata(areaColumn), shares, coverage, gaps };
+}
+
+function areaSharesMetadata(areaColumn) {
+  return {
+    source: 'CONAB',
+    vintage: AREA_SHARE_VINTAGE,
+    season: '2024/25',
+    bulletinNote: 'Estimativa em julho/2025 (safra 2024/25 fechada)',
+    areaColumn,
+    method:
+      'Participação da UF na área nacional da cultura (abas por UF / soma das UFs). PAM do repo é nacional-agregada e não fornece UF.',
+  };
+}
+
+/**
+ * Anexa `areaSharePct` às linhas tipadas do calendário a partir de
+ * `buildAreaShares(...).shares`. Cultura sem share → linha inalterada
+ * (campo ausente) e entrada em `gaps[].unmappedRows`. Pura (não muta).
+ */
+export function attachAreaShares(calendarRows, areaShares) {
+  const shares = (areaShares && areaShares.shares) || {};
+  const out = [];
+  const missingCrops = new Set();
+  for (const row of calendarRows) {
+    const pct = shares[row.crop]?.[row.uf];
+    if (typeof pct === 'number' && Number.isFinite(pct)) {
+      out.push({ ...row, areaSharePct: pct });
+    } else {
+      out.push({ ...row });
+      if (!shares[row.crop]) missingCrops.add(row.crop);
+    }
+  }
+  return { rows: out, gaps: [...missingCrops].map((crop) => ({ crop, reason: 'unmapped-crop' })) };
+}
+
+/**
+ * Read CSV file and output typed JSON. `parser` is parseCalendarTable |
+ * parseAvailabilityTable. `postprocess` (opcional) transforma as linhas
+ * antes da escrita (ex. `attachAreaShares` no calendário).
+ */
+function processCsv(srcFile, outputName, parser, postprocess) {
   const srcPath = path.join(DATA_SOURCE_DIR, 'csv', srcFile);
   if (!fs.existsSync(srcPath)) {
     console.log(`  ⚠ File not found: csv/${srcFile}`);
@@ -238,10 +386,11 @@ function processCsv(srcFile, outputName, parser) {
   try {
     const content = fs.readFileSync(srcPath, 'utf-8');
     const data = parser(splitTable(content));
+    const finalData = typeof postprocess === 'function' ? postprocess(data) : data;
 
     const outputPath = path.join(DATA_OUTPUT_DIR, outputName);
-    fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
-    console.log(`  ✓ csv/${srcFile} → ${outputName} (${data.length} typed rows)`);
+    fs.writeFileSync(outputPath, JSON.stringify(finalData, null, 2));
+    console.log(`  ✓ csv/${srcFile} → ${outputName} (${finalData.length} typed rows)`);
   } catch (err) {
     console.error(`  ✗ Error processing csv/${srcFile}: ${err.message}`);
   }
@@ -347,13 +496,16 @@ export function detectHeaderRowIndex(rawRows) {
 }
 
 /**
- * Process XLSX file to JSON (if xlsx module available)
+ * Process XLSX file to JSON (if xlsx module available).
+ * Returns the parsed workbook object (sheets map) so follow-up steps
+ * (e.g. `buildAreaShares`) can reuse it without re-reading the file;
+ * null when skipped/failed.
  */
 async function processXlsx(srcFile, outputName) {
   const srcPath = path.join(DATA_SOURCE_DIR, srcFile);
   if (!fs.existsSync(srcPath)) {
     console.log(`  ⚠ File not found: ${srcFile}`);
-    return;
+    return null;
   }
 
   try {
@@ -362,7 +514,7 @@ async function processXlsx(srcFile, outputName) {
       XLSX = (await import('xlsx')).default;
     } catch {
       console.log(`  ⚠ xlsx module not available, skipping ${srcFile}`);
-      return;
+      return null;
     }
 
     const workbook = XLSX.readFile(srcPath);
@@ -398,14 +550,16 @@ async function processXlsx(srcFile, outputName) {
 
     if (Object.keys(result).length === 0) {
       console.log(`  ⚠ No data found in ${srcFile}`);
-      return;
+      return null;
     }
 
     const outputPath = path.join(DATA_OUTPUT_DIR, outputName);
     fs.writeFileSync(outputPath, JSON.stringify(result, null, 2));
     console.log(`  ✓ ${srcFile} → ${outputName} (${JSON.stringify(result).length} bytes)`);
+    return result;
   } catch (err) {
     console.log(`  ⚠ Could not process ${srcFile}: ${err.message}`);
+    return null;
   }
 }
 
@@ -417,7 +571,7 @@ async function processXlsx(srcFile, outputName) {
  * `is_long_aggregate` — keep them out of per-year axes. Area "Brazil"
  * is normalized to "BR" (national aggregate, cf. json_dictionary).
  */
-function writeDataNotes() {
+function writeDataNotes(areaSummary) {
   const notes = {
     anos_1s: 'Crop years with mapping coverage in the first-semester (1S) campaign.',
     anos_2s: 'Crop years with mapping coverage in the second-semester (2S) campaign.',
@@ -427,7 +581,10 @@ function writeDataNotes() {
     area_aliases: AREA_ALIASES,
     calendar_months:
       'Calendar `months` arrays run October→September (CONAB bulletin order), one code per month (P/H/PH/"").',
+    area_shares:
+      'Calendar rows carry `areaSharePct` = UF share (%) of the crop national area from CONAB safra 2024/25 closed bulletin per-UF sheets (conab_safra_2024_25.xlsx, Jul/2025; full matrix in conab_area_shares.json). Repo PAM is national-only and cannot supply UF splits — unmapped crops carry NO areaSharePct (honest `mode: uf` fallback).',
   };
+  if (areaSummary) notes.area_shares_coverage = areaSummary;
   fs.writeFileSync(
     path.join(DATA_OUTPUT_DIR, 'conab_data_notes.json'),
     JSON.stringify(notes, null, 2),
@@ -609,14 +766,41 @@ async function main() {
   console.log('\n📄 Processing PAM files (PT+EN → unified i18n payload)...');
   processPamUnified();
 
+  console.log('\n📄 Processing CONAB safra 2024/25 (closed) → area shares cultura×UF...');
+  const safra2425 = await processXlsx('conab_safra_2024_25.xlsx', 'conab_safra_2425.json');
+  let areaShares = { metadata: null, shares: {}, coverage: {}, gaps: [] };
+  if (safra2425) {
+    try {
+      areaShares = buildAreaShares(safra2425);
+      fs.writeFileSync(
+        path.join(DATA_OUTPUT_DIR, 'conab_area_shares.json'),
+        JSON.stringify(areaShares, null, 2),
+      );
+      const nCrops = Object.keys(areaShares.shares).length;
+      console.log(`  ✓ conab_area_shares.json (${nCrops} crops, ${areaShares.gaps.length} gaps)`);
+      for (const g of areaShares.gaps) console.log(`    ⚠ gap: ${JSON.stringify(g)}`);
+    } catch (err) {
+      console.error(`  ✗ Error building conab_area_shares.json: ${err.message}`);
+    }
+  } else {
+    console.log('  ⚠ Safra 2024/25 unavailable — calendar keeps `mode: uf` fallback (no invented shares)');
+  }
+
   console.log('\n📄 Processing CSV files...');
-  processCsv('conab_crop_calendar.csv', 'conab_calendar.json', parseCalendarTable);
+  processCsv('conab_crop_calendar.csv', 'conab_calendar.json', parseCalendarTable, (rows) => {
+    const { rows: withArea, gaps } = attachAreaShares(rows, areaShares);
+    for (const g of gaps) console.log(`    ⚠ gap: calendar crop "${g.crop}" sem área UF (${g.reason})`);
+    return withArea;
+  });
   processCsv('conab_crop_avaliability.csv', 'conab_availability.json', parseAvailabilityTable);
-  writeDataNotes();
+  writeDataNotes({
+    crops: Object.keys(areaShares.shares).length,
+    gaps: areaShares.gaps.length,
+    ufsPerCrop: Object.values(areaShares.coverage)[0]?.ufs ?? 0,
+  });
 
   console.log('\n📄 Processing XLSX files...');
   await processXlsx('conab_safra_2023_24.xlsx', 'conab_safra_2324.json');
-  await processXlsx('conab_safra_2024_25.xlsx', 'conab_safra_2425.json');
   await processXlsx('conab_safra_2025_26.xlsx', 'conab_safra_2526.json');
 
   console.log('\n🖼️ Copying partner logos...');
