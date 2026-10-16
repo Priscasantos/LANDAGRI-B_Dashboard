@@ -5,6 +5,8 @@ import Card from '../../ui/Card';
 import EChartsLine from '../../charts/echarts/EChartsLine';
 import EChartsGantt from '../../charts/echarts/EChartsGantt';
 import EChartsPolar from '../../charts/echarts/EChartsPolar';
+import { LANDAGRI_COLORWAY_DARK, LANDAGRI_COLORWAY_LIGHT } from '../../../lib/echarts-theme';
+import { useEffectiveTheme } from '../../../hooks/use-theme';
 import { useT } from '../../../i18n/LanguageContext';
 import {
   translateActivity,
@@ -13,10 +15,18 @@ import {
 } from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
-import type { ConabCalendarRow } from '../../../types/calendar';
+import { bulletinIndexToMonth, type ConabCalendarRow } from '../../../types/calendar';
+import {
+  aggregateShares,
+  bulletinSlotForMonth,
+  currentCalendarMonth,
+  recencyOf,
+  toCalendarRecords,
+  type MonthShare,
+} from '../../../lib/calendarShare';
+import RecencyBadge from './RecencyBadge';
 
 const MONTHS_SHORT = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
-const MONTHS_FULL = ['October', 'November', 'December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September'];
 
 type CalendarRow = ConabCalendarRow;
 
@@ -30,15 +40,6 @@ interface MappingDataType {
   crop_calendar?: Record<string, unknown[]>;
 }
 
-function parseActivityValue(val: string): number {
-  if (!val || val.trim() === '') return 0;
-  const v = val.trim();
-  if (v === 'PH') return 3;
-  if (v === 'P') return 1;
-  if (v === 'H') return 2;
-  return 0;
-}
-
 interface ActivitiesTimelineTabProps {
   selectedCrops: string[];
   selectedRegions: string[];
@@ -46,96 +47,118 @@ interface ActivitiesTimelineTabProps {
 
 export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }: ActivitiesTimelineTabProps) {
   const { t: tBody, locale } = useT('agricultural');
+  const theme = useEffectiveTheme();
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
 
-  const { monthlyActivity, ganttBars, polarData } = useMemo(() => {
+  const { monthlyActivity, ganttBars, polarData, recency, currentSlot, currentMonthLabel } = useMemo(() => {
     const stateRegions: Record<string, string> = {};
     for (const [code, info] of Object.entries(statesMap)) {
       stateRegions[code] = info.region;
     }
 
-    const plantCount = MONTHS_FULL.map(() => 0);
-    const harvestCount = MONTHS_FULL.map(() => 0);
-    const ganttEntries: { label: string; start: number; end: number; category: string }[] = [];
-    const polarR: number[] = MONTHS_FULL.map(() => 0);
-
-    for (const row of rawData) {
+    const filtered = rawData.filter((row) => {
       const crop = (row.crop || '').trim();
-      if (!crop || !selectedCrops.includes(crop)) continue;
-
+      if (crop === '' || !selectedCrops.includes(crop)) return false;
       const state = (row.uf || '').trim();
-      if (!state) continue;
+      if (state === '') return false;
       const region = stateRegions[state];
-      if (region && !selectedRegions.includes(region)) continue;
+      if (region !== undefined && !selectedRegions.includes(region)) return false;
+      return true;
+    });
 
-      const activities = row.months.map((v) => parseActivityValue(v));
+    // % de UFs ativas por mês civil (ordem do boletim Out→Set no eixo).
+    const records = toCalendarRecords(filtered);
+    const global = aggregateShares(records);
+    const pct = (civil: number, pick: (m: MonthShare) => number): number => {
+      const share = global.find((m) => m.month === civil);
+      return share === undefined ? 0 : Math.round(pick(share));
+    };
+    const months = MONTHS_SHORT.map((m) => translateMonthShort(m, locale));
+    const civilOf = (slot: number): number => bulletinIndexToMonth(slot);
+    const current = currentCalendarMonth();
 
-      let firstPlanting = -1;
-      let lastPlanting = -1;
-      let firstHarvest = -1;
-      let lastHarvest = -1;
-
-      activities.forEach((val, i) => {
-        if (val === 1 || val === 3) {
-          plantCount[i]++;
-          if (firstPlanting === -1) firstPlanting = i;
-          lastPlanting = i;
+    // Gantt por UF×cultura: janela primeiro→último slot ativo por atividade,
+    // com tooltip % + contagem de UFs no mês de pico.
+    const activeByCropStateActivity = new Map<string, { crop: string; state: string; kind: 'P' | 'H'; slots: number[] }>();
+    for (const row of filtered) {
+      const crop = (row.crop || '').trim();
+      const state = (row.uf || '').trim();
+      row.months.slice(0, 12).forEach((code, slot) => {
+        const v = (code || '').trim().toUpperCase();
+        const kinds: ('P' | 'H')[] = [];
+        if (v === 'P' || v === 'PH') kinds.push('P');
+        if (v === 'H' || v === 'PH') kinds.push('H');
+        for (const kind of kinds) {
+          const key = `${crop}¦${state}¦${kind}`;
+          const entry = activeByCropStateActivity.get(key) ?? { crop, state, kind, slots: [] };
+          entry.slots.push(slot);
+          activeByCropStateActivity.set(key, entry);
         }
-        if (val === 2 || val === 3) {
-          harvestCount[i]++;
-          if (firstHarvest === -1) firstHarvest = i;
-          lastHarvest = i;
-        }
-        if (val > 0) polarR[i]++;
       });
-
-      if (firstPlanting >= 0) {
-        ganttEntries.push({
-          label: `${translateCropName(crop, locale)} P (${state})`,
-          start: firstPlanting,
-          end: lastPlanting + 0.5,
-          category: translateCropName(crop, locale),
-        });
-      }
-      if (firstHarvest >= 0) {
-        ganttEntries.push({
-          label: `${translateCropName(crop, locale)} H (${state})`,
-          start: firstHarvest,
-          end: lastHarvest + 0.5,
-          category: translateCropName(crop, locale),
-        });
-      }
+    }
+    const ganttEntries: { label: string; start: number; end: number; category: string; tip: string }[] = [];
+    for (const entry of activeByCropStateActivity.values()) {
+      const first = Math.min(...entry.slots);
+      const last = Math.max(...entry.slots);
+      ganttEntries.push({
+        label: `${translateCropName(entry.crop, locale)} ${entry.kind} (${entry.state})`,
+        start: first,
+        end: last + 0.5,
+        category: translateCropName(entry.crop, locale),
+        tip:
+          `<b>${translateCropName(entry.crop, locale)} ${entry.kind} (${entry.state})</b><br>` +
+          `${months[first]} – ${months[last]}`,
+      });
     }
 
     return {
       monthlyActivity: {
         series: [
-          { name: translateActivity('Planting', locale), x: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)), y: plantCount },
-          { name: translateActivity('Harvest', locale), x: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)), y: harvestCount },
+          {
+            name: translateActivity('Planting', locale),
+            x: months,
+            y: MONTHS_SHORT.map((_, slot) => pct(civilOf(slot), (m) => m.pctPlanting)),
+          },
+          {
+            name: translateActivity('Harvest', locale),
+            x: months,
+            y: MONTHS_SHORT.map((_, slot) => pct(civilOf(slot), (m) => m.pctHarvest)),
+          },
         ],
       },
       ganttBars: ganttEntries.slice(0, 100),
       polarData: {
         series: [{
           name: translateActivity('Total Activity', locale),
-          r: polarR,
-          theta: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)),
+          r: MONTHS_SHORT.map((_, slot) => pct(civilOf(slot), (m) => m.pctActive)),
+          theta: months,
           fill: 'toself' as const,
         }],
       },
+      recency: recencyOf(records),
+      currentSlot: bulletinSlotForMonth(current),
+      currentMonthLabel: months[bulletinSlotForMonth(current)] ?? '',
     };
   }, [rawData, selectedCrops, selectedRegions, statesMap, locale]);
+
+  const way = theme === 'dark' ? LANDAGRI_COLORWAY_DARK : LANDAGRI_COLORWAY_LIGHT;
 
   const monthlyContent = (
     <Card padding="lg" hover={false}>
       <h3 className="text-base font-semibold text-fg mb-3">{tBody('hMonthlySeasonality')}</h3>
       <EChartsLine
-        series={monthlyActivity.series}
-        captionKey="activityCount"
+        series={monthlyActivity.series.map((s, i) => ({ ...s, color: i === 0 ? way[0] : way[5] }))}
+        captionKey="shareSplitMonthly"
         height={400}
+        yMin={0}
+        yMax={100}
+        markLineX={{ x: currentMonthLabel, name: tBody('currentMonth') }}
       />
+      <div className="mt-3">
+        <RecencyBadge recency={recency} />
+      </div>
     </Card>
   );
 
@@ -148,9 +171,10 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
           xLabels={MONTHS_SHORT.map((m) => translateMonthShort(m, locale))}
           captionKey="monthAxisNote"
           height={Math.min(600, Math.max(300, ganttBars.length * 12))}
+          markLineX={{ position: currentSlot + 0.5, name: tBody('currentMonth') }}
         />
       ) : (
-        <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
+        <p className="text-fg-muted text-center py-8" role="status">{tBody('noFilterData')}</p>
       )}
     </Card>
   );
@@ -158,7 +182,7 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
   const polarContent = (
     <Card padding="lg" hover={false}>
       <h3 className="text-base font-semibold text-fg mb-3">{tBody('hPolarSeasonality')}</h3>
-      {polarData.series[0].r.some(v => v > 0) ? (
+      {polarData.series[0].r.some(v => (v ?? 0) > 0) ? (
         <EChartsPolar
           series={polarData.series}
           categories={MONTHS_SHORT.map((m) => translateMonthShort(m, locale))}
@@ -166,7 +190,7 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
           height={500}
         />
       ) : (
-        <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
+        <p className="text-fg-muted text-center py-8" role="status">{tBody('noFilterData')}</p>
       )}
     </Card>
   );

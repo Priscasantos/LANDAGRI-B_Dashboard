@@ -12,6 +12,18 @@ import type {
   ConabAvailabilityRow,
   ConabCalendarRow,
 } from '../../../types/calendar';
+import { bulletinIndexToMonth } from '../../../types/calendar';
+import {
+  aggregateSharesByGroup,
+  bulletinSlotForMonth,
+  currentCalendarMonth,
+  formatShareTip,
+  recencyOf,
+  toCalendarRecords,
+  type MonthShare,
+  type ShareTipLabels,
+} from '../../../lib/calendarShare';
+import RecencyBadge from '../CropCalendar/RecencyBadge';
 import { useT } from '../../../i18n/LanguageContext';
 import {
   translateCropName,
@@ -35,13 +47,6 @@ interface MappingDataType {
 }
 
 const ALL = 'all';
-
-function parseActivityValue(val: string): number {
-  if (!val || val.trim() === '') return 0;
-  const v = val.trim();
-  if (v === 'P' || v === 'H' || v === 'PH') return 1;
-  return 0;
-}
 
 /** Typed accessors over `conab_availability.json` (no `;`-joined fallback). */
 function availCrop(row: AvailabilityRow): string {
@@ -135,7 +140,7 @@ export default function AgricultureAvailabilityPage(): ReactElement {
   );
 
   // Same parsing as the Plotly original.
-  const { stateCoverage, cropDiversity, regionalActivity, activityHeatmap } = useMemo(() => {
+  const { stateCoverage, cropDiversity, regionalActivity, activityHeatmap, calendarRecency } = useMemo(() => {
     const cropStates: Record<string, Set<string>> = {};
     const stateYears: Record<string, Set<string>> = {};
     const stateCrops: Record<string, Set<string>> = {};
@@ -169,34 +174,52 @@ export default function AgricultureAvailabilityPage(): ReactElement {
       .map(([crop, states]) => ({ name: translateCropName(crop, locale), value: states.size }))
       .sort((a, b) => b.value - a.value);
 
-    const regionMonthActivity: Record<string, number[]> = {};
+    // Atividade regional em % de UFs ativas (Fase 2): registros tipados
+    // agrupados por região, meses em ordem do boletim Out→Set.
+    const calendarRecords = toCalendarRecords(
+      filteredCalendar.filter((row) => {
+        const uf = calendarUf(row);
+        return uf !== '' && stateRegions[uf] !== undefined;
+      }),
+    );
+    const byRegion = aggregateSharesByGroup(
+      calendarRecords,
+      (r) => stateRegions[r.region] ?? r.region,
+    );
+    const tipLabels: ShareTipLabels = {
+      activeUfs: tBody('activeUfsLabel'),
+      planting: tBody('tipPlanting'),
+      harvest: tBody('tipHarvest'),
+      more: (k) => tBody('ufsMore', { k }),
+    };
+    const currentSlot = bulletinSlotForMonth(currentCalendarMonth());
 
-    for (const row of filteredCalendar) {
-      const uf = calendarUf(row);
-      const region = stateRegions[uf];
-      if (!uf || !region) continue;
-
-      const months = row.months;
-      if (!Array.isArray(months) || months.length < 12) continue;
-
-      if (!regionMonthActivity[region]) {
-        regionMonthActivity[region] = MONTHS_SHORT.map(() => 0);
-      }
-      months.slice(0, 12).forEach((v, i) => {
-        if (parseActivityValue(v) > 0) {
-          regionMonthActivity[region][i]++;
-        }
-      });
-    }
-
-    const regionLabels = Object.keys(regionMonthActivity).sort();
-    const translatedMonths = MONTHS_SHORT.map((m) => translateMonthShort(m, locale));
+    const regionLabels = [...byRegion.keys()].sort();
+    const translatedMonths = MONTHS_SHORT.map((m, slot) => {
+      const label = translateMonthShort(m, locale);
+      return slot === currentSlot ? `${label} ●` : label;
+    });
+    const shareAt = (region: string, slot: number): MonthShare | undefined =>
+      byRegion.get(region)?.find((s) => s.month === bulletinIndexToMonth(slot));
     const regionalActivitySeries = regionLabels.map(region => ({
       name: translateRegion(region, locale),
-      values: regionMonthActivity[region],
+      values: MONTHS_SHORT.map((_, slot) => Math.round(shareAt(region, slot)?.pctActive ?? 0)),
     }));
 
-    const heatmapZ: number[][] = regionLabels.map(r => regionMonthActivity[r]);
+    const heatmapZ: number[][] = regionLabels.map((r) =>
+      MONTHS_SHORT.map((_, slot) => Math.round(shareAt(r, slot)?.pctActive ?? 0)),
+    );
+    const heatmapTips: (string | null)[][] = regionLabels.map((r) =>
+      MONTHS_SHORT.map((_, slot) => {
+        const share = shareAt(r, slot);
+        if (share === undefined || share.totalUfs === 0) return null;
+        return formatShareTip(
+          `${translateRegion(r, locale)} · ${translatedMonths[slot]}`,
+          share,
+          tipLabels,
+        );
+      }),
+    );
 
     return {
       stateCoverage: {
@@ -213,11 +236,13 @@ export default function AgricultureAvailabilityPage(): ReactElement {
       },
       activityHeatmap: {
         z: heatmapZ,
+        tips: heatmapTips,
         regions: regionLabels.map((r) => translateRegion(r, locale)),
         months: translatedMonths,
       },
+      calendarRecency: recencyOf(calendarRecords),
     };
-  }, [filteredAvail, filteredCalendar, stateRegions, locale]);
+  }, [filteredAvail, filteredCalendar, stateRegions, locale, tBody]);
 
   const totalStates = stateCoverage.labels.length;
   const totalCrops = cropDiversity.labels.length;
@@ -335,30 +360,46 @@ export default function AgricultureAvailabilityPage(): ReactElement {
           )}
         </Card>
         <Card padding="lg" hover={false}>
-          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hRegionalComparison')}</h3>
+          <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+            <h3 className="text-base font-semibold text-fg">{tBody('hRegionalComparison')}</h3>
+            <span className="text-xs font-medium text-fg-secondary">{tBody('shareModeUf')}</span>
+          </div>
           {regionalActivity.series.length > 0 ? (
             <EChartsGroupedBar
               categories={regionalActivity.categories}
               series={regionalActivity.series}
-              captionKey="activityCount"
+              captionKey="shareActiveUfs"
               height={400}
             />
           ) : (
-            <p className="text-fg-muted text-center py-8">{tBody('noRegionalActivity')}</p>
+            <p className="text-fg-muted text-center py-8" role="status">{tBody('noRegionalActivity')}</p>
           )}
         </Card>
         <Card padding="lg" hover={false}>
-          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hRegionalHeatmap')}</h3>
+          <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+            <h3 className="text-base font-semibold text-fg">{tBody('hRegionalHeatmap')}</h3>
+            <span className="text-xs font-medium text-fg-secondary">{tBody('shareModeUf')}</span>
+          </div>
           {activityHeatmap.regions.length > 0 ? (
-            <EChartsHeatmap
-              z={activityHeatmap.z}
-              x={activityHeatmap.months}
-              y={activityHeatmap.regions}
-              captionKey="activityIntensityByRegionMonth"
-              height={Math.max(300, activityHeatmap.regions.length * 60 + 100)}
-            />
+            <>
+              <EChartsHeatmap
+                z={activityHeatmap.z}
+                x={activityHeatmap.months}
+                y={activityHeatmap.regions}
+                captionKey="activityIntensityByRegionMonth"
+                height={Math.max(300, activityHeatmap.regions.length * 60 + 100)}
+                min={0}
+                max={100}
+                showValues
+                valueSuffix="%"
+                tips={activityHeatmap.tips}
+              />
+              <div className="mt-3">
+                <RecencyBadge recency={calendarRecency} />
+              </div>
+            </>
           ) : (
-            <p className="text-fg-muted text-center py-8">{tBody('noHeatmapData')}</p>
+            <p className="text-fg-muted text-center py-8" role="status">{tBody('noHeatmapData')}</p>
           )}
         </Card>
       </div>

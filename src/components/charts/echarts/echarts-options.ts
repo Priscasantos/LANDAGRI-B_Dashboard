@@ -376,6 +376,17 @@ export interface HeatmapInput extends BaseBuilderInput {
   /** Render values inside cells (Plotly `texttemplate` analogue). */
   showValues?: boolean;
   /**
+   * Suffix appended to cell labels/tooltips (ex. `'%'` for share
+   * heatmaps). Omitido → número puro (comportamento legado).
+   */
+  valueSuffix?: string;
+  /**
+   * Pre-formatted HTML tooltip per cell `[yi][xi]` (Fase 2: top-N UFs +
+   * split P/H). `null` → fallback do `valueFormatter`. Dimensões
+   * diferentes de `z` são ignoradas com segurança.
+   */
+  tips?: (string | null)[][];
+  /**
    * Value range rendered on light cells (label usa texto escuro legível;
    * fora dela, branco). Quando omitido, a cor do rótulo é automática por
    * contraste máximo contra a rampa resolvida (AA nos dois temas).
@@ -459,18 +470,45 @@ export function buildHeatmapOption(input: HeatmapInput): EChartsCoreOption {
   const ramp = input.colors ?? heatmapVisualColors(input.theme, input.palette ?? 'theme');
   const darkRange = input.labelDarkRange;
   const [darkLo, darkHi] = darkRange ?? [vMin, vMin + (vMax - vMin) * 0.4];
+  const suffix = input.valueSuffix ?? '';
+  const cellTips = input.tips;
+  const tipAt = (xi: number, yi: number): string | null => {
+    const row = cellTips?.[yi];
+    const tip = row?.[xi];
+    return typeof tip === 'string' && tip !== '' ? tip : null;
+  };
   return {
     textStyle: { fontFamily },
     toolbox: buildChartToolbox(input.locale, input.exportName, input.theme),
     tooltip: {
       ...tooltipBase(input, fontFamily),
       trigger: 'item',
-      valueFormatter: (value: unknown): string => {
-        const v = Array.isArray(value) ? value[2] : value;
-        return typeof v === 'number'
-          ? formatEChartsNumber(v, input.locale)
-          : String(v ?? '');
-      },
+      ...(cellTips !== undefined
+        ? {
+            formatter: (params: { data?: unknown; value?: unknown }): string => {
+              const raw = Array.isArray(params.value)
+                ? params.value
+                : Array.isArray(params.data)
+                  ? params.data
+                  : [];
+              const xi = typeof raw[0] === 'number' ? raw[0] : -1;
+              const yi = typeof raw[1] === 'number' ? raw[1] : -1;
+              const tip = xi >= 0 && yi >= 0 ? tipAt(xi, yi) : null;
+              if (tip !== null) return tip;
+              const v = raw[2];
+              return typeof v === 'number'
+                ? `${formatEChartsNumber(v, input.locale)}${suffix}`
+                : String(v ?? '');
+            },
+          }
+        : {
+            valueFormatter: (value: unknown): string => {
+              const v = Array.isArray(value) ? value[2] : value;
+              return typeof v === 'number'
+                ? `${formatEChartsNumber(v, input.locale)}${suffix}`
+                : String(v ?? '');
+            },
+          }),
     },
     legend: { show: false },
     grid: { left: 8, right: 24, top: 16, bottom: 104, containLabel: true },
@@ -525,7 +563,7 @@ export function buildHeatmapOption(input: HeatmapInput): EChartsCoreOption {
           },
           formatter: (params: { value?: unknown }): string => {
             const v = Array.isArray(params.value) ? params.value[2] : params.value;
-            return typeof v === 'number' ? v.toFixed(2) : '';
+            return typeof v === 'number' ? `${formatEChartsNumber(v, input.locale)}${suffix}` : '';
           },
         },
         emphasis: {
@@ -565,10 +603,15 @@ export interface LineInput extends BaseBuilderInput {
   yMax?: number;
   /** Y-axis minimum tick gap (ver `yMin`; `1` = só ticks inteiros). */
   yMinInterval?: number;
+  /**
+   * Linha vertical do mês atual (Fase 2) sobre a primeira série
+   * (`xAxis` categórico). Omitido → sem marcador (legado).
+   */
+  markLineX?: { x: string | number; name: string; color?: string };
 }
 
 export function buildLineOption(input: LineInput): EChartsCoreOption {
-  const { divider } = axisCommon(input.theme);
+  const { divider, labelColor } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
   const colorway = colorwayOf(input.theme);
   const showMarkers = input.showMarkers ?? true;
@@ -660,6 +703,25 @@ export function buildLineOption(input: LineInput): EChartsCoreOption {
                     coord: [s.markPoint.x, s.y[markIdx]],
                   },
                 ],
+              },
+            }
+          : {}),
+        ...(input.markLineX !== undefined && i === 0
+          ? {
+              markLine: {
+                silent: true,
+                symbol: 'none',
+                lineStyle: {
+                  color: input.markLineX.color ?? labelColor,
+                  width: 1.5,
+                  type: 'dashed',
+                },
+                label: {
+                  formatter: input.markLineX.name,
+                  fontSize: 11,
+                  fontFamily,
+                },
+                data: [{ xAxis: input.markLineX.x, name: input.markLineX.name }],
               },
             }
           : {}),
@@ -1205,6 +1267,11 @@ export interface GanttInput extends BaseBuilderInput {
   /** Month (or period) labels shown on the x value axis. */
   xLabels: (string | number)[];
   bars: GanttBarInput[];
+  /**
+   * Linha vertical do mês atual (Fase 2, posição no eixo de valor).
+   * Omitido → sem marcador (legado).
+   */
+  markLineX?: { position: number; name: string; color?: string };
 }
 
 /**
@@ -1213,7 +1280,7 @@ export interface GanttInput extends BaseBuilderInput {
  * ECharts analogue of Plotly `bar.base`.
  */
 export function buildGanttOption(input: GanttInput): EChartsCoreOption {
-  const { divider } = axisCommon(input.theme);
+  const { divider, labelColor } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
   const colorway = colorwayOf(input.theme);
   const labels = input.bars.map((b) => b.y);
@@ -1273,6 +1340,25 @@ export function buildGanttOption(input: GanttInput): EChartsCoreOption {
           },
         })),
         barWidth: '60%',
+        ...(input.markLineX !== undefined
+          ? {
+              markLine: {
+                silent: true,
+                symbol: 'none',
+                lineStyle: {
+                  color: input.markLineX.color ?? labelColor,
+                  width: 1.5,
+                  type: 'dashed',
+                },
+                label: {
+                  formatter: input.markLineX.name,
+                  fontSize: 11,
+                  fontFamily,
+                },
+                data: [{ xAxis: input.markLineX.position, name: input.markLineX.name }],
+              },
+            }
+          : {}),
       },
     ],
   } as EChartsCoreOption;

@@ -24,6 +24,8 @@ interface EChartsGanttProps {
   /** i18n key in `charts` namespace for figcaption/aria-label. */
   captionKey?: TKey<'charts'>;
   height?: number;
+  /** Vertical current-month line (Fase 2, value-axis position). */
+  markLineX?: { position: number; name: string; color?: string };
 }
 
 export default function EChartsGantt({
@@ -31,6 +33,7 @@ export default function EChartsGantt({
   bars,
   captionKey,
   height = 500,
+  markLineX,
 }: EChartsGanttProps): ReactElement {
   const theme = useEffectiveTheme();
   const fontFamily = useChartFontFamily();
@@ -51,8 +54,9 @@ export default function EChartsGantt({
         theme,
         locale,
         fontFamily,
+        ...(markLineX !== undefined ? { markLineX } : {}),
       }),
-    [xLabels, bars, theme, locale, fontFamily, t],
+    [xLabels, bars, theme, locale, fontFamily, t, markLineX],
   );
 
   const caption = captionKey !== undefined ? t(captionKey) : '';

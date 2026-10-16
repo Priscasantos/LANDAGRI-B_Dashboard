@@ -7,7 +7,8 @@ import { useT } from '../../../i18n/LanguageContext';
 import { translateCropName, translateMonthShort } from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
-import type { ConabCalendarRow } from '../../../types/calendar';
+import { activityFromCode, type ConabCalendarRow } from '../../../types/calendar';
+import { bulletinSlotForMonth, currentCalendarMonth } from '../../../lib/calendarShare';
 
 const MONTHS_SHORT = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
 
@@ -23,10 +24,8 @@ interface MappingDataType {
 }
 
 function parseActivityValue(val: string): number {
-  if (!val || val.trim() === '') return 0;
-  const v = val.trim();
-  if (v === 'P' || v === 'H' || v === 'PH') return 1;
-  return 0;
+  const { plantingPct, harvestPct } = activityFromCode(val);
+  return plantingPct > 0 || harvestPct > 0 ? 1 : 0;
 }
 
 interface SpatioTemporalTabProps {
@@ -75,6 +74,7 @@ export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: Sp
     const way = theme === 'dark' ? LANDAGRI_COLORWAY_DARK : LANDAGRI_COLORWAY_LIGHT;
     const bars: { label: string; start: number; end: number; color: string; tip: string }[] = [];
     const stateNames = Object.keys(stateCropMonths).sort();
+    const monthLabels = MONTHS_SHORT.map((m) => translateMonthShort(m, locale));
 
     stateNames.forEach((state) => {
       const monthsSet = new Set<number>();
@@ -99,7 +99,7 @@ export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: Sp
         start: firstMonth,
         end: lastMonth + 1,
         color,
-        tip: `<b>${state}</b><br>${t('period')}: ${firstMonth}-${lastMonth}<br>${t('crop')}: ${translateCropName(dominantCrop, locale)}`,
+        tip: `<b>${state}</b><br>${t('period')}: ${monthLabels[firstMonth]} – ${monthLabels[lastMonth]}<br>${t('crop')}: ${translateCropName(dominantCrop, locale)}`,
       });
     });
 
@@ -115,9 +115,10 @@ export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: Sp
           xLabels={MONTHS_SHORT.map((m) => translateMonthShort(m, locale))}
           captionKey="spatioTemporalDistribution"
           height={Math.max(400, chartData.length * 25 + 100)}
+          markLineX={{ position: bulletinSlotForMonth(currentCalendarMonth()) + 0.5, name: tBody('currentMonth') }}
         />
       ) : (
-        <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
+        <p className="text-fg-muted text-center py-8" role="status">{tBody('noFilterData')}</p>
       )}
     </Card>
   );

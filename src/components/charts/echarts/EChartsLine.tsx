@@ -23,6 +23,8 @@ interface EChartsLineProps {
   yMax?: number;
   /** Y-axis minimum tick gap (`1` = integer-only ticks; omitted → auto). */
   yMinInterval?: number;
+  /** Vertical current-month line on the first series (Fase 2). */
+  markLineX?: { x: string | number; name: string; color?: string };
 }
 
 export default function EChartsLine({
@@ -35,6 +37,7 @@ export default function EChartsLine({
   yMin,
   yMax,
   yMinInterval,
+  markLineX,
 }: EChartsLineProps): ReactElement {
   const theme = useEffectiveTheme();
   const fontFamily = useChartFontFamily();
@@ -53,8 +56,9 @@ export default function EChartsLine({
         ...(yMin !== undefined ? { yMin } : {}),
         ...(yMax !== undefined ? { yMax } : {}),
         ...(yMinInterval !== undefined ? { yMinInterval } : {}),
+        ...(markLineX !== undefined ? { markLineX } : {}),
       }),
-    [series, theme, locale, fontFamily, showMarkers, areaFill, stack, yMin, yMax, yMinInterval],
+    [series, theme, locale, fontFamily, showMarkers, areaFill, stack, yMin, yMax, yMinInterval, markLineX],
   );
 
   const caption = captionKey !== undefined ? t(captionKey) : '';

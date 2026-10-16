@@ -27,6 +27,10 @@ interface EChartsHeatmapProps {
   showValues?: boolean;
   /** Value range on light cells (dark label text; white elsewhere). */
   labelDarkRange?: [number, number];
+  /** Suffix for cell labels/tooltips (ex. `'%'` for share heatmaps). */
+  valueSuffix?: string;
+  /** Pre-formatted HTML tooltip per cell `[yi][xi]`; `null` → default. */
+  tips?: (string | null)[][];
   height?: number;
 }
 
@@ -42,14 +46,16 @@ export default function EChartsHeatmap({
   max,
   showValues,
   labelDarkRange,
+  valueSuffix,
+  tips,
 }: EChartsHeatmapProps): ReactElement {
   const theme = useEffectiveTheme();
   const fontFamily = useChartFontFamily();
   const { t, locale } = useT('charts');
 
   const option = useMemo(
-    () => buildHeatmapOption({ x, y, z, theme, locale, fontFamily, colors, palette, min, max, showValues, labelDarkRange }),
-    [x, y, z, theme, locale, fontFamily, colors, palette, min, max, showValues, labelDarkRange],
+    () => buildHeatmapOption({ x, y, z, theme, locale, fontFamily, colors, palette, min, max, showValues, labelDarkRange, valueSuffix, tips }),
+    [x, y, z, theme, locale, fontFamily, colors, palette, min, max, showValues, labelDarkRange, valueSuffix, tips],
   );
 
   const caption = captionKey !== undefined ? t(captionKey) : '';

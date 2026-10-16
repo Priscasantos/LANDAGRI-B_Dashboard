@@ -8,12 +8,14 @@ import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
 import { useT } from '../../../i18n/LanguageContext';
 import {
   translateActivity,
+  translateCropName,
   translateMonthShort,
   translateRegion,
 } from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
-import type { ConabCalendarRow } from '../../../types/calendar';
+import { activityFromCode, type ConabCalendarRow } from '../../../types/calendar';
+import { topUfsWithOverflow } from '../../../lib/calendarShare';
 
 const MONTHS_FULL = ['October', 'November', 'December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September'];
 const MONTHS_SHORT = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
@@ -27,14 +29,6 @@ interface StateInfo {
 
 interface MappingDataType {
   states?: Record<string, StateInfo>;
-}
-
-function parseActivityValue(val: string): number {
-  if (!val || val.trim() === '') return 0;
-  const v = val.trim();
-  if (v === 'PH') return 2;
-  if (v === 'P' || v === 'H') return 1;
-  return 0;
 }
 
 interface ActivityIntensityTabProps {
@@ -54,10 +48,11 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
       stateRegions[code] = info.region;
     }
 
-    // State × Month intensity
-    const stateMonthIntensity: Record<string, number[]> = {};
-    const regionMonthIntensity: Record<string, number[]> = {};
+    // Estado × mês: culturas com atividade (via schema Fase 1) → % das
+    // culturas do escopo. Soma bruta vira share 0–100 com tooltip de culturas.
+    const stateMonthCrops: Record<string, Set<string>[]> = {};
     const stateCropCount: Record<string, Set<string>> = {};
+    const regionMonthIntensity: Record<string, number[]> = {};
 
     for (const row of rawData) {
       const crop = (row.crop || '').trim();
@@ -68,8 +63,8 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
       const region = stateRegions[state];
       if (region && !selectedRegions.includes(region)) continue;
 
-      if (!stateMonthIntensity[state]) {
-        stateMonthIntensity[state] = MONTHS_FULL.map(() => 0);
+      if (!stateMonthCrops[state]) {
+        stateMonthCrops[state] = MONTHS_FULL.map(() => new Set<string>());
       }
       if (!stateCropCount[state]) stateCropCount[state] = new Set();
       stateCropCount[state].add(crop);
@@ -78,23 +73,41 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
         regionMonthIntensity[region] = MONTHS_FULL.map(() => 0);
       }
 
-      row.months.forEach((v, i) => {
-        const intensity = parseActivityValue(v);
-        stateMonthIntensity[state][i] += intensity;
+      row.months.slice(0, 12).forEach((code, i) => {
+        const { plantingPct, harvestPct } = activityFromCode(code);
+        const intensity = plantingPct > 0 || harvestPct > 0 ? 1 : 0;
+        if (intensity > 0) stateMonthCrops[state][i].add(crop);
         if (region) regionMonthIntensity[region][i] += intensity;
       });
     }
 
-    // Intensity matrix: states × months
-    const stateLabels = Object.keys(stateMonthIntensity).sort();
-    const z: number[][] = stateLabels.map(s => stateMonthIntensity[s]);
+    // Intensity matrix: estados × meses em % de culturas ativas.
+    const stateLabels = Object.keys(stateMonthCrops).sort();
+    const scopeCrops = Math.max(selectedCrops.length, 1);
+    const z: number[][] = stateLabels.map((s) =>
+      stateMonthCrops[s].map((set) => Math.round((set.size / scopeCrops) * 100)),
+    );
+    const monthLabels = MONTHS_SHORT.map((m) => translateMonthShort(m, locale));
+    const tips: (string | null)[][] = stateLabels.map((s) =>
+      stateMonthCrops[s].map((set, i) => {
+        if (set.size === 0) return null;
+        const crops = [...set].map((c) => translateCropName(c, locale)).sort();
+        const { top, overflow } = topUfsWithOverflow(crops, 5);
+        const more = overflow > 0 ? ` ${tBody('ufsMore', { k: overflow })}` : '';
+        return (
+          `<b>${s} · ${monthLabels[i]}</b><br>` +
+          `${Math.round((set.size / scopeCrops) * 100)}% (${set.size}/${scopeCrops})<br>` +
+          `${top.join(', ')}${more}`
+        );
+      }),
+    );
 
-    // Peak activity: max intensity month per state
-    const peakMonths = stateLabels.map(state => {
-      const intensities = stateMonthIntensity[state];
-      const maxVal = Math.max(...intensities);
-      const peakIdx = intensities.indexOf(maxVal);
-      return { state, peakMonth: translateMonthShort(MONTHS_SHORT[peakIdx], locale), peakValue: maxVal };
+    // Peak activity: mês com maior % de culturas ativas por estado.
+    const peakMonths = stateLabels.map((state, si) => {
+      const shares = z[si] ?? [];
+      const maxVal = shares.length > 0 ? Math.max(...shares) : 0;
+      const peakIdx = Math.max(shares.indexOf(maxVal), 0);
+      return { state, peakMonth: translateMonthShort(MONTHS_SHORT[peakIdx] ?? '', locale), peakValue: maxVal };
     });
 
     // Density by region
@@ -105,13 +118,13 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
     });
 
     // Concentration index: states ranked by total activity
-    const stateTotals = stateLabels.map(state => {
-      const sum = stateMonthIntensity[state].reduce((a, b) => a + b, 0);
+    const stateTotals = stateLabels.map((state, si) => {
+      const sum = (z[si] ?? []).reduce((a, b) => a + b, 0);
       return { name: state, value: sum };
     }).sort((a, b) => b.value - a.value);
 
     return {
-      intensityMatrix: { z, states: stateLabels, months: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)) },
+      intensityMatrix: { z, tips, states: stateLabels, months: monthLabels },
       peakActivity: {
         categories: peakMonths.map(p => p.state),
         series: [{
@@ -128,7 +141,7 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
         values: stateTotals.map(s => s.value),
       },
     };
-  }, [rawData, selectedCrops, selectedRegions, statesMap, locale]);
+  }, [rawData, selectedCrops, selectedRegions, statesMap, locale, tBody]);
 
   const noData = intensityMatrix.states.length === 0;
 
@@ -136,7 +149,7 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
     <Card padding="lg" hover={false}>
       <h3 className="text-base font-semibold text-fg mb-3">{tBody('hIntensityMatrix')}</h3>
       {noData ? (
-        <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
+        <p className="text-fg-muted text-center py-8" role="status">{tBody('noFilterData')}</p>
       ) : (
         <EChartsHeatmap
           z={intensityMatrix.z}
@@ -144,6 +157,11 @@ export default function ActivityIntensityTab({ selectedCrops, selectedRegions }:
           y={intensityMatrix.states}
           captionKey="activityIntensity"
           height={Math.max(400, intensityMatrix.states.length * 25 + 100)}
+          min={0}
+          max={100}
+          showValues
+          valueSuffix="%"
+          tips={intensityMatrix.tips}
         />
       )}
     </Card>

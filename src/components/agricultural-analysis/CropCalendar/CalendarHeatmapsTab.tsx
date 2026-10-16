@@ -1,13 +1,27 @@
 import { useMemo } from 'react';
 import Card from '../../ui/Card';
 import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
-import { HEATMAP_EMPTY_CELL_DARK, HEATMAP_EMPTY_CELL_LIGHT, LANDAGRI_COLORWAY_DARK, LANDAGRI_COLORWAY_LIGHT } from '../../../lib/echarts-theme';
+import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
+import { LANDAGRI_COLORWAY_DARK, LANDAGRI_COLORWAY_LIGHT } from '../../../lib/echarts-theme';
 import { useEffectiveTheme } from '../../../hooks/use-theme';
 import { useT } from '../../../i18n/LanguageContext';
 import { translateCropName, translateMonth } from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
-import type { ConabCalendarRow } from '../../../types/calendar';
+import { bulletinIndexToMonth, type ConabCalendarRow } from '../../../types/calendar';
+import {
+  aggregateShares,
+  aggregateSharesByGroup,
+  bulletinSlotForMonth,
+  currentCalendarMonth,
+  formatShareTip,
+  recencyOf,
+  resolveShareMode,
+  toCalendarRecords,
+  type MonthShare,
+  type ShareTipLabels,
+} from '../../../lib/calendarShare';
+import RecencyBadge from './RecencyBadge';
 
 const MONTHS = ['October', 'November', 'December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September'];
 
@@ -29,15 +43,6 @@ interface CalendarHeatmapsTabProps {
   selectedRegions: string[];
 }
 
-function parseActivityValue(val: string): number {
-  if (!val || val.trim() === '') return 0;
-  const v = val.trim();
-  if (v === 'PH') return 3; // both planting and harvest
-  if (v === 'P') return 1; // planting
-  if (v === 'H') return 2; // harvest
-  return 0;
-}
-
 export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: CalendarHeatmapsTabProps) {
   const { t } = useT('charts');
   const { t: tBody, locale } = useT('agricultural');
@@ -46,77 +51,82 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
 
-  const matrix = useMemo(() => {
-    const crops = [...new Set(selectedCrops)];
-    const monthIndices = MONTHS.map((_, i) => i);
-
-    // Build state-region lookup
+  const model = useMemo(() => {
     const stateRegions: Record<string, string> = {};
     for (const [code, info] of Object.entries(statesMap)) {
       stateRegions[code] = info.region;
     }
 
-    // Filter the raw CSV-like data
-    const filtered: { crop: string; state: string; activities: number[] }[] = [];
-
-    for (const row of rawData) {
+    // Filtro sobre campos tipados (sem parse ad-hoc); normalização via schema Fase 1.
+    const filtered = rawData.filter((row) => {
       const crop = (row.crop || '').trim();
-      if (!crop || !selectedCrops.includes(crop)) continue;
-
+      if (crop === '' || !selectedCrops.includes(crop)) return false;
       const state = (row.uf || '').trim();
-      if (!state) continue;
+      if (state === '') return false;
       const region = stateRegions[state];
-      if (region && !selectedRegions.includes(region)) continue;
+      if (region !== undefined && !selectedRegions.includes(region)) return false;
+      return true;
+    });
 
-      const activities = row.months.map((v) => parseActivityValue(v));
-      filtered.push({ crop, state, activities });
-    }
+    const records = toCalendarRecords(filtered);
+    const byCrop = aggregateSharesByGroup(records, (r) => r.cropId);
+    const global = aggregateShares(records);
+    return { records, byCrop, global, mode: resolveShareMode(records), recency: recencyOf(records) };
+  }, [rawData, selectedCrops, selectedRegions, statesMap]);
 
-    // National matrix: crops x months showing sum of activities
-    const nationalZ: number[][] = [];
-    const cropLabels: string[] = [];
+  const tipLabels: ShareTipLabels = {
+    activeUfs: tBody('activeUfsLabel'),
+    planting: tBody('tipPlanting'),
+    harvest: tBody('tipHarvest'),
+    more: (k) => tBody('ufsMore', { k }),
+  };
 
-    for (const crop of crops) {
-      const cropEntries = filtered.filter(f => f.crop === crop);
-      if (cropEntries.length === 0) continue;
-      cropLabels.push(translateCropName(crop, locale));
+  const currentMonth = currentCalendarMonth();
+  const currentSlot = bulletinSlotForMonth(currentMonth);
+  const monthLabels = MONTHS.map((m, slot) => {
+    const label = translateMonth(m, locale);
+    return slot === currentSlot ? `${label} ●` : label;
+  });
 
-      const monthSums = monthIndices.map(m => {
-        let sum = 0;
-        let hasPlanting = false;
-        let hasHarvest = false;
-        for (const entry of cropEntries) {
-          const val = entry.activities[m];
-          if (val === 1 || val === 3) hasPlanting = true;
-          if (val === 2 || val === 3) hasHarvest = true;
-        }
-        if (hasPlanting && hasHarvest) sum = 3;
-        else if (hasPlanting) sum = 1;
-        else if (hasHarvest) sum = 2;
-        return sum;
-      });
-      nationalZ.push(monthSums);
-    }
+  const cropKeys = selectedCrops.filter((crop) => model.byCrop.has(crop));
+  const z: number[][] = cropKeys.map((crop) => {
+    const shares = model.byCrop.get(crop);
+    if (shares === undefined) return MONTHS.map(() => 0);
+    return MONTHS.map((_, slot) => {
+      const civil = bulletinIndexToMonth(slot);
+      return Math.round(shares.find((m: MonthShare) => m.month === civil)?.pctActive ?? 0);
+    });
+  });
+  const tips: (string | null)[][] = cropKeys.map((crop) =>
+    MONTHS.map((_, slot) => {
+      const civil = bulletinIndexToMonth(slot);
+      const share = model.byCrop.get(crop)?.find((m: MonthShare) => m.month === civil);
+      if (share === undefined || share.totalUfs === 0) return null;
+      return formatShareTip(`${translateCropName(crop, locale)} · ${monthLabels[slot]}`, share, tipLabels);
+    }),
+  );
+  const cropLabels = cropKeys.map((crop) => translateCropName(crop, locale));
 
-    return { z: nationalZ, crops: cropLabels, months: MONTHS.map((m) => translateMonth(m, locale)) };
-  }, [rawData, selectedCrops, selectedRegions, statesMap, locale]);
+  // Split P/H por mês (global, ordem do boletim): barras empilhadas % plantio + % colheita.
+  const plantSeries = MONTHS.map((_, slot) => {
+    const civil = bulletinIndexToMonth(slot);
+    return Math.round(model.global.find((m) => m.month === civil)?.pctPlanting ?? 0);
+  });
+  const harvestSeries = MONTHS.map((_, slot) => {
+    const civil = bulletinIndexToMonth(slot);
+    return Math.round(model.global.find((m) => m.month === civil)?.pctHarvest ?? 0);
+  });
 
-  // Cores por categoria a partir do colorway do tema ativo (0=ausente neutro,
-  // 1=plantio verde, 2=colheita terra, 3=ambos teal) — semântica preservada
-  // nos dois temas em vez do hex fixo herdado.
   const way = theme === 'dark' ? LANDAGRI_COLORWAY_DARK : LANDAGRI_COLORWAY_LIGHT;
-  const colorscale = [
-    theme === 'dark' ? HEATMAP_EMPTY_CELL_DARK : HEATMAP_EMPTY_CELL_LIGHT,
-    way[0],
-    way[5],
-    way[7],
-  ];
+  const plantingColor = way[0];
+  const harvestColor = way[5];
+  const emptyCell = theme === 'dark' ? '#1e293b' : '#f1f5f9';
 
-  if (matrix.crops.length === 0) {
+  if (cropKeys.length === 0) {
     return (
       <Card padding="lg" hover={false}>
         <div className="p-8 text-center text-fg-secondary">
-          <p>{tBody('noCalendarData')}</p>
+          <p role="status">{tBody('noCalendarData')}</p>
         </div>
       </Card>
     );
@@ -125,42 +135,63 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
   return (
     <div className="space-y-6">
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-2">{tBody('hNationalMatrix')}</h3>
-        <p className="text-xs text-fg-secondary mb-4">
-          {tBody('matrixLegend')}
-        </p>
+        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+          <h3 className="text-base font-semibold text-fg">{tBody('hNationalMatrix')}</h3>
+          <span className="text-xs font-medium text-fg-secondary">
+            {model.mode === 'area' ? tBody('shareModeArea') : tBody('shareModeUf')}
+          </span>
+        </div>
+        <p className="text-xs text-fg-secondary mb-4">{tBody('shareScaleNote')}</p>
         <EChartsHeatmap
-          z={matrix.z}
-          x={matrix.months}
-          y={matrix.crops}
+          z={z}
+          x={monthLabels}
+          y={cropLabels}
           captionKey="cropCalendarActivity"
-          height={Math.max(300, matrix.crops.length * 50 + 100)}
-          colors={colorscale}
+          height={Math.max(300, cropLabels.length * 50 + 100)}
           min={0}
-          max={3}
+          max={100}
+          showValues
+          valueSuffix="%"
+          tips={tips}
+        />
+        <div className="mt-3">
+          <RecencyBadge recency={model.recency} />
+        </div>
+      </Card>
+
+      <Card padding="lg" hover={false}>
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hMonthlySeasonality')}</h3>
+        <EChartsGroupedBar
+          categories={monthLabels}
+          series={[
+            { name: t('planting'), values: plantSeries, color: plantingColor },
+            { name: t('harvest'), values: harvestSeries, color: harvestColor },
+          ]}
+          stacked
+          captionKey="activityCount"
+          height={360}
         />
       </Card>
 
-      {/* Legend */}
+      {/* Legenda única: vale para o heatmap (%) e para o split P/H empilhado. */}
       <Card padding="md" hover={false}>
-        <div className="flex items-center gap-6 flex-wrap">
+        <div className="flex items-center gap-6 flex-wrap" role="list" aria-label={t('legend')}>
           <span className="text-sm font-medium text-fg-secondary">{t('legend')}:</span>
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded bg-green-500 inline-block" />
+          <div className="flex items-center gap-2" role="listitem">
+            <span className="w-4 h-4 rounded inline-block" style={{ backgroundColor: plantingColor }} aria-hidden="true" />
             <span className="text-xs text-fg-secondary">{t('planting')}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded bg-orange-500 inline-block" />
+          <div className="flex items-center gap-2" role="listitem">
+            <span className="w-4 h-4 rounded inline-block" style={{ backgroundColor: harvestColor }} aria-hidden="true" />
             <span className="text-xs text-fg-secondary">{t('harvest')}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded bg-blue-500 inline-block" />
-            <span className="text-xs text-fg-secondary">{t('plantingHarvest')}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded bg-surface-alt inline-block" />
+          <div className="flex items-center gap-2" role="listitem">
+            <span className="w-4 h-4 rounded inline-block border border-border" style={{ backgroundColor: emptyCell }} aria-hidden="true" />
             <span className="text-xs text-fg-secondary">{t('noActivity')}</span>
           </div>
+          <span className="text-xs text-fg-secondary" role="listitem">
+            ● = {tBody('currentMonth')}
+          </span>
         </div>
       </Card>
     </div>

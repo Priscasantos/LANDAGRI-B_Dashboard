@@ -10,9 +10,20 @@ import {
 } from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
-import type { ConabCalendarRow } from '../../../types/calendar';
+import { bulletinIndexToMonth, type ConabCalendarRow } from '../../../types/calendar';
+import {
+  aggregateShares,
+  aggregateSharesByGroup,
+  bulletinSlotForMonth,
+  currentCalendarMonth,
+  formatShareTip,
+  recencyOf,
+  toCalendarRecords,
+  type MonthShare,
+  type ShareTipLabels,
+} from '../../../lib/calendarShare';
+import RecencyBadge from './RecencyBadge';
 
-const MONTHS_FULL = ['October', 'November', 'December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September'];
 const MONTHS_SHORT = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
 
 type CalendarRow = ConabCalendarRow;
@@ -26,14 +37,6 @@ interface MappingDataType {
   states?: Record<string, StateInfo>;
 }
 
-function parseActivityValue(val: string): number {
-  if (!val || val.trim() === '') return 0;
-  const v = val.trim();
-  if (v === 'PH') return 2;
-  if (v === 'P' || v === 'H') return 1;
-  return 0;
-}
-
 interface MonthlyIntensityTabProps {
   selectedCrops: string[];
   selectedRegions: string[];
@@ -45,87 +48,113 @@ export default function MonthlyIntensityTab({ selectedCrops, selectedRegions }: 
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
 
-  const { heatmapZ, intensitySeries } = useMemo(() => {
+  const model = useMemo(() => {
     const stateRegions: Record<string, string> = {};
     for (const [code, info] of Object.entries(statesMap)) {
       stateRegions[code] = info.region;
     }
 
-    // Per-crop per-month intensity
-    const cropMonthIntensity: Record<string, number[]> = {};
-    const totalIntensity: number[] = MONTHS_FULL.map(() => 0);
-
-    for (const row of rawData) {
+    const filtered = rawData.filter((row) => {
       const crop = (row.crop || '').trim();
-      if (!crop || !selectedCrops.includes(crop)) continue;
-
+      if (crop === '' || !selectedCrops.includes(crop)) return false;
       const state = (row.uf || '').trim();
-      if (!state) continue;
+      if (state === '') return false;
       const region = stateRegions[state];
-      if (region && !selectedRegions.includes(region)) continue;
+      if (region !== undefined && !selectedRegions.includes(region)) return false;
+      return true;
+    });
 
-      if (!cropMonthIntensity[crop]) {
-        cropMonthIntensity[crop] = MONTHS_FULL.map(() => 0);
-      }
-
-      row.months.forEach((v, i) => {
-        const intensity = parseActivityValue(v);
-        cropMonthIntensity[crop][i] += intensity;
-        totalIntensity[i] += intensity;
-      });
-    }
-
-    // Build heatmap Z: rows = crops, cols = months
-    const cropLabels: string[] = [];
-    const z: number[][] = [];
-
-    for (const [crop, intensities] of Object.entries(cropMonthIntensity)) {
-      if (selectedCrops.includes(crop)) {
-        cropLabels.push(translateCropName(crop, locale));
-        z.push(intensities);
-      }
-    }
-
+    const records = toCalendarRecords(filtered);
     return {
-      heatmapZ: { z, crops: cropLabels, months: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)) },
-      intensitySeries: {
-        series: [{
-          name: translateActivity('Activity Intensity', locale),
-          x: MONTHS_SHORT.map((m) => translateMonthShort(m, locale)),
-          y: totalIntensity,
-        }],
-      },
+      records,
+      byCrop: aggregateSharesByGroup(records, (r) => r.cropId),
+      global: aggregateShares(records),
+      recency: recencyOf(records),
     };
-  }, [rawData, selectedCrops, selectedRegions, statesMap, locale]);
+  }, [rawData, selectedCrops, selectedRegions, statesMap]);
 
-  const noData = intensitySeries.series[0].y.every(v => v === 0);
+  const tipLabels: ShareTipLabels = {
+    activeUfs: tBody('activeUfsLabel'),
+    planting: tBody('tipPlanting'),
+    harvest: tBody('tipHarvest'),
+    more: (k) => tBody('ufsMore', { k }),
+  };
+
+  const currentMonth = currentCalendarMonth();
+  const currentSlot = bulletinSlotForMonth(currentMonth);
+  const monthLabels = MONTHS_SHORT.map((m, slot) => {
+    const label = translateMonthShort(m, locale);
+    return slot === currentSlot ? `${label} ●` : label;
+  });
+
+  const cropKeys = selectedCrops.filter((crop) => model.byCrop.has(crop));
+  const z: number[][] = cropKeys.map((crop) =>
+    MONTHS_SHORT.map((_, slot) => {
+      const civil = bulletinIndexToMonth(slot);
+      return Math.round(model.byCrop.get(crop)?.find((m: MonthShare) => m.month === civil)?.pctActive ?? 0);
+    }),
+  );
+  const tips: (string | null)[][] = cropKeys.map((crop) =>
+    MONTHS_SHORT.map((_, slot) => {
+      const civil = bulletinIndexToMonth(slot);
+      const share = model.byCrop.get(crop)?.find((m: MonthShare) => m.month === civil);
+      if (share === undefined || share.totalUfs === 0) return null;
+      return formatShareTip(`${translateCropName(crop, locale)} · ${monthLabels[slot]}`, share, tipLabels);
+    }),
+  );
+
+  const intensityY = MONTHS_SHORT.map((_, slot) => {
+    const civil = bulletinIndexToMonth(slot);
+    return Math.round(model.global.find((m) => m.month === civil)?.pctActive ?? 0);
+  });
+  const noData = cropKeys.length === 0 || intensityY.every((v) => v === 0);
 
   return (
     <div className="space-y-6">
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hMonthlyHeatmap')}</h3>
+        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+          <h3 className="text-base font-semibold text-fg">{tBody('hMonthlyHeatmap')}</h3>
+          <span className="text-xs font-medium text-fg-secondary">{tBody('shareModeUf')}</span>
+        </div>
         {noData ? (
-          <p className="text-fg-muted text-center py-8">{tBody('noFilterData')}</p>
+          <p className="text-fg-muted text-center py-8" role="status">{tBody('noFilterData')}</p>
         ) : (
-          <EChartsHeatmap
-            z={heatmapZ.z}
-            x={heatmapZ.months}
-            y={heatmapZ.crops}
-            captionKey="activityIntensityCropsMonths"
-            height={Math.max(300, heatmapZ.crops.length * 40 + 100)}
-          />
+          <>
+            <EChartsHeatmap
+              z={z}
+              x={monthLabels}
+              y={cropKeys.map((crop) => translateCropName(crop, locale))}
+              captionKey="activityIntensityCropsMonths"
+              height={Math.max(300, cropKeys.length * 40 + 100)}
+              min={0}
+              max={100}
+              showValues
+              valueSuffix="%"
+              tips={tips}
+            />
+            <div className="mt-3">
+              <RecencyBadge recency={model.recency} />
+            </div>
+          </>
         )}
       </Card>
 
       <Card padding="lg" hover={false}>
         <h3 className="text-base font-semibold text-fg mb-3">{tBody('hIntensityByMonth')}</h3>
         {noData ? (
-          <p className="text-fg-muted text-center py-8">{tBody('noData')}</p>
+          <p className="text-fg-muted text-center py-8" role="status">{tBody('noData')}</p>
         ) : (
           <EChartsLine
-            series={intensitySeries.series}
-            captionKey="totalActivityCount"
+            series={[{
+              name: translateActivity('Activity Intensity', locale),
+              x: monthLabels,
+              y: intensityY,
+            }]}
+            captionKey="shareActiveUfs"
             height={350}
+            yMin={0}
+            yMax={100}
+            markLineX={{ x: monthLabels[currentSlot] ?? '', name: tBody('currentMonth') }}
           />
         )}
       </Card>
