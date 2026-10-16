@@ -601,6 +601,13 @@ export const pt = {
     noCoords: 'Sem coordenadas disponíveis para as iniciativas — exibindo mapa base do Brasil.',
     legendTitle: 'Legenda',
     legendBase: 'Mapa base do Brasil (sem pontos georreferenciados)',
+    baseOsm: 'Base: OpenStreetMap',
+    baseCarto: 'Base: CARTO claro',
+    overlayProdes: 'PRODES — desmatamento anual (Amazônia, INPE)',
+    overlayDeter: 'DETER — alertas de desmatamento (Amazônia, INPE)',
+    activeLayers: 'Camada(s) TerraBrasilis ativa(s) — ver legenda abaixo.',
+    legendActiveTitle: 'Camadas TerraBrasilis ativas',
+    wmsUnavailable: 'Camada WMS indisponível no momento — mapa base mantido.',
   },
   customizer: {
     customize: 'Personalizar tema',

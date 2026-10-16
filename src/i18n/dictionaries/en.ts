@@ -599,6 +599,13 @@ export const en: EnDictionary = {
     noCoords: 'No coordinates available for the initiatives — showing base map of Brazil.',
     legendTitle: 'Legend',
     legendBase: 'Base map of Brazil (no georeferenced points)',
+    baseOsm: 'Base: OpenStreetMap',
+    baseCarto: 'Base: CARTO light',
+    overlayProdes: 'PRODES — annual deforestation (Amazon, INPE)',
+    overlayDeter: 'DETER — deforestation alerts (Amazon, INPE)',
+    activeLayers: 'TerraBrasilis layer(s) on — see legend below.',
+    legendActiveTitle: 'Active TerraBrasilis layers',
+    wmsUnavailable: 'WMS layer currently unavailable — base map kept.',
   },
   customizer: {
     customize: 'Customize theme',
