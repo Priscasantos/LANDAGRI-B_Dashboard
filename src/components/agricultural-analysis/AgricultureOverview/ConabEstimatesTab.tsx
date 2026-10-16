@@ -5,7 +5,7 @@ import MetricCard from '../../ui/MetricCard';
 import EChartsLine from '../../charts/echarts/EChartsLine';
 import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
 import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
-import EChartsPie from '../../charts/echarts/EChartsPie';
+import SeasonCloseChart from './SeasonCloseChart';
 import { useT } from '../../../i18n/LanguageContext';
 import { translateActivity, translateCropName } from '../../../data/glossary';
 import { formatKpiArea, formatKpiProduction, formatProductivity } from '../../../lib/format';
@@ -109,43 +109,22 @@ export default function ConabEstimatesTab() {
     return { categories: seasons, series: productionSeries };
   }, [crops, locale]);
 
-  const soybeanCornProductivity = useMemo(() => {
+  const cropProductivity = useMemo(() => {
     if (!crops) return { series: [] };
     const seasons = ['2018/19', '2019/20', '2020/21', '2021/22', '2022/23', '2023/24', '2024/25', '2025/26'];
 
     const series: { name: string; x: string[]; y: number[] }[] = [];
-
-    const addCrop = (key: string, name: string) => {
-      const crop = crops[key];
-      if (crop?.production_data) {
-        series.push({
-          name,
-          x: seasons,
-          y: seasons.map(s => crop.production_data![s]?.productivity || 0),
-        });
-      }
-    };
-
-    addCrop('soybean', translateCropName('Soybean', locale));
-    addCrop('corn_total', translateCropName('Corn (Total)', locale));
-
-    return { series };
-  }, [crops, locale]);
-
-  const plantedAreaDistribution = useMemo(() => {
-    if (!crops) return [];
-    const latestSeason = '2024/25'; // last closed harvest (2025/26 is forecast)
-    const slices: { label: string; value: number }[] = [];
-
     for (const [, crop] of Object.entries(crops)) {
-      const pd = crop.production_data;
-      if (pd && pd[latestSeason] && pd[latestSeason].area > 0) {
-        slices.push({ label: translateCropName(crop.name, locale), value: pd[latestSeason].area });
+      if (crop.production_data) {
+        series.push({
+          name: translateCropName(crop.name, locale),
+          x: seasons,
+          y: seasons.map((s) => crop.production_data?.[s]?.productivity ?? 0),
+        });
       }
     }
 
-    slices.sort((a, b) => b.value - a.value);
-    return slices;
+    return { series };
   }, [crops, locale]);
 
   const allCropsProduction = useMemo(() => {
@@ -208,46 +187,33 @@ export default function ConabEstimatesTab() {
         />
       </Card>
 
-      {/* Soybean & Corn Productivity */}
+      {/* Productivity by crop (multi-series line, CONAB kg/ha) */}
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hSoybeanCorn')}</h3>
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hConabProductivity')}</h3>
         <EChartsLine
-          series={soybeanCornProductivity.series}
-          captionKey="productivity"
+          series={cropProductivity.series}
+          captionKey="conabProductivityCaption"
           height={350}
         />
       </Card>
 
-      {/* Planted Area Distribution + All Crops by Production */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card padding="lg" hover={false}>
-          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hPlantedAreaDist', { unit: tBody('kpiAreaUnit') })}</h3>
-          {plantedAreaDistribution.length > 0 ? (
-            <EChartsPie
-              data={plantedAreaDistribution}
-              captionKey="plantedArea"
-              height={350}
-              donut
-            />
-          ) : (
-            <p className="text-fg-muted text-center py-8">{tBody('noAreaData')}</p>
-          )}
-        </Card>
+      {/* Season close-out 24/25 × 25/26 (grouped bar + Δ % table) */}
+      <SeasonCloseChart />
 
-        <Card padding="lg" hover={false}>
-          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hAllCrops')}</h3>
-          {allCropsProduction.values.length > 0 ? (
-            <EChartsHorizontalBar
-              labels={allCropsProduction.labels}
-              values={allCropsProduction.values}
-              captionKey="production"
-              height={Math.max(250, allCropsProduction.labels.length * 40)}
-            />
-          ) : (
-            <p className="text-fg-muted text-center py-8">{tBody('noProductionData')}</p>
-          )}
-        </Card>
-      </div>
+      {/* All Crops by Production (horizontal bar kept; pie por safra removido P2b) */}
+      <Card padding="lg" hover={false}>
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hAllCrops')}</h3>
+        {allCropsProduction.values.length > 0 ? (
+          <EChartsHorizontalBar
+            labels={allCropsProduction.labels}
+            values={allCropsProduction.values}
+            captionKey="production"
+            height={Math.max(250, allCropsProduction.labels.length * 40)}
+          />
+        ) : (
+          <p className="text-fg-muted text-center py-8">{tBody('noProductionData')}</p>
+        )}
+      </Card>
 
       {/* Source Info */}
       <Card padding="md" hover={false}>

@@ -4,7 +4,6 @@ import { Map, Leaf } from 'lucide-react';
 import ConabMappingTab from './ConabMappingTab';
 import ConabEstimatesTab from './ConabEstimatesTab';
 import IbgeEstimatesTab from './IbgeEstimatesTab';
-import AgriculturalCharts from '../../overview/AgriculturalCharts';
 
 
 export default function AgricultureOverviewPage() {
@@ -19,11 +18,6 @@ export default function AgricultureOverviewPage() {
   return (
     <div>
       <Tabs tabs={tabs} />
-
-      <hr className="my-6 border-border" />
-
-      {/* Série histórica IBGE (linha + donut + barra) — componente reutilizado do Overview (P2a). */}
-      <AgriculturalCharts />
     </div>
   );
 }

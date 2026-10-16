@@ -1,16 +1,16 @@
 import { useMemo } from 'react';
-import { Wheat, BarChart3, MapPin, TrendingUp, CalendarDays, ClipboardList, RefreshCw } from 'lucide-react';
+import { BarChart3, TrendingUp, CalendarDays, ClipboardList, RefreshCw } from 'lucide-react';
 import Card from '../../ui/Card';
 import Tabs from '../../ui/Tabs';
 import DataTable from '../../ui/DataTable';
 import MetricCard from '../../ui/MetricCard';
-import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
 import EChartsLine from '../../charts/echarts/EChartsLine';
+import ProductivitySeriesChart from './ProductivitySeriesChart';
+import ProductionValueChart from './ProductionValueChart';
 import { useT } from '../../../i18n/LanguageContext';
 import {
   translateActivity,
   translateCropName,
-  translateRegion,
   translateTerm,
 } from '../../../data/glossary';
 import ibgeData from '../../../data/processed/brazilian_ibge_agricultural_data.json';
@@ -36,8 +36,6 @@ interface IBGEDataType {
     agricultural_production?: Record<string, IBGECropEntry>;
   };
 }
-
-const REGIONS = ['North', 'Northeast', 'Southeast', 'South', 'Central-West'];
 
 export default function IbgeEstimatesTab() {
   // locale reativo p/ chrome dos gráficos; rótulos de coluna usam o mesmo
@@ -166,45 +164,14 @@ export default function IbgeEstimatesTab() {
 
   const productionByCropContent = (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card padding="lg" hover={false}>
-          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hTop10')}</h3>
-          {topCrops.length > 0 ? (
-            <EChartsHorizontalBar
-              labels={topCrops.map(c => c.name)}
-              values={topCrops.map(c => c.production / 1000000)}
-              captionKey="production"
-              height={Math.max(300, topCrops.length * 35)}
-            />
-          ) : (
-            <p className="text-fg-muted text-center py-8">{tBody('noData')}</p>
-          )}
-        </Card>
-
-        <Card padding="lg" hover={false}>
-          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hCropTable')}</h3>
-          <DataTable
-            columns={tableColumns}
-            data={topCrops as unknown as Record<string, unknown>[]}
-          />
-        </Card>
-      </div>
-    </div>
-  );
-
-  const regionalContent = (
-    <div className="space-y-6">
+      {/* P2b (2): valor da produção PAM — R$ 927 bi + top por quantidade */}
+      <ProductionValueChart />
       <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hRegionalIndicators')}</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {REGIONS.map(region => (
-            <div key={region} className="bg-amber-50 rounded-lg p-3 text-center border border-amber-200">
-              <p className="text-xs text-amber-700 font-medium">{translateRegion(region, bodyLocale)}</p>
-              <p className="text-lg font-bold text-amber-900 mt-1"><Wheat size={20} aria-hidden="true" className="mx-auto" /></p>
-              <p className="text-xs text-amber-600">{tBody('majorProducer')}</p>
-            </div>
-          ))}
-        </div>
+        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hCropTable')}</h3>
+        <DataTable
+          columns={tableColumns}
+          data={topCrops as unknown as Record<string, unknown>[]}
+        />
       </Card>
     </div>
   );
@@ -243,12 +210,13 @@ export default function IbgeEstimatesTab() {
           <p className="text-fg-muted text-center py-8">{tBody('noData')}</p>
         )}
       </Card>
+      {/* P2b (1): rendimento médio kg/ha por cultura (PAM 2018–2025) */}
+      <ProductivitySeriesChart />
     </div>
   );
 
   const subTabs = [
     { id: 'production', label: tBody('tabProductionByCrop'), icon: BarChart3, content: productionByCropContent },
-    { id: 'regional', label: tBody('tabRegionalDist'), icon: MapPin, content: regionalContent },
     { id: 'historical', label: tBody('tabHistorical'), icon: TrendingUp, content: historicalContent },
   ];
 
