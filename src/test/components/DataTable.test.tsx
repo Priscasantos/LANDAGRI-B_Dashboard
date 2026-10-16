@@ -55,4 +55,22 @@ describe('DataTable locale (Fase 2 qualidade)', () => {
     expect(screen.getByRole('button', { name: /^next$/i })).toBeInTheDocument();
     expect(screen.getByText(/records/i)).toBeInTheDocument();
   });
+
+  it('P3 truncates long cell text with full tooltip and honors titleKey', () => {
+    const long = 'Environmental Systems Research Institute (ESRI), Impact Observatory, and Microsoft Maps for Good Initiative';
+    render(
+      <DataTable
+        columns={[
+          { key: 'name', label: 'Nome', titleKey: 'full' },
+          { key: 'provider', label: 'Provedor' },
+        ]}
+        data={[{ name: 'ESRI · ESRI curta', full: 'Nome Oficial Longo da Iniciativa', provider: long }]}
+      />,
+    );
+    const nameCell = screen.getByRole('cell', { name: 'ESRI · ESRI curta' });
+    expect(nameCell).toHaveAttribute('title', 'Nome Oficial Longo da Iniciativa');
+    const truncated = screen.getByTitle(long);
+    expect(truncated).toHaveAttribute('title', long);
+    expect(truncated).toHaveClass('truncate');
+  });
 });

@@ -25,7 +25,14 @@ function SensorCard({ sensorKey, sensor }: { sensorKey: string; sensor: SensorMe
       <Expandable title={t('expSpecs')} icon={<Search size={16} aria-hidden="true" />} defaultExpanded={true}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <div><span className="font-medium">{t('fPlatform')}</span> {sensor.platform_name || '-'}</div>
+            <div><span className="font-medium">{t('fPlatform')}</span>{' '}
+              <span
+                className="inline-block max-w-64 truncate align-bottom"
+                title={sensor.platform_name || undefined}
+              >
+                {sensor.platform_name || '-'}
+              </span>
+            </div>
             <div><span className="font-medium">{t('fFamily')}</span> {sensor.sensor_family || '-'}</div>
             <div><span className="font-medium">{t('fType')}</span> {sensor.sensor_type_description || '-'}</div>
           </div>

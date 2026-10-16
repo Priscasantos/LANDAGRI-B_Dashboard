@@ -20,7 +20,9 @@ export type GlossaryKind =
   | 'month'
   | 'monthShort'
   | 'season'
-  | 'activity';
+  | 'activity'
+  | 'initiativeShort'
+  | 'providerShort';
 
 type LocalizedTerm = Record<Locale, string>;
 
@@ -28,6 +30,11 @@ const COVERAGE: Record<string, LocalizedTerm> = {
   Global: { 'pt-BR': 'Global', en: 'Global' },
   Continental: { 'pt-BR': 'Continental', en: 'Continental' },
   National: { 'pt-BR': 'Nacional', en: 'National' },
+  // Variações legadas de "National" vindas dos dados (ex. conab_mapping
+  // "Brasil"): na UI valem Nacional/National; "Brazil"/"Brasil" seguem só
+  // em metadados de território, nunca como categoria traduzida à parte.
+  Brazil: { 'pt-BR': 'Nacional', en: 'National' },
+  Brasil: { 'pt-BR': 'Nacional', en: 'National' },
   Regional: { 'pt-BR': 'Regional', en: 'Regional' },
   State: { 'pt-BR': 'Estadual', en: 'State' },
   Municipal: { 'pt-BR': 'Municipal', en: 'Municipal' },
@@ -227,6 +234,11 @@ const TABLES: Record<GlossaryKind, Record<string, LocalizedTerm>> = {
   monthShort: MONTH_SHORT,
   season: SEASON,
   activity: ACTIVITY,
+  // Derivadas de INITIATIVE_SHORT/PROVIDER_SHORT (declaradas abaixo por
+  // dependerem só de display) — preenchidas via `Object.assign` após as
+  // definições para respeitar a ordem de inicialização do módulo.
+  initiativeShort: {},
+  providerShort: {},
 };
 
 /** Traduz um enum/unidade/cabeçalho; desconhecido volta intacto. */
@@ -367,6 +379,104 @@ export function getInitiativeShortName(name: string, locale: Locale): string {
   const entry = base !== name ? INITIATIVE_SHORT[base] : undefined;
   if (entry) return `${entry.acronym} · ${entry.short[locale]}`;
   return translateInitiativeName(name, locale);
+}
+
+/**
+ * Nome curto por provedor — sigla + nome curto traduzido (só display;
+ * bruto intacto). Uso: tabelas e fichas onde o nome oficial (ex. 100
+ * chars do provedor ESRI) estouraria o layout; o nome completo fica no
+ * `title`/tooltip. Provedor fora da tabela volta intacto — nunca some.
+ */
+const PROVIDER_SHORT: Record<string, { acronym: string; short: LocalizedTerm }> = {
+  "Copernicus European Union's Space Program": {
+    acronym: 'Copernicus',
+    short: { 'pt-BR': 'Programa espacial da União Europeia', en: 'European Union Space Program' },
+  },
+  'Google and World Resources Institute': {
+    acronym: 'Google–WRI',
+    short: { 'pt-BR': 'Google e World Resources Institute', en: 'Google and World Resources Institute' },
+  },
+  'Environmental Systems Research Institute (ESRI), Impact Observatory, and Microsoft Maps for Good Initiative': {
+    acronym: 'ESRI',
+    short: { 'pt-BR': 'ESRI, Impact Observatory e Microsoft', en: 'ESRI, Impact Observatory and Microsoft' },
+  },
+  'University of Maryland (UMD) Global Land Analysis and Discovery (GLAD) laboratory': {
+    acronym: 'UMD–GLAD',
+    short: { 'pt-BR': 'Laboratório GLAD de análise global (UMD)', en: 'GLAD global land analysis laboratory (UMD)' },
+  },
+  'Land & Carbon Lab': {
+    acronym: 'L&C Lab',
+    short: { 'pt-BR': 'Laboratório Terra e Carbono', en: 'Land & Carbon Lab' },
+  },
+  'European Space Agency (ESA)': {
+    acronym: 'ESA',
+    short: { 'pt-BR': 'Agência Espacial Europeia', en: 'European Space Agency' },
+  },
+  'National Institute for Space Research (INPE)': {
+    acronym: 'INPE',
+    short: { 'pt-BR': 'Instituto Nacional de Pesquisas Espaciais', en: 'National Institute for Space Research' },
+  },
+  'National Institute for Space Research (INPE) and Brazilian Agricultural Research Corporation (Embrapa)': {
+    acronym: 'INPE–Embrapa',
+    short: { 'pt-BR': 'INPE e Embrapa', en: 'INPE and Embrapa' },
+  },
+  "Non-governmental Organizations (NGO's), Universities and Technology Companies": {
+    acronym: 'ONGs',
+    short: { 'pt-BR': 'ONGs, universidades e empresas de tecnologia', en: 'NGOs, universities and tech companies' },
+  },
+  'Brazilian Institute of Geography and Statistics (IBGE)': {
+    acronym: 'IBGE',
+    short: { 'pt-BR': 'Instituto Brasileiro de Geografia e Estatística', en: 'Brazilian Institute of Geography and Statistics' },
+  },
+  'National Supply Company (CONAB)': {
+    acronym: 'CONAB',
+    short: { 'pt-BR': 'Companhia Nacional de Abastecimento', en: 'National Supply Company' },
+  },
+  'National Supply Company (Conab)': {
+    acronym: 'CONAB',
+    short: { 'pt-BR': 'Companhia Nacional de Abastecimento', en: 'National Supply Company' },
+  },
+};
+
+/** Rótulo curto "SIGLA · nome curto" do provedor para tabelas/fichas. */
+export function getProviderShortName(provider: string, locale: Locale): string {
+  const entry = PROVIDER_SHORT[provider];
+  if (entry) return `${entry.acronym} · ${entry.short[locale]}`;
+  return provider;
+}
+
+/** Achata uma tabela `{ acronym, short }` no formato `LocalizedTerm`. */
+function toShortTable(
+  src: Record<string, { acronym: string; short: LocalizedTerm }>,
+): Record<string, LocalizedTerm> {
+  return Object.fromEntries(
+    Object.entries(src).map(([key, value]) => [
+      key,
+      {
+        'pt-BR': `${value.acronym} · ${value.short['pt-BR']}`,
+        en: `${value.acronym} · ${value.short.en}`,
+      } satisfies LocalizedTerm,
+    ]),
+  );
+}
+
+Object.assign(TABLES.initiativeShort, toShortTable(INITIATIVE_SHORT));
+Object.assign(TABLES.providerShort, toShortTable(PROVIDER_SHORT));
+
+/**
+ * Tetos de tipografia P3 — rótulos curtos em cards cabem em 32 chars e em
+ * cabeçalhos de tabela em 60; acima disso, `truncateLabel` + `title`.
+ */
+export const SHORT_LABEL_MAX_CARD = 32;
+export const SHORT_LABEL_MAX_HEADER = 60;
+
+/** Trunca no limite com elipse, preferindo fronteira de palavra. */
+export function truncateLabel(text: string, max: number): string {
+  if (text.length <= max) return text;
+  const slice = text.slice(0, max - 1).trimEnd();
+  const boundary = slice.lastIndexOf(' ');
+  const cut = boundary > max * 0.5 ? slice.slice(0, boundary) : slice;
+  return `${cut.trimEnd()}…`;
 }
 
 /**

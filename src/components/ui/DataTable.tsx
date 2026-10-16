@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, type ReactElement } from 'react';
 import { ChevronUp, ChevronDown, Search } from 'lucide-react';
 import { useT } from '../../i18n/LanguageContext';
 
@@ -7,6 +7,10 @@ interface Column {
   label: string;
   format?: (value: unknown) => string;
   sortable?: boolean;
+  /** Campo da linha com o texto completo para o tooltip (`title`). */
+  titleKey?: string;
+  /** Trunca strings acima deste tamanho com elipse + `title` (padrão 60). */
+  truncateAt?: number;
 }
 
 interface DataTableProps {
@@ -19,6 +23,20 @@ interface DataTableProps {
   searchPlaceholder?: string;
   /** Sobrescreve a mensagem de vazio traduzida. */
   emptyMessage?: string;
+}
+
+/** P3: textos longos (provedor 100c, algoritmo 68c…) truncam com tooltip. */
+function TruncatedText({ text, max, title }: { text: string; max: number; title?: string }): string | ReactElement {
+  if (text.length <= max) return text;
+  return (
+    <span
+      className="block truncate"
+      style={{ maxWidth: `${Math.max(20, Math.min(max, 60))}ch` }}
+      title={title || text}
+    >
+      {text}
+    </span>
+  );
 }
 
 export default function DataTable({ columns, data, className = '', searchable = false, pageSize = 50, searchPlaceholder, emptyMessage }: DataTableProps) {
@@ -150,8 +168,13 @@ export default function DataTable({ columns, data, className = '', searchable = 
                     <td
                       key={col.key}
                       className="px-4 py-2.5 text-fg"
+                      title={
+                        col.titleKey != null && row[col.titleKey] != null
+                          ? String(row[col.titleKey])
+                          : undefined
+                      }
                     >
-                      {col.format ? col.format(row[col.key]) : String(row[col.key] ?? '-')}
+                      {col.format ? col.format(row[col.key]) : <TruncatedText text={String(row[col.key] ?? '-')} max={col.truncateAt ?? 60} title={col.titleKey != null ? undefined : String(row[col.key] ?? '')} />}
                     </td>
                   ))}
                 </tr>

@@ -48,9 +48,9 @@ export default function SplitCompareTab(): ReactElement {
     () =>
       initiatives.map((i) => ({
         value: i.Name,
-        label: `${i.Name} (${i.Acronym})`,
+        label: getInitiativeShortName(i.Display_Name, locale),
       })),
-    [initiatives],
+    [initiatives, locale],
   );
 
   const years = useMemo(() => {

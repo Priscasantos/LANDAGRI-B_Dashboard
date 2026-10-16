@@ -1,13 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import {
   getInitiativeDisplayName,
+  getInitiativeShortName,
+  getProviderShortName,
   normalizeCropOrdinals,
+  SHORT_LABEL_MAX_CARD,
+  SHORT_LABEL_MAX_HEADER,
   translateActivity,
   translateCropName,
   translateMonth,
   translateMonthShort,
   translateRegion,
   translateSeason,
+  truncateLabel,
   translateTerm,
 } from './glossary';
 
@@ -240,5 +245,50 @@ describe('glossary Fase 3 — iniciativas: Brasil/Brazil, typos de metodologia, 
     );
     // Desconhecida volta intacta (nunca some)
     expect(getInitiativeShortName('Quinoa Initiative', 'pt-BR')).toBe('Quinoa Initiative');
+  });
+});
+
+describe('glossary P3 — tipografia/identidade (initiativeShort/providerShort, tetos)', () => {
+  it('mapeia coverage "Brazil"/"Brasil" para Nacional (PT) / National (EN)', () => {
+    expect(translateTerm('coverage', 'Brazil', 'pt-BR')).toBe('Nacional');
+    expect(translateTerm('coverage', 'Brazil', 'en')).toBe('National');
+    expect(translateTerm('coverage', 'Brasil', 'pt-BR')).toBe('Nacional');
+    expect(translateTerm('coverage', 'Brasil', 'en')).toBe('National');
+  });
+
+  it('expõe kind initiativeShort via translateTerm (mesmo rótulo do helper)', () => {
+    expect(translateTerm('initiativeShort', 'MapBiomas', 'pt-BR')).toBe(
+      getInitiativeShortName('MapBiomas', 'pt-BR'),
+    );
+    expect(translateTerm('initiativeShort', 'MapBiomas', 'en')).toBe(
+      getInitiativeShortName('MapBiomas', 'en'),
+    );
+    expect(translateTerm('initiativeShort', 'Quinoa Initiative', 'pt-BR')).toBe(
+      'Quinoa Initiative',
+    );
+  });
+
+  it('expõe providerShort no padrão "[SIGLA] · Nome curto PT/EN"', () => {
+    const esri = 'Environmental Systems Research Institute (ESRI), Impact Observatory, and Microsoft Maps for Good Initiative';
+    expect(getProviderShortName(esri, 'pt-BR')).toBe(
+      'ESRI · ESRI, Impact Observatory e Microsoft',
+    );
+    expect(getProviderShortName(esri, 'en')).toBe(
+      'ESRI · ESRI, Impact Observatory and Microsoft',
+    );
+    expect(translateTerm('providerShort', esri, 'pt-BR')).toBe(
+      getProviderShortName(esri, 'pt-BR'),
+    );
+    expect(getProviderShortName('INPE', 'pt-BR')).toBe('INPE');
+  });
+
+  it('trunca rótulos longos com elipse sem quebrar palavra curta', () => {
+    expect(SHORT_LABEL_MAX_CARD).toBe(32);
+    expect(SHORT_LABEL_MAX_HEADER).toBe(60);
+    expect(truncateLabel('curto', SHORT_LABEL_MAX_CARD)).toBe('curto');
+    const long = 'National Institute for Space Research (INPE) and Brazilian Agricultural Research Corporation (Embrapa)';
+    const cut = truncateLabel(long, SHORT_LABEL_MAX_HEADER);
+    expect(cut.length).toBeLessThanOrEqual(SHORT_LABEL_MAX_HEADER);
+    expect(cut.endsWith('…')).toBe(true);
   });
 });

@@ -4,6 +4,7 @@ import { useDashboardStore } from '../../stores/dashboardStore';
 import SectionCards from '../ui/SectionCards';
 import type { SectionCardItem } from '../ui/SectionCards';
 import { formatNumber } from '../../lib/normalize';
+import { translateTerm } from '../../data/glossary';
 import { useT } from '../../i18n/LanguageContext';
 
 /**
@@ -12,7 +13,7 @@ import { useT } from '../../i18n/LanguageContext';
  * trocados por ícones Lucide com `aria-hidden` para leitores de tela.
  */
 export default function SummaryCards(): ReactElement | null {
-  const { t } = useT('overview');
+  const { t, locale } = useT('overview');
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const sections = useMemo((): { coverage: SectionCardItem[]; perf: SectionCardItem[] } | null => {
@@ -31,7 +32,7 @@ export default function SummaryCards(): ReactElement | null {
 
     const coverage: SectionCardItem[] = Object.entries(coverageCounts).map(([coverageName, count]) => ({
       key: coverageName,
-      label: coverageName,
+      label: translateTerm('coverage', coverageName, locale),
       value: String(count),
       hint: t('ofTotal', { pct: ((count / totalInitiatives) * 100).toFixed(0) }),
     }));
@@ -44,7 +45,7 @@ export default function SummaryCards(): ReactElement | null {
     ];
 
     return { coverage, perf };
-  }, [initiatives, t]);
+  }, [initiatives, t, locale]);
 
   if (!sections) return null;
 

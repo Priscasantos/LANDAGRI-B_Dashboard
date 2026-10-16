@@ -1,7 +1,13 @@
 import { useMemo } from 'react';
 import DataTable from '../../ui/DataTable';
 import { useDashboardStore } from '../../../stores/dashboardStore';
-import { translateMethodology } from '../../../data/glossary';
+import {
+  getInitiativeShortName,
+  getProviderShortName,
+  translateInitiativeName,
+  translateMethodology,
+  translateTerm,
+} from '../../../data/glossary';
 import { useT } from '../../../i18n/LanguageContext';
 
 interface DataDetailsTabProps {
@@ -17,11 +23,13 @@ export default function DataDetailsTab({ selectedInitiatives }: DataDetailsTabPr
       initiatives
         .filter((i) => selectedInitiatives.includes(i.Name))
         .map((i) => ({
-          displayName: i.Display_Name,
+          displayName: getInitiativeShortName(i.Display_Name, locale),
+          displayNameFull: translateInitiativeName(i.Display_Name, locale),
           acronym: i.Acronym,
-          provider: i.Provider,
+          provider: getProviderShortName(i.Provider, locale),
+          providerFull: i.Provider,
           source: i.Source,
-          coverage: i.Coverage,
+          coverage: translateTerm('coverage', i.Coverage, locale),
           methodology: translateMethodology(i.Methodology, locale),
           accuracy: i.Accuracy > 0 ? i.Accuracy.toFixed(1) : '-',
           accuracyMin: i.Accuracy_Min > 0 ? i.Accuracy_Min.toFixed(1) : '-',
@@ -43,9 +51,9 @@ export default function DataDetailsTab({ selectedInitiatives }: DataDetailsTabPr
   );
 
   const columns = [
-    { key: 'displayName', label: t('colInitiative') },
+    { key: 'displayName', label: t('colInitiative'), titleKey: 'displayNameFull' },
     { key: 'acronym', label: t('colAcronym') },
-    { key: 'provider', label: t('colProvider') },
+    { key: 'provider', label: t('colProvider'), titleKey: 'providerFull' },
     { key: 'source', label: t('colSource') },
     { key: 'coverage', label: t('colCoverage') },
     { key: 'methodology', label: t('colMethodology') },

@@ -2,6 +2,7 @@ import type { InitiativeRow } from '../../types/initiative';
 import Expandable from '../ui/Expandable';
 import { Building2, Microscope, History } from 'lucide-react';
 import { parseAvailableYears } from '../../lib/dataParser';
+import { translateMethodology, translateTerm } from '../../data/glossary';
 import { useT } from '../../i18n/LanguageContext';
 
 interface TechnicalDetailsProps {
@@ -9,23 +10,23 @@ interface TechnicalDetailsProps {
 }
 
 export default function TechnicalDetails({ data }: TechnicalDetailsProps) {
-  const { t } = useT('overview');
+  const { t, locale } = useT('overview');
   const years = parseAvailableYears(data.Available_Years);
 
   return (
     <div className="space-y-3">
       <Expandable title={t('expBasic')} icon={<Building2 size={16} aria-hidden="true" />} defaultExpanded={true}>
         <div className="space-y-2">
-          <div><span className="font-medium text-fg">{t('fProvider')}</span> {data.Provider || '-'}</div>
-          <div><span className="font-medium text-fg">{t('fSource')}</span> {data.Source || '-'}</div>
-          <div><span className="font-medium text-fg">{t('fCoverage')}</span> {data.Coverage || '-'}</div>
+          <div><span className="font-medium text-fg">{t('fProvider')}</span> <span title={data.Provider || undefined}>{data.Provider || '-'}</span></div>
+          <div><span className="font-medium text-fg">{t('fSource')}</span> <span title={data.Source || undefined}>{data.Source || '-'}</span></div>
+          <div><span className="font-medium text-fg">{t('fCoverage')}</span> {translateTerm('coverage', data.Coverage, locale) || '-'}</div>
         </div>
       </Expandable>
 
       <Expandable title={t('expTech')} icon={<Microscope size={16} aria-hidden="true" />}>
         <div className="space-y-2">
-          <div><span className="font-medium text-fg">{t('fMethodology')}</span> {data.Methodology || '-'}</div>
-          <div><span className="font-medium text-fg">{t('fAlgorithm')}</span> {data.Algorithm || '-'}</div>
+          <div><span className="font-medium text-fg">{t('fMethodology')}</span> {translateMethodology(data.Methodology, locale) || '-'}</div>
+          <div><span className="font-medium text-fg">{t('fAlgorithm')}</span> <span title={data.Algorithm || undefined}>{translateMethodology(data.Algorithm, locale) || '-'}</span></div>
           <div><span className="font-medium text-fg">{t('fResolution')}</span> {data.Resolution > 0 ? `${data.Resolution}m` : '-'}</div>
           <div><span className="font-medium text-fg">{t('fReference')}</span> {data.Reference_System || '-'}</div>
         </div>
