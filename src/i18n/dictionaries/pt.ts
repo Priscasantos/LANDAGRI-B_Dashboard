@@ -576,11 +576,15 @@ export const pt = {
     percentagePct: 'Percentual (%)',
     availableYears: 'Anos disponíveis',
     interactiveChart: 'Gráfico interativo',
+    exportCsv: 'Exportar CSV',
+    toolboxSaveAsImage: 'Salvar como imagem',
+    toolboxDataView: 'Ver dados',
     chartLoadError:
       'Não foi possível carregar o gráfico interativo. Tente recarregar a página.',
   },
   tables: {
     searchPlaceholder: 'Buscar...',
+    exportCsv: 'Exportar CSV',
     emptyMessage: 'Nenhum registro encontrado.',
     previous: 'Anterior',
     next: 'Próxima',

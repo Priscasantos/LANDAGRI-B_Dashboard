@@ -575,11 +575,15 @@ export const en: EnDictionary = {
     percentagePct: 'Percentage (%)',
     availableYears: 'Available years',
     interactiveChart: 'Interactive chart',
+    exportCsv: 'Export CSV',
+    toolboxSaveAsImage: 'Save as image',
+    toolboxDataView: 'View data',
     chartLoadError:
       'Could not load the interactive chart. Try reloading the page.',
   },
   tables: {
     searchPlaceholder: 'Search...',
+    exportCsv: 'Export CSV',
     emptyMessage: 'No records found.',
     previous: 'Previous',
     next: 'Next',

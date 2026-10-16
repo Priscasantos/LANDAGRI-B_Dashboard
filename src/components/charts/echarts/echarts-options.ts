@@ -12,6 +12,8 @@
  */
 import type { EChartsCoreOption } from 'echarts/core';
 import { CHART_FONT_FAMILY } from '../../../lib/fonts';
+import { translate } from '../../../i18n';
+import type { Locale } from '../../../i18n/types';
 import {
   BERRY_TOOLTIP_BG,
   GRID_DIVIDER_DARK,
@@ -41,6 +43,12 @@ interface BaseBuilderInput {
    * for correlation-style −1…1 data.
    */
   palette?: EChartsPalette;
+  /**
+   * Nome-base do PNG (`toolbox.saveAsImage`) — montado pelo chamador com
+   * rota/iniciativa/locale (ver `useChartExport`). Omitido → fallback
+   * `landagri-chart-{locale}`.
+   */
+  exportName?: string;
 }
 
 function fontOf(input: BaseBuilderInput): string {
@@ -108,6 +116,49 @@ function axisCommon(theme: EChartsPilotTheme): {
 
 function colorwayOf(theme: EChartsPilotTheme): string[] {
   return [...(theme === 'dark' ? LANDAGRI_COLORWAY_DARK : LANDAGRI_COLORWAY_LIGHT)];
+}
+
+/**
+ * Toolbox por gráfico (Expansão #2, reversível): `saveAsImage` (PNG 2x com o
+ * `exportName` de rota/iniciativa/locale) + `dataView` somente-leitura.
+ * Títulos via i18n (`charts:toolboxSaveAsImage/toolboxDataView`).
+ */
+export function buildChartToolbox(
+  locale: string,
+  exportName?: string,
+  theme: EChartsPilotTheme = 'light',
+): Record<string, unknown> {
+  const loc: Locale = locale.startsWith('pt') ? 'pt-BR' : 'en';
+  const saveTitle = translate(loc, 'charts', 'toolboxSaveAsImage');
+  const viewTitle = translate(loc, 'charts', 'toolboxDataView');
+  const closeTitle = translate(loc, 'common', 'close');
+  const refreshTitle = translate(loc, 'errors', 'boundaryRetry');
+  return {
+    show: true,
+    orient: 'horizontal',
+    right: 8,
+    top: 0,
+    itemSize: 14,
+    iconStyle: { borderColor: theme === 'dark' ? '#94a3b8' : '#64748b' },
+    emphasis: { iconStyle: { borderColor: theme === 'dark' ? '#e2e8f0' : '#1e293b' } },
+    feature: {
+      saveAsImage: {
+        show: true,
+        title: saveTitle,
+        name:
+          exportName ??
+          `landagri-chart-${locale.startsWith('pt') ? 'pt-br' : 'en'}`,
+        type: 'png',
+        pixelRatio: 2,
+      },
+      dataView: {
+        show: true,
+        title: viewTitle,
+        readOnly: true,
+        lang: [viewTitle, closeTitle, refreshTitle],
+      },
+    },
+  };
 }
 
 /**
@@ -180,6 +231,7 @@ export function buildHorizontalBarOption(
   return {
     color: [...colorway],
     textStyle: { fontFamily },
+    toolbox: buildChartToolbox(input.locale, input.exportName, input.theme),
     tooltip: {
       ...tooltipBase(input, fontFamily),
       trigger: 'axis',
@@ -243,6 +295,7 @@ export function buildGroupedBarOption(
   return {
     color: [...colorway],
     textStyle: { fontFamily },
+    toolbox: buildChartToolbox(input.locale, input.exportName, input.theme),
     tooltip: {
       ...tooltipBase(input, fontFamily),
       trigger: 'axis',
@@ -408,6 +461,7 @@ export function buildHeatmapOption(input: HeatmapInput): EChartsCoreOption {
   const [darkLo, darkHi] = darkRange ?? [vMin, vMin + (vMax - vMin) * 0.4];
   return {
     textStyle: { fontFamily },
+    toolbox: buildChartToolbox(input.locale, input.exportName, input.theme),
     tooltip: {
       ...tooltipBase(input, fontFamily),
       trigger: 'item',
@@ -519,6 +573,7 @@ export function buildLineOption(input: LineInput): EChartsCoreOption {
   return {
     color: [...colorway],
     textStyle: { fontFamily },
+    toolbox: buildChartToolbox(input.locale, input.exportName, input.theme),
     tooltip: {
       ...tooltipBase(input, fontFamily),
       trigger: 'axis',
@@ -619,6 +674,7 @@ export function buildPieOption(input: PieInput): EChartsCoreOption {
   return {
     color: [...colorway],
     textStyle: { fontFamily },
+    toolbox: buildChartToolbox(input.locale, input.exportName, input.theme),
     tooltip: {
       ...tooltipBase(input, fontFamily),
       trigger: 'item',
@@ -766,6 +822,7 @@ export function buildScatterOption(input: ScatterInput): EChartsCoreOption {
   return {
     color: [...colorway],
     textStyle: { fontFamily },
+    toolbox: buildChartToolbox(input.locale, input.exportName, input.theme),
     tooltip: {
       ...tooltipBase(input, fontFamily),
       trigger: 'item',
@@ -896,6 +953,7 @@ export function buildTimelineOption(input: TimelineInput): EChartsCoreOption {
   return {
     color: [...colorway],
     textStyle: { fontFamily },
+    toolbox: buildChartToolbox(input.locale, input.exportName, input.theme),
     tooltip: {
       ...tooltipBase(input, fontFamily),
       trigger: 'item',
@@ -958,6 +1016,7 @@ export function buildRadarOption(input: RadarInput): EChartsCoreOption {
   return {
     color: [...colorway],
     textStyle: { fontFamily },
+    toolbox: buildChartToolbox(input.locale, input.exportName, input.theme),
     tooltip: {
       ...tooltipBase(input, fontFamily),
       trigger: 'item',
@@ -1031,6 +1090,7 @@ export function buildGanttOption(input: GanttInput): EChartsCoreOption {
   return {
     color: [...colorway],
     textStyle: { fontFamily },
+    toolbox: buildChartToolbox(input.locale, input.exportName, input.theme),
     tooltip: {
       ...tooltipBase(input, fontFamily),
       trigger: 'item',
@@ -1109,6 +1169,7 @@ export function buildPolarOption(input: PolarInput): EChartsCoreOption {
   return {
     color: [...colorway],
     textStyle: { fontFamily },
+    toolbox: buildChartToolbox(input.locale, input.exportName, input.theme),
     tooltip: {
       ...tooltipBase(input, fontFamily),
       trigger: 'item',

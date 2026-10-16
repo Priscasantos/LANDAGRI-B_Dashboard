@@ -1,11 +1,17 @@
 import { useMemo, type ReactElement } from 'react';
+import { Download } from 'lucide-react';
 import DataTable from '../ui/DataTable';
 import { useDashboardStore } from '../../stores/dashboardStore';
 import { getInitiativeShortName } from '../../data/glossary';
 import { useT } from '../../i18n/LanguageContext';
+import { useChartExport } from '../../hooks/use-chart-export';
 
 interface InitiativesTableProps {
   className?: string;
+  /** Route slug for the CSV filename (default `overview`). */
+  route?: string;
+  /** Highlighted initiative for the CSV filename. */
+  initiative?: string;
 }
 
 /**
@@ -18,10 +24,19 @@ interface InitiativesTableProps {
  * is incompatible with the stable `@tanstack/react-table` v8 line; adopting
  * it would add a new dep + a beta API surface. Revisit when the template
  * lands on stable v8. Reversible: pure wrapper.
+ *
+ * Expansão #2 (reversível): CSV export button (papaparse) with
+ * route/locale filename via `useChartExport`.
  */
-export default function InitiativesTable({ className = '' }: InitiativesTableProps): ReactElement {
+export default function InitiativesTable({
+  className = '',
+  route = 'overview',
+  initiative,
+}: InitiativesTableProps): ReactElement {
   const { t, locale } = useT('overview');
+  const { t: tTables } = useT('tables');
   const initiatives = useDashboardStore((s) => s.initiatives);
+  const { exportCsv } = useChartExport({ chartId: 'initiatives', route, initiative });
 
   const data = useMemo(
     () =>
@@ -66,7 +81,30 @@ export default function InitiativesTable({ className = '' }: InitiativesTablePro
     );
   }
 
+  const exportLabel = tTables('exportCsv');
+
   return (
-    <DataTable columns={columns} data={data} searchable className={className} pageSize={10} />
+    <div className={className}>
+      <div className="mb-3 flex justify-end">
+        <button
+          type="button"
+          onClick={() =>
+            exportCsv(
+              data.map((row) =>
+                Object.fromEntries(
+                  columns.map((col) => [col.label, row[col.key as keyof typeof row] ?? '']),
+                ),
+              )
+            )
+          }
+          aria-label={exportLabel}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-alt px-2.5 py-1.5 text-xs font-medium text-fg-secondary transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        >
+          <Download size={14} aria-hidden="true" />
+          {exportLabel}
+        </button>
+      </div>
+      <DataTable columns={columns} data={data} searchable pageSize={10} />
+    </div>
   );
 }
