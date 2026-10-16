@@ -548,12 +548,13 @@ export function buildHeatmapOption(input: HeatmapInput): EChartsCoreOption {
         data,
         label: {
           show: input.showValues ?? false,
-          fontSize: 11,
+          fontSize: 12,
+          fontWeight: 500,
           fontFamily,
-          // Halo estático do tema: realça o glifo na faixa de transição da
+          // Halo fino: realça o glifo na faixa de transição da
           // rampa (onde nem branco nem Berry atingem 4.5:1 sozinhos); nos
           // stops o contraste ≥4.5:1 já vem da cor automática (ver teste).
-          textBorderWidth: 2,
+          textBorderWidth: 1,
           textBorderColor: input.theme === 'dark' ? 'rgba(255,255,255,0.85)' : 'rgba(30,41,59,0.85)',
           color: (params: { value?: unknown }): string => {
             const v = Array.isArray(params.value) ? params.value[2] : params.value;

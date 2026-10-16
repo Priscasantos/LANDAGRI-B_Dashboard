@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { Sprout, CalendarDays, Package } from 'lucide-react';
 import { useT } from '../i18n/LanguageContext';
 import FilterBar from '../components/ui/FilterBar';
@@ -27,6 +27,18 @@ export default function AgriculturalAnalysisPage(): React.JSX.Element {
         <Route path="overview" element={<AgricultureOverviewPage />} />
         <Route path="crop-calendar" element={<CropCalendarPage />} />
         <Route path="availability" element={<AgricultureAvailabilityPage />} />
+        {/* Deep-link desconhecido: mensagem local com retorno (nunca 404 silencioso). */}
+        <Route
+          path="*"
+          element={
+            <p className="text-center text-fg-secondary py-8" role="status">
+              {t('subpageNotFound')}{' '}
+              <Link to="/agricultural-analysis/overview" className="underline font-medium">
+                {t('backToSection')}
+              </Link>
+            </p>
+          }
+        />
       </Routes>
     </div>
   );

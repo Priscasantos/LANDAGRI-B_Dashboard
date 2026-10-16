@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { Clock, GitCompare, FileSearch } from 'lucide-react';
 import TemporalPage from '../components/initiative-analysis/TemporalAnalysis/TemporalPage';
 import ComparativePage from '../components/initiative-analysis/ComparativeAnalysis/ComparativePage';
@@ -39,6 +39,18 @@ export default function InitiativeAnalysisPage(): React.JSX.Element {
         <Route path="temporal" element={<TemporalPage />} />
         <Route path="comparative" element={<ComparativePage />} />
         <Route path="detailed" element={<DetailedPage />} />
+        {/* Deep-link desconhecido: mensagem local com retorno (nunca 404 silencioso). */}
+        <Route
+          path="*"
+          element={
+            <p className="text-center text-fg-secondary py-8" role="status">
+              {t('subpageNotFound')}{' '}
+              <Link to="/initiative-analysis/temporal" className="underline font-medium">
+                {t('backToSection')}
+              </Link>
+            </p>
+          }
+        />
       </Routes>
     </div>
   );

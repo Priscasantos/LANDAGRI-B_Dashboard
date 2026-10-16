@@ -897,8 +897,10 @@ describe('echarts-options palette (theme | divergent)', () => {
         showValues: true,
       });
       const ramp = visualColors(option);
-      const labelCfg = (option.series as { label: { textBorderWidth: number; textBorderColor: string } }[])[0].label;
-      expect(labelCfg.textBorderWidth).toBe(2);
+      const labelCfg = (option.series as { label: { textBorderWidth: number; textBorderColor: string; fontSize: number; fontWeight: number } }[])[0].label;
+      expect(labelCfg.textBorderWidth).toBe(1);
+      expect(labelCfg.fontSize).toBe(12);
+      expect(labelCfg.fontWeight).toBe(500);
       expect(labelCfg.textBorderColor).toBe(
         theme === 'dark' ? 'rgba(255,255,255,0.85)' : 'rgba(30,41,59,0.85)',
       );

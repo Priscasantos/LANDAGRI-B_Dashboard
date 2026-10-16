@@ -41,7 +41,7 @@ export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: Sp
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
 
-  const chartData = useMemo(() => {
+  const { bars, legend } = useMemo(() => {
     const stateRegions: Record<string, string> = {};
     for (const [code, info] of Object.entries(statesMap)) {
       stateRegions[code] = info.region;
@@ -103,20 +103,48 @@ export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: Sp
       });
     });
 
-    return bars;
+    // Legenda: cor por cultura dominante (mesmo slot do colorway usado nas barras).
+    const legend = selectedCrops
+      .filter((crop) => Object.values(stateCropMonths).some((byCrop) => (byCrop[crop]?.size ?? 0) > 0))
+      .map((crop, i) => ({
+        crop,
+        label: translateCropName(crop, locale),
+        color: way[selectedCrops.indexOf(crop) % way.length] ?? way[i % way.length],
+      }));
+
+    return { bars, legend };
   }, [rawData, selectedCrops, selectedRegions, statesMap, t, locale, theme]);
 
   return (
     <Card padding="lg" hover={false}>
       <h3 className="text-base font-semibold text-fg mb-3">{tBody('hSpatioTemporal')}</h3>
-      {chartData.length > 0 ? (
-        <EChartsGantt
-          bars={chartData}
-          xLabels={MONTHS_SHORT.map((m) => translateMonthShort(m, locale))}
-          captionKey="spatioTemporalDistribution"
-          height={Math.max(400, chartData.length * 25 + 100)}
-          markLineX={{ position: bulletinSlotForMonth(currentCalendarMonth()) + 0.5, name: tBody('currentMonth') }}
-        />
+      {bars.length > 0 ? (
+        <>
+          <EChartsGantt
+            bars={bars}
+            xLabels={MONTHS_SHORT.map((m) => translateMonthShort(m, locale))}
+            captionKey="spatioTemporalDistribution"
+            height={Math.max(400, bars.length * 25 + 100)}
+            markLineX={{ position: bulletinSlotForMonth(currentCalendarMonth()) + 0.5, name: tBody('currentMonth') }}
+          />
+          {legend.length > 0 ? (
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1" role="group" aria-label={t('legend')}>
+              <span className="text-xs font-medium text-fg-secondary">{t('legend')}:</span>
+              <ul className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                {legend.map((entry) => (
+                  <li key={entry.crop} className="flex items-center gap-1.5 text-xs text-fg-secondary">
+                    <span
+                      aria-hidden="true"
+                      className="inline-block h-3 w-3 rounded-sm"
+                      style={{ backgroundColor: entry.color }}
+                    />
+                    {entry.label}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </>
       ) : (
         <p className="text-fg-muted text-center py-8" role="status">{tBody('noFilterData')}</p>
       )}

@@ -118,8 +118,8 @@ describe('split-view + timeline animada (Expansão #4)', () => {
     expect(translate('en', 'charts', 'timelinePlay')).toBe('Play timeline');
     expect(translate('pt-BR', 'charts', 'timelinePause')).toBe('Pausar linha do tempo');
     expect(translate('en', 'charts', 'timelinePause')).toBe('Pause timeline');
-    expect(translate('pt-BR', 'initiative', 'tabSplit')).toBe('Lado a lado');
-    expect(translate('en', 'initiative', 'tabSplit')).toBe('Side by side');
+    expect(translate('pt-BR', 'initiative', 'tabSplit')).toBe('Lado a Lado');
+    expect(translate('en', 'initiative', 'tabSplit')).toBe('Side by Side');
   });
 
   it('EChartsBase conecta charts do mesmo grupo (tooltip/zoom sincronizados)', async () => {
