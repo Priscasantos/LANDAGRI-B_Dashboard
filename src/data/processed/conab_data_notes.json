@@ -1,0 +1,10 @@
+{
+  "anos_1s": "Crop years with mapping coverage in the first-semester (1S) campaign.",
+  "anos_2s": "Crop years with mapping coverage in the second-semester (2S) campaign.",
+  "year_format": "Agricultural years as \"YYYY-YYYY\" pairs, comma-separated per cell.",
+  "long_aggregates": "Tokens spanning more than one harvest year (e.g. \"2000-2014\", \"2000-2015\") are multi-year rollups, not single agricultural years; rows carrying them are flagged is_long_aggregate.",
+  "area_aliases": {
+    "Brazil": "BR"
+  },
+  "calendar_months": "Calendar `months` arrays run October→September (CONAB bulletin order), one code per month (P/H/PH/\"\")."
+}

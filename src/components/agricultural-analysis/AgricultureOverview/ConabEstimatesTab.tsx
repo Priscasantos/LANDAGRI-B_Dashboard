@@ -47,7 +47,7 @@ export default function ConabEstimatesTab() {
     let totalArea = 0;
     let totalProdWeighted = 0;
     let cropCount = 0;
-    const seasons = ['2023/24', '2022/23', '2021/22', '2020/21', '2019/20', '2018/19'];
+    const seasons = ['2024/25', '2023/24', '2022/23', '2021/22', '2020/21', '2019/20', '2018/19'];
     const latestSeason = seasons[0];
 
     for (const [, crop] of Object.entries(crops)) {
@@ -72,7 +72,7 @@ export default function ConabEstimatesTab() {
 
   const productionEvolution = useMemo(() => {
     if (!crops) return { series: [] };
-    const seasons = ['2018/19', '2019/20', '2020/21', '2021/22', '2022/23', '2023/24'];
+    const seasons = ['2018/19', '2019/20', '2020/21', '2021/22', '2022/23', '2023/24', '2024/25', '2025/26'];
 
     const totalBySeason: Record<string, number> = {};
     for (const season of seasons) {
@@ -96,7 +96,7 @@ export default function ConabEstimatesTab() {
 
   const cropComparison = useMemo(() => {
     if (!crops) return { categories: [], series: [] };
-    const seasons = ['2018/19', '2019/20', '2020/21', '2021/22', '2022/23', '2023/24'];
+    const seasons = ['2018/19', '2019/20', '2020/21', '2021/22', '2022/23', '2023/24', '2024/25', '2025/26'];
 
     const productionSeries = Object.entries(crops).map(([, crop]) => ({
       name: translateCropName(crop.name, locale),
@@ -111,7 +111,7 @@ export default function ConabEstimatesTab() {
 
   const soybeanCornProductivity = useMemo(() => {
     if (!crops) return { series: [] };
-    const seasons = ['2018/19', '2019/20', '2020/21', '2021/22', '2022/23', '2023/24'];
+    const seasons = ['2018/19', '2019/20', '2020/21', '2021/22', '2022/23', '2023/24', '2024/25', '2025/26'];
 
     const series: { name: string; x: string[]; y: number[] }[] = [];
 
@@ -134,7 +134,7 @@ export default function ConabEstimatesTab() {
 
   const plantedAreaDistribution = useMemo(() => {
     if (!crops) return [];
-    const latestSeason = '2023/24';
+    const latestSeason = '2024/25'; // last closed harvest (2025/26 is forecast)
     const slices: { label: string; value: number }[] = [];
 
     for (const [, crop] of Object.entries(crops)) {
@@ -150,7 +150,7 @@ export default function ConabEstimatesTab() {
 
   const allCropsProduction = useMemo(() => {
     if (!crops) return { labels: [], values: [] };
-    const latestSeason = '2023/24';
+    const latestSeason = '2024/25'; // last closed harvest (2025/26 is forecast)
     const items: { label: string; value: number }[] = [];
 
     for (const [, crop] of Object.entries(crops)) {

@@ -145,6 +145,8 @@ const REGION: Record<string, LocalizedTerm> = {
   Southeast: { 'pt-BR': 'Sudeste', en: 'Southeast' },
   South: { 'pt-BR': 'Sul', en: 'South' },
   Country: { 'pt-BR': 'Brasil', en: 'Country' },
+  // Agregado nacional (BR) — ex. cobertura CONAB "National".
+  National: { 'pt-BR': 'Nacional', en: 'National' },
 };
 
 /** Meses por extenso (conab_mapping seasons, cabeçalhos do calendário). */

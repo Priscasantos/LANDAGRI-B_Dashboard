@@ -9,9 +9,18 @@
     "unit_area": "thousand hectares",
     "note": "Data based on official CONAB bulletins",
     "portal_360_url": "https://portaldeinformacoes.conab.gov.br/produtos-360.html",
-    "last_update": "2025-08-08T14:49:39.703923",
     "total_crops": 9,
-    "data_enrichment": "Data enriched with Portal 360° CONAB"
+    "data_enrichment": "Data enriched with Portal 360° CONAB",
+    "last_update": "2026-10-16T00:00:00.000000",
+    "seasons_added": [
+      "2024/25 (closed harvest, CONAB bulletin Jul/2025)",
+      "2025/26 (forecast, CONAB bulletin, 2nd survey)"
+    ],
+    "season_notes": "2024/25 values are the closed harvest (Jul/2025 bulletin, 'Brasil - Total por Produto'). 2025/26 values are the current forecast and will move until harvest close. Cotton = lint (pluma). Units unchanged: production in thousand tons, area in thousand hectares, productivity in kg/ha.",
+    "conab_grain_total_2025_26": {
+      "million_tons": 361.7,
+      "note": "CONAB national grain total (summer + winter crops). The 9 crops tracked here sum to ~357.1 Mt; the remainder is winter crops not tracked (oat, barley, canola, rye, triticale, sesame)."
+    }
   },
   "crops": {
     "soybean": {
@@ -47,6 +56,16 @@
           "production": 147380,
           "area": 43694,
           "productivity": 3372
+        },
+        "2024/25": {
+          "production": 169488,
+          "area": 47615,
+          "productivity": 3560
+        },
+        "2025/26": {
+          "production": 180407,
+          "area": 48609,
+          "productivity": 3711
         }
       }
     },
@@ -83,6 +102,16 @@
           "production": 118651,
           "area": 21421,
           "productivity": 5538
+        },
+        "2024/25": {
+          "production": 131974,
+          "area": 21559,
+          "productivity": 6122
+        },
+        "2025/26": {
+          "production": 144010,
+          "area": 22601,
+          "productivity": 6372
         }
       }
     },
@@ -119,6 +148,16 @@
           "production": 3180,
           "area": 1639,
           "productivity": 1940
+        },
+        "2024/25": {
+          "production": 3938,
+          "area": 2084,
+          "productivity": 1890
+        },
+        "2025/26": {
+          "production": 4144,
+          "area": 2018,
+          "productivity": 2053
         }
       }
     },
@@ -155,6 +194,16 @@
           "production": 10773,
           "area": 1634,
           "productivity": 6595
+        },
+        "2024/25": {
+          "production": 12323,
+          "area": 1747,
+          "productivity": 7052
+        },
+        "2025/26": {
+          "production": 11076,
+          "area": 1517,
+          "productivity": 7303
         }
       }
     },
@@ -191,6 +240,16 @@
           "production": 3013,
           "area": 2877,
           "productivity": 1047
+        },
+        "2024/25": {
+          "production": 3156,
+          "area": 2756,
+          "productivity": 1145
+        },
+        "2025/26": {
+          "production": 2950,
+          "area": 2540,
+          "productivity": 1161
         }
       }
     },
@@ -227,6 +286,16 @@
           "production": 7948,
           "area": 2827,
           "productivity": 2811
+        },
+        "2024/25": {
+          "production": 7815,
+          "area": 2553,
+          "productivity": 3062
+        },
+        "2025/26": {
+          "production": 5740,
+          "area": 1927,
+          "productivity": 2978
         }
       }
     },
@@ -263,6 +332,16 @@
           "production": 3156,
           "area": 897,
           "productivity": 3520
+        },
+        "2024/25": {
+          "production": 5588,
+          "area": 1583,
+          "productivity": 3530
+        },
+        "2025/26": {
+          "production": 7348,
+          "area": 2169,
+          "productivity": 3388
         }
       }
     },
@@ -299,6 +378,16 @@
           "production": 112,
           "area": 69,
           "productivity": 1623
+        },
+        "2024/25": {
+          "production": 97,
+          "area": 62,
+          "productivity": 1566
+        },
+        "2025/26": {
+          "production": 98,
+          "area": 78,
+          "productivity": 1257
         }
       }
     },
@@ -335,6 +424,16 @@
           "production": 715,
           "area": 174,
           "productivity": 4109
+        },
+        "2024/25": {
+          "production": 1156,
+          "area": 280,
+          "productivity": 4137
+        },
+        "2025/26": {
+          "production": 1282,
+          "area": 282,
+          "productivity": 4547
         }
       }
     }
@@ -342,17 +441,8 @@
   "regional_production": {
     "central_west": {
       "name": "Central-West",
-      "states": [
-        "MT",
-        "MS",
-        "GO",
-        "DF"
-      ],
-      "main_crops": [
-        "soybean",
-        "corn_total",
-        "cotton"
-      ],
+      "states": ["MT", "MS", "GO", "DF"],
+      "main_crops": ["soybean", "corn_total", "cotton"],
       "production_2023_24": {
         "soybean": 72588,
         "corn_total": 54356,
@@ -362,17 +452,8 @@
     },
     "south": {
       "name": "South",
-      "states": [
-        "RS",
-        "SC",
-        "PR"
-      ],
-      "main_crops": [
-        "soybean",
-        "corn_total",
-        "rice",
-        "wheat"
-      ],
+      "states": ["RS", "SC", "PR"],
+      "main_crops": ["soybean", "corn_total", "rice", "wheat"],
       "production_2023_24": {
         "soybean": 50282,
         "corn_total": 24048,
@@ -383,22 +464,8 @@
     },
     "northeast": {
       "name": "Northeast",
-      "states": [
-        "BA",
-        "PE",
-        "CE",
-        "MA",
-        "PI",
-        "PB",
-        "RN",
-        "AL",
-        "SE"
-      ],
-      "main_crops": [
-        "soybean",
-        "corn_total",
-        "beans_total"
-      ],
+      "states": ["BA", "PE", "CE", "MA", "PI", "PB", "RN", "AL", "SE"],
+      "main_crops": ["soybean", "corn_total", "beans_total"],
       "production_2023_24": {
         "soybean": 15912,
         "corn_total": 14358,

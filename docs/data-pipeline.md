@@ -73,3 +73,28 @@ Two different mechanisms serve data in this SPA. Do not mix them.
   `PageTransition` (nothing imported them; shell is `RootLayout` +
   `Header`). Drawer a11y (Escape, `role=dialog`/`aria-modal`, focus trap,
   `aria-current`, `<Link>`) lives in `Header.tsx`.
+
+## 5. CONAB typed outputs (P0, reversible)
+
+- **Calendar/availability:** `processCsv` is delimiter-aware (`;`/`,`, BOM/CRLF)
+  and emits typed rows **alongside** the legacy single-key string
+  (`{crop, uf, months[12]}` Oct→Sep; `{crop, uf, anos_1s, anos_2s,
+is_long_aggregate}`). Old `split(';')` consumers keep working untouched.
+- **`Anos (1S)/(2S)`:** crop years with mapping in the 1st/2nd-semester
+  campaign (`"YYYY-YYYY"` pairs). Empty crop cells forward-fill from the
+  row above; Area `Brazil` → `BR` (national aggregate). Full notes in
+  `src/data/processed/conab_data_notes.json`.
+- **Long aggregates** (`2000-2014`, `2000-2015`, …) are multi-year rollups,
+  not single agricultural years — flagged `is_long_aggregate`, keep them
+  out of per-year axes (covered by `src/test/scripts/preprocess-data.test.ts`).
+- **Safra XLSX:** header-row detection + merged sub-header folding
+  (`SAFRAS 24/25`, `PRODUÇÃO (Em mil t) Safra 25/26 (f)`); zero `__EMPTY`
+  keys; all-null columns trimmed. `2324` stays an `_unavailable` marker
+  (failed download — re-download + `npm run preprocess`).
+- **Seasons:** `conab_agricultural_data.json` carries `2024/25` (closed,
+  Jul/2025) + `2025/26` (forecast; CONAB grain total 361.7 Mt —
+  9 tracked crops sum ~357.1 Mt). `ConabEstimatesTab` KPIs use the last
+  closed harvest (`2024/25`); charts also plot the forecast.
+- **Naming:** initiative `coverage: "National"`, dictionary `Country →
+Nacional/National` (glossary `REGION.National`); `Brazil`/`Brasil` remain
+  only in territory metadata strings.

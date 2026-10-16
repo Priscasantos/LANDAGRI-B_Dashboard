@@ -139,12 +139,12 @@
       ]
     },
     "Country": {
-      "name_pt": "Brasil",
+      "name_pt": "Nacional",
       "color": "#000000",
       "states": [
         {
           "sigla": "BR",
-          "nome": "Brazil"
+          "nome": "National"
         }
       ]
     }

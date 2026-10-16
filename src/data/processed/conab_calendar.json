@@ -1,524 +1,944 @@
 [
   {
+    "crop": "Cotton",
+    "uf": "RO",
+    "months": ["", "", "", "P", "P", "", "", "", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Cotton;RO;;;;P;P;;;;H;H;H;"
   },
   {
+    "crop": "Cotton",
+    "uf": "TO",
+    "months": ["", "", "P", "P", "P", "", "", "", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Cotton;TO;;;P;P;P;;;;H;H;H;"
   },
   {
+    "crop": "Cotton",
+    "uf": "MA",
+    "months": ["", "", "P", "P", "", "", "", "", "H", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Cotton;MA;;;P;P;;;;;H;H;H;H"
   },
   {
+    "crop": "Cotton",
+    "uf": "PI",
+    "months": ["", "", "P", "P", "", "", "", "", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Cotton;PI;;;P;P;;;;;H;H;H;"
   },
   {
+    "crop": "Cotton",
+    "uf": "CE",
+    "months": ["", "", "", "P", "P", "P", "", "", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Cotton;CE;;;;P;P;P;;;H;H;H;"
   },
   {
+    "crop": "Cotton",
+    "uf": "RN",
+    "months": ["", "", "", "H", "H", "H", "", "", "", "P", "P", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Cotton;RN;;;;H;H;H;;;;P;P;"
   },
   {
+    "crop": "Cotton",
+    "uf": "PB",
+    "months": ["", "", "", "P", "P", "P", "P", "P", "", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Cotton;PB;;;;P;P;P;P;P;;H;H;H"
   },
   {
+    "crop": "Cotton",
+    "uf": "BA",
+    "months": ["", "P", "P", "P", "P", "", "", "H", "H", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Cotton;BA;;P;P;P;P;;;H;H;H;H;H"
   },
   {
+    "crop": "Cotton",
+    "uf": "MT",
+    "months": ["", "", "P", "P", "P", "", "", "", "H", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Cotton;MT;;;P;P;P;;;;H;H;H;H"
   },
   {
+    "crop": "Cotton",
+    "uf": "MS",
+    "months": ["", "P", "P", "P", "", "", "H", "H", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Cotton;MS;;P;P;P;;;H;H;H;H;H;"
   },
   {
+    "crop": "Cotton",
+    "uf": "GO",
+    "months": ["", "", "", "", "", "", "", "H", "H", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Cotton;GO;;;;;;;;H;H;H;H;H"
   },
   {
+    "crop": "Cotton",
+    "uf": "MG",
+    "months": ["", "", "P", "P", "P", "", "", "H", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Cotton;MG;;;P;P;P;;;H;H;H;H;"
   },
   {
+    "crop": "Cotton",
+    "uf": "SP",
+    "months": ["P", "P", "P", "", "", "", "H", "H", "H", "H", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Cotton;SP;P;P;P;;;;H;H;H;H;;"
   },
   {
+    "crop": "Cotton",
+    "uf": "PR",
+    "months": ["", "P", "P", "P", "", "", "H", "H", "H", "H", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Cotton;PR;;P;P;P;;;H;H;H;H;;"
   },
   {
+    "crop": "Rice",
+    "uf": "RR",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "P", "", "", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;RR;P;P;P;H;H;H;H;P;;;H;H"
   },
   {
+    "crop": "Rice",
+    "uf": "RO",
+    "months": ["", "P", "P", "P", "", "H", "H", "P", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;RO;;P;P;P;;H;H;P;;;;"
   },
   {
+    "crop": "Rice",
+    "uf": "AC",
+    "months": ["P", "P", "P", "", "H", "H", "H", "", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;AC;P;P;P;;H;H;H;;;;;"
   },
   {
+    "crop": "Rice",
+    "uf": "AM",
+    "months": ["H", "", "", "P", "P", "P", "", "", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;AM;H;;;P;P;P;;;;;;"
   },
   {
+    "crop": "Rice",
+    "uf": "AP",
+    "months": ["", "", "", "P", "P", "P", "", "H", "H", "H", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;AP;;;;P;P;P;;H;H;H;;"
   },
   {
+    "crop": "Rice",
+    "uf": "PA",
+    "months": ["P", "P", "P", "P", "PH", "PH", "H", "H", "H", "H", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;PA;P;P;P;P;PH;PH;H;H;H;H;;"
   },
   {
+    "crop": "Rice",
+    "uf": "TO",
+    "months": ["P", "P", "P", "PH", "H", "H", "H", "H", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;TO;P;P;P;PH;H;H;H;H;;;;"
   },
   {
+    "crop": "Rice",
+    "uf": "MA",
+    "months": ["", "P", "P", "P", "P", "H", "H", "H", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;MA;;P;P;P;P;H;H;H;;;;"
   },
   {
+    "crop": "Rice",
+    "uf": "PI",
+    "months": ["", "", "P", "P", "", "", "H", "H", "H", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;PI;;;P;P;;;H;H;H;;;"
   },
   {
+    "crop": "Rice",
+    "uf": "CE",
+    "months": ["", "", "", "P", "P", "P", "", "", "", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;CE;;;;P;P;P;;;;H;H;"
   },
   {
+    "crop": "Rice",
+    "uf": "RN",
+    "months": ["", "", "", "P", "P", "P", "", "H", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;RN;;;;P;P;P;;H;H;H;H;"
   },
   {
+    "crop": "Rice",
+    "uf": "PB",
+    "months": ["", "", "", "P", "P", "P", "", "H", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;PB;;;;P;P;P;;H;H;H;H;"
   },
   {
+    "crop": "Rice",
+    "uf": "PE",
+    "months": ["H", "H", "", "", "P", "P", "P", "PH", "H", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;PE;H;H;;;P;P;P;PH;H;H;H;H"
   },
   {
+    "crop": "Rice",
+    "uf": "AL",
+    "months": ["", "P", "P", "H", "H", "H", "", "P", "P", "", "P", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;AL;;P;P;H;H;H;;P;P;;P;P"
   },
   {
+    "crop": "Rice",
+    "uf": "SE",
+    "months": ["", "", "H", "PH", "P", "P", "", "", "", "H", "H", "PH"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;SE;;;H;PH;P;P;;;;H;H;PH"
   },
   {
+    "crop": "Rice",
+    "uf": "MT",
+    "months": ["", "P", "P", "P", "", "H", "H", "H", "H", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;MT;;P;P;P;;H;H;H;H;;;"
   },
   {
+    "crop": "Rice",
+    "uf": "MS",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "", "", "", "P", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;MS;P;P;P;H;H;H;H;;;;P;P"
   },
   {
+    "crop": "Rice",
+    "uf": "GO",
+    "months": ["P", "P", "P", "", "", "H", "H", "H", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;GO;P;P;P;;;H;H;H;;;;"
   },
   {
+    "crop": "Rice",
+    "uf": "MG",
+    "months": ["P", "P", "P", "", "", "H", "H", "H", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;MG;P;P;P;;;H;H;H;;;;"
   },
   {
+    "crop": "Rice",
+    "uf": "ES",
+    "months": ["P", "P", "", "", "", "H", "H", "H", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;ES;P;P;;;;H;H;H;;;;"
   },
   {
+    "crop": "Rice",
+    "uf": "RJ",
+    "months": ["P", "P", "P", "", "", "H", "H", "H", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;RJ;P;P;P;;;H;H;H;;;;"
   },
   {
+    "crop": "Rice",
+    "uf": "SP",
+    "months": ["P", "P", "P", "", "", "H", "H", "H", "", "", "", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;SP;P;P;P;;;H;H;H;;;;P"
   },
   {
+    "crop": "Rice",
+    "uf": "PR",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "", "", "", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;PR;P;P;P;;H;H;H;H;;;;P"
   },
   {
+    "crop": "Rice",
+    "uf": "SC",
+    "months": ["P", "P", "", "H", "H", "H", "H", "H", "", "", "", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;SC;P;P;;H;H;H;H;H;;;;P"
   },
   {
+    "crop": "Rice",
+    "uf": "RS",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "", "", "", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Rice;RS;P;P;P;;H;H;H;H;;;;P"
   },
   {
+    "crop": "Beans (1st harvest)",
+    "uf": "AM",
+    "months": ["P", "", "", "H", "H", "", "", "", "", "", "", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (1st harvest);AM;P;;;H;H;;;;;;;P"
   },
   {
+    "crop": "Beans (1st harvest)",
+    "uf": "PA",
+    "months": ["", "P", "P", "P", "PH", "H", "H", "H", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (1st harvest);PA;;P;P;P;PH;H;H;H;;;;"
   },
   {
+    "crop": "Beans (1st harvest)",
+    "uf": "TO",
+    "months": ["", "P", "P", "P", "", "H", "H", "", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (1st harvest);TO;;P;P;P;;H;H;;;;;"
   },
   {
+    "crop": "Beans (1st harvest)",
+    "uf": "PI",
+    "months": ["", "", "P", "P", "P", "H", "H", "H", "H", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (1st harvest);PI;;;P;P;P;H;H;H;H;;;"
   },
   {
+    "crop": "Beans (1st harvest)",
+    "uf": "BA",
+    "months": ["P", "P", "P", "PH", "PH", "H", "H", "H", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (1st harvest);BA;P;P;P;PH;PH;H;H;H;;;;"
   },
   {
+    "crop": "Beans (1st harvest)",
+    "uf": "MA",
+    "months": ["", "", "P", "P", "", "H", "H", "H", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (1st harvest);MA;;;P;P;;H;H;H;;;;"
   },
   {
+    "crop": "Beans (1st harvest)",
+    "uf": "MT",
+    "months": ["", "P", "P", "H", "H", "H", "", "", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (1st harvest);MT;;P;P;H;H;H;;;;;;"
   },
   {
+    "crop": "Beans (1st harvest)",
+    "uf": "GO",
+    "months": ["P", "P", "", "H", "H", "", "", "", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (1st harvest);GO;P;P;;H;H;;;;;;;"
   },
   {
+    "crop": "Beans (1st harvest)",
+    "uf": "DF",
+    "months": ["P", "P", "", "H", "H", "", "", "", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (1st harvest);DF;P;P;;H;H;;;;;;;"
   },
   {
+    "crop": "Beans (1st harvest)",
+    "uf": "MG",
+    "months": ["P", "P", "P", "H", "H", "H", "", "", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (1st harvest);MG;P;P;P;H;H;H;;;;;;"
   },
   {
+    "crop": "Beans (1st harvest)",
+    "uf": "ES",
+    "months": ["P", "P", "P", "H", "H", "H", "", "", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (1st harvest);ES;P;P;P;H;H;H;;;;;;"
   },
   {
+    "crop": "Beans (1st harvest)",
+    "uf": "RJ",
+    "months": ["P", "P", "P", "H", "H", "H", "", "", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (1st harvest);RJ;P;P;P;H;H;H;;;;;;"
   },
   {
+    "crop": "Beans (1st harvest)",
+    "uf": "SP",
+    "months": ["", "H", "H", "H", "", "", "", "", "", "P", "P", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (1st harvest);SP;;H;H;H;;;;;;P;P;P"
   },
   {
+    "crop": "Beans (1st harvest)",
+    "uf": "PR",
+    "months": ["P", "P", "PH", "H", "H", "H", "", "", "", "", "P", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (1st harvest);PR;P;P;PH;H;H;H;;;;;P;P"
   },
   {
+    "crop": "Beans (1st harvest)",
+    "uf": "SC",
+    "months": ["P", "P", "PH", "H", "H", "H", "H", "", "", "", "", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (1st harvest);SC;P;P;PH;H;H;H;H;;;;;P"
   },
   {
+    "crop": "Beans (1st harvest)",
+    "uf": "RS",
+    "months": ["P", "P", "PH", "H", "H", "H", "H", "", "", "", "P", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (1st harvest);RS;P;P;PH;H;H;H;H;;;;P;P"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "RO",
+    "months": ["", "", "", "", "", "P", "P", "", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);RO;;;;;;P;P;;H;H;H;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "AC",
+    "months": ["", "", "", "", "", "P", "P", "P", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);AC;;;;;;P;P;P;H;H;H;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "AP",
+    "months": ["", "", "", "", "", "", "P", "P", "P", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);AP;;;;;;;P;P;P;H;H;H"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "TO",
+    "months": ["", "", "", "", "P", "P", "P", "PH", "H", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);TO;;;;;P;P;P;PH;H;H;H;H"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "MA",
+    "months": ["", "", "", "", "", "P", "P", "P", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);MA;;;;;;P;P;P;H;H;H;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "PI",
+    "months": ["", "", "", "", "P", "P", "", "H", "H", "H", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);PI;;;;;P;P;;H;H;H;;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "CE",
+    "months": ["", "", "", "P", "P", "P", "H", "H", "H", "H", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);CE;;;;P;P;P;H;H;H;H;;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "RN",
+    "months": ["", "", "", "P", "P", "P", "P", "H", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);RN;;;;P;P;P;P;H;H;H;H;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "PB",
+    "months": ["", "", "", "", "", "P", "P", "P", "H", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);PB;;;;;;P;P;P;H;H;H;H"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "PE",
+    "months": ["", "", "P", "P", "P", "PH", "H", "H", "H", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);PE;;;P;P;P;PH;H;H;H;;;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "BA",
+    "months": ["", "", "", "", "", "P", "P", "P", "H", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);BA;;;;;;P;P;P;H;H;H;H"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "MT",
+    "months": ["", "", "", "", "P", "P", "P", "H", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);MT;;;;;P;P;P;H;H;H;H;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "MS",
+    "months": ["", "", "", "", "", "P", "P", "", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);MS;;;;;;P;P;;H;H;H;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "GO",
+    "months": ["", "", "", "P", "P", "", "H", "H", "H", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);GO;;;;P;P;;H;H;H;;;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "DF",
+    "months": ["", "", "", "P", "P", "P", "H", "H", "P", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);DF;;;;P;P;P;H;H;P;;;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "MG",
+    "months": ["", "", "", "", "P", "P", "P", "H", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);MG;;;;;P;P;P;H;H;H;H;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "ES",
+    "months": ["", "", "", "", "P", "P", "P", "H", "H", "H", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);ES;;;;;P;P;P;H;H;H;;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "RJ",
+    "months": ["", "", "", "", "P", "P", "P", "H", "H", "H", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);RJ;;;;;P;P;P;H;H;H;;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "SP",
+    "months": ["", "", "", "P", "P", "P", "H", "H", "H", "H", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);SP;;;;P;P;P;H;H;H;H;;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "PR",
+    "months": ["", "", "", "P", "P", "P", "H", "H", "H", "H", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);PR;;;;P;P;P;H;H;H;H;;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "SC",
+    "months": ["", "", "", "P", "P", "P", "H", "H", "H", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);SC;;;;P;P;P;H;H;H;;;"
   },
   {
+    "crop": "Beans (2nd harvest)",
+    "uf": "RS",
+    "months": ["", "", "", "P", "P", "P", "H", "H", "H", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (2nd harvest);RS;;;;P;P;P;H;H;H;;;"
   },
   {
+    "crop": "Beans (3th harvest)",
+    "uf": "PA",
+    "months": ["H", "", "", "", "", "", "", "P", "P", "P", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (3th harvest);PA;H;;;;;;;P;P;P;H;H"
   },
   {
+    "crop": "Beans (3th harvest)",
+    "uf": "TO",
+    "months": ["", "", "", "", "", "", "", "P", "P", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (3th harvest);TO;;;;;;;;P;P;H;H;H"
   },
   {
+    "crop": "Beans (3th harvest)",
+    "uf": "CE",
+    "months": ["", "", "", "", "", "P", "P", "", "", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (3th harvest);CE;;;;;;P;P;;;H;H;"
   },
   {
+    "crop": "Beans (3th harvest)",
+    "uf": "PE",
+    "months": ["", "", "", "", "", "", "P", "P", "P", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (3th harvest);PE;;;;;;;P;P;P;H;H;H"
   },
   {
+    "crop": "Beans (3th harvest)",
+    "uf": "AL",
+    "months": ["", "", "", "", "", "", "P", "P", "P", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (3th harvest);AL;;;;;;;P;P;P;H;H;H"
   },
   {
+    "crop": "Beans (3th harvest)",
+    "uf": "SE",
+    "months": ["H", "", "", "", "", "", "P", "P", "P", "", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (3th harvest);SE;H;;;;;;P;P;P;;H;H"
   },
   {
+    "crop": "Beans (3th harvest)",
+    "uf": "BA",
+    "months": ["H", "", "", "", "", "", "P", "P", "P", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (3th harvest);BA;H;;;;;;P;P;P;H;H;H"
   },
   {
+    "crop": "Beans (3th harvest)",
+    "uf": "MT",
+    "months": ["H", "", "", "", "", "", "", "P", "P", "P", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (3th harvest);MT;H;;;;;;;P;P;P;H;H"
   },
   {
+    "crop": "Beans (3th harvest)",
+    "uf": "GO",
+    "months": ["", "", "", "", "", "", "P", "P", "P", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (3th harvest);GO;;;;;;;P;P;P;H;H;H"
   },
   {
+    "crop": "Beans (3th harvest)",
+    "uf": "DF",
+    "months": ["", "", "", "", "", "", "P", "P", "", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (3th harvest);DF;;;;;;;P;P;;H;H;H"
   },
   {
+    "crop": "Beans (3th harvest)",
+    "uf": "MG",
+    "months": ["H", "", "", "", "", "", "P", "P", "P", "PH", "PH", "PH"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (3th harvest);MG;H;;;;;;P;P;P;PH;PH;PH"
   },
   {
+    "crop": "Beans (3th harvest)",
+    "uf": "SP",
+    "months": ["H", "", "", "", "", "", "", "P", "P", "", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (3th harvest);SP;H;;;;;;;P;P;;H;H"
   },
   {
+    "crop": "Beans (3th harvest)",
+    "uf": "PR",
+    "months": ["", "", "", "", "", "P", "P", "P", "PH", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Beans (3th harvest);PR;;;;;;P;P;P;PH;H;H;H"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "RO",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "", "", "", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);RO;P;P;P;;H;H;H;H;;;;P"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "AC",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);AC;P;P;P;;H;H;H;H;;;;"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "AM",
+    "months": ["P", "P", "", "H", "H", "H", "", "", "", "", "P", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);AM;P;P;;H;H;H;;;;;P;P"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "PA",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "H", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);PA;P;P;P;;H;H;H;H;H;;;"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "TO",
+    "months": ["", "P", "P", "P", "", "H", "H", "H", "H", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);TO;;P;P;P;;H;H;H;H;;;"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "MA",
+    "months": ["", "P", "P", "P", "", "", "H", "H", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);MA;;P;P;P;;;H;H;H;H;H;"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "PI",
+    "months": ["", "P", "P", "P", "", "", "H", "H", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);PI;;P;P;P;;;H;H;H;H;H;"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "BA",
+    "months": ["P", "P", "P", "P", "H", "H", "H", "H", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);BA;P;P;P;P;H;H;H;H;H;H;H;"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "MT",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);MT;P;P;P;;H;H;H;H;;;;"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "MS",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "", "", "", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);MS;P;P;P;;H;H;H;H;;;;P"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "GO",
+    "months": ["P", "P", "P", "", "", "H", "H", "H", "H", "", "", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);GO;P;P;P;;;H;H;H;H;;;P"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "DF",
+    "months": ["P", "P", "", "", "H", "H", "H", "", "", "", "", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);DF;P;P;;;H;H;H;;;;;P"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "MG",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "H", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);MG;P;P;P;;H;H;H;H;H;;;"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "ES",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);ES;P;P;P;;H;H;H;H;;;;"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "RJ",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);RJ;P;P;P;;H;H;H;H;;;;"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "PR",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "H", "", "", "", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);PR;P;P;P;H;H;H;H;H;;;;P"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "SC",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "H", "", "", "P", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);SC;P;P;P;H;H;H;H;H;;;P;P"
   },
   {
+    "crop": "Corn (1st harvest)",
+    "uf": "RS",
+    "months": ["P", "P", "PH", "PH", "H", "H", "H", "H", "H", "", "P", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (1st harvest);RS;P;P;PH;PH;H;H;H;H;H;;P;P"
   },
   {
+    "crop": "Corn (2nd harvest)",
+    "uf": "RO",
+    "months": ["", "", "", "P", "P", "P", "", "", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (2nd harvest);RO;;;;P;P;P;;;H;H;H;"
   },
   {
+    "crop": "Corn (2nd harvest)",
+    "uf": "TO",
+    "months": ["", "", "", "P", "P", "P", "", "", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (2nd harvest);TO;;;;P;P;P;;;H;H;H;"
   },
   {
+    "crop": "Corn (2nd harvest)",
+    "uf": "MA",
+    "months": ["", "", "", "", "P", "P", "", "", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (2nd harvest);MA;;;;;P;P;;;H;H;H;"
   },
   {
+    "crop": "Corn (2nd harvest)",
+    "uf": "PI",
+    "months": ["", "", "", "", "", "P", "P", "H", "H", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (2nd harvest);PI;;;;;;P;P;H;H;H;H;H"
   },
   {
+    "crop": "Corn (2nd harvest)",
+    "uf": "PE",
+    "months": ["", "", "P", "P", "P", "P", "H", "H", "H", "H", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (2nd harvest);PE;;;P;P;P;P;H;H;H;H;;"
   },
   {
+    "crop": "Corn (2nd harvest)",
+    "uf": "CE",
+    "months": ["", "", "", "P", "P", "P", "H", "H", "H", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (2nd harvest);CE;;;;P;P;P;H;H;H;H;H;H"
   },
   {
+    "crop": "Corn (2nd harvest)",
+    "uf": "RN",
+    "months": ["", "", "", "", "P", "P", "P", "", "H", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (2nd harvest);RN;;;;;P;P;P;;H;H;H;H"
   },
   {
+    "crop": "Corn (2nd harvest)",
+    "uf": "PB",
+    "months": ["H", "", "", "P", "P", "P", "P", "P", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (2nd harvest);PB;H;;;P;P;P;P;P;;;;"
   },
   {
+    "crop": "Corn (2nd harvest)",
+    "uf": "BA",
+    "months": ["", "", "", "", "", "P", "", "", "", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (2nd harvest);BA;;;;;;P;;;;H;H;"
   },
   {
+    "crop": "Corn (2nd harvest)",
+    "uf": "MT",
+    "months": ["", "", "", "P", "P", "P", "", "H", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (2nd harvest);MT;;;;P;P;P;;H;H;H;H;"
   },
   {
+    "crop": "Corn (2nd harvest)",
+    "uf": "MS",
+    "months": ["", "", "", "P", "P", "P", "", "", "H", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (2nd harvest);MS;;;;P;P;P;;;H;H;H;H"
   },
   {
+    "crop": "Corn (2nd harvest)",
+    "uf": "GO",
+    "months": ["", "", "", "P", "P", "", "", "", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (2nd harvest);GO;;;;P;P;;;;H;H;H;"
   },
   {
+    "crop": "Corn (2nd harvest)",
+    "uf": "DF",
+    "months": ["H", "H", "", "", "P", "P", "P", "", "H", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (2nd harvest);DF;H;H;;;P;P;P;;H;H;H;H"
   },
   {
+    "crop": "Corn (2nd harvest)",
+    "uf": "MG",
+    "months": ["", "", "", "P", "P", "P", "", "", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (2nd harvest);MG;;;;P;P;P;;;H;H;H;"
   },
   {
+    "crop": "Corn (2nd harvest)",
+    "uf": "SP",
+    "months": ["", "", "", "", "P", "P", "P", "", "H", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (2nd harvest);SP;;;;;P;P;P;;H;H;H;H"
   },
   {
+    "crop": "Corn (2nd harvest)",
+    "uf": "PR",
+    "months": ["", "", "", "P", "P", "P", "P", "H", "H", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (2nd harvest);PR;;;;P;P;P;P;H;H;H;H;H"
   },
   {
+    "crop": "Corn (3th harvest)",
+    "uf": "AP",
+    "months": ["", "", "", "", "P", "P", "P", "P", "H", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (3th harvest);AP;;;;;P;P;P;P;H;H;H;H"
   },
   {
+    "crop": "Corn (3th harvest)",
+    "uf": "RR",
+    "months": ["H", "H", "", "", "", "", "", "P", "P", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (3th harvest);RR;H;H;;;;;;P;P;;;"
   },
   {
+    "crop": "Corn (3th harvest)",
+    "uf": "AL",
+    "months": ["H", "H", "", "", "", "", "P", "P", "P", "", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (3th harvest);AL;H;H;;;;;P;P;P;;H;H"
   },
   {
+    "crop": "Corn (3th harvest)",
+    "uf": "BA",
+    "months": ["H", "H", "H", "", "", "", "P", "P", "P", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (3th harvest);BA;H;H;H;;;;P;P;P;H;H;H"
   },
   {
+    "crop": "Corn (3th harvest)",
+    "uf": "PE",
+    "months": ["H", "", "", "", "", "P", "P", "P", "P", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (3th harvest);PE;H;;;;;P;P;P;P;H;H;H"
   },
   {
+    "crop": "Corn (3th harvest)",
+    "uf": "SE",
+    "months": ["H", "H", "H", "", "", "", "P", "P", "P", "", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Corn (3th harvest);SE;H;H;H;;;;P;P;P;;H;H"
   },
   {
+    "crop": "Soybean",
+    "uf": "RR",
+    "months": ["H", "", "", "", "", "", "P", "P", "P", "", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;RR;H;;;;;;P;P;P;;H;H"
   },
   {
+    "crop": "Soybean",
+    "uf": "RO",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;RO;P;P;P;H;H;H;H;;;;;"
   },
   {
+    "crop": "Soybean",
+    "uf": "PA",
+    "months": ["P", "P", "P", "P", "PH", "PH", "PH", "H", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;PA;P;P;P;P;PH;PH;PH;H;H;H;H;"
   },
   {
+    "crop": "Soybean",
+    "uf": "TO",
+    "months": ["P", "P", "P", "", "P", "P", "P", "P", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;TO;P;P;P;;P;P;P;P;;;;"
   },
   {
+    "crop": "Soybean",
+    "uf": "AP",
+    "months": ["", "", "", "", "P", "P", "P", "P", "H", "H", "H", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;AP;;;;;P;P;P;P;H;H;H;"
   },
   {
+    "crop": "Soybean",
+    "uf": "MA",
+    "months": ["P", "P", "P", "PH", "PH", "H", "H", "H", "H", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;MA;P;P;P;PH;PH;H;H;H;H;;;"
   },
   {
+    "crop": "Soybean",
+    "uf": "PI",
+    "months": ["P", "P", "P", "P", "H", "H", "H", "H", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;PI;P;P;P;P;H;H;H;H;;;;"
   },
   {
+    "crop": "Soybean",
+    "uf": "AL",
+    "months": ["H", "", "", "", "", "", "P", "P", "", "", "", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;AL;H;;;;;;P;P;;;;H"
   },
   {
+    "crop": "Soybean",
+    "uf": "BA",
+    "months": ["P", "P", "P", "PH", "H", "H", "H", "H", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;BA;P;P;P;PH;H;H;H;H;;;;"
   },
   {
+    "crop": "Soybean",
+    "uf": "MT",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "", "", "", "", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;MT;P;P;P;H;H;H;H;;;;;P"
   },
   {
+    "crop": "Soybean",
+    "uf": "MS",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "", "", "", "", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;MS;P;P;P;H;H;H;H;;;;;P"
   },
   {
+    "crop": "Soybean",
+    "uf": "GO",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;GO;P;P;P;H;H;H;H;;;;;"
   },
   {
+    "crop": "Soybean",
+    "uf": "DF",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;DF;P;P;P;H;H;H;H;;;;;"
   },
   {
+    "crop": "Soybean",
+    "uf": "MG",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;MG;P;P;P;H;H;H;H;;;;;"
   },
   {
+    "crop": "Soybean",
+    "uf": "SP",
+    "months": ["P", "P", "P", "", "H", "H", "H", "", "", "", "", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;SP;P;P;P;;H;H;H;;;;;P"
   },
   {
+    "crop": "Soybean",
+    "uf": "PR",
+    "months": ["P", "P", "P", "PH", "H", "H", "H", "H", "", "", "", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;PR;P;P;P;PH;H;H;H;H;;;;P"
   },
   {
+    "crop": "Soybean",
+    "uf": "SC",
+    "months": ["P", "P", "P", "P", "H", "H", "H", "H", "", "", "", "P"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;SC;P;P;P;P;H;H;H;H;;;;P"
   },
   {
+    "crop": "Soybean",
+    "uf": "RS",
+    "months": ["P", "P", "P", "P", "H", "H", "H", "H", "", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Soybean;RS;P;P;P;P;H;H;H;H;;;;"
   },
   {
+    "crop": "Wheat",
+    "uf": "BA",
+    "months": ["H", "", "", "", "", "", "", "", "P", "", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Wheat;BA;H;;;;;;;;P;;;"
   },
   {
+    "crop": "Wheat",
+    "uf": "MS",
+    "months": ["", "", "", "", "", "", "P", "P", "", "", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Wheat;MS;;;;;;;P;P;;;H;H"
   },
   {
+    "crop": "Wheat",
+    "uf": "GO",
+    "months": ["", "", "", "", "", "P", "", "P", "H", "", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Wheat;GO;;;;;;P;;P;H;;H;H"
   },
   {
+    "crop": "Wheat",
+    "uf": "DF",
+    "months": ["", "", "", "", "", "P", "P", "P", "", "H", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Wheat;DF;;;;;;P;P;P;;H;H;H"
   },
   {
+    "crop": "Wheat",
+    "uf": "MG",
+    "months": ["", "", "", "", "", "", "P", "", "", "", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Wheat;MG;;;;;;;P;;;;H;H"
   },
   {
+    "crop": "Wheat",
+    "uf": "SP",
+    "months": ["H", "", "", "", "", "", "P", "P", "", "", "", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Wheat;SP;H;;;;;;P;P;;;;H"
   },
   {
+    "crop": "Wheat",
+    "uf": "PR",
+    "months": ["H", "H", "", "", "", "", "P", "P", "P", "P", "H", "H"],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Wheat;PR;H;H;;;;;P;P;P;P;H;H"
   },
   {
+    "crop": "Wheat",
+    "uf": "SC",
+    "months": ["H", "H", "H", "", "", "", "", "P", "P", "P", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Wheat;SC;H;H;H;;;;;P;P;P;;"
   },
   {
+    "crop": "Wheat",
+    "uf": "RS",
+    "months": ["H", "H", "H", "", "", "", "", "P", "P", "P", "", ""],
     "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": "Wheat;RS;H;H;H;;;;;P;P;P;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
-  },
-  {
-    "Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September": ";;;;;;;;;;;;;"
   }
 ]
