@@ -19,7 +19,7 @@ describe('dataParser', () => {
         temporal_frequency: 'Annual',
         update_frequency: 'Yearly',
         reference_system: 'EPSG:4326',
-        methodology: 'Machine Learning',
+        methodology: 'Shallow ML',
         classification_method: 'Random Forest',
         coverage: 'National',
         overall_accuracy: 92.5,
@@ -37,11 +37,39 @@ describe('dataParser', () => {
     expect(result[0].Name).toBe('Test Initiative');
     expect(result[0].Acronym).toBe('TEST');
     expect(result[0].Coverage).toBe('National');
-    expect(result[0].Methodology).toBe('Machine Learning');
+    expect(result[0].Methodology).toBe('Shallow ML');
     expect(result[0].Resolution).toBe(30);
     expect(result[0].Accuracy).toBe(92.5);
     expect(result[0].Number_of_Classes).toBe(15);
     expect(result[0].Available_Years).toEqual([2020, 2021, 2022]);
+  });
+
+  it('maps legacy methodology names to taxonomy leaves without re-bucketing unknowns', () => {
+    const makeMeta = (methodology: string): Record<string, InitiativeMetadata> => ({
+      Test: {
+        acronym: 'T', provider: 'P', source: 'S',
+        spatial_resolution: 10, available_years: [2020],
+        temporal_frequency: '', update_frequency: '', reference_system: '',
+        methodology, classification_method: '', coverage: 'Global',
+        number_of_classes: 5, class_legend: '', number_of_agriculture_classes: 0,
+        agricultural_capabilities: '', algorithm: '', sensors_referenced: [],
+      },
+    });
+    // Bucket largo pré-taxonomia → ramo não-profundo.
+    expect(parseInitiatives(makeMeta('Machine Learning'))[0].Methodology).toBe('Shallow ML');
+    expect(parseInitiatives(makeMeta('Supervised Machine Learning'))[0].Methodology).toBe('Shallow ML');
+    // Texto livre multi-família → Hybrid (regra ≥2 famílias do SSoT).
+    expect(
+      parseInitiatives(makeMeta('Machine Learning, Statistical Methods, Visual Interpretation'))[0]
+        .Methodology,
+    ).toBe('Hybrid');
+    // Folhas canônicas passam intactas.
+    expect(parseInitiatives(makeMeta('Deep Learning'))[0].Methodology).toBe('Deep Learning');
+    expect(parseInitiatives(makeMeta('Statistical / Spectral'))[0].Methodology).toBe(
+      'Statistical / Spectral',
+    );
+    // Desconhecido: passthrough, nunca re-bucket silencioso.
+    expect(parseInitiatives(makeMeta('Something New'))[0].Methodology).toBe('Something New');
   });
 
   it('should handle null accuracy', () => {

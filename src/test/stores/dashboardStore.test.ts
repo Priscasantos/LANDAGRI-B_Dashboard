@@ -24,7 +24,7 @@ describe('dashboardStore', () => {
       Provider: '', Source: '', Resolution: 30, Resolution_Min: 30, Resolution_Max: 30,
       Available_Years: [2020], Year_Start: 2020, Year_End: 2020, Temporal_Duration: 0,
       Temporal_Frequency: '', Update_Frequency: '', Reference_System: '',
-      Methodology: 'Machine Learning' as const, Classification_Method: '', Coverage: 'Global' as const,
+      Methodology: 'Shallow ML' as const, Classification_Method: '', Coverage: 'Global' as const,
       Accuracy: 90, Accuracy_Min: 90, Accuracy_Max: 90, Number_of_Classes: 10,
       Class_Legend: '', Number_of_Agriculture_Classes: 0, Agricultural_Capabilities: '',
       Algorithm: '', Sensors: [], Detailed_Products: [], Has_Detailed_Products: false,

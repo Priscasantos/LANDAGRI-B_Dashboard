@@ -45,8 +45,13 @@ const COVERAGE: Record<string, LocalizedTerm> = {
 const METHODOLOGY: Record<string, LocalizedTerm> = {
   Hybrid: { 'pt-BR': 'Híbrida', en: 'Hybrid' },
   'Deep Learning': { 'pt-BR': 'Aprendizado Profundo', en: 'Deep Learning' },
-  'Machine Learning': { 'pt-BR': 'Aprendizado de Máquina', en: 'Machine Learning' },
+  'Shallow ML': { 'pt-BR': 'ML Raso', en: 'Shallow ML' },
   'Visual Interpretation': { 'pt-BR': 'Interpretação Visual', en: 'Visual Interpretation' },
+  'Statistical / Spectral': { 'pt-BR': 'Estatístico / Espectral', en: 'Statistical / Spectral' },
+  // Legado pré-taxonomia (só display; bruto intacto): o bucket largo
+  // "Machine Learning" exibe como o ramo não-profundo (Shallow ML) —
+  // Deep Learning ⊂ Machine Learning, nunca par lado a lado.
+  'Machine Learning': { 'pt-BR': 'ML Raso', en: 'Shallow ML' },
   Supervised: { 'pt-BR': 'Supervisionada', en: 'Supervised' },
   Unsupervised: { 'pt-BR': 'Não supervisionada', en: 'Unsupervised' },
 };

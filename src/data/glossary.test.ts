@@ -23,12 +23,26 @@ describe('glossary (Fase 1 — só UI traduzida, sem re-fetch)', () => {
     expect(translateTerm('coverage', 'Global', 'pt-BR')).toBe('Global');
   });
 
-  it('translates methodology enums per locale', () => {
+  it('translates methodology enums per locale (MECE taxonomy)', () => {
     expect(translateTerm('methodology', 'Hybrid', 'pt-BR')).toBe('Híbrida');
     expect(translateTerm('methodology', 'Hybrid', 'en')).toBe('Hybrid');
     expect(translateTerm('methodology', 'Visual Interpretation', 'pt-BR')).toBe(
       'Interpretação Visual',
     );
+    expect(translateTerm('methodology', 'Shallow ML', 'pt-BR')).toBe('ML Raso');
+    expect(translateTerm('methodology', 'Shallow ML', 'en')).toBe('Shallow ML');
+    expect(translateTerm('methodology', 'Deep Learning', 'pt-BR')).toBe(
+      'Aprendizado Profundo',
+    );
+    expect(translateTerm('methodology', 'Statistical / Spectral', 'pt-BR')).toBe(
+      'Estatístico / Espectral',
+    );
+    expect(translateTerm('methodology', 'Statistical / Spectral', 'en')).toBe(
+      'Statistical / Spectral',
+    );
+    // Legado pré-taxonomia exibe como o ramo não-profundo (só display).
+    expect(translateTerm('methodology', 'Machine Learning', 'pt-BR')).toBe('ML Raso');
+    expect(translateTerm('methodology', 'Machine Learning', 'en')).toBe('Shallow ML');
   });
 
   it('translates frequency and headers', () => {

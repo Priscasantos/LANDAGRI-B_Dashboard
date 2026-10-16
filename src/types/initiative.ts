@@ -27,11 +27,11 @@ export interface InitiativeMetadata {
 export type CoverageType = 'Global' | 'Regional' | 'National' | 'Other';
 
 export type MethodologyType =
+  | 'Shallow ML'
   | 'Deep Learning'
-  | 'Machine Learning'
   | 'Hybrid'
   | 'Visual Interpretation'
-  | 'Automatic Classification';
+  | 'Statistical / Spectral';
 
 interface ResolutionObject {
   resolution: number;

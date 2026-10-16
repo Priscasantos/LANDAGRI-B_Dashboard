@@ -27,7 +27,7 @@ function row(
       temporal_frequency: '',
       update_frequency: '',
       reference_system: '',
-      methodology: 'Machine Learning',
+      methodology: 'Shallow ML',
       classification_method: '',
       coverage: 'National',
       ...(accuracy !== undefined ? { overall_accuracy: accuracy } : {}),

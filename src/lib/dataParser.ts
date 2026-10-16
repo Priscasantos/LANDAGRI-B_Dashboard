@@ -65,22 +65,38 @@ function normalizeCoverage(coverage: string): CoverageType {
   return map[coverage?.toLowerCase()] || 'Other';
 }
 
+/**
+ * Normalize a methodology label to the MECE taxonomy leaf
+ * (single source of truth: `dashboard/components/shared/methodology_taxonomy.py`,
+ * `LEAVES`). Canonical leaves pass through; legacy coarse names map to their
+ * leaf (`Machine Learning` → `Shallow ML` — Deep Learning is a subset of ML,
+ * so the non-deep bucket is named explicitly); multi-family free text
+ * (≥2 families, mirroring the SSoT rule) resolves to `Hybrid`.
+ * Anything else passes through untouched — never silently re-bucketed
+ * (mirrors the glossary passthrough; raw third-party data stays intact).
+ */
 function normalizeMethodology(methodology: string): MethodologyType {
   const valid: MethodologyType[] = [
-    'Deep Learning', 'Machine Learning', 'Hybrid',
-    'Visual Interpretation', 'Automatic Classification',
+    'Shallow ML', 'Deep Learning', 'Hybrid',
+    'Visual Interpretation', 'Statistical / Spectral',
   ];
   if (valid.includes(methodology as MethodologyType)) {
     return methodology as MethodologyType;
   }
-  // Try fuzzy match
   const lower = methodology?.toLowerCase() || '';
-  if (lower.includes('deep')) return 'Deep Learning';
-  if (lower.includes('machine')) return 'Machine Learning';
-  if (lower.includes('hybrid')) return 'Hybrid';
-  if (lower.includes('visual')) return 'Visual Interpretation';
-  if (lower.includes('automatic') || lower.includes('auto')) return 'Automatic Classification';
-  return 'Automatic Classification';
+  const signals = [
+    /deep|neural|cnn|u-?net|resnet|transformer|\blstm\b|\brnn\b|\bgan\b|\bfcn\b|convolutional/.test(lower),
+    /shallow|machine learning|\bmachine\b|random forest|gradient boost|decision trees?|regression trees?|support vector|\bsvm\b|k-?nearest|\bknn\b|xgboost|catboost/.test(lower),
+    /visual|photo-?interpretation|\bmanual\b/.test(lower),
+    /statistical|spectral|mixture|bhattacharyya?|maximum likelihood|\bpca\b|regression/.test(lower),
+  ];
+  const hits = signals.filter(Boolean).length;
+  if (hits >= 2) return 'Hybrid';
+  if (signals[0]) return 'Deep Learning';
+  if (signals[1]) return 'Shallow ML';
+  if (signals[2]) return 'Visual Interpretation';
+  if (signals[3]) return 'Statistical / Spectral';
+  return methodology as MethodologyType;
 }
 
 function normalizeReferenceSystem(ref: unknown): string {

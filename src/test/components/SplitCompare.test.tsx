@@ -45,7 +45,7 @@ function seedTwo(): void {
         Available_Years: [2000, 2001],
         Year_Start: 2000,
         Year_End: 2001,
-        Methodology: 'Machine Learning',
+        Methodology: 'Shallow ML',
         Coverage: 'National',
         Accuracy: 90,
         Number_of_Classes: 10,

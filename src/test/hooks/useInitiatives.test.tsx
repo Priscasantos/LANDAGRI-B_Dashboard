@@ -10,7 +10,7 @@ const initiativesFixture = {
     acronym: 'TST',
     provider: 'Test Provider',
     coverage: 'national',
-    methodology: 'Machine Learning',
+    methodology: 'Shallow ML',
     available_years: [2020],
   },
 };

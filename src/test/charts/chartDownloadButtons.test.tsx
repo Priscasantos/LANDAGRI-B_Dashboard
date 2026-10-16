@@ -40,7 +40,7 @@ function seedTable(): void {
         Temporal_Frequency: 'Annual',
         Update_Frequency: 'Yearly',
         Reference_System: 'EPSG:4326',
-        Methodology: 'Machine Learning',
+        Methodology: 'Shallow ML',
         Classification_Method: 'RF',
         Coverage: 'National',
         Accuracy: 90,

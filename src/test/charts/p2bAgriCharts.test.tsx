@@ -67,7 +67,7 @@ describe('P2b MethodologyDistributionTab vira tabela', () => {
         {
           Name: 'MB',
           Display_Name: 'MapBiomas',
-          Methodology: 'Machine Learning',
+          Methodology: 'Hybrid',
           Coverage: 'National',
         },
         {
@@ -81,7 +81,7 @@ describe('P2b MethodologyDistributionTab vira tabela', () => {
     renderWithProviders(<MethodologyDistributionTab />);
     expect(await screen.findByRole('table')).toBeInTheDocument();
     // P3: células e cabeçalhos via glossário (locale default pt-BR).
-    expect(await screen.findByText('Aprendizado de Máquina')).toBeInTheDocument();
+    expect(await screen.findByText('Híbrida')).toBeInTheDocument();
     expect(await screen.findByText('Nacional')).toBeInTheDocument();
     expect(await screen.findByText('Metodologia')).toBeInTheDocument();
   });
