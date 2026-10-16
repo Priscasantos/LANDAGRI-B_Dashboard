@@ -8,7 +8,15 @@
  *
  * Registered once via `registerLandAgriThemes(echarts)`; components select
  * `landagri-light` / `landagri-dark` from the effective theme.
+ *
+ * Preset: as constantes legadas abaixo são o fallback agro-v2. Com
+ * `presetValue`, `heatmapVisualColors` deriva a rampa do preset ativo
+ * (`chart-preset`) — ver `docs/chart-theme-palette.md`.
  */
+import {
+  divergentRampForPreset,
+  sequentialRampForPreset,
+} from './chart-preset';
 
 export type EChartsPilotTheme = 'light' | 'dark';
 
@@ -104,11 +112,23 @@ export const LANDAGRI_DIVERGENT_DARK: readonly string[] = [
   '#9ccc65',
 ];
 
-/** Resolve a rampa do visualMap para o tema + paleta ativos. */
+/** Resolve a rampa do visualMap para o tema + paleta ativos.
+ *
+ * Sem `presetValue` (default): constantes Verde Agro legadas — caminho
+ * puro/estável para testes e para chamadores sem contexto de preset.
+ * Com `presetValue`: rampa derivada do preset ativo (`chart-preset`), de
+ * modo que Terra/Âmbar/Azul também tingem heatmaps e visualMaps.
+ */
 export function heatmapVisualColors(
   theme: EChartsPilotTheme,
   palette: EChartsPalette = 'theme',
+  presetValue?: string,
 ): string[] {
+  if (presetValue !== undefined) {
+    return palette === 'divergent'
+      ? divergentRampForPreset(presetValue, theme)
+      : sequentialRampForPreset(presetValue, theme);
+  }
   if (palette === 'divergent') {
     return [...(theme === 'dark' ? LANDAGRI_DIVERGENT_DARK : LANDAGRI_DIVERGENT_LIGHT)];
   }

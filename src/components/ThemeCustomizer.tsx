@@ -31,6 +31,8 @@ export default function ThemeCustomizer(): ReactElement {
     setDensity,
     font,
     setFont,
+    palette,
+    setPalette,
     resetCustomizations,
   } = useThemeManager();
 
@@ -55,6 +57,10 @@ export default function ThemeCustomizer(): ReactElement {
     default: 'fontDefault',
     mono: 'fontMono',
     system: 'fontSystem',
+  };
+  const paletteLabel: Record<string, TKey<'customizer'>> = {
+    theme: 'paletteTheme',
+    divergent: 'paletteDivergent',
   };
 
   return (
@@ -163,6 +169,28 @@ export default function ThemeCustomizer(): ReactElement {
                   />
                   <span aria-hidden="true" className="text-xs font-medium text-fg">
                     {t(fontLabel[f.value])}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend className="text-xs font-bold uppercase tracking-wider text-fg-muted mb-2">
+              {t('palette')}
+            </legend>
+            <div className="flex flex-wrap gap-2">
+              {(['theme', 'divergent'] as const).map((p) => (
+                <label key={p} className={RADIO_CARD_CLASS}>
+                  <input
+                    type="radio"
+                    name="landagri-palette"
+                    aria-label={t(paletteLabel[p])}
+                    checked={palette === p}
+                    onChange={() => setPalette(p)}
+                    className="accent-blue-500"
+                  />
+                  <span aria-hidden="true" className="text-xs font-medium text-fg">
+                    {t(paletteLabel[p])}
                   </span>
                 </label>
               ))}

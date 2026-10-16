@@ -682,6 +682,9 @@ export const en: EnDictionary = {
   customizer: {
     customize: 'Customize theme',
     preset: 'Preset',
+    palette: 'Palette',
+    paletteTheme: 'Theme',
+    paletteDivergent: 'Divergent',
     density: 'Density',
     radius: 'Border radius',
     font: 'Font',

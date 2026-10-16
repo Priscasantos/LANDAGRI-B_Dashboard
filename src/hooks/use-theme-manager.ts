@@ -5,15 +5,28 @@ import {
   DEFAULT_PRESET,
   type ThemePreset,
 } from '../config/theme-presets';
+import type { EChartsPalette } from '../lib/echarts-theme';
+import { sidebarDivergentVars } from '../lib/chart-preset';
 import { getFontOption } from '../lib/fonts';
 
 export type Density = 'comfortable' | 'compact';
 export type Radius = 'sm' | 'md' | 'lg';
+/**
+ * Paleta global da raiz (`data-palette`, reversível):
+ * - `'theme'`: sidebar padrão do preset (tinta sutil da primária).
+ * - `'divergent'`: sidebar em alto contraste derivado do preset
+ *   (`sidebarDivergentVars`) — mesmo matiz, fundo ativo densificado.
+ * Charts analíticos NÃO herdam este global: cada gráfico recebe `palette`
+ * explícito (heatmap correlação, barras de delta), para não codificar
+ * sinal onde só há magnitude.
+ */
+export type PaletteSetting = EChartsPalette;
 
 export const DENSITY_KEY = 'landagri-density';
 export const RADIUS_KEY = 'landagri-radius';
 export const PRESET_KEY = 'landagri-preset';
 export const FONT_KEY = 'landagri-font';
+export const PALETTE_KEY = 'landagri-palette';
 
 export const DENSITY_OPTIONS: readonly { value: Density; label: string }[] = [
   { value: 'comfortable', label: 'Confortável' },
@@ -81,12 +94,14 @@ function applyToRoot(
   density: Density,
   fontValue: string,
   effective: 'light' | 'dark',
+  palette: PaletteSetting = 'theme',
 ): void {
   const root = document.documentElement;
   root.dataset.density = density;
   root.dataset.preset = preset.value;
   root.dataset.radius = radius;
   root.dataset.font = fontValue;
+  root.dataset.palette = palette;
   root.style.setProperty('--radius', RADIUS_MAP[radius]);
   root.style.setProperty('--card-radius', RADIUS_MAP[radius]);
   for (const [token, value] of Object.entries(radiusScale(radius))) {
@@ -102,12 +117,21 @@ function applyToRoot(
   });
   root.style.setProperty('--color-sidebar-bg', colors.sidebarBg);
   root.style.setProperty('--color-sidebar-text', colors.sidebarText);
-  root.style.setProperty(
-    '--color-sidebar-text-active',
-    colors.sidebarTextActive,
-  );
-  root.style.setProperty('--color-sidebar-active-bg', colors.sidebarActiveBg);
-  root.style.setProperty('--color-sidebar-hover-bg', colors.sidebarHoverBg);
+  if (palette === 'divergent') {
+    // Variante de alto contraste por preset (ver `sidebarDivergentVars`):
+    // mesmo matiz, fundo ativo densificado + texto ativo reforçado.
+    const hc = sidebarDivergentVars(preset.value, effective);
+    root.style.setProperty('--color-sidebar-text-active', hc.sidebarTextActive);
+    root.style.setProperty('--color-sidebar-active-bg', hc.sidebarActiveBg);
+    root.style.setProperty('--color-sidebar-hover-bg', hc.sidebarHoverBg);
+  } else {
+    root.style.setProperty(
+      '--color-sidebar-text-active',
+      colors.sidebarTextActive,
+    );
+    root.style.setProperty('--color-sidebar-active-bg', colors.sidebarActiveBg);
+    root.style.setProperty('--color-sidebar-hover-bg', colors.sidebarHoverBg);
+  }
   root.style.setProperty('--color-header-overview', colors.headerOverview);
   root.style.setProperty(
     '--color-header-initiative',
@@ -125,7 +149,8 @@ function applyToRoot(
 }
 
 /**
- * Manager leve do customizer (Fase 3) — preset + raio + densidade + fonte.
+ * Manager leve do customizer (Fase 3) — preset + raio + densidade + fonte +
+ * paleta (`theme`|`divergent`, sidebar alto contraste por preset).
  * Sem radix/cmdk/novas deps: estado + CSS vars + localStorage. Reversível
  * via `resetCustomizations()`.
  */
@@ -147,19 +172,23 @@ export function useThemeManager() {
   const [fontValue, setFontValue] = React.useState<string>(() =>
     readStored(FONT_KEY, 'default', ['default', 'mono', 'system'] as const),
   );
+  const [palette, setPaletteState] = React.useState<PaletteSetting>(() =>
+    readStored(PALETTE_KEY, 'theme', ['theme', 'divergent'] as const),
+  );
 
   const preset = getThemePreset(presetValue);
 
   React.useEffect(() => {
-    applyToRoot(preset, radius, density, fontValue, effective);
+    applyToRoot(preset, radius, density, fontValue, effective, palette);
     // Persiste o valor RESOLVIDO (fallback já aplicado pelo getter): um
     // `landagri-preset`/`landagri-font` cru inválido nunca volta ao disco.
     persist(PRESET_KEY, preset.value);
     persist(RADIUS_KEY, radius);
     persist(DENSITY_KEY, density);
     persist(FONT_KEY, getFontOption(fontValue).value);
+    persist(PALETTE_KEY, palette);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [presetValue, radius, density, fontValue, effective]);
+  }, [presetValue, radius, density, fontValue, effective, palette]);
 
   /**
    * "Restaurar padrão" = voltar aos defaults do app (preset agro-v2 +
@@ -174,6 +203,7 @@ export function useThemeManager() {
     setRadius('md');
     setDensityState('comfortable');
     setFontValue('default');
+    setPaletteState('theme');
   }, []);
 
   return {
@@ -185,6 +215,8 @@ export function useThemeManager() {
     setDensity: setDensityState,
     font: fontValue,
     setFont: setFontValue,
+    palette,
+    setPalette: setPaletteState,
     resetCustomizations,
   };
 }

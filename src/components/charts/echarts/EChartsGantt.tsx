@@ -2,6 +2,7 @@ import { useMemo, type ReactElement } from 'react';
 import EChartsBase from './EChartsBase';
 import { buildGanttOption } from './echarts-options';
 import { useEffectiveTheme } from '../../../hooks/use-theme';
+import { useChartColorway } from '../../../hooks/use-chart-colorway';
 import { useChartFontFamily } from '../../../hooks/use-chart-font';
 import { useT } from '../../../i18n/LanguageContext';
 import type { TKey } from '../../../i18n/types';
@@ -36,6 +37,7 @@ export default function EChartsGantt({
   markLineX,
 }: EChartsGanttProps): ReactElement {
   const theme = useEffectiveTheme();
+  const { colorway, preset: presetValue } = useChartColorway();
   const fontFamily = useChartFontFamily();
   const { t, locale } = useT('charts');
 
@@ -52,11 +54,13 @@ export default function EChartsGantt({
           tip: b.tip ?? `<b>${b.label}</b><br>${t('period')}: ${b.start} - ${b.end}`,
         })),
         theme,
+        colorway,
+        preset: presetValue,
         locale,
         fontFamily,
         ...(markLineX !== undefined ? { markLineX } : {}),
       }),
-    [xLabels, bars, theme, locale, fontFamily, t, markLineX],
+    [xLabels, bars, theme, colorway, presetValue, locale, fontFamily, t, markLineX],
   );
 
   const caption = captionKey !== undefined ? t(captionKey) : '';

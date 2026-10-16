@@ -14,6 +14,8 @@ import type { EChartsCoreOption } from 'echarts/core';
 import type { CustomSeriesRenderItem, CustomSeriesRenderItemReturn } from 'echarts';
 import { CHART_FONT_FAMILY } from '../../../lib/fonts';
 import { escapeHtml } from '../../../lib/escapeHtml';
+import { divergingColorForValue } from '../../../lib/chart-preset';
+import { DEFAULT_PRESET } from '../../../config/theme-presets';
 import { phenoHatchColor, phenoPhaseColor } from '../../../lib/phenoColors';
 import { translate } from '../../../i18n';
 import type { Locale } from '../../../i18n/types';
@@ -40,12 +42,25 @@ interface BaseBuilderInput {
   fontFamily?: string;
   /**
    * Explicit palette (default `'theme'`). Categorical builders always use
-   * the colorway of the active theme and intentionally ignore `'divergent'`
-   * (sign-encoding hues would mislead counts/magnitudes); only
-   * `buildHeatmapOption` varies output by palette — `'divergent'` solely
-   * for correlation-style −1…1 data.
+   * the colorway of the active preset and intentionally ignore `'divergent'`
+   * (sign-encoding hues would mislead counts/magnitudes) — EXCETO
+   * `buildHeatmapOption` (correlação −1…1) e `buildHorizontalBarOption`
+   * (deltas em torno de 0), onde `'divergent'` codifica o sinal via
+   * `divergingColorForValue` do preset ativo.
    */
   palette?: EChartsPalette;
+  /**
+   * Colorway categórica do preset ativo — wrappers passam
+   * `useChartColorway()`. Omitida → constantes Verde Agro legadas
+   * (uso puro/teste). Nunca fixar hex no chamador: resolva do preset.
+   */
+  colorway?: readonly string[];
+  /**
+   * Valor do preset ativo (`'agro-v2'`, `'terra'`, …) — wrappers passam
+   * `useChartColorway()`. Deriva rampas do visualMap e âncoras
+   * divergentes do preset; omitido → rampas Verde Agro legadas.
+   */
+  preset?: string;
   /**
    * Nome-base do PNG (`toolbox.saveAsImage`) — montado pelo chamador com
    * rota/iniciativa/locale (ver `useChartExport`). Omitido → fallback
@@ -117,7 +132,8 @@ function axisCommon(theme: EChartsPilotTheme): {
   };
 }
 
-function colorwayOf(theme: EChartsPilotTheme): string[] {
+function colorwayOf(theme: EChartsPilotTheme, override?: readonly string[]): string[] {
+  if (override !== undefined && override.length > 0) return [...override];
   return [...(theme === 'dark' ? LANDAGRI_COLORWAY_DARK : LANDAGRI_COLORWAY_LIGHT)];
 }
 
@@ -220,7 +236,7 @@ function legendGridBottom(seriesCount: number): number {
 export interface HorizontalBarInput extends BaseBuilderInput {
   labels: (string | number)[];
   values: (number | null)[];
-  /** Series color; default = first Verde Agro colorway entry. */
+  /** Series color; default = first entry of the active preset colorway. */
   color?: string;
   name?: string;
 }
@@ -230,7 +246,7 @@ export function buildHorizontalBarOption(
 ): EChartsCoreOption {
   const { divider } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
-  const colorway = colorwayOf(input.theme);
+  const colorway = colorwayOf(input.theme, input.colorway);
   return {
     color: [...colorway],
     textStyle: { fontFamily },
@@ -261,7 +277,23 @@ export function buildHorizontalBarOption(
       {
         type: 'bar',
         name: input.name ?? '',
-        data: input.values,
+        // `palette: 'divergent'`: cada barra codifica o sinal em torno de 0
+        // (âncora negativa vs. primária do preset ativo); demais paletas
+        // usam a cor única da série (colorway do preset).
+        data:
+          input.palette === 'divergent' && input.color === undefined
+            ? input.values.map((v) => ({
+                value: v,
+                itemStyle: {
+                  color: divergingColorForValue(
+                    v,
+                    input.preset ?? DEFAULT_PRESET,
+                    input.theme,
+                    colorway[0],
+                  ),
+                },
+              }))
+            : input.values,
         itemStyle: { color: input.color ?? colorway[0] },
       },
     ],
@@ -271,7 +303,7 @@ export function buildHorizontalBarOption(
 export interface GroupedBarSeriesInput {
   name: string;
   values: (number | null)[];
-  /** Series color; default = Verde Agro colorway by index. */
+  /** Series color; default = active preset colorway by index. */
   color?: string;
 }
 
@@ -300,7 +332,7 @@ export function buildGroupedBarOption(
 ): EChartsCoreOption {
   const { divider, labelColor } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
-  const colorway = colorwayOf(input.theme);
+  const colorway = colorwayOf(input.theme, input.colorway);
   return {
     color: [...colorway],
     textStyle: { fontFamily },
@@ -502,9 +534,10 @@ export function buildHeatmapOption(input: HeatmapInput): EChartsCoreOption {
   const max = flat.length > 0 ? Math.max(...flat) : 0;
   const vMin = input.min ?? 0;
   const vMax = input.max ?? Math.max(max, 1);
-  // Rampa do tema ativo por paleta (override explícito vence); rótulo
-  // automático por contraste quando `labelDarkRange` é omitido.
-  const ramp = input.colors ?? heatmapVisualColors(input.theme, input.palette ?? 'theme');
+  // Rampa do preset ativo por paleta (override explícito vence); rótulo
+  // automático por contraste quando `labelDarkRange` é omitido. Sem
+  // `preset`, cai nas rampas Verde Agro legadas (uso puro/teste).
+  const ramp = input.colors ?? heatmapVisualColors(input.theme, input.palette ?? 'theme', input.preset);
   const darkRange = input.labelDarkRange;
   const [darkLo, darkHi] = darkRange ?? [vMin, vMin + (vMax - vMin) * 0.4];
   const suffix = input.valueSuffix ?? '';
@@ -651,7 +684,7 @@ export interface LineInput extends BaseBuilderInput {
 export function buildLineOption(input: LineInput): EChartsCoreOption {
   const { divider, labelColor } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
-  const colorway = colorwayOf(input.theme);
+  const colorway = colorwayOf(input.theme, input.colorway);
   const showMarkers = input.showMarkers ?? true;
   // Union of x values in first-appearance order — integer years stay
   // whole categories (never fractional labels like "2020.5").
@@ -783,7 +816,7 @@ export interface PieInput extends BaseBuilderInput {
 export function buildPieOption(input: PieInput): EChartsCoreOption {
   const { labelColor } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
-  const colorway = colorwayOf(input.theme);
+  const colorway = colorwayOf(input.theme, input.colorway);
   return {
     color: [...colorway],
     textStyle: { fontFamily },
@@ -930,7 +963,7 @@ function declutterScatterLabels(
 export function buildScatterOption(input: ScatterInput): EChartsCoreOption {
   const { divider, labelColor } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
-  const colorway = colorwayOf(input.theme);
+  const colorway = colorwayOf(input.theme, input.colorway);
   const labelVisible = declutterScatterLabels(input.series, input.yAxisType);
   return {
     color: [...colorway],
@@ -1068,7 +1101,7 @@ export function timelineAnimationYears(
 export function buildTimelineOption(input: TimelineInput): EChartsCoreOption {
   const { divider } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
-  const colorway = colorwayOf(input.theme);
+  const colorway = colorwayOf(input.theme, input.colorway);
   const labels = input.items.map((item) => item.label);
   const allYears = input.items.flatMap((item) => item.years);
   const min = allYears.length > 0 ? Math.min(...allYears) : 2000;
@@ -1124,6 +1157,7 @@ export function buildTimelineOption(input: TimelineInput): EChartsCoreOption {
       fontFamily,
       input.animation,
       timelineAnimationYears(input.animation),
+      colorway,
     ),
     options: timelineAnimationYears(input.animation).map((year) => ({
       series: buildTimelineSeries(input.items, colorway, tips, year),
@@ -1133,16 +1167,17 @@ export function buildTimelineOption(input: TimelineInput): EChartsCoreOption {
 
 /**
  * Native `timeline` component (Expansão #4): year labels, autoplay with
- * `playInterval`, checkpoint in the theme's Verde Agro lead color.
+ * `playInterval`, checkpoint in the lead color of the active preset colorway.
  */
 function buildTimelineAnimation(
   theme: BaseBuilderInput['theme'],
   fontFamily: string,
   animation: TimelineAnimation,
   years: number[],
+  colorway?: readonly string[],
 ): Record<string, unknown> {
   const { divider, labelColor } = axisCommon(theme);
-  const checkpoint = colorwayOf(theme)[0];
+  const checkpoint = colorwayOf(theme, colorway)[0];
   return {
     axisType: 'category',
     data: years.map(String),
@@ -1237,7 +1272,7 @@ export interface RadarInput extends BaseBuilderInput {
 export function buildRadarOption(input: RadarInput): EChartsCoreOption {
   const { labelColor } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
-  const colorway = colorwayOf(input.theme);
+  const colorway = colorwayOf(input.theme, input.colorway);
   const maxPerIndicator = input.indicators.map((_, i) => {
     const vals = input.series
       .map((s) => s.values[i])
@@ -1293,7 +1328,7 @@ export interface GanttBarInput {
   start: number;
   /** Bar length (Plotly `end - start` analogue). */
   duration: number;
-  /** Bar color; default = Verde Agro colorway by index. */
+  /** Bar color; default = active preset colorway by index. */
   color?: string;
   /** Legend name; defaults to the y label. */
   name?: string;
@@ -1320,7 +1355,7 @@ export interface GanttInput extends BaseBuilderInput {
 export function buildGanttOption(input: GanttInput): EChartsCoreOption {
   const { divider, labelColor } = axisCommon(input.theme);
   const fontFamily = fontOf(input);
-  const colorway = colorwayOf(input.theme);
+  const colorway = colorwayOf(input.theme, input.colorway);
   const labels = input.bars.map((b) => b.y);
   const tips = input.bars.map((b, i) => b.tip ?? labels[i]);
   return {
@@ -1420,7 +1455,7 @@ export interface PolarInput extends BaseBuilderInput {
  */
 export function buildPolarOption(input: PolarInput): EChartsCoreOption {
   const fontFamily = fontOf(input);
-  const colorway = colorwayOf(input.theme);
+  const colorway = colorwayOf(input.theme, input.colorway);
   return {
     color: [...colorway],
     textStyle: { fontFamily },

@@ -2,6 +2,7 @@ import { useMemo, type ReactElement } from 'react';
 import EChartsBase from './EChartsBase';
 import { buildGroupedBarOption, type GroupedBarSeriesInput } from './echarts-options';
 import { useEffectiveTheme } from '../../../hooks/use-theme';
+import { useChartColorway } from '../../../hooks/use-chart-colorway';
 import { useChartFontFamily } from '../../../hooks/use-chart-font';
 import { useT } from '../../../i18n/LanguageContext';
 import type { TKey } from '../../../i18n/types';
@@ -36,6 +37,7 @@ export default function EChartsGroupedBar({
   tips,
 }: EChartsGroupedBarProps): ReactElement {
   const theme = useEffectiveTheme();
+  const { colorway, preset: presetValue } = useChartColorway();
   const fontFamily = useChartFontFamily();
   const { t, locale } = useT('charts');
 
@@ -45,6 +47,8 @@ export default function EChartsGroupedBar({
         categories,
         series,
         theme,
+        colorway,
+        preset: presetValue,
         locale,
         fontFamily,
         stacked,
@@ -52,7 +56,7 @@ export default function EChartsGroupedBar({
         yAxisType,
         ...(tips !== undefined ? { tips } : {}),
       }),
-    [categories, series, theme, locale, fontFamily, stacked, referenceLine, yAxisType, tips],
+    [categories, series, theme, colorway, presetValue, locale, fontFamily, stacked, referenceLine, yAxisType, tips],
   );
 
   const caption = captionKey !== undefined ? t(captionKey) : '';

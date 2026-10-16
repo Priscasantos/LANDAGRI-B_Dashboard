@@ -3,6 +3,7 @@ import EChartsBase from './EChartsBase';
 import { buildHeatmapOption } from './echarts-options';
 import type { EChartsPalette } from '../../../lib/echarts-theme';
 import { useEffectiveTheme } from '../../../hooks/use-theme';
+import { useChartColorway } from '../../../hooks/use-chart-colorway';
 import { useChartFontFamily } from '../../../hooks/use-chart-font';
 import { useT } from '../../../i18n/LanguageContext';
 import type { TKey } from '../../../i18n/types';
@@ -50,12 +51,13 @@ export default function EChartsHeatmap({
   tips,
 }: EChartsHeatmapProps): ReactElement {
   const theme = useEffectiveTheme();
+  const { colorway, preset: presetValue } = useChartColorway();
   const fontFamily = useChartFontFamily();
   const { t, locale } = useT('charts');
 
   const option = useMemo(
-    () => buildHeatmapOption({ x, y, z, theme, locale, fontFamily, colors, palette, min, max, showValues, labelDarkRange, valueSuffix, tips }),
-    [x, y, z, theme, locale, fontFamily, colors, palette, min, max, showValues, labelDarkRange, valueSuffix, tips],
+    () => buildHeatmapOption({ x, y, z, theme, colorway, preset: presetValue, locale, fontFamily, colors, palette, min, max, showValues, labelDarkRange, valueSuffix, tips }),
+    [x, y, z, theme, colorway, presetValue, locale, fontFamily, colors, palette, min, max, showValues, labelDarkRange, valueSuffix, tips],
   );
 
   const caption = captionKey !== undefined ? t(captionKey) : '';

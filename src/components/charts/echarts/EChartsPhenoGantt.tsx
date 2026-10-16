@@ -2,6 +2,7 @@ import { useMemo, type ReactElement } from 'react';
 import EChartsBase from './EChartsBase';
 import { buildPhenoGanttOption, type PhenoGanttSegment } from './echarts-options';
 import { useEffectiveTheme } from '../../../hooks/use-theme';
+import { useChartColorway } from '../../../hooks/use-chart-colorway';
 import { useChartFontFamily } from '../../../hooks/use-chart-font';
 import { useT } from '../../../i18n/LanguageContext';
 import type { TKey } from '../../../i18n/types';
@@ -47,6 +48,7 @@ export default function EChartsPhenoGantt({
   height = 500,
 }: EChartsPhenoGanttProps): ReactElement {
   const theme = useEffectiveTheme();
+  const { colorway, preset: presetValue } = useChartColorway();
   const fontFamily = useChartFontFamily();
   const { t, locale } = useT('charts');
 
@@ -62,10 +64,12 @@ export default function EChartsPhenoGantt({
         todayPosition,
         todayName,
         theme,
+        colorway,
+        preset: presetValue,
         locale,
         fontFamily,
       }),
-    [lanes, laneKinds, xLabels, segments, seasonBandEnd, seasonBandName, todayPosition, todayName, theme, locale, fontFamily],
+    [lanes, laneKinds, xLabels, segments, seasonBandEnd, seasonBandName, todayPosition, todayName, theme, colorway, presetValue, locale, fontFamily],
   );
 
   const caption = captionKey !== undefined ? t(captionKey) : '';

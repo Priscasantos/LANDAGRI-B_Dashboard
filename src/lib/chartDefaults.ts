@@ -77,13 +77,20 @@ export function buildStandardLayout(
 }
 
 /**
- * Get theme-aware chart layout
+ * Get theme-aware chart layout.
+ *
+ * `colorway` (opcional): categórica do preset ativo (ex. `presetCharts` ou
+ * `useChartColorway().colorway`). Omitida → Verde Agro legada por tema.
  */
 export function getChartLayout(
   theme: 'light' | 'dark' = 'light',
   fontFamily: string = resolveChartFontFamily(),
+  colorway?: readonly string[],
 ): Partial<Layout> {
   const isDark = theme === 'dark';
+  const resolvedColorway = colorway !== undefined && colorway.length > 0 ? [...colorway] : isDark
+      ? ['#9CCC65', '#7CB342', '#C5E1A5', '#43A047', '#E8A04C', '#FFCA28', '#4DD0E1', '#9FA8DA', '#B0BEC5', '#66BB6A']
+      : ['#2E7D32', '#43A047', '#7CB342', '#AED581', '#1B5E20', '#C2701D', '#E6A817', '#0E7C86', '#5C6BC0', '#B0BEC5'];
   return {
     plot_bgcolor: 'transparent',
     paper_bgcolor: 'transparent',
@@ -136,9 +143,7 @@ export function getChartLayout(
       tracegroupgap: 15,
     },
     separators: separatorsForLocale(getActiveLocale()),
-    colorway: isDark
-      ? ['#9CCC65', '#7CB342', '#C5E1A5', '#43A047', '#E8A04C', '#FFCA28', '#4DD0E1', '#9FA8DA', '#B0BEC5', '#66BB6A']
-      : ['#2E7D32', '#43A047', '#7CB342', '#AED581', '#1B5E20', '#C2701D', '#E6A817', '#0E7C86', '#5C6BC0', '#B0BEC5'],
+    colorway: resolvedColorway,
   };
 }
 

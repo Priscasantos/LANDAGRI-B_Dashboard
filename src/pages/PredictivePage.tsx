@@ -338,7 +338,7 @@ export default function PredictivePage() {
                 </p>
                 <h3
                   className="text-2xl font-black"
-                  style={{ color: forestDelta >= 0 ? '#10b981' : '#ef4444' }}
+                  style={{ color: forestDelta >= 0 ? 'var(--color-success)' : 'var(--color-error)' }}
                 >
                   {t('deltaMha', { sign: forestDelta >= 0 ? '+' : '', value: forestDelta })}
                 </h3>
@@ -369,7 +369,7 @@ export default function PredictivePage() {
                 </p>
                 <h3
                   className="text-2xl font-black"
-                  style={{ color: carbonDelta <= 0 ? '#10b981' : '#ef4444' }}
+                  style={{ color: carbonDelta <= 0 ? 'var(--color-success)' : 'var(--color-error)' }}
                 >
                   {t('deltaPct', { sign: carbonDelta <= 0 ? '' : '+', value: carbonDelta })}
                 </h3>

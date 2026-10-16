@@ -2,6 +2,7 @@ import { useMemo, type ReactElement } from 'react';
 import EChartsBase from './EChartsBase';
 import { buildLineOption, type EChartsLinePoint } from './echarts-options';
 import { useEffectiveTheme } from '../../../hooks/use-theme';
+import { useChartColorway } from '../../../hooks/use-chart-colorway';
 import { useChartFontFamily } from '../../../hooks/use-chart-font';
 import { useT } from '../../../i18n/LanguageContext';
 import type { TKey } from '../../../i18n/types';
@@ -40,6 +41,7 @@ export default function EChartsLine({
   markLineX,
 }: EChartsLineProps): ReactElement {
   const theme = useEffectiveTheme();
+  const { colorway, preset: presetValue } = useChartColorway();
   const fontFamily = useChartFontFamily();
   const { t, locale } = useT('charts');
 
@@ -48,6 +50,8 @@ export default function EChartsLine({
       buildLineOption({
         series,
         theme,
+        colorway,
+        preset: presetValue,
         locale,
         fontFamily,
         showMarkers,
@@ -58,7 +62,7 @@ export default function EChartsLine({
         ...(yMinInterval !== undefined ? { yMinInterval } : {}),
         ...(markLineX !== undefined ? { markLineX } : {}),
       }),
-    [series, theme, locale, fontFamily, showMarkers, areaFill, stack, yMin, yMax, yMinInterval, markLineX],
+    [series, theme, colorway, presetValue, locale, fontFamily, showMarkers, areaFill, stack, yMin, yMax, yMinInterval, markLineX],
   );
 
   const caption = captionKey !== undefined ? t(captionKey) : '';

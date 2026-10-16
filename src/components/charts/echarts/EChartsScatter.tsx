@@ -2,6 +2,7 @@ import { useMemo, type ReactElement } from 'react';
 import EChartsBase from './EChartsBase';
 import { buildScatterOption, type ScatterSeriesInput } from './echarts-options';
 import { useEffectiveTheme } from '../../../hooks/use-theme';
+import { useChartColorway } from '../../../hooks/use-chart-colorway';
 import { useChartFontFamily } from '../../../hooks/use-chart-font';
 import { useT } from '../../../i18n/LanguageContext';
 import type { TKey } from '../../../i18n/types';
@@ -25,12 +26,13 @@ export default function EChartsScatter({
   group,
 }: EChartsScatterProps): ReactElement {
   const theme = useEffectiveTheme();
+  const { colorway, preset: presetValue } = useChartColorway();
   const fontFamily = useChartFontFamily();
   const { t, locale } = useT('charts');
 
   const option = useMemo(
-    () => buildScatterOption({ series, theme, locale, fontFamily, yAxisType }),
-    [series, theme, locale, fontFamily, yAxisType],
+    () => buildScatterOption({ series, theme, colorway, preset: presetValue, locale, fontFamily, yAxisType }),
+    [series, theme, colorway, presetValue, locale, fontFamily, yAxisType],
   );
 
   const caption = captionKey !== undefined ? t(captionKey) : '';

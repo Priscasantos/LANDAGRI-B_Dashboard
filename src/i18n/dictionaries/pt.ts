@@ -684,6 +684,9 @@ export const pt = {
   customizer: {
     customize: 'Personalizar tema',
     preset: 'Predefinição',
+    palette: 'Paleta',
+    paletteTheme: 'Tema',
+    paletteDivergent: 'Divergente',
     density: 'Densidade',
     radius: 'Raio das bordas',
     font: 'Fonte',

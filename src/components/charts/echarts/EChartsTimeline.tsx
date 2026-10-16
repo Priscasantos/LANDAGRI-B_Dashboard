@@ -8,6 +8,7 @@ import {
   type TimelineItemInput,
 } from './echarts-options';
 import { useEffectiveTheme } from '../../../hooks/use-theme';
+import { useChartColorway } from '../../../hooks/use-chart-colorway';
 import { useChartFontFamily } from '../../../hooks/use-chart-font';
 import { usePrefersReducedMotion } from '../../../hooks/use-prefers-reduced-motion';
 import { useT } from '../../../i18n/LanguageContext';
@@ -43,6 +44,7 @@ export default function EChartsTimeline({
   playInterval = TIMELINE_ANIMATION_PLAY_INTERVAL,
 }: EChartsTimelineProps): ReactElement {
   const theme = useEffectiveTheme();
+  const { colorway, preset: presetValue } = useChartColorway();
   const fontFamily = useChartFontFamily();
   const { t, locale } = useT('charts');
   const reduceMotion = usePrefersReducedMotion();
@@ -56,6 +58,8 @@ export default function EChartsTimeline({
       buildTimelineOption({
         items,
         theme,
+        colorway,
+        preset: presetValue,
         locale,
         fontFamily,
         ...(animated
@@ -69,7 +73,7 @@ export default function EChartsTimeline({
             }
           : {}),
       }),
-    [items, theme, locale, fontFamily, animated, animationFrom, animationTo, playInterval, playing],
+    [items, theme, colorway, presetValue, locale, fontFamily, animated, animationFrom, animationTo, playInterval, playing],
   );
 
   const caption = captionKey !== undefined ? t(captionKey) : '';
