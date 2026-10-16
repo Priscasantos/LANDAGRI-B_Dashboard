@@ -10,8 +10,8 @@ Two different mechanisms serve data in this SPA. Do not mix them.
 - **Consume:** static JSON imports, e.g.
   `AgriculturalCharts.tsx` ← `src/data/processed/brazilian_agricultural_data.json`.
   These files are **bundled** into JS chunks at build time.
-- **Status:** `src/data/processed/` is committed (except `conab_safra_2425.json`,
-  git-ignored as too large — regenerate via `npm run preprocess`).
+- **Status:** `src/data/processed/` is committed (except `conab_safra_2425.json`
+  and `conab_safra_2526.json`, git-ignored as too large — regenerate via `npm run preprocess`).
 
 ## 2. Runtime data (fetched over HTTP)
 

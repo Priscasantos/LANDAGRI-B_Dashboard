@@ -1,3 +1,7 @@
 {
-  "Sheet1": []
+  "Sheet1": {
+    "_unavailable": true,
+    "reason": "Sheet \"Sheet1\" in conab_safra_2023_24.xlsx has no data rows; the source spreadsheet looks like a failed-download placeholder. Re-download it and re-run `npm run preprocess`.",
+    "raw_preview": ["{\"error_type\": \"NotFound\"}"]
+  }
 }

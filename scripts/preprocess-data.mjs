@@ -180,7 +180,24 @@ async function processXlsx(srcFile, outputName) {
     workbook.SheetNames.forEach(sheetName => {
       const sheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: null });
-      result[sheetName] = jsonData;
+      if (jsonData.length > 0) {
+        result[sheetName] = jsonData;
+        return;
+      }
+      // Sheet has no data rows: distinguish a truly empty sheet from a
+      // failed-download placeholder (e.g. a single {"error_type":"NotFound"}
+      // cell, whose text is swallowed as the header row above).
+      const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
+      const cells = raw.flat().filter(v => v !== null && v !== '');
+      if (cells.length === 0) {
+        result[sheetName] = [];
+        return;
+      }
+      result[sheetName] = {
+        _unavailable: true,
+        reason: `Sheet "${sheetName}" in ${srcFile} has no data rows; the source spreadsheet looks like a failed-download placeholder. Re-download it and re-run \`npm run preprocess\`.`,
+        raw_preview: cells.slice(0, 3),
+      };
     });
 
     if (Object.keys(result).length === 0) {
@@ -264,6 +281,7 @@ async function main() {
   console.log('\n📄 Processing XLSX files...');
   await processXlsx('conab_safra_2023_24.xlsx', 'conab_safra_2324.json');
   await processXlsx('conab_safra_2024_25.xlsx', 'conab_safra_2425.json');
+  await processXlsx('conab_safra_2025_26.xlsx', 'conab_safra_2526.json');
 
   console.log('\n🖼️ Copying partner logos...');
   copyLogos();
