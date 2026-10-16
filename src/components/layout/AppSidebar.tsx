@@ -79,11 +79,6 @@ const navGroups: SidebarNavGroup[] = [
     labelKey: 'groupPredictive',
     items: [
       { titleKey: 'predictive', url: '/predictive', icon: BrainCircuit },
-    ],
-  },
-  {
-    labelKey: 'groupAbout',
-    items: [
       { titleKey: 'about', url: '/about', icon: BookOpen },
     ],
   },

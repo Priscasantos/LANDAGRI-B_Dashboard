@@ -10,7 +10,6 @@ import KeyMetricsCards from '../components/overview/KeyMetricsCards';
 import LulcClasses from '../components/overview/LulcClasses';
 import TechnicalDetails from '../components/overview/TechnicalDetails';
 import SensorInfo from '../components/overview/SensorInfo';
-import AgriculturalCharts from '../components/overview/AgriculturalCharts';
 import type { SensorMap } from '../types/sensor';
 
 export default function OverviewPage() {
@@ -78,11 +77,6 @@ export default function OverviewPage() {
           </div>
         </>
       )}
-
-      <hr className="my-6 border-border" />
-
-      {/* Agricultural Data Charts */}
-      <AgriculturalCharts />
 
       <hr className="my-6 border-border" />
 

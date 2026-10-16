@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, startTransition } from 'react';
-import { CalendarDays, History, Map, Sun, BarChart3, TrendingUp, Zap } from 'lucide-react';
+import { CalendarDays, Sun, Map } from 'lucide-react';
 import Tabs from '../../ui/Tabs';
 import CropCalendarFilters from './CropCalendarFilters';
 import CalendarHeatmapsTab from './CalendarHeatmapsTab';
@@ -47,48 +47,42 @@ export default function CropCalendarPage() {
     onRegionsChange: setSelectedRegions,
   };
 
+  // P2a: 7 tabs reagrupadas em 3 seções (conteúdo preservado, só reagrupe visual).
+  // Tabs são estado local (sem rotas internas) — nenhuma url/path muda.
   const calendarTabs = [
     {
-      id: 'heatmaps',
-      label: t('tabHeatmaps'),
+      id: 'calendario',
+      label: t('tabCalendar'),
       icon: CalendarDays,
-      content: <CalendarHeatmapsTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
+      content: (
+        <div className="space-y-8">
+          <CalendarHeatmapsTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />
+          <ActivitiesTimelineTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />
+        </div>
+      ),
     },
     {
-      id: 'timeline',
-      label: t('tabActivitiesTimeline'),
-      icon: History,
-      content: <ActivitiesTimelineTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
-    },
-    {
-      id: 'spatiotemporal',
-      label: t('tabSpatioTemporal'),
-      icon: Map,
-      content: <SpatioTemporalTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
-    },
-    {
-      id: 'seasonal',
-      label: t('tabSeasonal'),
+      id: 'sazonalidade',
+      label: t('tabSeasonality'),
       icon: Sun,
-      content: <SeasonalOverviewTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
+      content: (
+        <div className="space-y-8">
+          <SeasonalOverviewTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />
+          <MonthlyIntensityTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />
+          <ActivityIntensityTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />
+        </div>
+      ),
     },
     {
-      id: 'distribution',
-      label: t('tabCropDistribution'),
-      icon: BarChart3,
-      content: <CropDistributionTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
-    },
-    {
-      id: 'intensity',
-      label: t('tabMonthly'),
-      icon: TrendingUp,
-      content: <MonthlyIntensityTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
-    },
-    {
-      id: 'activity',
-      label: t('tabActivity'),
-      icon: Zap,
-      content: <ActivityIntensityTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />,
+      id: 'territorio',
+      label: t('tabTerritory'),
+      icon: Map,
+      content: (
+        <div className="space-y-8">
+          <SpatioTemporalTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />
+          <CropDistributionTab selectedCrops={selectedCrops} selectedRegions={selectedRegions} />
+        </div>
+      ),
     },
   ];
 

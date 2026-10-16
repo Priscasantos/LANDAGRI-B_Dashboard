@@ -1,6 +1,5 @@
-import { useMemo, type ReactElement } from 'react';
-import { Map, Wheat, MapPin, BarChart3, Sprout } from 'lucide-react';
-import Tabs from '../../ui/Tabs';
+import { useMemo, useState, type ReactElement } from 'react';
+import { Map, Wheat, MapPin } from 'lucide-react';
 import Card from '../../ui/Card';
 import MetricCard from '../../ui/MetricCard';
 import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
@@ -20,10 +19,17 @@ const MONTHS_SHORT = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'J
 
 interface AvailabilityRow {
   'Crop Type;Area;Anos (1S);Anos (2S)': string;
+  crop?: string;
+  uf?: string;
+  anos_1s?: string[];
+  anos_2s?: string[];
 }
 
 interface CalendarRow {
   'Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September': string;
+  crop?: string;
+  uf?: string;
+  months?: string[];
 }
 
 interface StateInfo {
@@ -35,6 +41,8 @@ interface MappingDataType {
   states?: Record<string, StateInfo>;
 }
 
+const ALL = 'all';
+
 function parseActivityValue(val: string): number {
   if (!val || val.trim() === '') return 0;
   const v = val.trim();
@@ -42,37 +50,131 @@ function parseActivityValue(val: string): number {
   return 0;
 }
 
+/** Typed fields first (conab_availability.json), legacy `;`-joined string as fallback. */
+function availCrop(row: AvailabilityRow): string {
+  if (row.crop && row.crop.trim() !== '') return row.crop.trim();
+  const entry = row['Crop Type;Area;Anos (1S);Anos (2S)'];
+  const crop = entry?.split(';')[0]?.trim();
+  return crop && crop !== '' ? crop : 'Unknown';
+}
+
+function availUf(row: AvailabilityRow): string {
+  if (row.uf && row.uf.trim() !== '') return row.uf.trim();
+  const entry = row['Crop Type;Area;Anos (1S);Anos (2S)'];
+  return entry?.split(';')[1]?.trim() ?? '';
+}
+
+function availPeriods(row: AvailabilityRow): string[] {
+  const out = [...(row.anos_1s ?? []), ...(row.anos_2s ?? [])].map((p) => p.trim()).filter(Boolean);
+  if (out.length > 0) return out;
+  const entry = row['Crop Type;Area;Anos (1S);Anos (2S)'];
+  if (!entry) return [];
+  const parts = entry.split(';');
+  const periods: string[] = [];
+  for (const idx of [2, 3]) {
+    const chunk = parts[idx]?.trim();
+    if (chunk) {
+      for (const p of chunk.split(',')) {
+        const period = p.trim();
+        if (period) periods.push(period);
+      }
+    }
+  }
+  return periods;
+}
+
+function calendarUf(row: CalendarRow): string {
+  if (row.uf && row.uf.trim() !== '') return row.uf.trim();
+  const entry = row['Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September'];
+  if (!entry || entry.trim() === '' || entry.startsWith(';')) return '';
+  return entry.split(';')[1]?.trim() ?? '';
+}
+
+function calendarCrop(row: CalendarRow): string {
+  if (row.crop && row.crop.trim() !== '') return row.crop.trim();
+  const entry = row['Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September'];
+  if (!entry || entry.trim() === '' || entry.startsWith(';')) return '';
+  return entry.split(';')[0]?.trim() ?? '';
+}
+
 /**
- * ECharts pilot of the Availability page (1 route, reversible).
- * Same JSONs, headings and i18n as `AgricultureAvailabilityPage` —
- * only the chart renderer changes (Plotly → ECharts SVG).
+ * P2a: single filterable page (replaces tabs + nested regional sub-tabs).
+ * Same JSONs, headings and i18n — sections render stacked and react to the
+ * cultura/região/período filters. Route url and Ctrl+K index unchanged.
  */
 export default function AgricultureAvailabilityPage(): ReactElement {
   const { t: tBody, locale } = useT('agricultural');
   const availData = conabAvailability as AvailabilityRow[];
   const calendarData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
+
+  const [selectedCrop, setSelectedCrop] = useState<string>(ALL);
+  const [selectedRegion, setSelectedRegion] = useState<string>(ALL);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>(ALL);
+
+  const stateRegions = useMemo(() => {
+    const statesMap: Record<string, StateInfo> = mappingData?.states || {};
+    const out: Record<string, string> = {};
+    for (const [code, info] of Object.entries(statesMap)) {
+      out[code] = info.region;
+    }
+    return out;
+  }, [mappingData]);
+
+  const filterOptions = useMemo(() => {
+    const crops = new Set<string>();
+    const regions = new Set<string>();
+    const periods = new Set<string>();
+    for (const row of availData) {
+      const crop = availCrop(row);
+      if (crop !== 'Unknown') crops.add(crop);
+      const uf = availUf(row);
+      if (uf && stateRegions[uf]) regions.add(stateRegions[uf]);
+      for (const p of availPeriods(row)) periods.add(p);
+    }
+    for (const row of calendarData) {
+      const crop = calendarCrop(row);
+      if (crop) crops.add(crop);
+      const uf = calendarUf(row);
+      if (uf && stateRegions[uf]) regions.add(stateRegions[uf]);
+    }
+    return {
+      crops: Array.from(crops).sort(),
+      regions: Array.from(regions).sort(),
+      periods: Array.from(periods).sort(),
+    };
+  }, [availData, calendarData, stateRegions]);
+
+  const filteredAvail = useMemo(
+    () =>
+      availData.filter((row) => {
+        if (selectedCrop !== ALL && availCrop(row) !== selectedCrop) return false;
+        if (selectedRegion !== ALL && stateRegions[availUf(row)] !== selectedRegion) return false;
+        if (selectedPeriod !== ALL && !availPeriods(row).includes(selectedPeriod)) return false;
+        return true;
+      }),
+    [availData, selectedCrop, selectedRegion, selectedPeriod, stateRegions],
+  );
+
+  const filteredCalendar = useMemo(
+    () =>
+      calendarData.filter((row) => {
+        if (selectedCrop !== ALL && calendarCrop(row) !== selectedCrop) return false;
+        if (selectedRegion !== ALL && stateRegions[calendarUf(row)] !== selectedRegion) return false;
+        return true;
+      }),
+    [calendarData, selectedCrop, selectedRegion, stateRegions],
+  );
+
   // Same parsing as the Plotly original.
   const { stateCoverage, cropDiversity, regionalActivity, activityHeatmap } = useMemo(() => {
-    const statesMap: Record<string, StateInfo> = mappingData?.states || {};
-    const stateRegions: Record<string, string> = {};
-    for (const [code, info] of Object.entries(statesMap)) {
-      stateRegions[code] = info.region;
-    }
-
     const cropStates: Record<string, Set<string>> = {};
     const stateYears: Record<string, Set<string>> = {};
     const stateCrops: Record<string, Set<string>> = {};
 
-    for (const row of availData) {
-      const entry = row['Crop Type;Area;Anos (1S);Anos (2S)'];
-      if (!entry || entry.trim() === '') continue;
-
-      const parts = entry.split(';');
-      if (parts.length < 2) continue;
-
-      const crop = parts[0].trim() || 'Unknown';
-      const state = parts[1].trim();
+    for (const row of filteredAvail) {
+      const crop = availCrop(row);
+      const state = availUf(row);
 
       if (!state) continue;
 
@@ -82,13 +184,9 @@ export default function AgricultureAvailabilityPage(): ReactElement {
       if (!stateCrops[state]) stateCrops[state] = new Set();
       stateCrops[state].add(crop);
 
-      if (parts[2]) {
+      for (const period of availPeriods(row)) {
         if (!stateYears[state]) stateYears[state] = new Set();
-        stateYears[state].add(parts[2].trim());
-      }
-      if (parts[3]) {
-        if (!stateYears[state]) stateYears[state] = new Set();
-        stateYears[state].add(parts[3].trim());
+        stateYears[state].add(period);
       }
     }
 
@@ -105,16 +203,29 @@ export default function AgricultureAvailabilityPage(): ReactElement {
 
     const regionMonthActivity: Record<string, number[]> = {};
 
-    for (const row of calendarData) {
+    for (const row of filteredCalendar) {
+      const uf = calendarUf(row);
+      const region = stateRegions[uf];
+      if (!uf || !region) continue;
+
+      const typedMonths = row.months;
+      if (typedMonths && typedMonths.length >= 12) {
+        if (!regionMonthActivity[region]) {
+          regionMonthActivity[region] = MONTHS_SHORT.map(() => 0);
+        }
+        typedMonths.slice(0, 12).forEach((v, i) => {
+          if (parseActivityValue(v) > 0) {
+            regionMonthActivity[region][i]++;
+          }
+        });
+        continue;
+      }
+
       const entry = row['Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September'];
       if (!entry || entry.trim() === '' || entry.startsWith(';')) continue;
 
       const parts = entry.split(';');
       if (parts.length < 13) continue;
-
-      const state = parts[1].trim();
-      const region = stateRegions[state];
-      if (!region) continue;
 
       if (!regionMonthActivity[region]) {
         regionMonthActivity[region] = MONTHS_SHORT.map(() => 0);
@@ -155,59 +266,123 @@ export default function AgricultureAvailabilityPage(): ReactElement {
         months: translatedMonths,
       },
     };
-  }, [availData, calendarData, mappingData, locale]);
+  }, [filteredAvail, filteredCalendar, stateRegions, locale]);
 
   const totalStates = stateCoverage.labels.length;
   const totalCrops = cropDiversity.labels.length;
   const totalRegions = activityHeatmap.regions.length;
+  const hasActiveFilters = selectedCrop !== ALL || selectedRegion !== ALL || selectedPeriod !== ALL;
 
-  const spatialContent = (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <MetricCard icon={Map} label={tBody('metricStatesAvail')} value={totalStates} variant="accuracy" />
-        <MetricCard icon={Wheat} label={tBody('metricCropsAvailable')} value={totalCrops} variant="resolution" />
-        <MetricCard icon={MapPin} label={tBody('metricRegions')} value={totalRegions} variant="classes" />
-      </div>
-      <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hSpatialCoverage')}</h3>
-        {stateCoverage.values.length > 0 ? (
-          <EChartsHorizontalBar
-            labels={stateCoverage.labels}
-            values={stateCoverage.values}
-            captionKey="cropsAvailable"
-            height={Math.max(300, stateCoverage.labels.length * 25)}
-          />
-        ) : (
-          <p className="text-fg-muted text-center py-8">{tBody('noSpatialData')}</p>
+  const selectClassName =
+    'mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
+
+  return (
+    <div>
+      <fieldset className="mb-6 rounded-xl border border-border bg-card p-4">
+        <legend className="px-2 text-sm font-semibold text-fg">{tBody('filtersTitle')}</legend>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div>
+            <label htmlFor="availability-filter-crop" className="text-sm font-medium text-fg">
+              {tBody('filterCrop')}
+            </label>
+            <select
+              id="availability-filter-crop"
+              className={selectClassName}
+              value={selectedCrop}
+              onChange={(event) => setSelectedCrop(event.target.value)}
+            >
+              <option value={ALL}>{tBody('allCrops')}</option>
+              {filterOptions.crops.map((crop) => (
+                <option key={crop} value={crop}>
+                  {translateCropName(crop, locale)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="availability-filter-region" className="text-sm font-medium text-fg">
+              {tBody('filterRegion')}
+            </label>
+            <select
+              id="availability-filter-region"
+              className={selectClassName}
+              value={selectedRegion}
+              onChange={(event) => setSelectedRegion(event.target.value)}
+            >
+              <option value={ALL}>{tBody('allRegions')}</option>
+              {filterOptions.regions.map((region) => (
+                <option key={region} value={region}>
+                  {translateRegion(region, locale)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="availability-filter-period" className="text-sm font-medium text-fg">
+              {tBody('filterPeriod')}
+            </label>
+            <select
+              id="availability-filter-period"
+              className={selectClassName}
+              value={selectedPeriod}
+              onChange={(event) => setSelectedPeriod(event.target.value)}
+            >
+              <option value={ALL}>{tBody('allPeriods')}</option>
+              {filterOptions.periods.map((period) => (
+                <option key={period} value={period}>
+                  {period}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            className="mt-4 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-fg-secondary transition-colors hover:bg-surface-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            onClick={() => {
+              setSelectedCrop(ALL);
+              setSelectedRegion(ALL);
+              setSelectedPeriod(ALL);
+            }}
+          >
+            {tBody('clearFilters')}
+          </button>
         )}
-      </Card>
-    </div>
-  );
+      </fieldset>
 
-  const cropDiversityContent = (
-    <div className="space-y-6">
-      <Card padding="lg" hover={false}>
-        <h3 className="text-base font-semibold text-fg mb-3">{tBody('hCropDiversity')}</h3>
-        {cropDiversity.values.length > 0 ? (
-          <EChartsHorizontalBar
-            labels={cropDiversity.labels}
-            values={cropDiversity.values}
-            captionKey="statesCount"
-            height={Math.max(300, cropDiversity.labels.length * 35)}
-          />
-        ) : (
-          <p className="text-fg-muted text-center py-8">{tBody('noDiversityData')}</p>
-        )}
-      </Card>
-    </div>
-  );
-
-  const regionalActivitySubTabs = [
-    {
-      id: 'comparison',
-      label: tBody('subTabComparison'),
-      icon: BarChart3,
-      content: (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <MetricCard icon={Map} label={tBody('metricStatesAvail')} value={totalStates} variant="accuracy" />
+          <MetricCard icon={Wheat} label={tBody('metricCropsAvailable')} value={totalCrops} variant="resolution" />
+          <MetricCard icon={MapPin} label={tBody('metricRegions')} value={totalRegions} variant="classes" />
+        </div>
+        <Card padding="lg" hover={false}>
+          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hSpatialCoverage')}</h3>
+          {stateCoverage.values.length > 0 ? (
+            <EChartsHorizontalBar
+              labels={stateCoverage.labels}
+              values={stateCoverage.values}
+              captionKey="cropsAvailable"
+              height={Math.max(300, stateCoverage.labels.length * 25)}
+            />
+          ) : (
+            <p className="text-fg-muted text-center py-8">{tBody('noSpatialData')}</p>
+          )}
+        </Card>
+        <Card padding="lg" hover={false}>
+          <h3 className="text-base font-semibold text-fg mb-3">{tBody('hCropDiversity')}</h3>
+          {cropDiversity.values.length > 0 ? (
+            <EChartsHorizontalBar
+              labels={cropDiversity.labels}
+              values={cropDiversity.values}
+              captionKey="statesCount"
+              height={Math.max(300, cropDiversity.labels.length * 35)}
+            />
+          ) : (
+            <p className="text-fg-muted text-center py-8">{tBody('noDiversityData')}</p>
+          )}
+        </Card>
         <Card padding="lg" hover={false}>
           <h3 className="text-base font-semibold text-fg mb-3">{tBody('hRegionalComparison')}</h3>
           {regionalActivity.series.length > 0 ? (
@@ -221,13 +396,6 @@ export default function AgricultureAvailabilityPage(): ReactElement {
             <p className="text-fg-muted text-center py-8">{tBody('noRegionalActivity')}</p>
           )}
         </Card>
-      ),
-    },
-    {
-      id: 'heatmap',
-      label: tBody('subTabHeatmap'),
-      icon: Map,
-      content: (
         <Card padding="lg" hover={false}>
           <h3 className="text-base font-semibold text-fg mb-3">{tBody('hRegionalHeatmap')}</h3>
           {activityHeatmap.regions.length > 0 ? (
@@ -242,19 +410,7 @@ export default function AgricultureAvailabilityPage(): ReactElement {
             <p className="text-fg-muted text-center py-8">{tBody('noHeatmapData')}</p>
           )}
         </Card>
-      ),
-    },
-  ];
-
-  const tabs = [
-    { id: 'spatial', label: tBody('tabSpatial'), icon: Map, content: spatialContent },
-    { id: 'diversity', label: tBody('tabDiversity'), icon: Sprout, content: cropDiversityContent },
-    { id: 'regional', label: tBody('tabRegional'), icon: Map, content: <Tabs tabs={regionalActivitySubTabs} /> },
-  ];
-
-  return (
-    <div>
-      <Tabs tabs={tabs} />
+      </div>
     </div>
   );
 }
