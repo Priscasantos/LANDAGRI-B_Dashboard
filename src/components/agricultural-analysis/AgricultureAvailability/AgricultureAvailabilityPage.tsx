@@ -13,6 +13,7 @@ import type {
   ConabCalendarRow,
 } from '../../../types/calendar';
 import { bulletinIndexToMonth } from '../../../types/calendar';
+import { isNationalAggregateUf } from '../../../lib/nationalAggregates';
 import {
   aggregateSharesByGroup,
   bulletinSlotForMonth,
@@ -149,7 +150,7 @@ export default function AgricultureAvailabilityPage(): ReactElement {
       const crop = availCrop(row);
       const state = availUf(row);
 
-      if (!state) continue;
+      if (!state || isNationalAggregateUf(state)) continue;
 
       if (!cropStates[crop]) cropStates[crop] = new Set();
       cropStates[crop].add(state);
