@@ -55,21 +55,11 @@ def translate_methodology(methodology: str) -> str:
         str: Metodologia traduzida
     """
     methodology_map = {
-        "Machine Learning": "Aprendizado de Máquina",
+        "Shallow ML": "Aprendizado de Máquina Raso",
         "Deep Learning": "Aprendizado Profundo",
-        "Random Forest": "Floresta Aleatória",
-        "Neural Networks": "Redes Neurais",
-        "Supervised Classification": "Classificação Supervisionada",
-        "Unsupervised Classification": "Classificação Não Supervisionada",
-        "Object-based": "Baseada em Objetos",
-        "Pixel-based": "Baseada em Pixels",
-        "Time Series Analysis": "Análise de Séries Temporais",
-        "Spectral Analysis": "Análise Espectral",
+        "Hybrid": "Híbrido",
         "Visual Interpretation": "Interpretação Visual",
-        "Statistical Analysis": "Análise Estatística",
-        "N/A": "N/A",
-        "Not Available": "Não Disponível",
-        "Unknown": "Desconhecido",
+        "Statistical / Spectral": "Estatístico/Espectral",
     }
     return methodology_map.get(methodology, methodology)
 

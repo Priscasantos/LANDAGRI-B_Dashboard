@@ -14,184 +14,84 @@
     "soja": {
       "name": "Soja",
       "scientific_name": "Glycine max",
-      "mapping_years": [
-        "2020",
-        "2021",
-        "2022",
-        "2023",
-        "2024"
-      ],
+      "mapping_years": ["2020", "2021", "2022", "2023", "2024"],
       "total_area_mapped_2024": 43850,
-      "main_regions": [
-        "Centro-Oeste",
-        "Sul"
-      ],
+      "main_regions": ["Centro-Oeste", "Sul"],
       "accuracy": 0.92,
-      "data_sources": [
-        "Sentinel-2",
-        "Landsat-8",
-        "MODIS"
-      ],
+      "data_sources": ["Sentinel-2", "Landsat-8", "MODIS"],
       "mapping_method": "Machine Learning + Visual Interpretation"
     },
     "milho_primeira_safra": {
       "name": "Milho 1ª Safra",
       "scientific_name": "Zea mays",
-      "mapping_years": [
-        "2020",
-        "2021",
-        "2022",
-        "2023",
-        "2024"
-      ],
+      "mapping_years": ["2020", "2021", "2022", "2023", "2024"],
       "total_area_mapped_2024": 4680,
-      "main_regions": [
-        "Sul",
-        "Sudeste"
-      ],
+      "main_regions": ["Sul", "Sudeste"],
       "accuracy": 0.89,
-      "data_sources": [
-        "Sentinel-2",
-        "Landsat-8"
-      ],
+      "data_sources": ["Sentinel-2", "Landsat-8"],
       "mapping_method": "Temporal Analysis + NDVI"
     },
     "milho_segunda_safra": {
       "name": "Milho 2ª Safra (Safrinha)",
       "scientific_name": "Zea mays",
-      "mapping_years": [
-        "2020",
-        "2021",
-        "2022",
-        "2023",
-        "2024"
-      ],
+      "mapping_years": ["2020", "2021", "2022", "2023", "2024"],
       "total_area_mapped_2024": 16890,
-      "main_regions": [
-        "Centro-Oeste",
-        "Nordeste"
-      ],
+      "main_regions": ["Centro-Oeste", "Nordeste"],
       "accuracy": 0.87,
-      "data_sources": [
-        "Sentinel-2",
-        "MODIS"
-      ],
+      "data_sources": ["Sentinel-2", "MODIS"],
       "mapping_method": "Multi-temporal Analysis"
     },
     "algodao": {
       "name": "Algodão",
       "scientific_name": "Gossypium hirsutum",
-      "mapping_years": [
-        "2020",
-        "2021",
-        "2022",
-        "2023",
-        "2024"
-      ],
+      "mapping_years": ["2020", "2021", "2022", "2023", "2024"],
       "total_area_mapped_2024": 1690,
-      "main_regions": [
-        "Centro-Oeste",
-        "Nordeste"
-      ],
+      "main_regions": ["Centro-Oeste", "Nordeste"],
       "accuracy": 0.94,
-      "data_sources": [
-        "Sentinel-2",
-        "Landsat-8"
-      ],
+      "data_sources": ["Sentinel-2", "Landsat-8"],
       "mapping_method": "Phenology-based Classification"
     },
     "cana_acucar": {
       "name": "Cana-de-açúcar",
       "scientific_name": "Saccharum officinarum",
-      "mapping_years": [
-        "2020",
-        "2021",
-        "2022",
-        "2023",
-        "2024"
-      ],
+      "mapping_years": ["2020", "2021", "2022", "2023", "2024"],
       "total_area_mapped_2024": 8950,
-      "main_regions": [
-        "Sudeste",
-        "Centro-Oeste"
-      ],
+      "main_regions": ["Sudeste", "Centro-Oeste"],
       "accuracy": 0.91,
-      "data_sources": [
-        "Sentinel-2",
-        "Landsat-8",
-        "SPOT"
-      ],
+      "data_sources": ["Sentinel-2", "Landsat-8", "SPOT"],
       "mapping_method": "Multi-sensor Fusion"
     }
   },
   "regional_mapping_stats": {
     "centro_oeste": {
       "name": "Centro-Oeste",
-      "states": [
-        "MT",
-        "MS",
-        "GO",
-        "DF"
-      ],
+      "states": ["MT", "MS", "GO", "DF"],
       "total_mapped_area_2024": 35720,
-      "main_crops_mapped": [
-        "soja",
-        "milho_segunda_safra",
-        "algodao"
-      ],
+      "main_crops_mapped": ["soja", "milho_segunda_safra", "algodao"],
       "mapping_accuracy": 0.91,
       "coverage_percentage": 78.5
     },
     "sul": {
       "name": "Sul",
-      "states": [
-        "RS",
-        "SC",
-        "PR"
-      ],
+      "states": ["RS", "SC", "PR"],
       "total_mapped_area_2024": 18650,
-      "main_crops_mapped": [
-        "soja",
-        "milho_primeira_safra"
-      ],
+      "main_crops_mapped": ["soja", "milho_primeira_safra"],
       "mapping_accuracy": 0.89,
       "coverage_percentage": 82.3
     },
     "sudeste": {
       "name": "Sudeste",
-      "states": [
-        "SP",
-        "MG",
-        "RJ",
-        "ES"
-      ],
+      "states": ["SP", "MG", "RJ", "ES"],
       "total_mapped_area_2024": 12340,
-      "main_crops_mapped": [
-        "cana_acucar",
-        "soja"
-      ],
+      "main_crops_mapped": ["cana_acucar", "soja"],
       "mapping_accuracy": 0.9,
       "coverage_percentage": 76.8
     },
     "nordeste": {
       "name": "Nordeste",
-      "states": [
-        "BA",
-        "PE",
-        "CE",
-        "MA",
-        "PI",
-        "PB",
-        "RN",
-        "AL",
-        "SE"
-      ],
+      "states": ["BA", "PE", "CE", "MA", "PI", "PB", "RN", "AL", "SE"],
       "total_mapped_area_2024": 8920,
-      "main_crops_mapped": [
-        "algodao",
-        "milho_segunda_safra",
-        "soja"
-      ],
+      "main_crops_mapped": ["algodao", "milho_segunda_safra", "soja"],
       "mapping_accuracy": 0.88,
       "coverage_percentage": 71.2
     }

@@ -27,6 +27,24 @@ try:
 except Exception:
     pass
 
+#: Internal SSoT component families — kept by json_interpreter, the CSV and the
+#: metadata for audit, but never surfaced in a UI-rendered frame.
+_INTERNAL_METHODOLOGY_COLUMNS = ("Methodology Components", "Methodology_Components")
+
+
+def _drop_internal_methodology_columns(df):
+    """Hide internal methodology component families from the dashboard frame.
+
+    Applied once where ``df_interpreted`` is assembled for the UI. The source
+    interpreter and the persisted CSV/metadata intentionally retain the column
+    (Hybrid must display only "Hybrid").
+    """
+    columns = [
+        column for column in _INTERNAL_METHODOLOGY_COLUMNS if column in df.columns
+    ]
+    return df.drop(columns=columns) if columns else df
+
+
 def render():
     # Robust local module loader to avoid import cache/key conflicts in some environments (e.g., Streamlit reload)
     def _load_dashboard_module(module_name: str):
@@ -74,7 +92,9 @@ def render():
             df = interpret_initiatives_metadata(metadata_file_path)
             if df is None or df.empty:
                 return pd.DataFrame()
-            return df
+            # Single source-level drop: the internal component families never
+            # reach any UI-rendered frame (overview tables, multiselect, charts).
+            return _drop_internal_methodology_columns(df)
         except Exception:
             return pd.DataFrame()
 

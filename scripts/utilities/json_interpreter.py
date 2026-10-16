@@ -14,11 +14,21 @@ Key Features:
 """
 
 import json
-import re
 from pathlib import Path
+import re
+import sys
 from typing import Any
 
 import pandas as pd
+
+# Add project root to path so the shared taxonomy is importable when this
+# module is executed directly (``python scripts/utilities/json_interpreter.py``)
+# as well as when imported as ``scripts.utilities.json_interpreter``.
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+
+from dashboard.components.shared.methodology_taxonomy import classify  # noqa: E402
 
 
 # Helper function to load and clean JSONC content
@@ -282,47 +292,6 @@ def _standardize_type(coverage_field: str | None) -> str:
     return "Other"
 
 
-def _standardize_methodology(
-    methodology: str | None, classification_method: str | None
-) -> str:
-    """Standardizes methodology from available fields."""
-    text_to_check = ""
-    if methodology:
-        text_to_check += methodology.lower() + " "
-    if classification_method:
-        text_to_check += classification_method.lower()
-
-    if not text_to_check.strip():
-        return "Unknown"
-
-    if any(
-        term in text_to_check
-        for term in ["deep learning", "neural network", "cnn", "u-net"]
-    ):
-        return "Deep Learning"
-    if any(
-        term in text_to_check
-        for term in [
-            "machine learning",
-            "random forest",
-            "gradient boost",
-            "catboost",
-            "decision tree",
-        ]
-    ):  # Added decision tree here
-        return "Machine Learning"
-    if any(term in text_to_check for term in ["visual interpretation", "visual"]):
-        return "Visual Interpretation"
-    if "hybrid" in text_to_check or (
-        "combined" in text_to_check
-        and not ("learning" in text_to_check or "visual" in text_to_check)
-    ):  # Refined 'Combined'
-        return "Hybrid/Combined"
-    if "statistical" in text_to_check or "regression" in text_to_check:
-        return "Statistical Methods"
-    return "Other"
-
-
 def _parse_available_years(years_field: Any) -> list[int]:
     """Parses the 'available_years' field into a list of integers."""
     if isinstance(years_field, list):
@@ -451,6 +420,16 @@ def interpret_initiatives_metadata(file_path: str | Path | None = None) -> pd.Da
         else:
             sensor_info = primary_sensor if primary_sensor else "-"
 
+        methodology_result = classify(_get_safe_value(details, "classification_method"))
+        if methodology_result.label is None:
+            raise ValueError(
+                f"Cannot classify methodology for initiative {initiative_name!r}: "
+                f"classification_method="
+                f"{_get_safe_value(details, 'classification_method')!r} matched no "
+                f"known family. Add a term to TERM_FAMILIES in "
+                f"dashboard/components/shared/methodology_taxonomy.py."
+            )
+
         initiative_dict = {
             "Name": initiative_name,
             "Acronym": acronym,
@@ -464,10 +443,8 @@ def interpret_initiatives_metadata(file_path: str | Path | None = None) -> pd.Da
             "Accuracy_min_val": accuracy_data["min_val"],
             "Accuracy_max_val": accuracy_data["max_val"],
             "Type": _standardize_type(_get_safe_value(details, "coverage")),
-            "Methodology": _standardize_methodology(
-                _get_safe_value(details, "methodology"),
-                _get_safe_value(details, "classification_method"),
-            ),
+            "Methodology": methodology_result.label,  # Derived MECE leaf (SSoT)
+            "Methodology Components": "|".join(sorted(methodology_result.families)),
             "Coverage": _get_safe_value(details, "coverage"),
             "Provider": _get_safe_value(details, "provider"),
             "Source": _get_safe_value(details, "source"),

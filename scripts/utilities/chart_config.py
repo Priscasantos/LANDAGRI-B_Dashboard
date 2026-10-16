@@ -5,7 +5,7 @@ Chart Configuration and Standards
 Standard configurations for responsive charts with modern design.
 Provides consistent styling across all dashboard visualizations.
 
-Author: LANDAGRI-B Project Team 
+Author: LANDAGRI-B Project Team
 Date: 2025
 """
 
@@ -14,10 +14,24 @@ from typing import Any
 import plotly.graph_objects as go
 
 # Import modern themes system
-from .modern_themes import ModernThemes, modern_colors
+from .modern_themes import ModernColorPalettes, ModernThemes
 
 # Initialize modern theme
 ModernThemes.setup_modern_theme()
+
+# Semantic colour roles resolved from the modern palette system
+modern_colors = {
+    "primary": ModernColorPalettes.PRIMARY["blue"],
+    "secondary": ModernColorPalettes.PRIMARY["emerald"],
+    "accent": ModernColorPalettes.PRIMARY["amber"],
+    "danger": ModernColorPalettes.SEMANTIC["error"],
+    "warning": ModernColorPalettes.PRIMARY["orange"],
+    "info": ModernColorPalettes.PRIMARY["cyan"],
+    "success": ModernColorPalettes.SEMANTIC["success"],
+    "purple": ModernColorPalettes.PRIMARY["purple"],
+    "pink": ModernColorPalettes.PRIMARY["pink"],
+    "indigo": ModernColorPalettes.PRIMARY["indigo"],
+}
 
 # Modern color palettes based on the modern theme system
 MODERN_COLORS = {

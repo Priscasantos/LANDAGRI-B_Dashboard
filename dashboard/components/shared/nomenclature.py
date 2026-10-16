@@ -3,6 +3,8 @@ Global nomenclature configuration for LULC dashboard.
 Provides standardized, user-friendly labels for metrics and columns.
 """
 
+from dashboard.components.shared.methodology_taxonomy import LEAVES
+
 # Global dictionary for friendly column names (English)
 COLUMN_LABELS = {
     # Basic info
@@ -86,6 +88,7 @@ COLUMN_LABELS = {
     # Technical details
     "Algorithm": "Algorithm",
     "Classification_Method": "Classification Method",
+    "Methodology_Components": "Methodology Components",
     "Machine_Learning": "Machine Learning",
     "Deep_Learning": "Deep Learning",
     "Random_Forest": "Random Forest",
@@ -116,27 +119,13 @@ COLUMN_LABELS = {
 # Reverse mapping for internal use
 INTERNAL_NAMES = {v: k for k, v in COLUMN_LABELS.items()}
 
-# Methodology categories (English)
+# Methodology categories (English) — mirrors the SSoT MECE leaves exactly.
 METHODOLOGY_CATEGORIES = {
-    "machine_learning": "Machine Learning",
-    "deep_learning": "Deep Learning", 
-    "random_forest": "Random Forest",
-    "svm": "Support Vector Machine",
-    "cnn": "Convolutional Neural Network",
-    "lstm": "Long Short-Term Memory",
-    "decision_tree": "Decision Tree",
-    "ensemble": "Ensemble Methods",
-    "pixel_based": "Pixel-based Classification",
-    "object_based": "Object-based Classification",
-    "hybrid": "Hybrid Approach",
-    "supervised": "Supervised Learning",
-    "unsupervised": "Unsupervised Learning",
-    "semi_supervised": "Semi-supervised Learning",
-    "time_series": "Time Series Analysis",
-    "spectral_analysis": "Spectral Analysis",
-    "texture_analysis": "Texture Analysis",
-    "change_detection": "Change Detection",
-    "multitemporal": "Multitemporal Analysis"
+    "shallow_ml": "Shallow ML",
+    "deep_learning": "Deep Learning",
+    "hybrid": "Hybrid",
+    "visual_interpretation": "Visual Interpretation",
+    "statistical_spectral": "Statistical / Spectral",
 }
 
 # Performance level categories
@@ -235,15 +224,22 @@ def categorize_resolution(value: float) -> dict:
 def get_methodology_label(methodology: str) -> str:
     """
     Get friendly label for methodology.
-    
+
+    Canonical SSoT leaves are returned unchanged (identity): the display label
+    of "Shallow ML" is "Shallow ML", not a reformatted title-case variant.
+
     Args:
         methodology: Internal methodology name
-        
+
     Returns:
         User-friendly methodology label
     """
+    if methodology in LEAVES:
+        return methodology
     methodology_lower = methodology.lower().replace(" ", "_")
-    return METHODOLOGY_CATEGORIES.get(methodology_lower, methodology.replace("_", " ").title())
+    return METHODOLOGY_CATEGORIES.get(
+        methodology_lower, methodology.replace("_", " ").title()
+    )
 
 def get_chart_color(index: int) -> str:
     """

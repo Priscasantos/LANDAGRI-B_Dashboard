@@ -1,3 +1,12 @@
+# =============================================================================
+# LANDAGRI-B Dashboard — .gitignore
+# Single source of truth. Keep sections ordered, no duplicate rules.
+# NOTE: data/processed/ is tracked on purpose — do not ignore it.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# React / Node (SPA)
+# -----------------------------------------------------------------------------
 # Dependencies
 node_modules/
 
@@ -14,32 +23,131 @@ dist-ssr/
 src/data/processed/conab_safra_2425.json
 src/data/processed/conab_safra_2526.json
 
-# Editor
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-
-# Logs
-*.log
-npm-debug.log*
-
-# OS
-Thumbs.db
-ehthumbs.db
-
 # Testing
 coverage/
 .nyc_output/
-
-# Misc
-*.local
-*.bak
-.pantheon/
 
 # Playwright artifacts (local only, regenerados via e2e)
 playwright-report/
 playwright-results.json
 test-results/
+
+# -----------------------------------------------------------------------------
+# Python / Streamlit (legacy)
+# -----------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+*.egg
+*.whl
+.tox/
+.nox/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.hypothesis/
+
+# -----------------------------------------------------------------------------
+# Virtual environments
+# -----------------------------------------------------------------------------
+.venv/
+venv/
+env/
+ENV/
+lulc_env/
+
+# -----------------------------------------------------------------------------
+# Logs, temp & backup files
+# -----------------------------------------------------------------------------
+*.log
+logs/
+debug.log
+error.log
+npm-debug.log*
+yarn-*.log*
+*.tmp
+*.temp
+*.bak
+*.backup
+backups/
+*.local
+*~
+
+# -----------------------------------------------------------------------------
+# OS / IDE / editor
+# -----------------------------------------------------------------------------
+.DS_Store
+._*
+Thumbs.db
+ehthumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# -----------------------------------------------------------------------------
+# Secrets & credentials
+# -----------------------------------------------------------------------------
+*.env
+*.key
+*.pem
+secrets/
+config/secrets.json
+
+# -----------------------------------------------------------------------------
+# Jupyter
+# -----------------------------------------------------------------------------
+.ipynb_checkpoints
+
+# -----------------------------------------------------------------------------
+# Archives
+# -----------------------------------------------------------------------------
+*.zip
+*.rar
+*.7z
+*.gz
+*.tar
+*.tar.gz
+*.bz2
+
+# -----------------------------------------------------------------------------
+# Large / fetched data
+# -----------------------------------------------------------------------------
+data/brazil-vector/
+data/temp/
+data/cache/
+
+# -----------------------------------------------------------------------------
+# Generated outputs & caches
+# -----------------------------------------------------------------------------
+cache/
+.cache/
+*.cache
+graphics/
+.streamlit/
+
+# -----------------------------------------------------------------------------
+# Agentic / runtime state
+# (anchored /tools/ so scripts/tools/ stays tracked)
+# -----------------------------------------------------------------------------
+.pantheon/
+agentic_tools/
+ai_generated/
+*.ai
+/tools/
+sequential_thinking/
+mcp_*/
+
+# -----------------------------------------------------------------------------
+# Installers & miscellaneous
+# -----------------------------------------------------------------------------
+install.bat
+install.sh
+setup_dependencies.py
+system_report.json

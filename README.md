@@ -26,10 +26,12 @@ This software contributes to the field of remote sensing and geospatial analysis
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js 18+
 - npm 9+
 
 ### Installation and Execution
+
 ```bash
 # Clone the repository
 git clone https://github.com/Priscasantos/LANDAGRI-B_Dashboard.git
@@ -49,17 +51,20 @@ Access the application at <http://localhost:5173>.
 ## Features
 
 ### Analytical Modules
+
 - **Overview**: Aggregated metrics and key performance indicators for LULC initiatives.
 - **Initiative Analysis**: Temporal, detailed, and comparative analysis of monitoring initiatives.
 - **Agricultural Analysis**: CONAB/IBGE integration, crop calendar, and availability data.
 - **About**: Project documentation, methodology, and citation information.
 
 ### Visualization Capabilities
+
 - 14 interactive Plotly chart types for dynamic data exploration.
 - Responsive design optimized for desktop and mobile devices.
 - Client-side data processing with preprocessed static JSON datasets.
 
 ### Architecture
+
 - Modular React/TypeScript component architecture.
 - Zustand state management for predictable data flow.
 - Zero backend dependency — fully static SPA deployable to GitHub Pages.
@@ -70,6 +75,7 @@ Access the application at <http://localhost:5173>.
 ## Technical Specifications
 
 ### Core Technologies
+
 - **Framework**: React 19 with TypeScript 5.7
 - **Build Tool**: Vite 6
 - **Charts**: Plotly.js (react-plotly.js)
@@ -79,6 +85,7 @@ Access the application at <http://localhost:5173>.
 - **Linting**: ESLint with typescript-eslint
 
 ### Data Sources
+
 - Brazilian Institute of Geography and Statistics (IBGE) agricultural datasets.
 - National Supply Company (CONAB) crop monitoring data (safra 2023-24).
 - Preprocessed static JSON datasets bundled with the SPA.
@@ -87,20 +94,35 @@ Access the application at <http://localhost:5173>.
 
 ## Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start development server with HMR |
-| `npm run build` | Type-check and build for production |
-| `npm run preview` | Preview production build locally |
-| `npm test` | Run test suite |
-| `npm run lint` | Lint all source files |
-| `npm run deploy` | Deploy to GitHub Pages |
+| Script            | Description                         |
+| ----------------- | ----------------------------------- |
+| `npm run dev`     | Start development server with HMR   |
+| `npm run build`   | Type-check and build for production |
+| `npm run preview` | Preview production build locally    |
+| `npm test`        | Run test suite                      |
+| `npm run lint`    | Lint all source files               |
+| `npm run deploy`  | Deploy to GitHub Pages              |
+
+---
+
+## Documentation
+
+Comprehensive documentation is available in the [`docs/`](./docs/) folder:
+
+- [`docs/README.md`](./docs/README.md): Documentation overview
+- [`docs/RELEASE_v1.0.0.md`](./docs/RELEASE_v1.0.0.md): Release notes
+- [`docs/methodology_taxonomy.md`](./docs/methodology_taxonomy.md): Methodology taxonomy (upstream)
+
+> **Note (dependency pins)**: frontend pins live in `package.json` / `package-lock.json`;
+> legacy Python pins (e.g. Streamlit 1.47.0, Ruff 0.12.4) remain in `requirements.txt`
+> for reference. The SPA is the current application; the Streamlit app is legacy.
 
 ---
 
 ## Version History
 
 ### v2.0.0 (May 2026)
+
 - Complete rewrite from Python/Streamlit to React/TypeScript SPA
 - 60+ React components across 4 modules
 - 14 interactive Plotly chart types
@@ -108,6 +130,7 @@ Access the application at <http://localhost:5173>.
 - 24 passing tests with Vitest
 
 ### v1.0.0 (September 2, 2025)
+
 - Original Python/Streamlit release
 - Zenodo DOI assignment: <https://doi.org/10.5281/zenodo.17042299>
 
@@ -123,6 +146,7 @@ We welcome contributions from the academic and developer community. To contribut
 4. Submit a pull request with detailed description.
 
 ### Development Guidelines
+
 - **Code Quality**: ESLint with TypeScript strict rules.
 - **Testing**: Write Vitest tests for new features.
 - **Documentation**: Update relevant docs for changes.
@@ -134,9 +158,11 @@ We welcome contributions from the academic and developer community. To contribut
 If you use this software in your research, please cite as follows:
 
 ### APA (7th Edition)
-Santos, P. A. (2025). *LANDAGRI-B Dashboard: Interactive Dashboard for Land Use and Land Cover Monitoring in Brazil* (Version 2.0.0) [Computer software]. Zenodo. <https://doi.org/10.5281/zenodo.17042299>
+
+Santos, P. A. (2025). _LANDAGRI-B Dashboard: Interactive Dashboard for Land Use and Land Cover Monitoring in Brazil_ (Version 2.0.0) [Computer software]. Zenodo. <https://doi.org/10.5281/zenodo.17042299>
 
 ### BibTeX
+
 ```bibtex
 @software{santos_landagri_b_2025,
   author = {Santos, Priscilla Azevedo dos},
@@ -169,4 +195,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **LANDAGRI-B Dashboard** - Advancing geospatial analysis for sustainable land management in Brazil 🇧🇷
 
-*Developed as part of doctoral research at INPE*
+_Developed as part of doctoral research at INPE_
