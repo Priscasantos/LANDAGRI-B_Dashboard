@@ -128,7 +128,8 @@ jobs:
           path: dist
 
   deploy:
-    if: github.ref == 'refs/heads/main'
+    # Guard deployment because deploy-pages fails with 404 when Pages is not enabled.
+    if: github.ref == 'refs/heads/main' && vars.ENABLE_PAGES_DEPLOY == 'true'
     needs: build
     runs-on: ubuntu-latest
     environment:
