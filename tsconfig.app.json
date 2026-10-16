@@ -28,5 +28,10 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  // Test files are run by vitest (esbuild, no typecheck) and must not break `tsc -b`.
+  // Root cause: src/test/scripts/preprocess-data.test.ts imports untyped
+  // scripts/preprocess-data.mjs -> TS7016 + cascading TS7006 on `tsc -b`,
+  // while `tsc --noEmit` (root tsconfig has files:[]) checks nothing.
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test"]
 }
