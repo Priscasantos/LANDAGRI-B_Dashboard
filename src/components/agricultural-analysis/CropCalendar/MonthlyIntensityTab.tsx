@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Card from '../../ui/Card';
 import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
 import EChartsLine from '../../charts/echarts/EChartsLine';
 import { useT } from '../../../i18n/LanguageContext';
+import { useEffectiveTheme } from '../../../hooks/use-theme';
 import {
   translateActivity,
   translateCropName,
@@ -12,17 +13,21 @@ import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 import { bulletinIndexToMonth, type ConabCalendarRow } from '../../../types/calendar';
 import {
-  aggregateShares,
   aggregateSharesByGroup,
+  aggregateSharesWithMode,
   bulletinSlotForMonth,
   currentCalendarMonth,
   formatShareTip,
   recencyOf,
+  resolveShareMode,
   toCalendarRecords,
   type MonthShare,
+  type ShareMode,
   type ShareTipLabels,
 } from '../../../lib/calendarShare';
 import RecencyBadge from './RecencyBadge';
+import ShareModeToggle from './ShareModeToggle';
+import PhenologyLegend from './PhenologyLegend';
 
 const MONTHS_SHORT = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
 
@@ -44,9 +49,12 @@ interface MonthlyIntensityTabProps {
 
 export default function MonthlyIntensityTab({ selectedCrops, selectedRegions }: MonthlyIntensityTabProps) {
   const { t: tBody, locale } = useT('agricultural');
+  const theme = useEffectiveTheme();
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
+  // Toggle % UFs vs % área: default área quando há `areaSharePct`, senão UFs rotulado.
+  const [modeOverride, setModeOverride] = useState<ShareMode | null>(null);
 
   const model = useMemo(() => {
     const stateRegions: Record<string, string> = {};
@@ -65,13 +73,17 @@ export default function MonthlyIntensityTab({ selectedCrops, selectedRegions }: 
     });
 
     const records = toCalendarRecords(filtered);
+    const requested: ShareMode = modeOverride ?? resolveShareMode(records);
+    const withMode = aggregateSharesWithMode(records, requested);
     return {
       records,
-      byCrop: aggregateSharesByGroup(records, (r) => r.cropId),
-      global: aggregateShares(records),
+      byCrop: aggregateSharesByGroup(records, (r) => r.cropId, withMode.effective),
+      global: withMode.shares,
+      mode: withMode.effective,
+      hasArea: withMode.hasArea,
       recency: recencyOf(records),
     };
-  }, [rawData, selectedCrops, selectedRegions, statesMap]);
+  }, [rawData, selectedCrops, selectedRegions, statesMap, modeOverride]);
 
   const tipLabels: ShareTipLabels = {
     activeUfs: tBody('activeUfsLabel'),
@@ -112,9 +124,9 @@ export default function MonthlyIntensityTab({ selectedCrops, selectedRegions }: 
   return (
     <div className="space-y-6">
       <Card padding="lg" hover={false}>
-        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-base font-semibold text-fg">{tBody('hMonthlyHeatmap')}</h3>
-          <span className="text-xs font-medium text-fg-secondary">{tBody('shareModeUf')}</span>
+          <ShareModeToggle mode={model.mode} hasArea={model.hasArea} onChange={setModeOverride} />
         </div>
         {noData ? (
           <p className="text-fg-muted text-center py-8" role="status">{tBody('noFilterData')}</p>
@@ -132,7 +144,8 @@ export default function MonthlyIntensityTab({ selectedCrops, selectedRegions }: 
               valueSuffix="%"
               tips={tips}
             />
-            <div className="mt-3">
+            <div className="mt-3 space-y-2">
+              <PhenologyLegend />
               <RecencyBadge recency={model.recency} />
             </div>
           </>
@@ -149,6 +162,8 @@ export default function MonthlyIntensityTab({ selectedCrops, selectedRegions }: 
               name: translateActivity('Activity Intensity', locale),
               x: monthLabels,
               y: intensityY,
+              // Total genérico em neutro: verde/âmbar são reservados à fase (P/H).
+              color: theme === 'dark' ? '#94a3b8' : '#64748b',
             }]}
             captionKey="shareActiveUfs"
             height={350}

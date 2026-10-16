@@ -1,30 +1,42 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { BarChart3, GanttChart as GanttChartIcon, Target } from 'lucide-react';
 import Tabs from '../../ui/Tabs';
 import Card from '../../ui/Card';
 import EChartsLine from '../../charts/echarts/EChartsLine';
-import EChartsGantt from '../../charts/echarts/EChartsGantt';
+import EChartsPhenoGantt from '../../charts/echarts/EChartsPhenoGantt';
 import EChartsPolar from '../../charts/echarts/EChartsPolar';
-import { LANDAGRI_COLORWAY_DARK, LANDAGRI_COLORWAY_LIGHT } from '../../../lib/echarts-theme';
 import { useEffectiveTheme } from '../../../hooks/use-theme';
 import { useT } from '../../../i18n/LanguageContext';
 import {
   translateActivity,
   translateCropName,
   translateMonthShort,
+  translateRegion,
 } from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 import { bulletinIndexToMonth, type ConabCalendarRow } from '../../../types/calendar';
 import {
-  aggregateShares,
+  aggregateSharesWithMode,
   bulletinSlotForMonth,
   currentCalendarMonth,
   recencyOf,
+  resolveShareMode,
   toCalendarRecords,
   type MonthShare,
+  type ShareMode,
 } from '../../../lib/calendarShare';
+import {
+  MAX_PHENO_LANES,
+  buildPhenoModel,
+  formatPhenoTip,
+  seasonLabelForDate,
+  type PhenoTipLabels,
+} from '../../../lib/phenoGantt';
+import { phenoPhaseColor } from '../../../lib/phenoColors';
 import RecencyBadge from './RecencyBadge';
+import ShareModeToggle from './ShareModeToggle';
+import PhenologyLegend from './PhenologyLegend';
 
 const MONTHS_SHORT = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
 
@@ -50,9 +62,24 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
   const theme = useEffectiveTheme();
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
-  const statesMap = mappingData?.states || {};
+  // Congelado por render: `{}` literal recriado invalidaria o useMemo abaixo.
+  const statesMap = useMemo(() => mappingData?.states ?? {}, [mappingData]);
+  // Toggle % UFs vs % área: default área quando há `areaSharePct`, senão UFs rotulado.
+  const [modeOverride, setModeOverride] = useState<ShareMode | null>(null);
 
-  const { monthlyActivity, ganttBars, polarData, recency, currentSlot, currentMonthLabel } = useMemo(() => {
+  const {
+    monthlyActivity,
+    phenoLanes,
+    phenoLaneKinds,
+    phenoSegments,
+    lanesNote,
+    polarData,
+    recency,
+    currentSlot,
+    currentMonthLabel,
+    shareMode,
+    shareHasArea,
+  } = useMemo(() => {
     const stateRegions: Record<string, string> = {};
     for (const [code, info] of Object.entries(statesMap)) {
       stateRegions[code] = info.region;
@@ -68,9 +95,10 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
       return true;
     });
 
-    // % de UFs ativas por mês civil (ordem do boletim Out→Set no eixo).
+    // % por mês civil com modo explícito (ordem do boletim Out→Set no eixo).
     const records = toCalendarRecords(filtered);
-    const global = aggregateShares(records);
+    const requested: ShareMode = modeOverride ?? resolveShareMode(records);
+    const { shares: global, effective, hasArea } = aggregateSharesWithMode(records, requested);
     const pct = (civil: number, pick: (m: MonthShare) => number): number => {
       const share = global.find((m) => m.month === civil);
       return share === undefined ? 0 : Math.round(pick(share));
@@ -79,39 +107,37 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
     const civilOf = (slot: number): number => bulletinIndexToMonth(slot);
     const current = currentCalendarMonth();
 
-    // Gantt por UF×cultura: janela primeiro→último slot ativo por atividade,
-    // com tooltip % + contagem de UFs no mês de pico.
-    const activeByCropStateActivity = new Map<string, { crop: string; state: string; kind: 'P' | 'H'; slots: number[] }>();
-    for (const row of filtered) {
-      const crop = (row.crop || '').trim();
-      const state = (row.uf || '').trim();
-      row.months.slice(0, 12).forEach((code, slot) => {
-        const v = (code || '').trim().toUpperCase();
-        const kinds: ('P' | 'H')[] = [];
-        if (v === 'P' || v === 'PH') kinds.push('P');
-        if (v === 'H' || v === 'PH') kinds.push('H');
-        for (const kind of kinds) {
-          const key = `${crop}¦${state}¦${kind}`;
-          const entry = activeByCropStateActivity.get(key) ?? { crop, state, kind, slots: [] };
-          entry.slots.push(slot);
-          activeByCropStateActivity.set(key, entry);
-        }
+    // Gantt fenológico: duas lanes (P/H) por cultura-região com segmentos
+    // disjuntos (hiato nunca colapsa); PH vira faixa hachurada própria.
+    const pheno = buildPhenoModel(filtered, stateRegions);
+    const shownLanes = pheno.lanes.slice(0, MAX_PHENO_LANES);
+    const shownIds = new Set(shownLanes.map((l) => l.id));
+    const laneLabels = shownLanes.map(
+      (l) => `${translateCropName(l.crop, locale)} · ${l.kind} · ${translateRegion(l.region, locale)}`,
+    );
+    const tipLabels: PhenoTipLabels = {
+      planting: translateActivity('Planting', locale),
+      harvest: translateActivity('Harvest', locale),
+      activeUfs: (active, total) => `${active}/${total} ${tBody('activeUfsLabel')}`,
+      simultaneous: tBody('legendBothNote'),
+      more: (k) => tBody('ufsMore', { k }),
+    };
+    const segments = pheno.segments
+      .filter((s) => shownIds.has(s.laneId))
+      .map((s) => {
+        const lane = shownLanes.findIndex((l) => l.id === s.laneId);
+        return {
+          lane,
+          start: s.start,
+          end: s.end,
+          ph: s.ph,
+          tip: formatPhenoTip(s, laneLabels[lane] ?? s.laneId, months, tipLabels),
+        };
       });
-    }
-    const ganttEntries: { label: string; start: number; end: number; category: string; tip: string }[] = [];
-    for (const entry of activeByCropStateActivity.values()) {
-      const first = Math.min(...entry.slots);
-      const last = Math.max(...entry.slots);
-      ganttEntries.push({
-        label: `${translateCropName(entry.crop, locale)} ${entry.kind} (${entry.state})`,
-        start: first,
-        end: last + 0.5,
-        category: translateCropName(entry.crop, locale),
-        tip:
-          `<b>${translateCropName(entry.crop, locale)} ${entry.kind} (${entry.state})</b><br>` +
-          `${months[first]} – ${months[last]}`,
-      });
-    }
+
+    // Relógio fenológico: radial mês-circular (raio = % em P/H por série).
+    const plantingR = MONTHS_SHORT.map((_, slot) => pct(civilOf(slot), (m) => m.pctPlanting));
+    const harvestR = MONTHS_SHORT.map((_, slot) => pct(civilOf(slot), (m) => m.pctHarvest));
 
     return {
       monthlyActivity: {
@@ -119,44 +145,59 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
           {
             name: translateActivity('Planting', locale),
             x: months,
-            y: MONTHS_SHORT.map((_, slot) => pct(civilOf(slot), (m) => m.pctPlanting)),
+            y: plantingR,
+            color: phenoPhaseColor('P', theme),
           },
           {
             name: translateActivity('Harvest', locale),
             x: months,
-            y: MONTHS_SHORT.map((_, slot) => pct(civilOf(slot), (m) => m.pctHarvest)),
+            y: harvestR,
+            color: phenoPhaseColor('H', theme),
           },
         ],
       },
-      ganttBars: ganttEntries.slice(0, 100),
+      phenoLanes: laneLabels,
+      phenoLaneKinds: shownLanes.map((l) => l.kind),
+      phenoSegments: segments,
+      lanesNote:
+        pheno.lanes.length > shownLanes.length
+          ? tBody('ganttLanesNote', { shown: shownLanes.length, total: pheno.lanes.length })
+          : null,
       polarData: {
-        series: [{
-          name: translateActivity('Total Activity', locale),
-          r: MONTHS_SHORT.map((_, slot) => pct(civilOf(slot), (m) => m.pctActive)),
-          theta: months,
-          fill: 'toself' as const,
-        }],
+        series: [
+          { name: translateActivity('Planting', locale), r: plantingR, color: phenoPhaseColor('P', theme) },
+          { name: translateActivity('Harvest', locale), r: harvestR, color: phenoPhaseColor('H', theme) },
+        ],
       },
       recency: recencyOf(records),
       currentSlot: bulletinSlotForMonth(current),
       currentMonthLabel: months[bulletinSlotForMonth(current)] ?? '',
+      shareMode: effective,
+      shareHasArea: hasArea,
     };
-  }, [rawData, selectedCrops, selectedRegions, statesMap, locale]);
+  }, [rawData, selectedCrops, selectedRegions, statesMap, locale, theme, tBody, modeOverride]);
 
-  const way = theme === 'dark' ? LANDAGRI_COLORWAY_DARK : LANDAGRI_COLORWAY_LIGHT;
+  const seasonBadge = tBody('seasonBadge', {
+    season: seasonLabelForDate(new Date()),
+    month: currentMonthLabel,
+  });
 
   const monthlyContent = (
     <Card padding="lg" hover={false}>
-      <h3 className="text-base font-semibold text-fg mb-3">{tBody('hMonthlySeasonality')}</h3>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-base font-semibold text-fg">{tBody('hMonthlySeasonality')}</h3>
+        <ShareModeToggle mode={shareMode} hasArea={shareHasArea} onChange={setModeOverride} />
+      </div>
       <EChartsLine
-        series={monthlyActivity.series.map((s, i) => ({ ...s, color: i === 0 ? way[0] : way[5] }))}
+        series={monthlyActivity.series}
         captionKey="shareSplitMonthly"
         height={400}
         yMin={0}
         yMax={100}
         markLineX={{ x: currentMonthLabel, name: tBody('currentMonth') }}
       />
-      <div className="mt-3">
+      <div className="mt-3 space-y-2">
+        <PhenologyLegend />
         <RecencyBadge recency={recency} />
       </div>
     </Card>
@@ -164,15 +205,35 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
 
   const ganttContent = (
     <Card padding="lg" hover={false}>
-      <h3 className="text-base font-semibold text-fg mb-3">{tBody('hPlantingHarvest')}</h3>
-      {ganttBars.length > 0 ? (
-        <EChartsGantt
-          bars={ganttBars}
-          xLabels={MONTHS_SHORT.map((m) => translateMonthShort(m, locale))}
-          captionKey="monthAxisNote"
-          height={Math.min(600, Math.max(300, ganttBars.length * 12))}
-          markLineX={{ position: currentSlot + 0.5, name: tBody('currentMonth') }}
-        />
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-base font-semibold text-fg">{tBody('hPlantingHarvest')}</h3>
+        <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand" role="status">
+          {seasonBadge}
+        </span>
+      </div>
+      {phenoSegments.length > 0 ? (
+        <>
+          <EChartsPhenoGantt
+            lanes={phenoLanes}
+            laneKinds={phenoLaneKinds}
+            xLabels={MONTHS_SHORT.map((m) => translateMonthShort(m, locale))}
+            segments={phenoSegments}
+            seasonBandEnd={currentSlot + 0.5}
+            seasonBandName={tBody('seasonBand')}
+            todayPosition={currentSlot + 0.5}
+            todayName={tBody('today')}
+            captionKey="monthAxisNote"
+            height={Math.min(600, Math.max(300, phenoLanes.length * 28))}
+          />
+          <div className="mt-3 space-y-2">
+            <PhenologyLegend />
+            {lanesNote !== null && (
+              <p className="text-xs text-fg-muted" role="status">
+                {lanesNote}
+              </p>
+            )}
+          </div>
+        </>
       ) : (
         <p className="text-fg-muted text-center py-8" role="status">{tBody('noFilterData')}</p>
       )}
@@ -182,13 +243,18 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
   const polarContent = (
     <Card padding="lg" hover={false}>
       <h3 className="text-base font-semibold text-fg mb-3">{tBody('tabPolar')}</h3>
-      {polarData.series[0].r.some(v => (v ?? 0) > 0) ? (
-        <EChartsPolar
-          series={polarData.series}
-          categories={MONTHS_SHORT.map((m) => translateMonthShort(m, locale))}
-          captionKey="seasonalActivityDistribution"
-          height={500}
-        />
+      {polarData.series.some((s) => s.r.some((v) => (v ?? 0) > 0)) ? (
+        <>
+          <EChartsPolar
+            series={polarData.series}
+            categories={MONTHS_SHORT.map((m) => translateMonthShort(m, locale))}
+            captionKey="seasonalActivityDistribution"
+            height={500}
+          />
+          <div className="mt-3">
+            <PhenologyLegend />
+          </div>
+        </>
       ) : (
         <p className="text-fg-muted text-center py-8" role="status">{tBody('noFilterData')}</p>
       )}

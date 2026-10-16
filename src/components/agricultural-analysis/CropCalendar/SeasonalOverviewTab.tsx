@@ -3,8 +3,9 @@ import { LayoutGrid, Sprout, Map as MapIcon } from 'lucide-react';
 import Card from '../../ui/Card';
 import Tabs from '../../ui/Tabs';
 import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
-import { LANDAGRI_COLORWAY_DARK, LANDAGRI_COLORWAY_LIGHT } from '../../../lib/echarts-theme';
 import { useEffectiveTheme } from '../../../hooks/use-theme';
+import { phenoPhaseColor } from '../../../lib/phenoColors';
+import PhenologyLegend from './PhenologyLegend';
 import { useT } from '../../../i18n/LanguageContext';
 import { translateActivity, translateCropName, translateRegion, translateSeason } from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
@@ -91,7 +92,8 @@ export default function SeasonalOverviewTab({ selectedCrops, selectedRegions }: 
 
     const denom = Math.max(scopeUfs.size, 1);
     const pct = (set: Set<string>): number => Math.round((set.size / denom) * 100);
-    const way = theme === 'dark' ? LANDAGRI_COLORWAY_DARK : LANDAGRI_COLORWAY_LIGHT;
+    const plantingColor = phenoPhaseColor('P', theme);
+    const harvestColor = phenoPhaseColor('H', theme);
 
     // Breakdowns por cultura e por região: % de células UF×mês com P/H
     // (agregação em código sobre months[] tipado; UF→região via mapping).
@@ -103,8 +105,8 @@ export default function SeasonalOverviewTab({ selectedCrops, selectedRegions }: 
       seasonal: {
         categories: seasonNames.map((s) => translateSeason(s, locale)),
         series: [
-          { name: translateActivity('Planting', locale), values: seasonNames.map((s) => pct(plantUfs[s])), color: way[0] },
-          { name: translateActivity('Harvest', locale), values: seasonNames.map((s) => pct(harvestUfs[s])), color: way[5] },
+          { name: translateActivity('Planting', locale), values: seasonNames.map((s) => pct(plantUfs[s])), color: plantingColor },
+          { name: translateActivity('Harvest', locale), values: seasonNames.map((s) => pct(harvestUfs[s])), color: harvestColor },
         ],
         empty: scopeUfs.size === 0,
       },
@@ -119,9 +121,8 @@ export default function SeasonalOverviewTab({ selectedCrops, selectedRegions }: 
     harvest: tBody('tipHarvest'),
     more: (k) => tBody('ufsMore', { k }),
   };
-  const way = theme === 'dark' ? LANDAGRI_COLORWAY_DARK : LANDAGRI_COLORWAY_LIGHT;
-  const plantingColor = way[0];
-  const harvestColor = way[5];
+  const plantingColor = phenoPhaseColor('P', theme);
+  const harvestColor = phenoPhaseColor('H', theme);
 
   // Visão por cultura: barras P/H por cultura com tooltips de UFs.
   const byCropMap = new Map(model.byCrop.map((b) => [b.key, b]));
@@ -197,6 +198,9 @@ export default function SeasonalOverviewTab({ selectedCrops, selectedRegions }: 
           height={400}
         />
       )}
+      <div className="mt-4">
+        <PhenologyLegend />
+      </div>
       <div className="mt-4 p-3 bg-surface-alt rounded-lg">
         <p className="text-xs text-fg-secondary">
           <strong>{tBody('noteLabel')}</strong> {tBody('seasonNote')}
@@ -227,6 +231,9 @@ export default function SeasonalOverviewTab({ selectedCrops, selectedRegions }: 
           {tBody('emptyGroupNoData', { names: cropsWithoutActivity.join(', ') })}
         </p>
       ) : null}
+      <div className="mt-4">
+        <PhenologyLegend />
+      </div>
       <div className="mt-4 p-3 bg-surface-alt rounded-lg">
         <p className="text-xs text-fg-secondary">
           <strong>{tBody('noteLabel')}</strong> {tBody('breakdownNote')}
@@ -257,6 +264,9 @@ export default function SeasonalOverviewTab({ selectedCrops, selectedRegions }: 
           {tBody('emptyGroupNoData', { names: regionsWithoutActivity.join(', ') })}
         </p>
       ) : null}
+      <div className="mt-4">
+        <PhenologyLegend />
+      </div>
       <div className="mt-4 p-3 bg-surface-alt rounded-lg">
         <p className="text-xs text-fg-secondary">
           <strong>{tBody('noteLabel')}</strong> {tBody('breakdownNote')}

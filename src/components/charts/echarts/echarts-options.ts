@@ -11,7 +11,10 @@
  * - Value/axis formatters per locale via `formatEChartsNumber`
  */
 import type { EChartsCoreOption } from 'echarts/core';
+import type { CustomSeriesRenderItem, CustomSeriesRenderItemReturn } from 'echarts';
 import { CHART_FONT_FAMILY } from '../../../lib/fonts';
+import { escapeHtml } from '../../../lib/escapeHtml';
+import { phenoHatchColor, phenoPhaseColor } from '../../../lib/phenoColors';
 import { translate } from '../../../i18n';
 import type { Locale } from '../../../i18n/types';
 import {
@@ -327,10 +330,10 @@ export function buildGroupedBarOption(
                 const v =
                   typeof p.value === 'number'
                     ? formatEChartsNumber(p.value, input.locale)
-                    : String(p.value ?? '');
-                return `${p.marker ?? ''} ${p.seriesName ?? ''}: ${v}`.trim();
+                    : escapeHtml(String(p.value ?? ''));
+                return `${p.marker ?? ''} ${escapeHtml(p.seriesName ?? '')}: ${v}`.trim();
               });
-              return `<b>${String(cat)}</b><br>` + lines.join('<br>');
+              return `<b>${escapeHtml(String(cat))}</b><br>` + lines.join('<br>');
             },
           }
         : {}),
@@ -1085,7 +1088,7 @@ export function buildTimelineOption(input: TimelineInput): EChartsCoreOption {
       }): string => {
         const value = Array.isArray(params.value) ? params.value[0] : '';
         const key = `${params.seriesName ?? ''}||${String(value)}`;
-        return tips.get(key) ?? `<b>${params.seriesName ?? ''}</b><br>${String(value)}`;
+        return tips.get(key) ?? `<b>${escapeHtml(params.seriesName ?? '')}</b><br>${escapeHtml(String(value))}`;
       },
     },
     legend: { ...legendBase(input.theme, fontFamily), show: false },
@@ -1191,7 +1194,7 @@ function buildTimelineSeries(
     sorted.forEach((year) => {
       tips.set(
         `${item.label}||${year}`,
-        item.tip !== undefined ? item.tip(year) : `<b>${item.label}</b><br>${year}`,
+        item.tip !== undefined ? item.tip(year) : `<b>${escapeHtml(item.label)}</b><br>${year}`,
       );
     });
     const visible =
@@ -1455,5 +1458,168 @@ export function buildPolarOption(input: PolarInput): EChartsCoreOption {
         areaStyle: { opacity: 0.12 },
       };
     }),
+  } as EChartsCoreOption;
+}
+
+export interface PhenoGanttSegment {
+  /** Índice da lane em `lanes`. */
+  lane: number;
+  /** Slot do boletim (0 = Out), início inclusivo. */
+  start: number;
+  /** Slot do boletim, fim exclusivo. */
+  end: number;
+  /** `PH` — render com hachura contrastante. */
+  ph: boolean;
+  /** Tooltip HTML pré-formatado (i18n no chamador). */
+  tip: string;
+}
+
+export interface PhenoGanttInput extends BaseBuilderInput {
+  /** Rótulos das lanes (y). */
+  lanes: string[];
+  /** Fase de cada lane (cor fixa: P = verde, H = âmbar). */
+  laneKinds: ('P' | 'H')[];
+  /** Rótulos dos meses no eixo safra (Out→Set). */
+  xLabels: (string | number)[];
+  segments: PhenoGanttSegment[];
+  /** Fim da banda "safra vigente" (posição no eixo de valor). */
+  seasonBandEnd: number;
+  seasonBandName: string;
+  /** Linha "hoje" (posição no eixo de valor). */
+  todayPosition: number;
+  todayName: string;
+}
+
+/** Diagonais 45° contidas no retângulo (hachura PH sem depender de decal). */
+function hatchLines(
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  step = 6,
+): { x1: number; y1: number; x2: number; y2: number }[] {
+  const out: { x1: number; y1: number; x2: number; y2: number }[] = [];
+  const y0 = y;
+  const y1 = y + h;
+  const x0 = x;
+  const x1 = x + w;
+  for (let c = x0 - y1; c <= x1 - y0; c += step * Math.SQRT2) {
+    const pts: { x: number; y: number }[] = [];
+    const yyLeft = x0 - c;
+    if (yyLeft >= y0 && yyLeft <= y1) pts.push({ x: x0, y: yyLeft });
+    const yyRight = x1 - c;
+    if (yyRight >= y0 && yyRight <= y1) pts.push({ x: x1, y: yyRight });
+    const xxTop = c + y0;
+    if (xxTop >= x0 && xxTop <= x1) pts.push({ x: xxTop, y: y0 });
+    const xxBottom = c + y1;
+    if (xxBottom >= x0 && xxBottom <= x1) pts.push({ x: xxBottom, y: y1 });
+    const a = pts[0];
+    const b = pts.find((p) => Math.abs(p.x - (a?.x ?? 0)) > 0.5 || Math.abs(p.y - (a?.y ?? 0)) > 0.5);
+    if (a !== undefined && b !== undefined) out.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y });
+  }
+  return out;
+}
+
+/**
+ * Gantt fenológico (Gaia): série `custom` com um retângulo por segmento
+ * disjunto — hiato nunca colapsa. PH recebe hachura contrastante.
+ * Eixo safra Out→Set com banda da safra vigente + linha "hoje".
+ */
+export function buildPhenoGanttOption(input: PhenoGanttInput): EChartsCoreOption {
+  const { divider, labelColor } = axisCommon(input.theme);
+  const fontFamily = fontOf(input);
+  const tips = input.segments.map((s) => s.tip);
+
+  const renderItem: CustomSeriesRenderItem = (params, api) => {
+    const start = Number(api.value(0));
+    const lane = Number(api.value(1));
+    const end = Number(api.value(2));
+    const ph = Number(api.value(3)) === 1;
+    const kind = input.laneKinds[lane] ?? 'P';
+    const base = phenoPhaseColor(kind, input.theme);
+    const hatch = phenoHatchColor(kind, input.theme);
+    const p0 = api.coord([start, lane]) as [number, number];
+    const p1 = api.coord([end, lane]) as [number, number];
+    const x0 = Math.min(p0[0], p1[0]);
+    const x1 = Math.max(p0[0], p1[0]);
+    const band = (api.size?.([0, 1]) as [number, number] | undefined)?.[1] ?? 24;
+    const barH = Math.min(16, Math.max(band * 0.55, 8));
+    const yMid = (p0[1] + p1[1]) / 2;
+    const rect = { x: x0, y: yMid - barH / 2, width: Math.max(x1 - x0, 2), height: barH };
+    const children: Record<string, unknown>[] = [
+      {
+        type: 'rect',
+        shape: rect,
+        style: { fill: base, opacity: ph ? 0.3 : 0.9, stroke: base, lineWidth: 1 },
+      },
+    ];
+    if (ph) {
+      for (const line of hatchLines(rect.x, rect.y, rect.width, rect.height)) {
+        children.push({
+          type: 'line',
+          shape: { x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y2 },
+          style: { stroke: hatch, lineWidth: 1.5, opacity: 0.95 },
+        });
+      }
+    }
+    void params;
+    return { type: 'group', children } as unknown as CustomSeriesRenderItemReturn;
+  };
+
+  return {
+    textStyle: { fontFamily },
+    toolbox: buildChartToolbox(input.locale, input.exportName, input.theme),
+    tooltip: {
+      ...tooltipBase(input, fontFamily),
+      trigger: 'item',
+      formatter: (p: { dataIndex?: number }): string => tips[p.dataIndex ?? 0] ?? '',
+    },
+    legend: { ...legendBase(input.theme, fontFamily), show: false },
+    grid: { left: 8, right: 24, top: 24, bottom: 48, containLabel: true },
+    xAxis: {
+      type: 'value',
+      min: -0.5,
+      max: Math.max(input.xLabels.length - 0.5, 0.5),
+      axisLabel: tickLabel(input.theme, fontFamily, {
+        formatter: (v: number): string => {
+          if (!Number.isInteger(v)) return '';
+          const label = input.xLabels[v];
+          return label === undefined ? '' : String(label);
+        },
+      }),
+      splitLine: { lineStyle: { color: divider } },
+    },
+    yAxis: {
+      type: 'category',
+      data: input.lanes,
+      inverse: true,
+      axisLabel: tickLabel(input.theme, fontFamily, {
+        formatter: (v: unknown): string => truncateCategoryLabel(v),
+      }),
+      axisTick: { show: false },
+      axisLine: { lineStyle: { color: 'rgba(148,163,184,0.3)' } },
+    },
+    series: [
+      {
+        type: 'custom',
+        renderItem,
+        clip: true,
+        encode: { x: [0, 2], y: 1 },
+        data: input.segments.map((s) => ({ value: [s.start, s.lane, s.end, s.ph ? 1 : 0] })),
+        markArea: {
+          silent: true,
+          itemStyle: { color: labelColor, opacity: 0.08 },
+          label: { formatter: input.seasonBandName, fontSize: 11, fontFamily, color: labelColor },
+          data: [[{ xAxis: -0.5 }, { xAxis: input.seasonBandEnd }]],
+        },
+        markLine: {
+          silent: true,
+          symbol: 'none',
+          lineStyle: { color: labelColor, width: 1.5, type: 'dashed' },
+          label: { formatter: input.todayName, fontSize: 11, fontFamily },
+          data: [{ xAxis: input.todayPosition, name: input.todayName }],
+        },
+      },
+    ],
   } as EChartsCoreOption;
 }

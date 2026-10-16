@@ -1,9 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Info } from 'lucide-react';
 import Card from '../../ui/Card';
 import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
 import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
-import { LANDAGRI_COLORWAY_DARK, LANDAGRI_COLORWAY_LIGHT } from '../../../lib/echarts-theme';
 import { useEffectiveTheme } from '../../../hooks/use-theme';
 import { useT } from '../../../i18n/LanguageContext';
 import { translateCropName, translateMonth } from '../../../data/glossary';
@@ -11,8 +10,8 @@ import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
 import { bulletinIndexToMonth, type ConabCalendarRow } from '../../../types/calendar';
 import {
-  aggregateShares,
   aggregateSharesByGroup,
+  aggregateSharesWithMode,
   bulletinSlotForMonth,
   currentCalendarMonth,
   formatShareTip,
@@ -20,9 +19,12 @@ import {
   resolveShareMode,
   toCalendarRecords,
   type MonthShare,
+  type ShareMode,
   type ShareTipLabels,
 } from '../../../lib/calendarShare';
+import { phenoPhaseColor } from '../../../lib/phenoColors';
 import RecencyBadge from './RecencyBadge';
+import ShareModeToggle from './ShareModeToggle';
 
 const MONTHS = ['October', 'November', 'December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September'];
 
@@ -51,6 +53,8 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
   const rawData = conabCalendar as CalendarRow[];
   const mappingData = conabMapping as MappingDataType;
   const statesMap = mappingData?.states || {};
+  // Toggle % UFs vs % área: default área quando há `areaSharePct`, senão UFs rotulado.
+  const [modeOverride, setModeOverride] = useState<ShareMode | null>(null);
 
   const model = useMemo(() => {
     const stateRegions: Record<string, string> = {};
@@ -70,10 +74,12 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
     });
 
     const records = toCalendarRecords(filtered);
-    const byCrop = aggregateSharesByGroup(records, (r) => r.cropId);
-    const global = aggregateShares(records);
-    return { records, byCrop, global, mode: resolveShareMode(records), recency: recencyOf(records) };
-  }, [rawData, selectedCrops, selectedRegions, statesMap]);
+    const requested: ShareMode = modeOverride ?? resolveShareMode(records);
+    const withMode = aggregateSharesWithMode(records, requested);
+    const byCrop = aggregateSharesByGroup(records, (r) => r.cropId, withMode.effective);
+    const global = withMode.shares;
+    return { records, byCrop, global, mode: withMode.effective, hasArea: withMode.hasArea, recency: recencyOf(records) };
+  }, [rawData, selectedCrops, selectedRegions, statesMap, modeOverride]);
 
   const tipLabels: ShareTipLabels = {
     activeUfs: tBody('activeUfsLabel'),
@@ -118,9 +124,9 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
     return Math.round(model.global.find((m) => m.month === civil)?.pctHarvest ?? 0);
   });
 
-  const way = theme === 'dark' ? LANDAGRI_COLORWAY_DARK : LANDAGRI_COLORWAY_LIGHT;
-  const plantingColor = way[0];
-  const harvestColor = way[5];
+  const way = theme === 'dark' ? 'dark' : 'light';
+  const plantingColor = phenoPhaseColor('P', way);
+  const harvestColor = phenoPhaseColor('H', way);
   const emptyCell = theme === 'dark' ? '#1e293b' : '#f1f5f9';
 
   if (cropKeys.length === 0) {
@@ -139,7 +145,7 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
         <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
           <h3 className="text-base font-semibold text-fg">{tBody('hNationalMatrix')}</h3>
           <span className="inline-flex items-center gap-1 text-xs font-medium text-fg-secondary">
-            {model.mode === 'area' ? tBody('shareModeArea') : tBody('shareModeUf')}
+            <ShareModeToggle mode={model.mode} hasArea={model.hasArea} onChange={setModeOverride} />
             <button
               type="button"
               title={tBody('shareScaleNote')}
@@ -199,6 +205,9 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
           </div>
           <span className="text-xs text-fg-secondary" role="listitem">
             ● = {tBody('currentMonth')}
+          </span>
+          <span className="text-xs text-fg-muted" role="listitem">
+            {tBody('legendCodingNote')}
           </span>
         </div>
       </Card>
