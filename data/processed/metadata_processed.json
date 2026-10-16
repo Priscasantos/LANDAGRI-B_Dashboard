@@ -5,13 +5,7 @@
     "provider": "Copernicus European Union's Space Program",
     "source": "PROBA-V",
     "spatial_resolution": 100,
-    "available_years": [
-      2015,
-      2016,
-      2017,
-      2018,
-      2019
-    ],
+    "available_years": [2015, 2016, 2017, 2018, 2019],
     "temporal_frequency": "Annual",
     "update_frequency": "Annual",
     "reference_system": "EPSG:4326",
@@ -22,9 +16,7 @@
     "overall_accuracy": 83.3,
     "number_of_agriculture_classes": 1,
     "agricultural_capabilities": "Mixed temporary crops",
-    "references": [
-      "[1,2,51–53]"
-    ],
+    "references": ["[1,2,51–53]"],
     "algorithm": "Supervised random forest classification/regression using PROBA-V data",
     "sensors_referenced": [
       {
@@ -44,16 +36,7 @@
     "provider": "Google and World Resources Institute",
     "source": "Sentinel-2 MSI",
     "spatial_resolution": 10,
-    "available_years": [
-      2017,
-      2018,
-      2019,
-      2020,
-      2021,
-      2022,
-      2023,
-      2024
-    ],
+    "available_years": [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
     "temporal_frequency": "Annual",
     "update_frequency": "Near real time",
     "reference_system": "EPSG:4326",
@@ -83,16 +66,7 @@
     "provider": "Environmental Systems Research Institute (ESRI), Impact Observatory, and Microsoft Maps for Good Initiative",
     "source": "Sentinel-2 MSI",
     "spatial_resolution": 10,
-    "available_years": [
-      2017,
-      2018,
-      2019,
-      2020,
-      2021,
-      2022,
-      2023,
-      2024
-    ],
+    "available_years": [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
     "temporal_frequency": "Annual",
     "update_frequency": "Annual or Sub-annual",
     "reference_system": [
@@ -155,13 +129,7 @@
     "provider": "University of Maryland (UMD) Global Land Analysis and Discovery (GLAD) laboratory",
     "source": "Landsat series",
     "spatial_resolution": 30,
-    "available_years": [
-      2000,
-      2005,
-      2010,
-      2015,
-      2020
-    ],
+    "available_years": [2000, 2005, 2010, 2015, 2020],
     "temporal_frequency": "Quadriennial",
     "update_frequency": "Quadriennial",
     "reference_system": "EPSG:4326",
@@ -172,9 +140,7 @@
     "overall_accuracy": 85.0,
     "number_of_agriculture_classes": 1,
     "agricultural_capabilities": "Arable land (annual and perennial herbaceous crops, meadows, and fallow)",
-    "references": [
-      "[14–16]"
-    ],
+    "references": ["[14–16]"],
     "algorithm": "Supervised machine learning methods (decision and regression trees, U-Net convolutional neural network) applied to Landsat series data",
     "sensors_referenced": [
       {
@@ -185,22 +151,8 @@
     "end_year": 2020,
     "temporal_span": 21,
     "temporal_gaps": [
-      2001,
-      2002,
-      2003,
-      2004,
-      2006,
-      2007,
-      2008,
-      2009,
-      2011,
-      2012,
-      2013,
-      2014,
-      2016,
-      2017,
-      2018,
-      2019
+      2001, 2002, 2003, 2004, 2006, 2007, 2008, 2009, 2011, 2012, 2013, 2014,
+      2016, 2017, 2018, 2019
     ],
     "Methodology": "Hybrid",
     "Methodology Components": "Deep Learning|Shallow ML"
@@ -212,18 +164,7 @@
     "source": "Landsat series",
     "spatial_resolution": 30,
     "available_years": [
-      2000,
-      2002,
-      2004,
-      2006,
-      2008,
-      2010,
-      2012,
-      2014,
-      2016,
-      2018,
-      2020,
-      2022
+      2000, 2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016, 2018, 2020, 2022
     ],
     "temporal_frequency": "Biennial",
     "update_frequency": "Biennial",
@@ -264,17 +205,7 @@
     "end_year": 2022,
     "temporal_span": 23,
     "temporal_gaps": [
-      2001,
-      2003,
-      2005,
-      2007,
-      2009,
-      2011,
-      2013,
-      2015,
-      2017,
-      2019,
-      2021
+      2001, 2003, 2005, 2007, 2009, 2011, 2013, 2015, 2017, 2019, 2021
     ],
     "Methodology": "Shallow ML",
     "Methodology Components": "Shallow ML"
@@ -286,30 +217,8 @@
     "source": "Landsat and MODIS series",
     "spatial_resolution": 30,
     "available_years": [
-      2000,
-      2001,
-      2002,
-      2003,
-      2004,
-      2005,
-      2006,
-      2007,
-      2008,
-      2009,
-      2010,
-      2011,
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018,
-      2019,
-      2020,
-      2021,
-      2022,
-      2023
+      2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
+      2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023
     ],
     "temporal_frequency": "Annual",
     "update_frequency": "Annual",
@@ -346,10 +255,7 @@
     "provider": "European Space Agency (ESA)",
     "source": "Sentinel-1 and Sentinel-2 MSI",
     "spatial_resolution": 10,
-    "available_years": [
-      2020,
-      2021
-    ],
+    "available_years": [2020, 2021],
     "temporal_frequency": "Annual",
     "update_frequency": "Annual",
     "reference_system": "EPSG:4326",
@@ -397,9 +303,7 @@
     "provider": "European Space Agency (ESA)",
     "source": "Sentinel-1, Sentinel-2, and Landsat-8",
     "spatial_resolution": 10,
-    "available_years": [
-      2021
-    ],
+    "available_years": [2021],
     "temporal_frequency": "Annual and Seasonal",
     "update_frequency": "Annual",
     "reference_system": "EPSG:4326",
@@ -471,29 +375,8 @@
     "source": "IRS, Sentinel-2 MSI, Landsat series, CBERS-4/4A",
     "spatial_resolution": 30,
     "available_years": [
-      2001,
-      2002,
-      2003,
-      2004,
-      2005,
-      2006,
-      2007,
-      2008,
-      2009,
-      2010,
-      2011,
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018,
-      2019,
-      2020,
-      2021,
-      2022,
-      2023
+      2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012,
+      2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023
     ],
     "temporal_frequency": "Annual",
     "update_frequency": "Annual",
@@ -505,63 +388,23 @@
     "overall_accuracy": 93.0,
     "number_of_agriculture_classes": 1,
     "agricultural_capabilities": "Non-forest area",
-    "references": [
-      "[25,28,60–62]"
-    ],
+    "references": ["[25,28,60–62]"],
     "algorithm": "Visual interpretation applied to combined satellite data",
     "sensors_referenced": [
       {
         "sensor_key": "IRS_LISS",
-        "years_used": [
-          2001,
-          2002,
-          2003,
-          2004,
-          2005,
-          2006,
-          2007,
-          2008
-        ]
+        "years_used": [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008]
       },
       {
         "sensor_key": "LANDSAT_LEGACY_TM_ETM_OLI",
         "years_used": [
-          2001,
-          2002,
-          2003,
-          2004,
-          2005,
-          2006,
-          2007,
-          2008,
-          2009,
-          2010,
-          2011,
-          2012,
-          2013,
-          2014,
-          2015,
-          2016,
-          2017,
-          2018,
-          2019,
-          2020,
-          2021,
-          2022,
-          2023
+          2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
+          2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023
         ]
       },
       {
         "sensor_key": "SENTINEL_2_MSI",
-        "years_used": [
-          2017,
-          2018,
-          2019,
-          2020,
-          2021,
-          2022,
-          2023
-        ]
+        "years_used": [2017, 2018, 2019, 2020, 2021, 2022, 2023]
       },
       {
         "sensor_key": "CBERS_AWFI_MUX_PAN"
@@ -579,34 +422,10 @@
     "acronym": "DETER",
     "provider": "National Institute for Space Research (INPE)",
     "source": "MODIS Terra/Aqua, CBERS series, Amazônia-1",
-    "spatial_resolution": [
-      56,
-      64
-    ],
+    "spatial_resolution": [56, 64],
     "available_years": [
-      2001,
-      2002,
-      2003,
-      2004,
-      2005,
-      2006,
-      2007,
-      2008,
-      2009,
-      2010,
-      2011,
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018,
-      2019,
-      2020,
-      2021,
-      2022,
-      2023
+      2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012,
+      2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023
     ],
     "temporal_frequency": "Annual",
     "update_frequency": "Annual",
@@ -618,74 +437,26 @@
     "overall_accuracy": 93.0,
     "number_of_agriculture_classes": 1,
     "agricultural_capabilities": "Non-forest area",
-    "references": [
-      "[25,28,60–62]"
-    ],
+    "references": ["[25,28,60–62]"],
     "algorithm": "Visual interpretation and Spectral Mixture Model applied to combined satellite data",
     "sensors_referenced": [
       {
         "sensor_key": "MODIS_TERRA_AQUA",
         "years_used": [
-          2001,
-          2002,
-          2003,
-          2004,
-          2005,
-          2006,
-          2007,
-          2008,
-          2009,
-          2010,
-          2011,
-          2012,
-          2013,
-          2014,
-          2015,
-          2016,
-          2017,
-          2018,
-          2019,
-          2020,
-          2021,
-          2022,
-          2023
+          2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
+          2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023
         ]
       },
       {
         "sensor_key": "CBERS_AWFI_MUX_PAN",
         "years_used": [
-          2001,
-          2002,
-          2003,
-          2004,
-          2005,
-          2006,
-          2007,
-          2008,
-          2009,
-          2010,
-          2011,
-          2012,
-          2013,
-          2014,
-          2015,
-          2016,
-          2017,
-          2018,
-          2019,
-          2020,
-          2021,
-          2022,
-          2023
+          2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
+          2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023
         ]
       },
       {
         "sensor_key": "AMAZONIA_1_WFI",
-        "years_used": [
-          2021,
-          2022,
-          2023
-        ]
+        "years_used": [2021, 2022, 2023]
       }
     ],
     "start_year": 2001,
@@ -714,16 +485,7 @@
         "current": true
       }
     ],
-    "available_years": [
-      2008,
-      2010,
-      2012,
-      2014,
-      2016,
-      2018,
-      2020,
-      2022
-    ],
+    "available_years": [2008, 2010, 2012, 2014, 2016, 2018, 2020, 2022],
     "temporal_frequency": "Annual",
     "update_frequency": "Biennial",
     "reference_system": "EPSG:4674",
@@ -738,46 +500,21 @@
     "sensors_referenced": [
       {
         "sensor_key": "LANDSAT_LEGACY_TM_ETM_OLI",
-        "years_used": [
-          2008,
-          2010,
-          2012,
-          2014,
-          2016,
-          2018
-        ]
+        "years_used": [2008, 2010, 2012, 2014, 2016, 2018]
       },
       {
         "sensor_key": "MODIS_TERRA_AQUA",
-        "years_used": [
-          2008,
-          2010,
-          2012,
-          2014,
-          2016,
-          2018
-        ]
+        "years_used": [2008, 2010, 2012, 2014, 2016, 2018]
       },
       {
         "sensor_key": "SENTINEL_2_MSI",
-        "years_used": [
-          2020,
-          2022
-        ]
+        "years_used": [2020, 2022]
       }
     ],
     "start_year": 2008,
     "end_year": 2022,
     "temporal_span": 15,
-    "temporal_gaps": [
-      2009,
-      2011,
-      2013,
-      2015,
-      2017,
-      2019,
-      2021
-    ],
+    "temporal_gaps": [2009, 2011, 2013, 2015, 2017, 2019, 2021],
     "Methodology": "Hybrid",
     "Methodology Components": "Deep Learning|Statistical / Spectral|Visual Interpretation"
   },
@@ -800,11 +537,7 @@
         "current": true
       }
     ],
-    "available_years": [
-      2018,
-      2020,
-      2022
-    ],
+    "available_years": [2018, 2020, 2022],
     "temporal_frequency": "Annual",
     "update_frequency": "Biennial",
     "reference_system": "EPSG:4674",
@@ -825,20 +558,13 @@
       },
       {
         "sensor_key": "SENTINEL_2_MSI",
-        "years_used": [
-          2018,
-          2020,
-          2022
-        ]
+        "years_used": [2018, 2020, 2022]
       }
     ],
     "start_year": 2018,
     "end_year": 2022,
     "temporal_span": 5,
-    "temporal_gaps": [
-      2019,
-      2021
-    ],
+    "temporal_gaps": [2019, 2021],
     "Methodology": "Hybrid",
     "Methodology Components": "Deep Learning|Statistical / Spectral|Visual Interpretation"
   },
@@ -849,45 +575,10 @@
     "source": "Landsat series",
     "spatial_resolution": 30,
     "available_years": [
-      1985,
-      1986,
-      1987,
-      1988,
-      1989,
-      1990,
-      1991,
-      1992,
-      1993,
-      1994,
-      1995,
-      1996,
-      1997,
-      1998,
-      1999,
-      2000,
-      2001,
-      2002,
-      2003,
-      2004,
-      2005,
-      2006,
-      2007,
-      2008,
-      2009,
-      2010,
-      2011,
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018,
-      2019,
-      2020,
-      2021,
-      2022,
-      2023
+      1985, 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
+      1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
+      2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020,
+      2021, 2022, 2023
     ],
     "temporal_frequency": "Annual",
     "update_frequency": "Annual",
@@ -934,17 +625,7 @@
     "source": "Landsat-8 OLI",
     "spatial_resolution": 30,
     "available_years": [
-      2000,
-      2002,
-      2004,
-      2006,
-      2008,
-      2010,
-      2012,
-      2014,
-      2016,
-      2018,
-      2020
+      2000, 2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016, 2018, 2020
     ],
     "temporal_frequency": "Biennial since 2010",
     "update_frequency": "Biennial",
@@ -971,16 +652,7 @@
     "end_year": 2020,
     "temporal_span": 21,
     "temporal_gaps": [
-      2001,
-      2003,
-      2005,
-      2007,
-      2009,
-      2011,
-      2013,
-      2015,
-      2017,
-      2019
+      2001, 2003, 2005, 2007, 2009, 2011, 2013, 2015, 2017, 2019
     ],
     "Methodology": "Visual Interpretation",
     "Methodology Components": "Visual Interpretation"
@@ -992,30 +664,8 @@
     "source": "MODIS, Sentinel-2 MSI, and Landsat series",
     "spatial_resolution": 30,
     "available_years": [
-      2000,
-      2001,
-      2002,
-      2003,
-      2004,
-      2005,
-      2006,
-      2007,
-      2008,
-      2009,
-      2010,
-      2011,
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018,
-      2019,
-      2020,
-      2021,
-      2022,
-      2023
+      2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
+      2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023
     ],
     "temporal_frequency": "By Crop Year",
     "update_frequency": "Annual",
@@ -1026,9 +676,7 @@
     "class_legend": "Cotton, irrigated rice, coffee, sugarcane, corn, soybean, others Summer and Winter crops (peanut, oat, canola, rye, barley, beans, sesame, sunflower, castor bean, sorghum, wheat, and triticale), and sugarcane mill",
     "number_of_agriculture_classes": 13,
     "agricultural_capabilities": "Cotton, irrigated rice, coffee, sugarcane, corn, soybean, others summer/winter crops",
-    "references": [
-      "[48–50,67]"
-    ],
+    "references": ["[48–50,67]"],
     "accuracy": {
       "status": "incomplete",
       "overall": null,

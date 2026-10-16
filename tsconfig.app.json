@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "esnext",
+    "types": ["vite/client"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Path aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "ignoreDeprecations": "6.0",
+
+    /* Linting */
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"],
+  // Test files are run by vitest (esbuild, no typecheck) and must not break `tsc -b`.
+  // Root cause: src/test/scripts/preprocess-data.test.ts imports untyped
+  // scripts/preprocess-data.mjs -> TS7016 + cascading TS7006 on `tsc -b`,
+  // while `tsc --noEmit` (root tsconfig has files:[]) checks nothing.
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test"]
+}

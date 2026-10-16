@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>LANDAGRI-B Dashboard</title>
+  <script>
+    // gh-pages SPA fallback: stash the deep link, then boot the app at the
+    // basename root. The app restores the path from sessionStorage on load
+    // (see `useEffectRedirect` in `src/App.tsx`).
+    //
+    // Basename resolution (no hardcoded sub-path, honours custom
+    // `VITE_BASENAME` deploys):
+    //   1. value stored by the app in localStorage (`landagri-basename`);
+    //   2. fallback: first path segment (gh-pages project-page layout).
+    // Query string and hash are preserved in the stashed target.
+    (function () {
+      var pathname = location.pathname;
+      var stored = null;
+      try {
+        stored = localStorage.getItem('landagri-basename');
+      } catch (e) { /* private mode: fall through to heuristic */ }
+
+      var basename = '';
+      var rest = pathname;
+      if (stored && stored !== '/' && pathname.indexOf(stored + '/') === 0) {
+        basename = stored;
+        rest = pathname.slice(stored.length) || '/';
+      } else if (stored === '/') {
+        basename = '';
+        rest = pathname;
+      } else {
+        var segs = pathname.split('/').filter(Boolean);
+        if (segs.length > 0) {
+          basename = '/' + segs[0];
+          rest = segs.length > 1 ? '/' + segs.slice(1).join('/') : '/';
+        }
+      }
+
+      var target = (rest || '/') + location.search + location.hash;
+      try {
+        sessionStorage.setItem('redirectPath', target);
+      } catch (e) { /* storage unavailable: still redirect home */ }
+      location.replace(basename + '/');
+    })();
+  </script>
+</head>
+<body>
+  <p>Redirecting to LANDAGRI-B Dashboard...</p>
+</body>
+</html>

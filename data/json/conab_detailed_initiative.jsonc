@@ -4,7 +4,7 @@
     // Based on crop availability data for different regions and time periods
     //
     "CONAB Crop Monitoring Initiative": {
-        "coverage": "Brazil",
+        "coverage": "National",
         "acronym": "CONAB",
         "provider": "Companhia Nacional de Abastecimento (CONAB)",
         "source": "Multiple satellite sensors and ground surveys",
@@ -172,10 +172,10 @@
             "Sugar cane mill": {
                 "regions": ["BR"],
                 "first_crop_years": {
-                    "Brazil": ["2020-2021"]
+                    "BR": ["2020-2021"]
                 },
                 "second_crop_years": {
-                    "Brazil": []
+                    "BR": []
                 }
             }
         },        "regional_coverage": [

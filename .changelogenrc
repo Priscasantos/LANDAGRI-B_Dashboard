@@ -1,0 +1,14 @@
+{
+  "types": {
+    "feat": { "title": "✨ Novo" },
+    "fix": { "title": "🐛 Correções" },
+    "refactor": { "title": "🔧 Técnico" },
+    "perf": { "title": "⚡ Performance" },
+    "docs": { "title": "📚 Documentação" },
+    "style": { "title": "🎨 UX" },
+    "test": { "title": "✅ Testes" },
+    "chore": { "title": "🏡 Chore" },
+    "ci": { "title": "🤖 CI" },
+    "build": { "title": "📦 Build" }
+  }
+}

@@ -1,0 +1,331 @@
+[
+  {
+    "crop": "Cotton",
+    "uf": "GO",
+    "anos_1s": ["2018-2019", "2019-2020", "2021-2022", "2022-2023"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Cotton",
+    "uf": "MS",
+    "anos_1s": ["2021-2022"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Irrigated Rice",
+    "uf": "TO",
+    "anos_1s": ["2017-2018"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Irrigated Rice",
+    "uf": "GO",
+    "anos_1s": ["2018-2019"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Irrigated Rice",
+    "uf": "MS",
+    "anos_1s": ["2018-2019"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Irrigated Rice",
+    "uf": "PR",
+    "anos_1s": ["2017-2018"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Irrigated Rice",
+    "uf": "SC",
+    "anos_1s": ["2018-2019"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Irrigated Rice",
+    "uf": "RS",
+    "anos_1s": ["2019-2020", "2022-2023"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Coffee",
+    "uf": "GO",
+    "anos_1s": ["2020-2021"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Coffee",
+    "uf": "RJ",
+    "anos_1s": ["2020-2021"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Coffee",
+    "uf": "SP",
+    "anos_1s": ["2015-2016", "2016-2017", "2018-2019"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Sugar cane",
+    "uf": "GO",
+    "anos_1s": ["2010-2011", "2011-2012"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Sugar cane",
+    "uf": "MT",
+    "anos_1s": ["2012-2013"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Sugar cane",
+    "uf": "MS",
+    "anos_1s": ["2012-2013"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Sugar cane",
+    "uf": "SP",
+    "anos_1s": ["2012-2013"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Other winter crops",
+    "uf": "SP",
+    "anos_1s": ["2013-2014"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Other winter crops",
+    "uf": "PR",
+    "anos_1s": ["2009-2010", "2010-2011", "2011-2012", "2012-2013"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Other winter crops",
+    "uf": "RS",
+    "anos_1s": ["2000-2015"],
+    "anos_2s": [],
+    "is_long_aggregate": true
+  },
+  {
+    "crop": "Other summer crops",
+    "uf": "RO",
+    "anos_1s": ["2011-2012", "2013-2014", "2020-2021"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Other summer crops",
+    "uf": "PA",
+    "anos_1s": ["2011-2012", "2020-2021"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Other summer crops",
+    "uf": "TO",
+    "anos_1s": ["2000-2014"],
+    "anos_2s": [],
+    "is_long_aggregate": true
+  },
+  {
+    "crop": "Other summer crops",
+    "uf": "BA",
+    "anos_1s": ["2000-2014", "2020-2021"],
+    "anos_2s": [],
+    "is_long_aggregate": true
+  },
+  {
+    "crop": "Other summer crops",
+    "uf": "MA",
+    "anos_1s": ["2000-2014", "2020-2021"],
+    "anos_2s": ["2011-2012", "2012-2013", "2013-2014"],
+    "is_long_aggregate": true
+  },
+  {
+    "crop": "Other summer crops",
+    "uf": "TO",
+    "anos_1s": ["2019-2020", "2020-2021"],
+    "anos_2s": ["2011-2012", "2012-2013", "2013-2014"],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Other summer crops",
+    "uf": "PI",
+    "anos_1s": ["2000-2014", "2020-2021"],
+    "anos_2s": ["2011-2012", "2012-2013", "2013-2014"],
+    "is_long_aggregate": true
+  },
+  {
+    "crop": "Other summer crops",
+    "uf": "GO",
+    "anos_1s": ["2020-2021"],
+    "anos_2s": ["2011-2012", "2012-2013", "2013-2014"],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Other summer crops",
+    "uf": "DF",
+    "anos_1s": ["2008-2009", "2011-2015", "2017-2018", "2020-2021"],
+    "anos_2s": ["2013-2014"],
+    "is_long_aggregate": true
+  },
+  {
+    "crop": "Other summer crops",
+    "uf": "MG",
+    "anos_1s": ["2000-2014", "2020-2021"],
+    "anos_2s": ["2011-2012", "2012-2013", "2013-2014"],
+    "is_long_aggregate": true
+  },
+  {
+    "crop": "Other summer crops",
+    "uf": "MT",
+    "anos_1s": ["2004-2015", "2020-2021"],
+    "anos_2s": ["2011-2012", "2012-2013", "2013-2014"],
+    "is_long_aggregate": true
+  },
+  {
+    "crop": "Other summer crops",
+    "uf": "MS",
+    "anos_1s": ["2000-2015", "2020-2021"],
+    "anos_2s": ["2011-2012", "2012-2013", "2013-2014"],
+    "is_long_aggregate": true
+  },
+  {
+    "crop": "Other summer crops",
+    "uf": "PR",
+    "anos_1s": ["2000-2014", "2020-2021"],
+    "anos_2s": ["2009-2010", "2010-2011", "2011-2012", "2012-2013"],
+    "is_long_aggregate": true
+  },
+  {
+    "crop": "Other summer crops",
+    "uf": "SP",
+    "anos_1s": ["2005-2006", "2009-2015", "2020-2021"],
+    "anos_2s": ["2011-2012", "2012-2013", "2013-2014"],
+    "is_long_aggregate": true
+  },
+  {
+    "crop": "Other summer crops",
+    "uf": "SC",
+    "anos_1s": ["2003-2004", "2005-2010", "2011-2014", "2020-2021"],
+    "anos_2s": [],
+    "is_long_aggregate": true
+  },
+  {
+    "crop": "Other summer crops",
+    "uf": "RS",
+    "anos_1s": ["2004-2015", "2020-2021"],
+    "anos_2s": [],
+    "is_long_aggregate": true
+  },
+  {
+    "crop": "Corn",
+    "uf": "PR",
+    "anos_1s": ["2022-2023"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Soybean",
+    "uf": "RO",
+    "anos_1s": ["2000-2021"],
+    "anos_2s": [],
+    "is_long_aggregate": true
+  },
+  {
+    "crop": "Soybean",
+    "uf": "TO",
+    "anos_1s": ["2021-2022"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Soybean",
+    "uf": "PI",
+    "anos_1s": ["2021-2022"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Soybean",
+    "uf": "BA",
+    "anos_1s": ["2021-2022"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Soybean",
+    "uf": "MA",
+    "anos_1s": ["2021-2022"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Soybean",
+    "uf": "GO",
+    "anos_1s": ["2020-2021"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Soybean",
+    "uf": "MT",
+    "anos_1s": ["2020-2021"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Soybean",
+    "uf": "MS",
+    "anos_1s": ["2020-2021"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Soybean",
+    "uf": "PR",
+    "anos_1s": ["2022-2023"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Soybean",
+    "uf": "SC",
+    "anos_1s": ["2022-2023"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Soybean",
+    "uf": "RS",
+    "anos_1s": ["2022-2023"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  },
+  {
+    "crop": "Sugar cane mill",
+    "uf": "BR",
+    "anos_1s": ["2020-2021"],
+    "anos_2s": [],
+    "is_long_aggregate": false
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "anos_1s": "Crop years with mapping coverage in the first-semester (1S) campaign.",
+  "anos_2s": "Crop years with mapping coverage in the second-semester (2S) campaign.",
+  "year_format": "Agricultural years as \"YYYY-YYYY\" pairs, comma-separated per cell.",
+  "long_aggregates": "Tokens spanning more than one harvest year (e.g. \"2000-2014\", \"2000-2015\") are multi-year rollups, not single agricultural years; rows carrying them are flagged is_long_aggregate.",
+  "area_aliases": {
+    "Brazil": "BR"
+  },
+  "calendar_months": "Calendar `months` arrays run October→September (CONAB bulletin order), one code per month (P/H/PH/\"\").",
+  "area_shares": "Calendar rows carry `areaSharePct` = UF share (%) of the crop national area from CONAB safra 2024/25 closed bulletin per-UF sheets (conab_safra_2024_25.xlsx, Jul/2025; full matrix in conab_area_shares.json). Repo PAM is national-only and cannot supply UF splits — unmapped crops carry NO areaSharePct (honest `mode: uf` fallback).",
+  "area_shares_coverage": {
+    "crops": 10,
+    "gaps": 0,
+    "ufsPerCrop": 27
+  }
+}

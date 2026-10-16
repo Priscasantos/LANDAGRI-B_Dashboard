@@ -1,10 +1,28 @@
 {
     //
+    // P1-2025 data refresh (2026-10-16, reversible, no commit/push/deploy):
+    // MapBiomas Col.10/10.1 through 2024 (accuracy pending publication, see entry);
+    // PRODES 2001-2025 + 2025 Amazonia rate 5,731 km2 (INPE); DETER as a
+    // continuous series 2001-2025 (near-real-time alerts); ESRI LULC confirmed
+    // through 2024; Dynamic World through 2025 (near real time); CGLS PROBA-V
+    // series stays legacy (ends 2019, PROBA-V operations reduced).
+    // CANDIDATES (pending verification - NOT added as entries, no invented years):
+    // - JAXA Forest/Non-Forest Map (FNF): https://www.eorc.jaxa.jp/ALOS/en/dataset/fnf_e.htm
+    //   verify year list/resolution before adding.
+    // - JJ-FAST (JICA-JAXA Forest Early Warning System in the Tropics): https://www.eorc.jaxa.jp/jjfast/
+    //   verify coverage/years before adding.
+    // - Global Forest Watch (GFW): SKIPPED - product/year scope unconfirmed; confirm before adding.
+    // Official reference portals: INPE TerraBrasilis https://terrabrasilis.dpi.inpe.br/,
+    // MapBiomas https://brasil.mapbiomas.org/, Dynamic World https://dynamicworld.app/
+    //
+    //
     // Copernicus Global Land Cover Service Dynamic Land Cover
     //
     "Copernicus Global Land Cover Service Dynamic Land Cover": {
         "coverage": "Global",
         "acronym": "CGLS",
+        "status": "legacy",
+        "status_note": "PROBA-V-based annual products end in 2019; PROBA-V operations reduced, series kept as legacy",
         "provider": "Copernicus European Union's Space Program",
         "source": "PROBA-V",
         "spatial_resolution": 100,
@@ -37,6 +55,7 @@
     "Google Dynamic World V1": {
         "coverage": "Global",
         "acronym": "GDW",
+        "status": "active",
         "provider": "Google and World Resources Institute",
         "source": "Sentinel-2 MSI",
         "spatial_resolution": 10,
@@ -48,10 +67,12 @@
             2021,
             2022,
             2023,
-            2024
+            2024,
+            2025
         ],
         "temporal_frequency": "Annual",
         "update_frequency": "Near real time",
+        "near_real_time": true,
         "reference_system": "EPSG:4326",
         "methodology": "Deep Learning",
         "classification_method": "Deep Learning",
@@ -60,6 +81,7 @@
         "overall_accuracy": 73.8,
         "number_of_agriculture_classes": 1,
         "agricultural_capabilities": "Row crops and paddy crops",
+        "references": ["https://dynamicworld.app/"],
         "algorithm": "Deep learning fully convolutional network applied to Sentinel-2 MSI data",
         "sensors_referenced": [
             { "sensor_key": "SENTINEL_2_MSI" }
@@ -71,6 +93,7 @@
     "ESRI-10m Annual LULC": {
         "coverage": "Global",
         "acronym": "ESRI-10m LULC",
+        "status": "active",
         "provider": "Environmental Systems Research Institute (ESRI), Impact Observatory, and Microsoft Maps for Good Initiative",
         "source": "Sentinel-2 MSI",
         "spatial_resolution": 10,
@@ -138,6 +161,7 @@
     "Global LULC change 2000 and 2020": {
         "coverage": "Global",
         "acronym": "UMD-GLC",
+        "status": "active",
         "provider": "University of Maryland (UMD) Global Land Analysis and Discovery (GLAD) laboratory",
         "source": "Landsat series",
         "spatial_resolution": 30,
@@ -170,6 +194,7 @@
     "Global Pasture Watch (GPW)": {
         "coverage": "Global",
         "acronym": "GPW",
+        "status": "active",
         "provider": "Land & Carbon Lab",
         "source": "Landsat series",
         "spatial_resolution": 30,
@@ -227,6 +252,7 @@
     "South America Soybean Maps": {
         "coverage": "Continental",
         "acronym": "UMD-SASM",
+        "status": "active",
         "provider": "University of Maryland (UMD) Global Land Analysis and Discovery (GLAD) laboratory",
         "source": "Landsat and MODIS series",
         "spatial_resolution": 30,
@@ -256,6 +282,7 @@
     "WorldCover 10m 2021": {
         "coverage": "Global",
         "acronym": "ESA-WC",
+        "status": "active",
         "provider": "European Space Agency (ESA)",
         "source": "Sentinel-1 and Sentinel-2 MSI",
         "spatial_resolution": 10,
@@ -300,6 +327,7 @@
     "WorldCereal": {
         "coverage": "Global",
         "acronym": "WorldCereal",
+        "status": "active",
         "provider": "European Space Agency (ESA)",
         "source": "Sentinel-1, Sentinel-2, and Landsat-8",
         "spatial_resolution": 10,
@@ -364,11 +392,13 @@
     "PRODES Deforestation, Warnings and Vegetation for Brazilian Biomes": {
         "coverage": "National",
         "acronym": "PRODES",
+        "status": "active",
+        "official_name": "Projeto de Monitoramento do Desmatamento na Amazônia Legal por Satélite (PRODES)",
         "provider": "National Institute for Space Research (INPE)",
         "source": "IRS, Sentinel-2 MSI, Landsat series, CBERS-4/4A",
         "spatial_resolution": 30,
         "available_years": [
-            2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023
+            2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025
         ],
         "temporal_frequency": "Annual",
         "update_frequency": "Annual",
@@ -380,12 +410,19 @@
         "overall_accuracy": 93.0,
         "number_of_agriculture_classes": 1,
         "agricultural_capabilities": "Non-forest area",
-        "references": ["[25,28,60–62]"],
+        "latest_deforestation_rate": {
+            "year": 2025,
+            "area_km2": 5731,
+            "scope": "Legal Amazon (PRODES Amazonia)",
+            "source": "INPE PRODES 2025",
+            "reference_url": "https://terrabrasilis.dpi.inpe.br/"
+        },
+        "references": ["[25,28,60–62]", "https://terrabrasilis.dpi.inpe.br/"],
         "algorithm": "Visual interpretation applied to combined satellite data",
         "sensors_referenced": [
             { "sensor_key": "IRS_LISS", "years_used": [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008] },
-            { "sensor_key": "LANDSAT_LEGACY_TM_ETM_OLI", "years_used": [2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023] },
-            { "sensor_key": "SENTINEL_2_MSI", "years_used": [2017,2018,2019,2020,2021,2022,2023] },
+            { "sensor_key": "LANDSAT_LEGACY_TM_ETM_OLI", "years_used": [2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025] },
+            { "sensor_key": "SENTINEL_2_MSI", "years_used": [2017,2018,2019,2020,2021,2022,2023,2024,2025] },
             { "sensor_key": "CBERS_AWFI_MUX_PAN" }
         ]
     },
@@ -395,14 +432,17 @@
     "DETER Deforestation, Warnings and Vegetation for Brazilian Biomes": {
         "coverage": "National",
         "acronym": "DETER",
+        "status": "active",
+        "official_name": "Sistema de Detecção de Desmatamento em Tempo Real (DETER)",
         "provider": "National Institute for Space Research (INPE)",
         "source": "MODIS Terra/Aqua, CBERS series, Amazônia-1",
         "spatial_resolution": [56, 64],
         "available_years": [
-            2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023
+            2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025
         ],
         "temporal_frequency": "Annual",
-        "update_frequency": "Annual",
+        "update_frequency": "Near real time",
+        "near_real_time": true,
         "reference_system": "EPSG:4674",
         "methodology": "Hybrid",
         "classification_method": "Visual Interpretation and Spectral Mixture Model",
@@ -411,12 +451,12 @@
         "overall_accuracy": 93.0,
         "number_of_agriculture_classes": 1,
         "agricultural_capabilities": "Non-forest area",
-        "references": ["[25,28,60–62]"],
+        "references": ["[25,28,60–62]", "https://terrabrasilis.dpi.inpe.br/"],
         "algorithm": "Visual interpretation and Spectral Mixture Model applied to combined satellite data",
         "sensors_referenced": [
-            { "sensor_key": "MODIS_TERRA_AQUA", "years_used": [2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023] },
-            { "sensor_key": "CBERS_AWFI_MUX_PAN", "years_used": [2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023] },
-            { "sensor_key": "AMAZONIA_1_WFI", "years_used": [2021,2022,2023] }
+            { "sensor_key": "MODIS_TERRA_AQUA", "years_used": [2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025] },
+            { "sensor_key": "CBERS_AWFI_MUX_PAN", "years_used": [2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025] },
+            { "sensor_key": "AMAZONIA_1_WFI", "years_used": [2021,2022,2023,2024,2025] }
         ]
     },
     //
@@ -425,6 +465,7 @@
     "TerraClass Amazonia": {
         "coverage": "Regional",
         "acronym": "TerraClass Amazon",
+        "status": "active",
         "provider": "National Institute for Space Research (INPE) and Brazilian Agricultural Research Corporation (Embrapa)",
         "spatial_resolution": [
             {
@@ -467,6 +508,7 @@
     "TerraClass Cerrado": {
         "coverage": "Regional",
         "acronym": "TerraClass Cerrado",
+        "status": "active",
         "provider": "National Institute for Space Research (INPE) and Brazilian Agricultural Research Corporation (Embrapa)",
         "spatial_resolution": [
             {
@@ -509,11 +551,12 @@
     "MapBiomas": {
         "coverage": "National",
         "acronym": "MapBiomas",
+        "status": "active",
         "provider": "Non-governmental Organizations (NGO's), Universities and Technology Companies",
         "source": "Landsat series",
         "spatial_resolution": 30,
         "available_years": [
-            1985,1986,1987,1988,1989,1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023
+            1985,1986,1987,1988,1989,1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024
         ],
         "temporal_frequency": "Annual",
         "update_frequency": "Annual",
@@ -533,7 +576,12 @@
                 {
                     "collection_name": "Collection 9 (c.9)",
                     "accuracy": 90.0,
-                    "description": "Accuracy for MapBiomas Collection 9",
+                    "description": "Accuracy for MapBiomas Collection 9"
+                },
+                {
+                    "collection_name": "Collection 10 (c.10)",
+                    "accuracy": null,
+                    "description": "Collection 10/10.1 adds year 2024; accuracy pending publication",
                     "current": true
                 }
             ]
@@ -551,6 +599,7 @@
     "IBGE Monitoring Land Cover and Land Use": {
         "coverage": "National",
         "acronym": "IBGE-MLCU",
+        "status": "legacy",
         "provider": "Brazilian Institute of Geography and Statistics (IBGE)",
         "source": "Landsat-8 OLI",
         "spatial_resolution": 30,
@@ -582,6 +631,7 @@
     "National Supply Company Agricultural Mapping": {
         "coverage": "National",
         "acronym": "CONAB-AM",
+        "status": "active",
         "provider": "National Supply Company (CONAB)",
         "source": "MODIS, Sentinel-2 MSI, and Landsat series",
         "spatial_resolution": 30,

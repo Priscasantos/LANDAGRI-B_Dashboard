@@ -1,0 +1,944 @@
+[
+  {
+    "crop": "Cotton",
+    "uf": "RO",
+    "months": ["", "", "", "P", "P", "", "", "", "H", "H", "H", ""],
+    "areaSharePct": 0.4223
+  },
+  {
+    "crop": "Cotton",
+    "uf": "TO",
+    "months": ["", "", "P", "P", "P", "", "", "", "H", "H", "H", ""],
+    "areaSharePct": 0.6958
+  },
+  {
+    "crop": "Cotton",
+    "uf": "MA",
+    "months": ["", "", "P", "P", "", "", "", "", "H", "H", "H", "H"],
+    "areaSharePct": 1.5836
+  },
+  {
+    "crop": "Cotton",
+    "uf": "PI",
+    "months": ["", "", "P", "P", "", "", "", "", "H", "H", "H", ""],
+    "areaSharePct": 1.5597
+  },
+  {
+    "crop": "Cotton",
+    "uf": "CE",
+    "months": ["", "", "", "P", "P", "P", "", "", "H", "H", "H", ""],
+    "areaSharePct": 0.1104
+  },
+  {
+    "crop": "Cotton",
+    "uf": "RN",
+    "months": ["", "", "", "H", "H", "H", "", "", "", "P", "P", ""],
+    "areaSharePct": 0.0576
+  },
+  {
+    "crop": "Cotton",
+    "uf": "PB",
+    "months": ["", "", "", "P", "P", "P", "P", "P", "", "H", "H", "H"],
+    "areaSharePct": 0.024
+  },
+  {
+    "crop": "Cotton",
+    "uf": "BA",
+    "months": ["", "P", "P", "P", "P", "", "", "H", "H", "H", "H", "H"],
+    "areaSharePct": 19.8244
+  },
+  {
+    "crop": "Cotton",
+    "uf": "MT",
+    "months": ["", "", "P", "P", "P", "", "", "", "H", "H", "H", "H"],
+    "areaSharePct": 70.1603
+  },
+  {
+    "crop": "Cotton",
+    "uf": "MS",
+    "months": ["", "P", "P", "P", "", "", "H", "H", "H", "H", "H", ""],
+    "areaSharePct": 1.5213
+  },
+  {
+    "crop": "Cotton",
+    "uf": "GO",
+    "months": ["", "", "", "", "", "", "", "H", "H", "H", "H", "H"],
+    "areaSharePct": 1.4301
+  },
+  {
+    "crop": "Cotton",
+    "uf": "MG",
+    "months": ["", "", "P", "P", "P", "", "", "H", "H", "H", "H", ""],
+    "areaSharePct": 2.1643
+  },
+  {
+    "crop": "Cotton",
+    "uf": "SP",
+    "months": ["P", "P", "P", "", "", "", "H", "H", "H", "H", "", ""],
+    "areaSharePct": 0.3599
+  },
+  {
+    "crop": "Cotton",
+    "uf": "PR",
+    "months": ["", "P", "P", "P", "", "", "H", "H", "H", "H", "", ""],
+    "areaSharePct": 0.0768
+  },
+  {
+    "crop": "Rice",
+    "uf": "RR",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "P", "", "", "H", "H"],
+    "areaSharePct": 0.7611
+  },
+  {
+    "crop": "Rice",
+    "uf": "RO",
+    "months": ["", "P", "P", "P", "", "H", "H", "P", "", "", "", ""],
+    "areaSharePct": 2.518
+  },
+  {
+    "crop": "Rice",
+    "uf": "AC",
+    "months": ["P", "P", "P", "", "H", "H", "H", "", "", "", "", ""],
+    "areaSharePct": 0.2175
+  },
+  {
+    "crop": "Rice",
+    "uf": "AM",
+    "months": ["H", "", "", "P", "P", "P", "", "", "", "", "", ""],
+    "areaSharePct": 0.2632
+  },
+  {
+    "crop": "Rice",
+    "uf": "AP",
+    "months": ["", "", "", "P", "P", "P", "", "H", "H", "H", "", ""],
+    "areaSharePct": 0.0515
+  },
+  {
+    "crop": "Rice",
+    "uf": "PA",
+    "months": ["P", "P", "P", "P", "PH", "PH", "H", "H", "H", "H", "", ""],
+    "areaSharePct": 2.2605
+  },
+  {
+    "crop": "Rice",
+    "uf": "TO",
+    "months": ["P", "P", "P", "PH", "H", "H", "H", "H", "", "", "", ""],
+    "areaSharePct": 7.6399
+  },
+  {
+    "crop": "Rice",
+    "uf": "MA",
+    "months": ["", "P", "P", "P", "P", "H", "H", "H", "", "", "", ""],
+    "areaSharePct": 5.3451
+  },
+  {
+    "crop": "Rice",
+    "uf": "PI",
+    "months": ["", "", "P", "P", "", "", "H", "H", "H", "", "", ""],
+    "areaSharePct": 3.2334
+  },
+  {
+    "crop": "Rice",
+    "uf": "CE",
+    "months": ["", "", "", "P", "P", "P", "", "", "", "H", "H", ""],
+    "areaSharePct": 0.2232
+  },
+  {
+    "crop": "Rice",
+    "uf": "RN",
+    "months": ["", "", "", "P", "P", "P", "", "H", "H", "H", "H", ""],
+    "areaSharePct": 0.0229
+  },
+  {
+    "crop": "Rice",
+    "uf": "PB",
+    "months": ["", "", "", "P", "P", "P", "", "H", "H", "H", "H", ""],
+    "areaSharePct": 0.1545
+  },
+  {
+    "crop": "Rice",
+    "uf": "PE",
+    "months": ["H", "H", "", "", "P", "P", "P", "PH", "H", "H", "H", "H"],
+    "areaSharePct": 0.0114
+  },
+  {
+    "crop": "Rice",
+    "uf": "AL",
+    "months": ["", "P", "P", "H", "H", "H", "", "P", "P", "", "P", "P"],
+    "areaSharePct": 0.1488
+  },
+  {
+    "crop": "Rice",
+    "uf": "SE",
+    "months": ["", "", "H", "PH", "P", "P", "", "", "", "H", "H", "PH"],
+    "areaSharePct": 0.3548
+  },
+  {
+    "crop": "Rice",
+    "uf": "MT",
+    "months": ["", "P", "P", "P", "", "H", "H", "H", "H", "", "", ""],
+    "areaSharePct": 8.3953
+  },
+  {
+    "crop": "Rice",
+    "uf": "MS",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "", "", "", "P", "P"],
+    "areaSharePct": 0.784
+  },
+  {
+    "crop": "Rice",
+    "uf": "GO",
+    "months": ["P", "P", "P", "", "", "H", "H", "H", "", "", "", ""],
+    "areaSharePct": 1.6596
+  },
+  {
+    "crop": "Rice",
+    "uf": "MG",
+    "months": ["P", "P", "P", "", "", "H", "H", "H", "", "", "", ""],
+    "areaSharePct": 1.2705
+  },
+  {
+    "crop": "Rice",
+    "uf": "ES",
+    "months": ["P", "P", "", "", "", "H", "H", "H", "", "", "", ""],
+    "areaSharePct": 0.0057
+  },
+  {
+    "crop": "Rice",
+    "uf": "RJ",
+    "months": ["P", "P", "P", "", "", "H", "H", "H", "", "", "", ""],
+    "areaSharePct": 0.0172
+  },
+  {
+    "crop": "Rice",
+    "uf": "SP",
+    "months": ["P", "P", "P", "", "", "H", "H", "H", "", "", "", "P"],
+    "areaSharePct": 0.4521
+  },
+  {
+    "crop": "Rice",
+    "uf": "PR",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "", "", "", "P"],
+    "areaSharePct": 1.1274
+  },
+  {
+    "crop": "Rice",
+    "uf": "SC",
+    "months": ["P", "P", "", "H", "H", "H", "H", "H", "", "", "", "P"],
+    "areaSharePct": 8.5842
+  },
+  {
+    "crop": "Rice",
+    "uf": "RS",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "", "", "", "P"],
+    "areaSharePct": 54.4752
+  },
+  {
+    "crop": "Beans (1st harvest)",
+    "uf": "AM",
+    "months": ["P", "", "", "H", "H", "", "", "", "", "", "", "P"],
+    "areaSharePct": 0.2422
+  },
+  {
+    "crop": "Beans (1st harvest)",
+    "uf": "PA",
+    "months": ["", "P", "P", "P", "PH", "H", "H", "H", "", "", "", ""],
+    "areaSharePct": 0.3192
+  },
+  {
+    "crop": "Beans (1st harvest)",
+    "uf": "TO",
+    "months": ["", "P", "P", "P", "", "H", "H", "", "", "", "", ""],
+    "areaSharePct": 0.8255
+  },
+  {
+    "crop": "Beans (1st harvest)",
+    "uf": "PI",
+    "months": ["", "", "P", "P", "P", "H", "H", "H", "H", "", "", ""],
+    "areaSharePct": 21.2768
+  },
+  {
+    "crop": "Beans (1st harvest)",
+    "uf": "BA",
+    "months": ["P", "P", "P", "PH", "PH", "H", "H", "H", "", "", "", ""],
+    "areaSharePct": 23.7644
+  },
+  {
+    "crop": "Beans (1st harvest)",
+    "uf": "MA",
+    "months": ["", "", "P", "P", "", "H", "H", "H", "", "", "", ""],
+    "areaSharePct": 1.7942
+  },
+  {
+    "crop": "Beans (1st harvest)",
+    "uf": "MT",
+    "months": ["", "P", "P", "H", "H", "H", "", "", "", "", "", ""],
+    "areaSharePct": 1.1447
+  },
+  {
+    "crop": "Beans (1st harvest)",
+    "uf": "GO",
+    "months": ["P", "P", "", "H", "H", "", "", "", "", "", "", ""],
+    "areaSharePct": 4.7331
+  },
+  {
+    "crop": "Beans (1st harvest)",
+    "uf": "DF",
+    "months": ["P", "P", "", "H", "H", "", "", "", "", "", "", ""],
+    "areaSharePct": 1.2108
+  },
+  {
+    "crop": "Beans (1st harvest)",
+    "uf": "MG",
+    "months": ["P", "P", "P", "H", "H", "H", "", "", "", "", "", ""],
+    "areaSharePct": 14.1332
+  },
+  {
+    "crop": "Beans (1st harvest)",
+    "uf": "ES",
+    "months": ["P", "P", "P", "H", "H", "H", "", "", "", "", "", ""],
+    "areaSharePct": 0.5063
+  },
+  {
+    "crop": "Beans (1st harvest)",
+    "uf": "RJ",
+    "months": ["P", "P", "P", "H", "H", "H", "", "", "", "", "", ""],
+    "areaSharePct": 0.033
+  },
+  {
+    "crop": "Beans (1st harvest)",
+    "uf": "SP",
+    "months": ["", "H", "H", "H", "", "", "", "", "", "P", "P", "P"],
+    "areaSharePct": 4.9532
+  },
+  {
+    "crop": "Beans (1st harvest)",
+    "uf": "PR",
+    "months": ["P", "P", "PH", "H", "H", "H", "", "", "", "", "P", "P"],
+    "areaSharePct": 17.9747
+  },
+  {
+    "crop": "Beans (1st harvest)",
+    "uf": "SC",
+    "months": ["P", "P", "PH", "H", "H", "H", "H", "", "", "", "", "P"],
+    "areaSharePct": 3.5553
+  },
+  {
+    "crop": "Beans (1st harvest)",
+    "uf": "RS",
+    "months": ["P", "P", "PH", "H", "H", "H", "H", "", "", "", "P", "P"],
+    "areaSharePct": 2.9829
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "RO",
+    "months": ["", "", "", "", "", "P", "P", "", "H", "H", "H", ""],
+    "areaSharePct": 0.1428
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "AC",
+    "months": ["", "", "", "", "", "P", "P", "P", "H", "H", "H", ""],
+    "areaSharePct": 0.3785
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "AP",
+    "months": ["", "", "", "", "", "", "P", "P", "P", "H", "H", "H"],
+    "areaSharePct": 0.0786
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "TO",
+    "months": ["", "", "", "", "P", "P", "P", "PH", "H", "H", "H", "H"],
+    "areaSharePct": 4.9846
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "MA",
+    "months": ["", "", "", "", "", "P", "P", "P", "H", "H", "H", ""],
+    "areaSharePct": 2.221
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "PI",
+    "months": ["", "", "", "", "P", "P", "", "H", "H", "H", "", ""],
+    "areaSharePct": 0.4642
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "CE",
+    "months": ["", "", "", "P", "P", "P", "H", "H", "H", "H", "", ""],
+    "areaSharePct": 24.3733
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "RN",
+    "months": ["", "", "", "P", "P", "P", "P", "H", "H", "H", "H", ""],
+    "areaSharePct": 3.335
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "PB",
+    "months": ["", "", "", "", "", "P", "P", "P", "H", "H", "H", "H"],
+    "areaSharePct": 7.2913
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "PE",
+    "months": ["", "", "P", "P", "P", "PH", "H", "H", "H", "", "", ""],
+    "areaSharePct": 6.1415
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "BA",
+    "months": ["", "", "", "", "", "P", "P", "P", "H", "H", "H", "H"],
+    "areaSharePct": 6.7843
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "MT",
+    "months": ["", "", "", "", "P", "P", "P", "H", "H", "H", "H", ""],
+    "areaSharePct": 6.8985
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "MS",
+    "months": ["", "", "", "", "", "P", "P", "", "H", "H", "H", ""],
+    "areaSharePct": 0.4071
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "GO",
+    "months": ["", "", "", "P", "P", "", "H", "H", "H", "", "", ""],
+    "areaSharePct": 1.1569
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "DF",
+    "months": ["", "", "", "P", "P", "P", "H", "H", "P", "", "", ""],
+    "areaSharePct": 0
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "MG",
+    "months": ["", "", "", "", "P", "P", "P", "H", "H", "H", "H", ""],
+    "areaSharePct": 7.1699
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "ES",
+    "months": ["", "", "", "", "P", "P", "P", "H", "H", "H", "", ""],
+    "areaSharePct": 0.3142
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "RJ",
+    "months": ["", "", "", "", "P", "P", "P", "H", "H", "H", "", ""],
+    "areaSharePct": 0.0428
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "SP",
+    "months": ["", "", "", "P", "P", "P", "H", "H", "H", "H", "", ""],
+    "areaSharePct": 1.2354
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "PR",
+    "months": ["", "", "", "P", "P", "P", "H", "H", "H", "H", "", ""],
+    "areaSharePct": 23.4378
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "SC",
+    "months": ["", "", "", "P", "P", "P", "H", "H", "H", "", "", ""],
+    "areaSharePct": 2.0496
+  },
+  {
+    "crop": "Beans (2nd harvest)",
+    "uf": "RS",
+    "months": ["", "", "", "P", "P", "P", "H", "H", "H", "", "", ""],
+    "areaSharePct": 1.0926
+  },
+  {
+    "crop": "Beans (3th harvest)",
+    "uf": "PA",
+    "months": ["H", "", "", "", "", "", "", "P", "P", "P", "H", "H"],
+    "areaSharePct": 4.3391
+  },
+  {
+    "crop": "Beans (3th harvest)",
+    "uf": "TO",
+    "months": ["", "", "", "", "", "", "", "P", "P", "H", "H", "H"],
+    "areaSharePct": 0
+  },
+  {
+    "crop": "Beans (3th harvest)",
+    "uf": "CE",
+    "months": ["", "", "", "", "", "P", "P", "", "", "H", "H", ""],
+    "areaSharePct": 0
+  },
+  {
+    "crop": "Beans (3th harvest)",
+    "uf": "PE",
+    "months": ["", "", "", "", "", "", "P", "P", "P", "H", "H", "H"],
+    "areaSharePct": 18.497
+  },
+  {
+    "crop": "Beans (3th harvest)",
+    "uf": "AL",
+    "months": ["", "", "", "", "", "", "P", "P", "P", "H", "H", "H"],
+    "areaSharePct": 4.764
+  },
+  {
+    "crop": "Beans (3th harvest)",
+    "uf": "SE",
+    "months": ["H", "", "", "", "", "", "P", "P", "P", "", "H", "H"],
+    "areaSharePct": 0.5368
+  },
+  {
+    "crop": "Beans (3th harvest)",
+    "uf": "BA",
+    "months": ["H", "", "", "", "", "", "P", "P", "P", "H", "H", "H"],
+    "areaSharePct": 27.4883
+  },
+  {
+    "crop": "Beans (3th harvest)",
+    "uf": "MT",
+    "months": ["H", "", "", "", "", "", "", "P", "P", "P", "H", "H"],
+    "areaSharePct": 12.7936
+  },
+  {
+    "crop": "Beans (3th harvest)",
+    "uf": "GO",
+    "months": ["", "", "", "", "", "", "P", "P", "P", "H", "H", "H"],
+    "areaSharePct": 13.4198
+  },
+  {
+    "crop": "Beans (3th harvest)",
+    "uf": "DF",
+    "months": ["", "", "", "", "", "", "P", "P", "", "H", "H", "H"],
+    "areaSharePct": 0.8723
+  },
+  {
+    "crop": "Beans (3th harvest)",
+    "uf": "MG",
+    "months": ["H", "", "", "", "", "", "P", "P", "P", "PH", "PH", "PH"],
+    "areaSharePct": 12.7041
+  },
+  {
+    "crop": "Beans (3th harvest)",
+    "uf": "SP",
+    "months": ["H", "", "", "", "", "", "", "P", "P", "", "H", "H"],
+    "areaSharePct": 3.4668
+  },
+  {
+    "crop": "Beans (3th harvest)",
+    "uf": "PR",
+    "months": ["", "", "", "", "", "P", "P", "P", "PH", "H", "H", "H"],
+    "areaSharePct": 0.1118
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "RO",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "", "", "", "P"],
+    "areaSharePct": 0.4269
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "AC",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "", "", "", ""],
+    "areaSharePct": 0.7874
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "AM",
+    "months": ["P", "P", "", "H", "H", "H", "", "", "", "", "P", "P"],
+    "areaSharePct": 0.2201
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "PA",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "H", "", "", ""],
+    "areaSharePct": 5.9098
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "TO",
+    "months": ["", "P", "P", "P", "", "H", "H", "H", "H", "", "", ""],
+    "areaSharePct": 1.5563
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "MA",
+    "months": ["", "P", "P", "P", "", "", "H", "H", "H", "H", "H", ""],
+    "areaSharePct": 7.8824
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "PI",
+    "months": ["", "P", "P", "P", "", "", "H", "H", "H", "H", "H", ""],
+    "areaSharePct": 9.68
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "BA",
+    "months": ["P", "P", "P", "P", "H", "H", "H", "H", "H", "H", "H", ""],
+    "areaSharePct": 9.3247
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "MT",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "", "", "", ""],
+    "areaSharePct": 1.9275
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "MS",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "", "", "", "P"],
+    "areaSharePct": 0.2704
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "GO",
+    "months": ["P", "P", "P", "", "", "H", "H", "H", "H", "", "", "P"],
+    "areaSharePct": 3.9505
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "DF",
+    "months": ["P", "P", "", "", "H", "H", "H", "", "", "", "", "P"],
+    "areaSharePct": 0.411
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "MG",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "H", "", "", ""],
+    "areaSharePct": 16.4117
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "ES",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "", "", "", ""],
+    "areaSharePct": 0.3659
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "RJ",
+    "months": ["P", "P", "P", "", "H", "H", "H", "H", "", "", "", ""],
+    "areaSharePct": 0.0424
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "PR",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "H", "", "", "", "P"],
+    "areaSharePct": 7.1798
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "SC",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "H", "", "", "P", "P"],
+    "areaSharePct": 7.6385
+  },
+  {
+    "crop": "Corn (1st harvest)",
+    "uf": "RS",
+    "months": ["P", "P", "PH", "PH", "H", "H", "H", "H", "H", "", "P", "P"],
+    "areaSharePct": 18.9702
+  },
+  {
+    "crop": "Corn (2nd harvest)",
+    "uf": "RO",
+    "months": ["", "", "", "P", "P", "P", "", "", "H", "H", "H", ""],
+    "areaSharePct": 2.7861
+  },
+  {
+    "crop": "Corn (2nd harvest)",
+    "uf": "TO",
+    "months": ["", "", "", "P", "P", "P", "", "", "H", "H", "H", ""],
+    "areaSharePct": 2.3716
+  },
+  {
+    "crop": "Corn (2nd harvest)",
+    "uf": "MA",
+    "months": ["", "", "", "", "P", "P", "", "", "H", "H", "H", ""],
+    "areaSharePct": 1.6318
+  },
+  {
+    "crop": "Corn (2nd harvest)",
+    "uf": "PI",
+    "months": ["", "", "", "", "", "P", "P", "H", "H", "H", "H", "H"],
+    "areaSharePct": 0.5617
+  },
+  {
+    "crop": "Corn (2nd harvest)",
+    "uf": "PE",
+    "months": ["", "", "P", "P", "P", "P", "H", "H", "H", "H", "", ""],
+    "areaSharePct": 0.7613
+  },
+  {
+    "crop": "Corn (2nd harvest)",
+    "uf": "CE",
+    "months": ["", "", "", "P", "P", "P", "H", "H", "H", "H", "H", "H"],
+    "areaSharePct": 3.4476
+  },
+  {
+    "crop": "Corn (2nd harvest)",
+    "uf": "RN",
+    "months": ["", "", "", "", "P", "P", "P", "", "H", "H", "H", "H"],
+    "areaSharePct": 0.3713
+  },
+  {
+    "crop": "Corn (2nd harvest)",
+    "uf": "PB",
+    "months": ["H", "", "", "P", "P", "P", "P", "P", "", "", "", ""],
+    "areaSharePct": 0.6843
+  },
+  {
+    "crop": "Corn (2nd harvest)",
+    "uf": "BA",
+    "months": ["", "", "", "", "", "P", "", "", "", "H", "H", ""],
+    "areaSharePct": 0.2919
+  },
+  {
+    "crop": "Corn (2nd harvest)",
+    "uf": "MT",
+    "months": ["", "", "", "P", "P", "P", "", "H", "H", "H", "H", ""],
+    "areaSharePct": 41.6332
+  },
+  {
+    "crop": "Corn (2nd harvest)",
+    "uf": "MS",
+    "months": ["", "", "", "P", "P", "P", "", "", "H", "H", "H", "H"],
+    "areaSharePct": 12.0937
+  },
+  {
+    "crop": "Corn (2nd harvest)",
+    "uf": "GO",
+    "months": ["", "", "", "P", "P", "", "", "", "H", "H", "H", ""],
+    "areaSharePct": 9.6877
+  },
+  {
+    "crop": "Corn (2nd harvest)",
+    "uf": "DF",
+    "months": ["H", "H", "", "", "P", "P", "P", "", "H", "H", "H", "H"],
+    "areaSharePct": 0.2376
+  },
+  {
+    "crop": "Corn (2nd harvest)",
+    "uf": "MG",
+    "months": ["", "", "", "P", "P", "P", "", "", "H", "H", "H", ""],
+    "areaSharePct": 2.7049
+  },
+  {
+    "crop": "Corn (2nd harvest)",
+    "uf": "SP",
+    "months": ["", "", "", "", "P", "P", "P", "", "H", "H", "H", "H"],
+    "areaSharePct": 2.7972
+  },
+  {
+    "crop": "Corn (2nd harvest)",
+    "uf": "PR",
+    "months": ["", "", "", "P", "P", "P", "P", "H", "H", "H", "H", "H"],
+    "areaSharePct": 16.1654
+  },
+  {
+    "crop": "Corn (3th harvest)",
+    "uf": "AP",
+    "months": ["", "", "", "", "P", "P", "P", "P", "H", "H", "H", "H"],
+    "areaSharePct": 0.3488
+  },
+  {
+    "crop": "Corn (3th harvest)",
+    "uf": "RR",
+    "months": ["H", "H", "", "", "", "", "", "P", "P", "", "", ""],
+    "areaSharePct": 1.3649
+  },
+  {
+    "crop": "Corn (3th harvest)",
+    "uf": "AL",
+    "months": ["H", "H", "", "", "", "", "P", "P", "P", "", "H", "H"],
+    "areaSharePct": 8.2044
+  },
+  {
+    "crop": "Corn (3th harvest)",
+    "uf": "BA",
+    "months": ["H", "H", "H", "", "", "", "P", "P", "P", "H", "H", "H"],
+    "areaSharePct": 52.2596
+  },
+  {
+    "crop": "Corn (3th harvest)",
+    "uf": "PE",
+    "months": ["H", "", "", "", "", "P", "P", "P", "P", "H", "H", "H"],
+    "areaSharePct": 9.9788
+  },
+  {
+    "crop": "Corn (3th harvest)",
+    "uf": "SE",
+    "months": ["H", "H", "H", "", "", "", "P", "P", "P", "", "H", "H"],
+    "areaSharePct": 27.8435
+  },
+  {
+    "crop": "Soybean",
+    "uf": "RR",
+    "months": ["H", "", "", "", "", "", "P", "P", "P", "", "H", "H"],
+    "areaSharePct": 0.2478
+  },
+  {
+    "crop": "Soybean",
+    "uf": "RO",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "", "", "", "", ""],
+    "areaSharePct": 1.4575
+  },
+  {
+    "crop": "Soybean",
+    "uf": "PA",
+    "months": ["P", "P", "P", "P", "PH", "PH", "PH", "H", "H", "H", "H", ""],
+    "areaSharePct": 2.6469
+  },
+  {
+    "crop": "Soybean",
+    "uf": "TO",
+    "months": ["P", "P", "P", "", "P", "P", "P", "P", "", "", "", ""],
+    "areaSharePct": 3.2857
+  },
+  {
+    "crop": "Soybean",
+    "uf": "AP",
+    "months": ["", "", "", "", "P", "P", "P", "P", "H", "H", "H", ""],
+    "areaSharePct": 0.021
+  },
+  {
+    "crop": "Soybean",
+    "uf": "MA",
+    "months": ["P", "P", "P", "PH", "PH", "H", "H", "H", "H", "", "", ""],
+    "areaSharePct": 3.0161
+  },
+  {
+    "crop": "Soybean",
+    "uf": "PI",
+    "months": ["P", "P", "P", "P", "H", "H", "H", "H", "", "", "", ""],
+    "areaSharePct": 2.3058
+  },
+  {
+    "crop": "Soybean",
+    "uf": "AL",
+    "months": ["H", "", "", "", "", "", "P", "P", "", "", "", "H"],
+    "areaSharePct": 0.0145
+  },
+  {
+    "crop": "Soybean",
+    "uf": "BA",
+    "months": ["P", "P", "P", "PH", "H", "H", "H", "H", "", "", "", ""],
+    "areaSharePct": 4.4852
+  },
+  {
+    "crop": "Soybean",
+    "uf": "MT",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "", "", "", "", "P"],
+    "areaSharePct": 26.7536
+  },
+  {
+    "crop": "Soybean",
+    "uf": "MS",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "", "", "", "", "P"],
+    "areaSharePct": 8.9329
+  },
+  {
+    "crop": "Soybean",
+    "uf": "GO",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "", "", "", "", ""],
+    "areaSharePct": 10.4058
+  },
+  {
+    "crop": "Soybean",
+    "uf": "DF",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "", "", "", "", ""],
+    "areaSharePct": 0.1857
+  },
+  {
+    "crop": "Soybean",
+    "uf": "MG",
+    "months": ["P", "P", "P", "H", "H", "H", "H", "", "", "", "", ""],
+    "areaSharePct": 4.8896
+  },
+  {
+    "crop": "Soybean",
+    "uf": "SP",
+    "months": ["P", "P", "P", "", "H", "H", "H", "", "", "", "", "P"],
+    "areaSharePct": 2.847
+  },
+  {
+    "crop": "Soybean",
+    "uf": "PR",
+    "months": ["P", "P", "P", "PH", "H", "H", "H", "H", "", "", "", "P"],
+    "areaSharePct": 12.3136
+  },
+  {
+    "crop": "Soybean",
+    "uf": "SC",
+    "months": ["P", "P", "P", "P", "H", "H", "H", "H", "", "", "", "P"],
+    "areaSharePct": 1.7217
+  },
+  {
+    "crop": "Soybean",
+    "uf": "RS",
+    "months": ["P", "P", "P", "P", "H", "H", "H", "H", "", "", "", ""],
+    "areaSharePct": 14.3921
+  },
+  {
+    "crop": "Wheat",
+    "uf": "BA",
+    "months": ["H", "", "", "", "", "", "", "", "P", "", "", ""],
+    "areaSharePct": 0.1959
+  },
+  {
+    "crop": "Wheat",
+    "uf": "MS",
+    "months": ["", "", "", "", "", "", "P", "P", "", "", "H", "H"],
+    "areaSharePct": 1.4378
+  },
+  {
+    "crop": "Wheat",
+    "uf": "GO",
+    "months": ["", "", "", "", "", "P", "", "P", "H", "", "H", "H"],
+    "areaSharePct": 3.3301
+  },
+  {
+    "crop": "Wheat",
+    "uf": "DF",
+    "months": ["", "", "", "", "", "P", "P", "P", "", "H", "H", "H"],
+    "areaSharePct": 0.2821
+  },
+  {
+    "crop": "Wheat",
+    "uf": "MG",
+    "months": ["", "", "", "", "", "", "P", "", "", "", "H", "H"],
+    "areaSharePct": 5.9667
+  },
+  {
+    "crop": "Wheat",
+    "uf": "SP",
+    "months": ["H", "", "", "", "", "", "P", "P", "", "", "", "H"],
+    "areaSharePct": 4.5054
+  },
+  {
+    "crop": "Wheat",
+    "uf": "PR",
+    "months": ["H", "H", "", "", "", "", "P", "P", "P", "P", "H", "H"],
+    "areaSharePct": 32.6699
+  },
+  {
+    "crop": "Wheat",
+    "uf": "SC",
+    "months": ["H", "H", "H", "", "", "", "", "P", "P", "P", "", ""],
+    "areaSharePct": 4.5054
+  },
+  {
+    "crop": "Wheat",
+    "uf": "RS",
+    "months": ["H", "H", "H", "", "", "", "", "P", "P", "P", "", ""],
+    "areaSharePct": 47.1068
+  }
+]

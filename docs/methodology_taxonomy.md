@@ -23,7 +23,7 @@ The dashboard previously treated **`Machine Learning`** and
 Machine Learning   ← peers? ────   Deep Learning
 ```
 
-This is a **category error**: Deep Learning is a *subset* of Machine Learning
+This is a **category error**: Deep Learning is a _subset_ of Machine Learning
 (every neural network is a machine-learning model). Placing them side by side
 means the buckets are **not mutually exclusive**, so an initiative that uses
 both could land in either one, and the pie chart double-counted a concept it
@@ -42,13 +42,13 @@ instead of a false `{ML, DL}` peer partition.
 
 The flat MECE leaves, in canonical order (`LEAVES`):
 
-| Leaf | Role |
-|------|------|
-| `Shallow ML` | Classical / "raso" machine learning |
-| `Deep Learning` | Neural-network based methods |
-| `Hybrid` | Two or more families detected (single display label) |
-| `Visual Interpretation` | Human/photo interpretation |
-| `Statistical / Spectral` | Statistical and spectral-mixture methods *(reserve)* |
+| Leaf                     | Role                                                 |
+| ------------------------ | ---------------------------------------------------- |
+| `Shallow ML`             | Classical / "raso" machine learning                  |
+| `Deep Learning`          | Neural-network based methods                         |
+| `Hybrid`                 | Two or more families detected (single display label) |
+| `Visual Interpretation`  | Human/photo interpretation                           |
+| `Statistical / Spectral` | Statistical and spectral-mixture methods _(reserve)_ |
 
 Every initiative lands in exactly one leaf (mutually exclusive), and the five
 leaves cover every possible input (collectively exhaustive), so each chart is
@@ -62,7 +62,7 @@ Each leaf has a stable colour in `METHODOLOGY_COLORS`.
 
 ## 3. Vocabulary
 
-- **`Shallow ML`** — classical / *raso* machine learning: random forest,
+- **`Shallow ML`** — classical / _raso_ machine learning: random forest,
   gradient boosting, decision/regression trees, SVM, k-NN, CatBoost/XGBoost,
   etc. It is the explicit name for the **non-deep** branch; it is not a claim
   that Deep Learning is a sibling of Machine Learning.
@@ -70,8 +70,8 @@ Each leaf has a stable colour in `METHODOLOGY_COLORS`.
   when the rule engine detects **two or more families**. The component
   families are stored internally on `MethodologyResult.families` and exposed
   in the derived `Methodology Components` column (pipe-joined, sorted), but
-  `Hybrid` is always rendered as a **single label**. The words *"hybrid"* and
-  *"combined"* are deliberately **not** dictionary terms, so a free text that
+  `Hybrid` is always rendered as a **single label**. The words _"hybrid"_ and
+  _"combined"_ are deliberately **not** dictionary terms, so a free text that
   merely says "Combined" (with no recognisable technique) matches no family and
   has **no label** — it is never assumed to be mixed.
 - **No `Unclassified` leaf** — the taxonomy has five leaves only. When no
@@ -109,21 +109,21 @@ Each leaf has a stable colour in `METHODOLOGY_COLORS`.
 
 ### Worked examples
 
-| Input (`classification_method`) | Matched families | Result |
-|---|---|---|
-| `"Supervised Random Forest and Deep Learning"` | `Shallow ML` + `Deep Learning` | **`Hybrid`** |
-| `"Statistical Methods"` | `Statistical / Spectral` | **`Statistical / Spectral`** |
-| `"CNN + visual interpretation"` | `Deep Learning` + `Visual Interpretation` | **`Hybrid`** |
-| `"Machine Learning"` | `Shallow ML` | **`Shallow ML`** |
+| Input (`classification_method`)                | Matched families                          | Result                       |
+| ---------------------------------------------- | ----------------------------------------- | ---------------------------- |
+| `"Supervised Random Forest and Deep Learning"` | `Shallow ML` + `Deep Learning`            | **`Hybrid`**                 |
+| `"Statistical Methods"`                        | `Statistical / Spectral`                  | **`Statistical / Spectral`** |
+| `"CNN + visual interpretation"`                | `Deep Learning` + `Visual Interpretation` | **`Hybrid`**                 |
+| `"Machine Learning"`                           | `Shallow ML`                              | **`Shallow ML`**             |
 
 ### Span-suppression edge cases
 
-| Input | Walk | Result |
-|---|---|---|
-| `"Gradient Boosting on decision trees"` | `gradient boosting` (Shallow) + `decision trees` (Shallow); the stem `regression` never fires | `Shallow ML` |
-| `"regression tree"` | `regression tree` (Shallow) consumes the span; the shorter `regression` (Statistical) is skipped | `Shallow ML` only — no false `Hybrid` |
-| `"decision trees"` | `decision trees` consumes the span; `decision tree` is skipped | `Shallow ML` |
-| `""` / `None` / `"Combined"` | no family matched | **no label** (`label is None`; generation fails loudly) |
+| Input                                   | Walk                                                                                             | Result                                                  |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------- |
+| `"Gradient Boosting on decision trees"` | `gradient boosting` (Shallow) + `decision trees` (Shallow); the stem `regression` never fires    | `Shallow ML`                                            |
+| `"regression tree"`                     | `regression tree` (Shallow) consumes the span; the shorter `regression` (Statistical) is skipped | `Shallow ML` only — no false `Hybrid`                   |
+| `"decision trees"`                      | `decision trees` consumes the span; `decision tree` is skipped                                   | `Shallow ML`                                            |
+| `""` / `None` / `"Combined"`            | no family matched                                                                                | **no label** (`label is None`; generation fails loudly) |
 
 ---
 
@@ -133,12 +133,12 @@ Each leaf has a stable colour in `METHODOLOGY_COLORS`.
 **single place** a methodology term is defined. Terms are stored **normalised**
 (lowercase, hyphens and other punctuation already collapsed to single spaces).
 
-| Family | Terms |
-|---|---|
-| `Shallow ML` | random forest, gradient boosting, gradient boost, decision trees, decision tree, regression trees, regression tree, catboost, xgboost, support vector, svm, k nearest, knn, machine learning, supervised machine learning, rf |
-| `Deep Learning` | deep learning, neural networks, neural network, convolutional, cnn, u net, unet, resnet, transformer, lstm, rnn, fcn, gan |
-| `Visual Interpretation` | visual interpretation, photo interpretation, photointerpretation, manual |
-| `Statistical / Spectral` | spectral mixture, mixture model, bhattacharyya, bhattacharya, maximum likelihood, statistical, pca, regression |
+| Family                   | Terms                                                                                                                                                                                                                         |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Shallow ML`             | random forest, gradient boosting, gradient boost, decision trees, decision tree, regression trees, regression tree, catboost, xgboost, support vector, svm, k nearest, knn, machine learning, supervised machine learning, rf |
+| `Deep Learning`          | deep learning, neural networks, neural network, convolutional, cnn, u net, unet, resnet, transformer, lstm, rnn, fcn, gan                                                                                                     |
+| `Visual Interpretation`  | visual interpretation, photo interpretation, photointerpretation, manual                                                                                                                                                      |
+| `Statistical / Spectral` | spectral mixture, mixture model, bhattacharyya, bhattacharya, maximum likelihood, statistical, pca, regression                                                                                                                |
 
 **Maintenance contract**
 
@@ -153,18 +153,18 @@ Each leaf has a stable colour in `METHODOLOGY_COLORS`.
 
 ### Public API
 
-| Name | Kind | Purpose |
-|---|---|---|
-| `LEAVES` | constant | Canonical ordered tuple of the five leaves |
-| `HYBRID` | constant | `"Hybrid"` (no `Unclassified` constant — no such leaf) |
-| `METHODOLOGY_COLORS` | constant | Stable colour per leaf |
-| `TERM_FAMILIES` | constant | Dictionary of record |
-| `normalize(text)` | function | Canonical text form |
-| `match_families(text)` | function | `(families, matched_terms)` |
-| `classify(text)` | function | `MethodologyResult` (frozen dataclass) |
-| `canonical_label(value)` | function | Idempotent leaf for a value that may already be a leaf |
-| `label_counts(source)` | function | MECE counts from a DataFrame/Series/iterable |
-| `membership(source)` | function | leaf → frozenset of member identifiers |
+| Name                     | Kind     | Purpose                                                    |
+| ------------------------ | -------- | ---------------------------------------------------------- |
+| `LEAVES`                 | constant | Canonical ordered tuple of the five leaves                 |
+| `HYBRID`                 | constant | `"Hybrid"` (no `Unclassified` constant — no such leaf)     |
+| `METHODOLOGY_COLORS`     | constant | Stable colour per leaf                                     |
+| `TERM_FAMILIES`          | constant | Dictionary of record                                       |
+| `normalize(text)`        | function | Canonical text form                                        |
+| `match_families(text)`   | function | `(families, matched_terms)`                                |
+| `classify(text)`         | function | `MethodologyResult` (frozen dataclass)                     |
+| `canonical_label(value)` | function | Idempotent leaf for a value that may already be a leaf     |
+| `label_counts(source)`   | function | MECE counts from a DataFrame/Series/iterable               |
+| `membership(source)`     | function | leaf → frozenset of member identifiers                     |
 | `present_leaves(counts)` | function | Display helper: leaves with `count > 0`, in `LEAVES` order |
 
 `canonical_label()` makes the aggregate helpers idempotent: a value that is
@@ -177,11 +177,11 @@ column can be fed back through `label_counts()` / `membership()` without
 
 ## 6. Single source of truth
 
-| Layer | Artifact | Authority |
-|---|---|---|
-| **Rule engine (SSoT)** | `dashboard/components/shared/methodology_taxonomy.py` | Owns the leaves, the dictionary and the decision rule |
-| **Source free text** | `data/json/initiatives_metadata.jsonc` → `classification_method` | **Authoritative** for what each initiative actually does |
-| **Generated outputs** | `data/processed/initiatives_processed.csv`, `metadata_processed.json`, `auxiliary_data.json`, `validation_report.json` | Derived — **never hand-edited** |
+| Layer                  | Artifact                                                                                                               | Authority                                                |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| **Rule engine (SSoT)** | `dashboard/components/shared/methodology_taxonomy.py`                                                                  | Owns the leaves, the dictionary and the decision rule    |
+| **Source free text**   | `data/json/initiatives_metadata.jsonc` → `classification_method`                                                       | **Authoritative** for what each initiative actually does |
+| **Generated outputs**  | `data/processed/initiatives_processed.csv`, `metadata_processed.json`, `auxiliary_data.json`, `validation_report.json` | Derived — **never hand-edited**                          |
 
 - `data/json/initiatives_metadata.jsonc` is the authority for the free-text
   method. Its `methodology` field is **machine-managed**: it is set to the
@@ -208,23 +208,23 @@ Final leaves after regeneration: `Shallow ML` 4 · `Deep Learning` 2 ·
 `Hybrid` 7 · `Visual Interpretation` 2 · `Statistical / Spectral` 0
 (5 leaves; no `Unclassified`).
 
-| # | Initiative (acronym) | `classification_method` | Final leaf | Rationale |
-|---|---|---|---|---|
-| 1 | Copernicus Global Land Cover Service (CGLS) | Supervised Random Forest | `Shallow ML` | Random forest = classical (shallow) ML |
-| 2 | Google Dynamic World V1 (GDW) | Deep Learning | `Deep Learning` | Deep-learning classifier |
-| 3 | ESRI-10m Annual LULC | Convolutional Neural Network | `Deep Learning` | CNN = deep |
-| 4 | Global LULC change 2000 and 2020 (UMD-GLC) | Decision/Regression Trees and U-Net CNN | `Hybrid` | Decision/regression trees (shallow) **+** U-Net CNN (deep) |
-| 5 | Global Pasture Watch (GPW) | Supervised Machine Learning | `Shallow ML` | Classical supervised ensembles (RF, GBT);¹ see note below |
-| 6 | South America Soybean Maps (UMD-SASM) | Regression, Visual Interpretation, and Decision Trees | `Hybrid` | Regression + visual interpretation + decision trees (Song et al., 2021)² |
-| 7 | WorldCover 10m 2021 (ESA-WC) | Gradient Boosting Decision Tree Algorithm | `Shallow ML` | Gradient-boosted trees |
-| 8 | WorldCereal | Gradient Boosting on decision trees | `Shallow ML` | Gradient boosting + decision trees |
-| 9 | PRODES | Visual Interpretation | `Visual Interpretation` | Human visual interpretation |
-| 10 | DETER | Visual Interpretation and Spectral Mixture Model | `Hybrid` | Visual interpretation + spectral mixture |
-| 11 | TerraClass Amazônia | Visual Interpretation, Supervised Bhattacharya Classification, and Deep Learning | `Hybrid` | Visual + Bhattacharya (spectral) + deep learning |
-| 12 | TerraClass Cerrado | Visual Interpretation, Supervised Bhattacharya Classification, and Deep Learning | `Hybrid` | Visual + Bhattacharya (spectral) + deep learning |
-| 13 | MapBiomas | Supervised Random Forest and Deep Learning | `Hybrid` | Random forest (shallow) + deep learning |
-| 14 | IBGE Monitoring Land Cover and Land Use (IBGE-MLCU) | Visual Interpretation | `Visual Interpretation` | Human visual interpretation |
-| 15 | National Supply Company Agricultural Mapping (CONAB-AM) | Machine Learning, Statistical Methods, Visual Interpretation | `Hybrid` | Shallow ML + statistical + visual interpretation |
+| #   | Initiative (acronym)                                    | `classification_method`                                                          | Final leaf              | Rationale                                                                |
+| --- | ------------------------------------------------------- | -------------------------------------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------ |
+| 1   | Copernicus Global Land Cover Service (CGLS)             | Supervised Random Forest                                                         | `Shallow ML`            | Random forest = classical (shallow) ML                                   |
+| 2   | Google Dynamic World V1 (GDW)                           | Deep Learning                                                                    | `Deep Learning`         | Deep-learning classifier                                                 |
+| 3   | ESRI-10m Annual LULC                                    | Convolutional Neural Network                                                     | `Deep Learning`         | CNN = deep                                                               |
+| 4   | Global LULC change 2000 and 2020 (UMD-GLC)              | Decision/Regression Trees and U-Net CNN                                          | `Hybrid`                | Decision/regression trees (shallow) **+** U-Net CNN (deep)               |
+| 5   | Global Pasture Watch (GPW)                              | Supervised Machine Learning                                                      | `Shallow ML`            | Classical supervised ensembles (RF, GBT);¹ see note below                |
+| 6   | South America Soybean Maps (UMD-SASM)                   | Regression, Visual Interpretation, and Decision Trees                            | `Hybrid`                | Regression + visual interpretation + decision trees (Song et al., 2021)² |
+| 7   | WorldCover 10m 2021 (ESA-WC)                            | Gradient Boosting Decision Tree Algorithm                                        | `Shallow ML`            | Gradient-boosted trees                                                   |
+| 8   | WorldCereal                                             | Gradient Boosting on decision trees                                              | `Shallow ML`            | Gradient boosting + decision trees                                       |
+| 9   | PRODES                                                  | Visual Interpretation                                                            | `Visual Interpretation` | Human visual interpretation                                              |
+| 10  | DETER                                                   | Visual Interpretation and Spectral Mixture Model                                 | `Hybrid`                | Visual interpretation + spectral mixture                                 |
+| 11  | TerraClass Amazônia                                     | Visual Interpretation, Supervised Bhattacharya Classification, and Deep Learning | `Hybrid`                | Visual + Bhattacharya (spectral) + deep learning                         |
+| 12  | TerraClass Cerrado                                      | Visual Interpretation, Supervised Bhattacharya Classification, and Deep Learning | `Hybrid`                | Visual + Bhattacharya (spectral) + deep learning                         |
+| 13  | MapBiomas                                               | Supervised Random Forest and Deep Learning                                       | `Hybrid`                | Random forest (shallow) + deep learning                                  |
+| 14  | IBGE Monitoring Land Cover and Land Use (IBGE-MLCU)     | Visual Interpretation                                                            | `Visual Interpretation` | Human visual interpretation                                              |
+| 15  | National Supply Company Agricultural Mapping (CONAB-AM) | Machine Learning, Statistical Methods, Visual Interpretation                     | `Hybrid`                | Shallow ML + statistical + visual interpretation                         |
 
 ¹ GPW's `algorithm` field additionally mentions an artificial neural network
 (RF, gradient-boosted trees, ANN), but the authoritative
@@ -232,8 +232,8 @@ Final leaves after regeneration: `Shallow ML` 4 · `Deep Learning` 2 ·
 matches only the shallow family. The engine deliberately classifies
 `classification_method`.
 
-² **Song, X.-P., Hansen, M.C., Potapov, P., et al. (2021).** *Massive soybean
-expansion in South America since 2000 and implications for conservation.*
+² **Song, X.-P., Hansen, M.C., Potapov, P., et al. (2021).** _Massive soybean
+expansion in South America since 2000 and implications for conservation._
 **Nature Sustainability, 4, 784–792.** DOI:
 [10.1038/s41893-021-00729-z](https://doi.org/10.1038/s41893-021-00729-z)
 (UMD-SASM was the only initiative without a reference; this was added to the
@@ -271,11 +271,11 @@ source JSONC.)
 
 ### Change log
 
-| Date | Change |
-|---|---|
+| Date       | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-09-22 | Replaced the flat `{Machine Learning, Deep Learning}` peer buckets (plus `Combined`/`Other`/`Unknown` tail) with the MECE taxonomy and a single shared rule engine. Renamed the non-deep bucket to `Shallow ML`; `Hybrid` is now derived from ≥2 families. Added `dashboard/components/shared/methodology_taxonomy.py`; deleted the duplicated keyword lists in `scripts/data_generation/lulc_data_engine.py` and `scripts/utilities/json_interpreter.py`. Curated UMD-GLC and UMD-SASM and added UMD-SASM's missing reference. Regenerated `data/processed/*`. |
-| 2026-09-22 | Added `present_leaves(counts)` and updated the display contract: zero-count leaves are no longer rendered (no empty `0%` slice/tile), while the model still retained all six leaves. |
-| 2026-09-22 | **Removed the `Unclassified` leaf** — the taxonomy is now 5 leaves. `classify()` returns `label=None` when no family matches and the data pipeline (`json_interpreter.py`, `lulc_data_engine.py`) **fails loudly** with a `ValueError` naming the initiative and raw `classification_method`. `label_counts()` / `membership()` iterate the 5 `LEAVES` and ignore `None`. All 15 initiatives still classify (counts unchanged). |
+| 2026-09-22 | Added `present_leaves(counts)` and updated the display contract: zero-count leaves are no longer rendered (no empty `0%` slice/tile), while the model still retained all six leaves.                                                                                                                                                                                                                                                                                                                                                                            |
+| 2026-09-22 | **Removed the `Unclassified` leaf** — the taxonomy is now 5 leaves. `classify()` returns `label=None` when no family matches and the data pipeline (`json_interpreter.py`, `lulc_data_engine.py`) **fails loudly** with a `ValueError` naming the initiative and raw `classification_method`. `label_counts()` / `membership()` iterate the 5 `LEAVES` and ignore `None`. All 15 initiatives still classify (counts unchanged).                                                                                                                                 |
 
 ### How to add an initiative
 

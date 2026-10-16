@@ -1,0 +1,258 @@
+{
+  "metadata": {
+    "source": "CONAB - Portal de Informações Agropecuárias",
+    "url": "https://portaldeinformacoes.conab.gov.br/mapeamentos-agricolas-downloads.html",
+    "description": "Mapeamentos Agrícolas - Dados Geoespaciais de Culturas",
+    "data_type": "mapped",
+    "format": "Shapefiles, GeoJSON, Raster",
+    "coverage": "Brasil",
+    "last_update": "2025-08-08T15:00:22.397851",
+    "spatial_resolution": "30m",
+    "temporal_coverage": "2020-2024"
+  },
+  "crops_mapping": {
+    "soja": {
+      "name": "Soja",
+      "scientific_name": "Glycine max",
+      "mapping_years": [
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024"
+      ],
+      "total_area_mapped_2024": 43850,
+      "main_regions": [
+        "Centro-Oeste",
+        "Sul"
+      ],
+      "accuracy": 0.92,
+      "data_sources": [
+        "Sentinel-2",
+        "Landsat-8",
+        "MODIS"
+      ],
+      "mapping_method": "Machine Learning + Visual Interpretation"
+    },
+    "milho_primeira_safra": {
+      "name": "Milho 1ª Safra",
+      "scientific_name": "Zea mays",
+      "mapping_years": [
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024"
+      ],
+      "total_area_mapped_2024": 4680,
+      "main_regions": [
+        "Sul",
+        "Sudeste"
+      ],
+      "accuracy": 0.89,
+      "data_sources": [
+        "Sentinel-2",
+        "Landsat-8"
+      ],
+      "mapping_method": "Temporal Analysis + NDVI"
+    },
+    "milho_segunda_safra": {
+      "name": "Milho 2ª Safra (Safrinha)",
+      "scientific_name": "Zea mays",
+      "mapping_years": [
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024"
+      ],
+      "total_area_mapped_2024": 16890,
+      "main_regions": [
+        "Centro-Oeste",
+        "Nordeste"
+      ],
+      "accuracy": 0.87,
+      "data_sources": [
+        "Sentinel-2",
+        "MODIS"
+      ],
+      "mapping_method": "Multi-temporal Analysis"
+    },
+    "algodao": {
+      "name": "Algodão",
+      "scientific_name": "Gossypium hirsutum",
+      "mapping_years": [
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024"
+      ],
+      "total_area_mapped_2024": 1690,
+      "main_regions": [
+        "Centro-Oeste",
+        "Nordeste"
+      ],
+      "accuracy": 0.94,
+      "data_sources": [
+        "Sentinel-2",
+        "Landsat-8"
+      ],
+      "mapping_method": "Phenology-based Classification"
+    },
+    "cana_acucar": {
+      "name": "Cana-de-açúcar",
+      "scientific_name": "Saccharum officinarum",
+      "mapping_years": [
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024"
+      ],
+      "total_area_mapped_2024": 8950,
+      "main_regions": [
+        "Sudeste",
+        "Centro-Oeste"
+      ],
+      "accuracy": 0.91,
+      "data_sources": [
+        "Sentinel-2",
+        "Landsat-8",
+        "SPOT"
+      ],
+      "mapping_method": "Multi-sensor Fusion"
+    }
+  },
+  "regional_mapping_stats": {
+    "centro_oeste": {
+      "name": "Centro-Oeste",
+      "states": [
+        "MT",
+        "MS",
+        "GO",
+        "DF"
+      ],
+      "total_mapped_area_2024": 35720,
+      "main_crops_mapped": [
+        "soja",
+        "milho_segunda_safra",
+        "algodao"
+      ],
+      "mapping_accuracy": 0.91,
+      "coverage_percentage": 78.5
+    },
+    "sul": {
+      "name": "Sul",
+      "states": [
+        "RS",
+        "SC",
+        "PR"
+      ],
+      "total_mapped_area_2024": 18650,
+      "main_crops_mapped": [
+        "soja",
+        "milho_primeira_safra"
+      ],
+      "mapping_accuracy": 0.89,
+      "coverage_percentage": 82.3
+    },
+    "sudeste": {
+      "name": "Sudeste",
+      "states": [
+        "SP",
+        "MG",
+        "RJ",
+        "ES"
+      ],
+      "total_mapped_area_2024": 12340,
+      "main_crops_mapped": [
+        "cana_acucar",
+        "soja"
+      ],
+      "mapping_accuracy": 0.9,
+      "coverage_percentage": 76.8
+    },
+    "nordeste": {
+      "name": "Nordeste",
+      "states": [
+        "BA",
+        "PE",
+        "CE",
+        "MA",
+        "PI",
+        "PB",
+        "RN",
+        "AL",
+        "SE"
+      ],
+      "total_mapped_area_2024": 8920,
+      "main_crops_mapped": [
+        "algodao",
+        "milho_segunda_safra",
+        "soja"
+      ],
+      "mapping_accuracy": 0.88,
+      "coverage_percentage": 71.2
+    }
+  },
+  "temporal_evolution": {
+    "2020": {
+      "total_mapped_area": 68450,
+      "accuracy": 0.85
+    },
+    "2021": {
+      "total_mapped_area": 71230,
+      "accuracy": 0.87
+    },
+    "2022": {
+      "total_mapped_area": 73890,
+      "accuracy": 0.89
+    },
+    "2023": {
+      "total_mapped_area": 75120,
+      "accuracy": 0.9
+    },
+    "2024": {
+      "total_mapped_area": 76150,
+      "accuracy": 0.91
+    }
+  },
+  "technical_info": {
+    "satellites_used": [
+      {
+        "name": "Sentinel-2",
+        "resolution": "10-20m",
+        "revisit": "5 dias"
+      },
+      {
+        "name": "Landsat-8",
+        "resolution": "30m",
+        "revisit": "16 dias"
+      },
+      {
+        "name": "MODIS",
+        "resolution": "250-500m",
+        "revisit": "1-2 dias"
+      },
+      {
+        "name": "SPOT",
+        "resolution": "6-20m",
+        "revisit": "26 dias"
+      }
+    ],
+    "classification_methods": [
+      "Machine Learning (Random Forest)",
+      "Deep Learning (CNN)",
+      "Temporal Analysis",
+      "Phenology-based Classification",
+      "Multi-sensor Fusion"
+    ],
+    "validation_methods": [
+      "Field samples",
+      "Visual interpretation",
+      "Cross-validation",
+      "Historical data comparison"
+    ]
+  }
+}

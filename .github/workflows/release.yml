@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Tipo de bump (auto = detecta dos commits)'
+        required: true
+        type: choice
+        default: auto
+        options:
+          - auto
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Bump version
+        run: |
+          if [ "${{ inputs.bump }}" = "auto" ]; then
+            npx changelogen --bump
+          else
+            npx changelogen --bump --${{ inputs.bump }}
+          fi
+
+      - name: Commit, tag and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          VERSION=v$(node -p "require('./package.json').version")
+          git add package.json package-lock.json
+          git commit -m "chore(release): $VERSION [skip ci]"
+          git tag "$VERSION"
+          git push --follow-tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=v$(node -p "require('./package.json').version")
+          gh release create "$VERSION" \
+            --title "$VERSION" \
+            --generate-notes \
+            --target ${{ github.sha }}
