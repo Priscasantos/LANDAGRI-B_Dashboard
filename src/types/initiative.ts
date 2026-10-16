@@ -110,6 +110,13 @@ export interface InitiativeRow {
   Accuracy: number;
   Accuracy_Min: number;
   Accuracy_Max: number;
+  /**
+   * Display label for accuracy: `"91.0"` when assessed, `"n/a"` when the
+   * source reports no/incomplete assessment (never an invented number).
+   */
+  Accuracy_Label?: string;
+  /** Justification for `n/a` (source `reason`/`description`), else `''`. */
+  Accuracy_Note?: string;
   Number_of_Classes: number;
   Class_Legend: string;
   Number_of_Agriculture_Classes: number;

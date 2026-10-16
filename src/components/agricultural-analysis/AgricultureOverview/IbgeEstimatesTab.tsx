@@ -13,37 +13,16 @@ import {
   translateCropName,
   translateTerm,
 } from '../../../data/glossary';
-import ibgeData from '../../../data/processed/brazilian_ibge_agricultural_data.json';
-
-interface IBGECropEntry {
-  name: string;
-  code: string;
-  production_quantity_tonnes?: Record<string, number>;
-  harvested_area_hectares?: Record<string, number>;
-  planted_area_hectares?: Record<string, number>;
-  average_yield?: Record<string, number>;
-  production_value_thousand_reais?: Record<string, number>;
-}
-
-interface IBGEDataType {
-  metadata?: {
-    source?: string;
-    survey?: string;
-    period_range?: string;
-    periodicity?: string;
-  };
-  data?: {
-    agricultural_production?: Record<string, IBGECropEntry>;
-  };
-}
+import ibgeData from '../../../data/processed/pam_unified.json';
+import type { PamUnified } from '../../../lib/agriP2b';
 
 export default function IbgeEstimatesTab() {
   // locale reativo p/ chrome dos gráficos; rótulos de coluna usam o mesmo
   // namespace `charts` (são legendas da tabela de culturas).
   const { t, locale } = useT('charts');
   const { t: tBody, locale: bodyLocale } = useT('agricultural');
-  const data = ibgeData as IBGEDataType;
-  const production = data?.data?.agricultural_production;
+  const data = ibgeData as PamUnified;
+  const production = data?.crops;
 
   const years = useMemo(() => {
     if (!production) return [];
@@ -226,8 +205,8 @@ export default function IbgeEstimatesTab() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard icon={BarChart3} label={tBody('metricCropsTracked')} value={Object.keys(production).length} variant="accuracy" />
         <MetricCard icon={CalendarDays} label={tBody('metricPeriod')} value={data?.metadata?.period_range || years.join('-')} variant="frequency" />
-        <MetricCard icon={ClipboardList} label={tBody('metricSurvey')} value={data?.metadata?.survey?.split(' ')[0] || 'PAM'} variant="resolution" />
-        <MetricCard icon={RefreshCw} label={tBody('metricFrequency')} value={translateTerm('frequency', data?.metadata?.periodicity || 'Annual', bodyLocale)} variant="classes" />
+        <MetricCard icon={ClipboardList} label={tBody('metricSurvey')} value={(bodyLocale === 'pt-BR' ? data?.metadata?.survey?.pt : data?.metadata?.survey?.en)?.split(' ')[0] || 'PAM'} variant="resolution" />
+        <MetricCard icon={RefreshCw} label={tBody('metricFrequency')} value={translateTerm('frequency', data?.metadata?.periodicity?.en || 'Annual', bodyLocale)} variant="classes" />
       </div>
 
       <Tabs tabs={subTabs} />

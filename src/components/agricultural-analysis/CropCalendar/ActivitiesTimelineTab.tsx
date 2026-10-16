@@ -13,13 +13,12 @@ import {
 } from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
+import type { ConabCalendarRow } from '../../../types/calendar';
 
 const MONTHS_SHORT = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
 const MONTHS_FULL = ['October', 'November', 'December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September'];
 
-interface CalendarRow {
-  'Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September': string;
-}
+type CalendarRow = ConabCalendarRow;
 
 interface StateInfo {
   name: string;
@@ -63,20 +62,15 @@ export default function ActivitiesTimelineTab({ selectedCrops, selectedRegions }
     const polarR: number[] = MONTHS_FULL.map(() => 0);
 
     for (const row of rawData) {
-      const entry = row['Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September'];
-      if (!entry || entry.trim() === '' || entry.startsWith(';')) continue;
-
-      const parts = entry.split(';');
-      if (parts.length < 13) continue;
-
-      const crop = parts[0].trim();
+      const crop = (row.crop || '').trim();
       if (!crop || !selectedCrops.includes(crop)) continue;
 
-      const state = parts[1].trim();
+      const state = (row.uf || '').trim();
+      if (!state) continue;
       const region = stateRegions[state];
       if (region && !selectedRegions.includes(region)) continue;
 
-      const activities = parts.slice(2).map(v => parseActivityValue(v));
+      const activities = row.months.map((v) => parseActivityValue(v));
 
       let firstPlanting = -1;
       let lastPlanting = -1;

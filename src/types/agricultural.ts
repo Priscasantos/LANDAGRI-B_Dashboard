@@ -1,19 +1,33 @@
+/** Localized string pair from `pam_unified.json` (single numeric payload). */
+export interface PamLocalized {
+  pt?: string | null;
+  en?: string | null;
+}
+
 export interface CropProduction {
+  code: string;
+  /** EN display name (stable crop key lives on the parent record). */
+  name: string;
+  /** PT display name. */
   nome: string;
-  codigo: string;
-  quantidade_produzida_toneladas: Record<string, number>;
-  area_colhida_hectares: Record<string, number>;
+  production_quantity_tonnes: Record<string, number>;
+  harvested_area_hectares: Record<string, number>;
+  average_yield_kg_per_ha?: Record<string, number>;
 }
 
 export interface IBGEData {
   metadata: {
-    source: string;
-    survey: string;
-    period_range: string;
+    source: PamLocalized;
+    survey: PamLocalized;
+    survey_code?: string | null;
+    territory_level?: PamLocalized;
+    periodicity?: PamLocalized;
+    period_range?: string | null;
+    last_updated?: string | null;
+    pam_2025_status?: PamLocalized;
   };
-  data: {
-    producao_agricola: Record<string, CropProduction>;
-  };
+  crops: Record<string, CropProduction>;
+  summary_annual: Record<string, Record<string, unknown>>;
 }
 
 export interface ConabCropCalendar {

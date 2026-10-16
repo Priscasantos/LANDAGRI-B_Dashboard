@@ -55,6 +55,7 @@
     "Google Dynamic World V1": {
         "coverage": "Global",
         "acronym": "GDW",
+        "status": "active",
         "provider": "Google and World Resources Institute",
         "source": "Sentinel-2 MSI",
         "spatial_resolution": 10,
@@ -92,6 +93,7 @@
     "ESRI-10m Annual LULC": {
         "coverage": "Global",
         "acronym": "ESRI-10m LULC",
+        "status": "active",
         "provider": "Environmental Systems Research Institute (ESRI), Impact Observatory, and Microsoft Maps for Good Initiative",
         "source": "Sentinel-2 MSI",
         "spatial_resolution": 10,
@@ -159,6 +161,7 @@
     "Global LULC change 2000 and 2020": {
         "coverage": "Global",
         "acronym": "UMD-GLC",
+        "status": "active",
         "provider": "University of Maryland (UMD) Global Land Analysis and Discovery (GLAD) laboratory",
         "source": "Landsat series",
         "spatial_resolution": 30,
@@ -191,6 +194,7 @@
     "Global Pasture Watch (GPW)": {
         "coverage": "Global",
         "acronym": "GPW",
+        "status": "active",
         "provider": "Land & Carbon Lab",
         "source": "Landsat series",
         "spatial_resolution": 30,
@@ -248,6 +252,7 @@
     "South America Soybean Maps": {
         "coverage": "Continental",
         "acronym": "UMD-SASM",
+        "status": "active",
         "provider": "University of Maryland (UMD) Global Land Analysis and Discovery (GLAD) laboratory",
         "source": "Landsat and MODIS series",
         "spatial_resolution": 30,
@@ -276,6 +281,7 @@
     "WorldCover 10m 2021": {
         "coverage": "Global",
         "acronym": "ESA-WC",
+        "status": "active",
         "provider": "European Space Agency (ESA)",
         "source": "Sentinel-1 and Sentinel-2 MSI",
         "spatial_resolution": 10,
@@ -320,6 +326,7 @@
     "WorldCereal": {
         "coverage": "Global",
         "acronym": "WorldCereal",
+        "status": "active",
         "provider": "European Space Agency (ESA)",
         "source": "Sentinel-1, Sentinel-2, and Landsat-8",
         "spatial_resolution": 10,
@@ -384,6 +391,7 @@
     "PRODES Deforestation, Warnings and Vegetation for Brazilian Biomes": {
         "coverage": "National",
         "acronym": "PRODES",
+        "status": "active",
         "official_name": "Projeto de Monitoramento do Desmatamento na Amazônia Legal por Satélite (PRODES)",
         "provider": "National Institute for Space Research (INPE)",
         "source": "IRS, Sentinel-2 MSI, Landsat series, CBERS-4/4A",
@@ -423,6 +431,7 @@
     "DETER Deforestation, Warnings and Vegetation for Brazilian Biomes": {
         "coverage": "National",
         "acronym": "DETER",
+        "status": "active",
         "official_name": "Sistema de Detecção de Desmatamento em Tempo Real (DETER)",
         "provider": "National Institute for Space Research (INPE)",
         "source": "MODIS Terra/Aqua, CBERS series, Amazônia-1",
@@ -455,6 +464,7 @@
     "TerraClass Amazonia": {
         "coverage": "Regional",
         "acronym": "TerraClass Amazon",
+        "status": "active",
         "provider": "National Institute for Space Research (INPE) and Brazilian Agricultural Research Corporation (Embrapa)",
         "spatial_resolution": [
             {
@@ -497,6 +507,7 @@
     "TerraClass Cerrado": {
         "coverage": "Regional",
         "acronym": "TerraClass Cerrado",
+        "status": "active",
         "provider": "National Institute for Space Research (INPE) and Brazilian Agricultural Research Corporation (Embrapa)",
         "spatial_resolution": [
             {
@@ -539,6 +550,7 @@
     "MapBiomas": {
         "coverage": "National",
         "acronym": "MapBiomas",
+        "status": "active",
         "provider": "Non-governmental Organizations (NGO's), Universities and Technology Companies",
         "source": "Landsat series",
         "spatial_resolution": 30,
@@ -618,6 +630,7 @@
     "National Supply Company Agricultural Mapping": {
         "coverage": "National",
         "acronym": "CONAB-AM",
+        "status": "active",
         "provider": "National Supply Company (CONAB)",
         "source": "MODIS, Sentinel-2 MSI, and Landsat series",
         "spatial_resolution": 30,

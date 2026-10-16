@@ -8,6 +8,10 @@ import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
 import conabAvailability from '../../../data/processed/conab_availability.json';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
+import type {
+  ConabAvailabilityRow,
+  ConabCalendarRow,
+} from '../../../types/calendar';
 import { useT } from '../../../i18n/LanguageContext';
 import {
   translateCropName,
@@ -17,20 +21,9 @@ import {
 
 const MONTHS_SHORT = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
 
-interface AvailabilityRow {
-  'Crop Type;Area;Anos (1S);Anos (2S)': string;
-  crop?: string;
-  uf?: string;
-  anos_1s?: string[];
-  anos_2s?: string[];
-}
+type AvailabilityRow = ConabAvailabilityRow;
 
-interface CalendarRow {
-  'Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September': string;
-  crop?: string;
-  uf?: string;
-  months?: string[];
-}
+type CalendarRow = ConabCalendarRow;
 
 interface StateInfo {
   name: string;
@@ -50,51 +43,26 @@ function parseActivityValue(val: string): number {
   return 0;
 }
 
-/** Typed fields first (conab_availability.json), legacy `;`-joined string as fallback. */
+/** Typed accessors over `conab_availability.json` (no `;`-joined fallback). */
 function availCrop(row: AvailabilityRow): string {
-  if (row.crop && row.crop.trim() !== '') return row.crop.trim();
-  const entry = row['Crop Type;Area;Anos (1S);Anos (2S)'];
-  const crop = entry?.split(';')[0]?.trim();
-  return crop && crop !== '' ? crop : 'Unknown';
+  const crop = (row.crop || '').trim();
+  return crop !== '' ? crop : 'Unknown';
 }
 
 function availUf(row: AvailabilityRow): string {
-  if (row.uf && row.uf.trim() !== '') return row.uf.trim();
-  const entry = row['Crop Type;Area;Anos (1S);Anos (2S)'];
-  return entry?.split(';')[1]?.trim() ?? '';
+  return (row.uf || '').trim();
 }
 
 function availPeriods(row: AvailabilityRow): string[] {
-  const out = [...(row.anos_1s ?? []), ...(row.anos_2s ?? [])].map((p) => p.trim()).filter(Boolean);
-  if (out.length > 0) return out;
-  const entry = row['Crop Type;Area;Anos (1S);Anos (2S)'];
-  if (!entry) return [];
-  const parts = entry.split(';');
-  const periods: string[] = [];
-  for (const idx of [2, 3]) {
-    const chunk = parts[idx]?.trim();
-    if (chunk) {
-      for (const p of chunk.split(',')) {
-        const period = p.trim();
-        if (period) periods.push(period);
-      }
-    }
-  }
-  return periods;
+  return [...(row.anos_1s ?? []), ...(row.anos_2s ?? [])].map((p) => p.trim()).filter(Boolean);
 }
 
 function calendarUf(row: CalendarRow): string {
-  if (row.uf && row.uf.trim() !== '') return row.uf.trim();
-  const entry = row['Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September'];
-  if (!entry || entry.trim() === '' || entry.startsWith(';')) return '';
-  return entry.split(';')[1]?.trim() ?? '';
+  return (row.uf || '').trim();
 }
 
 function calendarCrop(row: CalendarRow): string {
-  if (row.crop && row.crop.trim() !== '') return row.crop.trim();
-  const entry = row['Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September'];
-  if (!entry || entry.trim() === '' || entry.startsWith(';')) return '';
-  return entry.split(';')[0]?.trim() ?? '';
+  return (row.crop || '').trim();
 }
 
 /**
@@ -208,30 +176,13 @@ export default function AgricultureAvailabilityPage(): ReactElement {
       const region = stateRegions[uf];
       if (!uf || !region) continue;
 
-      const typedMonths = row.months;
-      if (typedMonths && typedMonths.length >= 12) {
-        if (!regionMonthActivity[region]) {
-          regionMonthActivity[region] = MONTHS_SHORT.map(() => 0);
-        }
-        typedMonths.slice(0, 12).forEach((v, i) => {
-          if (parseActivityValue(v) > 0) {
-            regionMonthActivity[region][i]++;
-          }
-        });
-        continue;
-      }
-
-      const entry = row['Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September'];
-      if (!entry || entry.trim() === '' || entry.startsWith(';')) continue;
-
-      const parts = entry.split(';');
-      if (parts.length < 13) continue;
+      const months = row.months;
+      if (!Array.isArray(months) || months.length < 12) continue;
 
       if (!regionMonthActivity[region]) {
         regionMonthActivity[region] = MONTHS_SHORT.map(() => 0);
       }
-
-      parts.slice(2).forEach((v, i) => {
+      months.slice(0, 12).forEach((v, i) => {
         if (parseActivityValue(v) > 0) {
           regionMonthActivity[region][i]++;
         }

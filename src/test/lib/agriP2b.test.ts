@@ -6,24 +6,26 @@ import {
   buildSeasonClose,
   deltaPct,
   formatDeltaPct,
+  pamCropName,
   type ConabCrops,
   type PamProduction,
+  type PamUnified,
 } from '../../lib/agriP2b';
-import pamData from '../../data/processed/brazilian_agricultural_data.json';
+import pamUnified from '../../data/processed/pam_unified.json';
 import conabData from '../../data/processed/conab_agricultural_data.json';
 
 describe('agriP2b helpers (P2b charts)', () => {
-  it('expõe anos PAM 2018–2025 e chaves de grãos presentes no JSON', () => {
+  it('expõe anos PAM 2018–2025 e chaves de grãos presentes no payload unificado', () => {
     expect(PAM_YEARS).toEqual(['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025']);
-    const prod = (pamData as { data: { producao_agricola: PamProduction } }).data.producao_agricola;
+    const prod = (pamUnified as PamUnified).crops as PamProduction;
     for (const key of PAM_GRAIN_KEYS) {
       expect(prod[key], `chave PAM ausente: ${key}`).toBeDefined();
-      expect(prod[key].rendimento_medio_kg_por_ha['2025']).toBeGreaterThan(0);
+      expect(prod[key].average_yield_kg_per_ha?.['2025']).toBeGreaterThan(0);
     }
   });
 
   it('buildPamYieldSeries monta multi-série kg/ha sem inventar anos', () => {
-    const prod = (pamData as { data: { producao_agricola: PamProduction } }).data.producao_agricola;
+    const prod = (pamUnified as PamUnified).crops as PamProduction;
     const series = buildPamYieldSeries(prod, PAM_GRAIN_KEYS, PAM_YEARS);
     expect(series.length).toBe(PAM_GRAIN_KEYS.length);
     const soja = series.find((s) => s.name === 'Soja (em grão)');
@@ -31,6 +33,14 @@ describe('agriP2b helpers (P2b charts)', () => {
     expect(soja?.x).toEqual(PAM_YEARS);
     // Valor real do JSON: soja 2025 = 3470 kg/ha
     expect(soja?.y[PAM_YEARS.indexOf('2025')]).toBe(3470);
+  });
+
+  it('localiza nomes via dicionário {en, pt} sem re-fetch', () => {
+    const prod = (pamUnified as PamUnified).crops as PamProduction;
+    expect(pamCropName(prod.soybean, 'pt-BR')).toBe('Soja (em grão)');
+    expect(pamCropName(prod.soybean, 'en')).toBe('Soybean (grain)');
+    const seriesEn = buildPamYieldSeries(prod, ['soybean'], PAM_YEARS, 'en');
+    expect(seriesEn[0]?.name).toBe('Soybean (grain)');
   });
 
   it('deltaPct calcula variação percentual e null sem base', () => {

@@ -125,7 +125,7 @@ const CROP: Record<string, LocalizedTerm> = {
     en: 'Other winter crops',
   },
   // Rótulos IBGE (nomes PT originais confirmados em
-  // data/brazilian_agricultural_data.json → producao_agricola[].nome).
+  // src/data/processed/pam_unified.json → crops[][nome]).
   'Peanut (in shell)': { 'pt-BR': 'Amendoim (em casca)', en: 'Peanut (in shell)' },
   'Rice (in husk)': { 'pt-BR': 'Arroz (em casca)', en: 'Rice (in husk)' },
   Oat: { 'pt-BR': 'Aveia', en: 'Oat' },

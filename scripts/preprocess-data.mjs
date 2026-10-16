@@ -128,12 +128,10 @@ function processJsonc(srcFile, outputName) {
 }
 
 /**
- * Legacy single-key row shapes (kept so existing consumers keep working).
- * Typed fields are ADDED alongside — never replace — the legacy key.
+ * Typed calendar/availability row shapes (Fase 1: legacy `;`-joined keys
+ * removed — consumers use `{crop, uf, months[12]}` /
+ * `{crop, uf, anos_1s, anos_2s, is_long_aggregate}` directly).
  */
-export const LEGACY_CALENDAR_KEY = 'Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September';
-export const LEGACY_AVAIL_KEY = 'Crop Type;Area;Anos (1S);Anos (2S)';
-
 export const CALENDAR_MONTHS = [
   'October', 'November', 'December', 'January', 'February', 'March',
   'April', 'May', 'June', 'July', 'August', 'September',
@@ -158,7 +156,7 @@ export function splitTable(text) {
 
 /**
  * Parse the CONAB crop-calendar table into typed rows.
- * `{ crop, uf, months[12] }` in October→September order + legacy key.
+ * `{ crop, uf, months[12] }` in October→September order.
  * All-empty filler rows (`;;;;;;;;;;;;;`) are dropped (consumers skip them).
  */
 export function parseCalendarTable(rows) {
@@ -170,12 +168,7 @@ export function parseCalendarTable(rows) {
     const months = CALENDAR_MONTHS.map((_, i) => (cells[2 + i] || '').trim());
     if (!crop && !uf && months.every(m => m === '')) continue; // filler
     if (!crop || !uf) continue;
-    out.push({
-      crop,
-      uf,
-      months,
-      [LEGACY_CALENDAR_KEY]: [crop, uf, ...months].join(';'),
-    });
+    out.push({ crop, uf, months });
   }
   return out;
 }
@@ -205,7 +198,7 @@ export function isLongAggregate(token) {
  * Parse the CONAB availability table into typed rows.
  * Empty "Crop Type" cells inherit the previous crop (forward-fill — the
  * source groups states under one crop label). `{ crop, uf, anos_1s,
- * anos_2s, is_long_aggregate }` + legacy key.
+ * anos_2s, is_long_aggregate }`.
  */
 export function parseAvailabilityTable(rows) {
   const out = [];
@@ -227,15 +220,14 @@ export function parseAvailabilityTable(rows) {
       anos_1s,
       anos_2s,
       is_long_aggregate: tokens.some(isLongAggregate),
-      [LEGACY_AVAIL_KEY]: [rawCrop, cells[1] || '', cells[2] || '', cells[3] || ''].join(';'),
     });
   }
   return out;
 }
 
 /**
- * Read CSV file and output typed JSON (with legacy keys preserved).
- * `parser` is parseCalendarTable | parseAvailabilityTable.
+ * Read CSV file and output typed JSON. `parser` is parseCalendarTable |
+ * parseAvailabilityTable.
  */
 function processCsv(srcFile, outputName, parser) {
   const srcPath = path.join(DATA_SOURCE_DIR, 'csv', srcFile);
@@ -444,6 +436,120 @@ function writeDataNotes() {
 }
 
 /**
+ * Build the unified PAM payload (Fase 1 i18n): PT + EN IBGE files carry
+ * IDENTICAL numeric series under different slugs/keys, so the bundle keeps
+ * the numbers ONCE under stable EN slugs plus a `{pt, en}` name dictionary.
+ * Any numeric mismatch between the two sources throws — never silently
+ * ships a half-merged payload. Exported for unit tests.
+ */
+export function buildPamUnified(pt, en) {
+  const ptCrops = pt?.data?.producao_agricola || {};
+  const enCrops = en?.data?.agricultural_production || {};
+  const ptByCode = {};
+  for (const [slug, entry] of Object.entries(ptCrops)) ptByCode[entry.codigo] = { slug, entry };
+  const enByCode = {};
+  for (const [slug, entry] of Object.entries(enCrops)) enByCode[entry.code] = { slug, entry };
+
+  const ptCodes = Object.keys(ptByCode).sort();
+  const enCodes = Object.keys(enByCode).sort();
+  if (JSON.stringify(ptCodes) !== JSON.stringify(enCodes)) {
+    throw new Error(
+      `PAM code sets diverged: PT [${ptCodes}] vs EN [${enCodes}]`,
+    );
+  }
+
+  const crops = {};
+  for (const code of ptCodes) {
+    const { slug: ptSlug, entry: p } = ptByCode[code];
+    const { slug: enSlug, entry: e } = enByCode[code];
+    for (const year of Object.keys(p.quantidade_produzida_toneladas || {})) {
+      const pairs = [
+        [p.quantidade_produzida_toneladas?.[year], e.production_quantity_tonnes?.[year], 'quantity', year],
+        [p.area_colhida_hectares?.[year], e.harvested_area_hectares?.[year], 'area', year],
+        [p.rendimento_medio_kg_por_ha?.[year], e.average_yield_kg_per_ha?.[year], 'yield', year],
+      ];
+      for (const [pv, ev, kind, y] of pairs) {
+        if (pv !== ev) {
+          throw new Error(`PAM numeric mismatch code=${code} (${ptSlug}/${enSlug}) ${kind} ${y}: ${pv} !== ${ev}`);
+        }
+      }
+    }
+    crops[enSlug] = {
+      code,
+      name: e.name,
+      nome: p.nome,
+      production_quantity_tonnes: e.production_quantity_tonnes,
+      harvested_area_hectares: e.harvested_area_hectares,
+      average_yield_kg_per_ha: e.average_yield_kg_per_ha,
+    };
+  }
+
+  const ptSlugToEn = {};
+  for (const code of ptCodes) ptSlugToEn[ptByCode[code].slug] = enByCode[code].slug;
+
+  const summaryAnnual = {};
+  for (const [year, s] of Object.entries(en?.data?.summary_annual || {})) {
+    const ps = pt?.data?.resumo_anual?.[year] || {};
+    summaryAnnual[year] = {
+      total_harvested_area_hectares: s.total_harvested_area_hectares,
+      main_crops: (s.main_crops || []).map(sl => sl),
+      total_production_value_billion_reais: s.total_production_value_billion_reais,
+      production_value_source: {
+        pt: ps.fonte_valor_producao || null,
+        en: s.production_value_source || null,
+      },
+    };
+  }
+
+  const lang = (ptVal, enVal) => ({ pt: ptVal ?? null, en: enVal ?? null });
+  const variables = {};
+  for (const code of Object.keys(en?.metadata?.variables || {})) {
+    variables[code] = lang(pt?.metadata?.variables?.[code], en?.metadata?.variables?.[code]);
+  }
+
+  return {
+    metadata: {
+      source: lang(pt?.metadata?.source, en?.metadata?.source),
+      source_url: en?.metadata?.source_url || pt?.metadata?.source_url || null,
+      survey: lang(pt?.metadata?.survey, en?.metadata?.survey),
+      survey_code: en?.metadata?.survey_code || pt?.metadata?.survey_code || null,
+      territory_level: lang(pt?.metadata?.territory_level, en?.metadata?.territory_level),
+      periodicity: lang(pt?.metadata?.periodicity, en?.metadata?.periodicity),
+      period_range: en?.metadata?.period_range || pt?.metadata?.period_range || null,
+      last_updated: en?.metadata?.last_updated || pt?.metadata?.last_updated || null,
+      description: lang(pt?.metadata?.description, en?.metadata?.description),
+      variables,
+      pam_2025_status: lang(pt?.metadata?.pam_2025_status, en?.metadata?.pam_2025_status),
+    },
+    crops,
+    summary_annual: summaryAnnual,
+  };
+}
+
+/**
+ * Read the PT + EN PAM sources, unify, and write `pam_unified.json`.
+ * The per-language copies are NOT emitted (single payload in the bundle).
+ */
+function processPamUnified() {
+  const ptPath = path.join(DATA_SOURCE_DIR, 'brazilian_agricultural_data.json');
+  const enPath = path.join(DATA_SOURCE_DIR, 'brazilian_ibge_agricultural_data.json');
+  if (!fs.existsSync(ptPath) || !fs.existsSync(enPath)) {
+    console.log('  ⚠ PAM sources missing (brazilian_agricultural_data.json + brazilian_ibge_agricultural_data.json)');
+    return;
+  }
+  try {
+    const pt = JSON.parse(fs.readFileSync(ptPath, 'utf-8'));
+    const en = JSON.parse(fs.readFileSync(enPath, 'utf-8'));
+    const unified = buildPamUnified(pt, en);
+    fs.writeFileSync(path.join(DATA_OUTPUT_DIR, 'pam_unified.json'), JSON.stringify(unified, null, 2));
+    console.log(`  ✓ PAM PT+EN → pam_unified.json (${Object.keys(unified.crops).length} crops, single numeric payload)`);
+  } catch (err) {
+    console.error(`  ✗ Error building pam_unified.json: ${err.message}`);
+    throw err;
+  }
+}
+
+/**
  * Copy partner logos to public directory
  */
 function copyLogos() {
@@ -473,16 +579,12 @@ async function main() {
 
   console.log('📄 Processing JSONC files...');
   processJsonc('json/initiatives_metadata.jsonc', 'initiatives.json');
-  processJsonc('json/initiatives_metadata_backup.jsonc', 'initiatives_backup.json');
   processJsonc('json/sensors_metadata.jsonc', 'sensors.json');
-  processJsonc('json/sensors_metadata_original.jsonc', 'sensors_original.json');
   processJsonc('json/agricultural_conab_mapping_data_complete.jsonc', 'conab_mapping.json');
   processJsonc('json/conab_detailed_initiative.jsonc', 'conab_detailed_initiative.json');
 
   console.log('\n📄 Processing top-level JSON files...');
   const topJsonFiles = [
-    'brazilian_agricultural_data.json',
-    'brazilian_ibge_agricultural_data.json',
     'conab_agricultural_data.json',
     'conab_mapping_data.json',
     'json_dictionary.json',
@@ -503,6 +605,9 @@ async function main() {
       console.log(`  ⚠ File not found: ${file}`);
     }
   });
+
+  console.log('\n📄 Processing PAM files (PT+EN → unified i18n payload)...');
+  processPamUnified();
 
   console.log('\n📄 Processing CSV files...');
   processCsv('conab_crop_calendar.csv', 'conab_calendar.json', parseCalendarTable);

@@ -4,8 +4,9 @@ import Card from '../../ui/Card';
 import MetricCard from '../../ui/MetricCard';
 import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
 import { useT } from '../../../i18n/LanguageContext';
-import type { PamProduction } from '../../../lib/agriP2b';
-import pamData from '../../../data/processed/brazilian_agricultural_data.json';
+import type { PamProduction, PamUnified } from '../../../lib/agriP2b';
+import { pamCropName } from '../../../lib/agriP2b';
+import pamData from '../../../data/processed/pam_unified.json';
 
 interface ValuePayload {
   totalBn: number | null;
@@ -24,17 +25,15 @@ export default function ProductionValueChart(): React.JSX.Element | null {
 
   const payload = useMemo<ValuePayload>(() => {
     try {
-      const root = pamData as {
-        data: { producao_agricola?: PamProduction; resumo_anual?: Record<string, { valor_total_producao_bilhoes_reais?: number }> };
-      };
+      const root = pamData as PamUnified;
       const totalBn =
-        root.data?.resumo_anual?.['2025']?.valor_total_producao_bilhoes_reais ?? null;
-      const production = root.data?.producao_agricola;
+        root.summary_annual?.['2025']?.total_production_value_billion_reais ?? null;
+      const production: PamProduction | undefined = root.crops;
       if (production === undefined) return { totalBn, labels: [], valuesMt: [] };
       const items = Object.values(production)
         .map((crop) => ({
-          label: crop.nome,
-          value: crop.quantidade_produzida_toneladas?.['2025'] ?? 0,
+          label: pamCropName(crop, locale),
+          value: crop.production_quantity_tonnes?.['2025'] ?? 0,
         }))
         .filter((i) => i.value > 0)
         .sort((a, b) => b.value - a.value)
@@ -47,7 +46,7 @@ export default function ProductionValueChart(): React.JSX.Element | null {
     } catch {
       return { totalBn: null, labels: [], valuesMt: [] };
     }
-  }, []);
+  }, [locale]);
 
   if (payload.totalBn === null && payload.labels.length === 0) return null;
 

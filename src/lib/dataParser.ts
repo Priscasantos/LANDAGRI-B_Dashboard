@@ -12,7 +12,9 @@ export function parseInitiatives(metadata: Record<string, InitiativeMetadata>): 
 
 function parseSingleInitiative(name: string, data: InitiativeMetadata): InitiativeRow {
   const resolutionInfo = parseResolution(data.spatial_resolution);
-  const accuracyInfo = parseAccuracy(data.overall_accuracy ?? data.accuracy ?? null);
+  const rawAccuracy: unknown = data.overall_accuracy ?? data.accuracy ?? null;
+  const accuracyInfo = parseAccuracy(rawAccuracy);
+  const accuracyDisplay = describeAccuracy(rawAccuracy, accuracyInfo.value);
   const years = Array.isArray(data.available_years) ? data.available_years : [];
   const yearStart = years.length > 0 ? Math.min(...years) : 0;
   const yearEnd = years.length > 0 ? Math.max(...years) : 0;
@@ -39,6 +41,8 @@ function parseSingleInitiative(name: string, data: InitiativeMetadata): Initiati
     Accuracy: accuracyInfo.value,
     Accuracy_Min: accuracyInfo.minVal,
     Accuracy_Max: accuracyInfo.maxVal,
+    Accuracy_Label: accuracyDisplay.label,
+    Accuracy_Note: accuracyDisplay.note,
     Number_of_Classes: data.number_of_classes || 0,
     Class_Legend: data.class_legend || '',
     Number_of_Agriculture_Classes: data.number_of_agriculture_classes || 0,
@@ -150,6 +154,22 @@ function parseAccuracy(accuracy: unknown): AccuracyInfo {
     }
   }
   return zero;
+}
+
+/**
+ * Human display for accuracy: numeric label when assessed, `"n/a"` with the
+ * source justification when the assessment is missing/incomplete.
+ * Never invents a number — unassessed series stay `n/a`, not `0.0`.
+ */
+function describeAccuracy(raw: unknown, value: number): { label: string; note: string } {
+  if (value > 0) return { label: value.toFixed(1), note: '' };
+  let note = 'Accuracy not assessed for this series (n/a — no published assessment).';
+  if (raw !== null && typeof raw === 'object') {
+    const r = raw as Record<string, unknown>;
+    if (typeof r.reason === 'string' && r.reason !== '') note = r.reason;
+    else if (typeof r.description === 'string' && r.description !== '') note = r.description;
+  }
+  return { label: 'n/a', note };
 }
 
 /**

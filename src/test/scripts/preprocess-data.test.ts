@@ -6,8 +6,6 @@ import {
   detectHeaderRowIndex,
   normalizeBulletinRows,
   isLongAggregate,
-  LEGACY_CALENDAR_KEY,
-  LEGACY_AVAIL_KEY,
   CALENDAR_MONTHS,
 } from '../../../scripts/preprocess-data.mjs';
 import calendarJson from '../../data/processed/conab_calendar.json';
@@ -39,29 +37,32 @@ describe('preprocess-data.mjs typed parsers (P0)', () => {
     expect(rows[1].slice(0, 2)).toEqual(['Cotton', 'RO']);
   });
 
-  it('parseCalendarTable emits {crop, uf, months[12]} + legacy key, drops fillers', () => {
+  it('parseCalendarTable emits {crop, uf, months[12]} with NO `;`-joined legacy keys', () => {
     const rows = parseCalendarTable(splitTable(CAL_FIXTURE));
     expect(rows).toHaveLength(2);
     expect(rows[0].crop).toBe('Cotton');
     expect(rows[0].uf).toBe('RO');
     expect(rows[0].months).toHaveLength(12);
     expect(rows[0].months[3]).toBe('P'); // January
-    expect(rows[0][LEGACY_CALENDAR_KEY]).toBe('Cotton;RO;;;;P;P;;;;H;H;H;');
+    for (const r of rows) {
+      expect(Object.keys(r).some((k) => k.includes(';'))).toBe(false);
+    }
     expect(CALENDAR_MONTHS).toEqual([
       'October', 'November', 'December', 'January', 'February', 'March',
       'April', 'May', 'June', 'July', 'August', 'September',
     ]);
   });
 
-  it('parseAvailabilityTable forward-fills crop, splits years, aliases BR', () => {
+  it('parseAvailabilityTable forward-fills crop, splits years, aliases BR, no legacy keys', () => {
     const rows = parseAvailabilityTable(splitTable(AVAIL_FIXTURE));
     expect(rows).toHaveLength(4);
     expect(rows[0]).toMatchObject({ crop: 'Cotton', uf: 'GO', anos_1s: ['2018-2019', '2019-2020'], anos_2s: [] });
     expect(rows[1].crop).toBe('Cotton'); // forward-fill from ";MS;…"
     expect(rows[1].uf).toBe('MS');
-    // Legacy key keeps the RAW line so old `split(';')` consumers behave identically.
-    expect(rows[1][LEGACY_AVAIL_KEY]).toBe(';MS;2021-2022;');
     expect(rows[3].uf).toBe('BR');
+    for (const r of rows) {
+      expect(Object.keys(r).some((k) => k.includes(';'))).toBe(false);
+    }
   });
 
   it('flags long aggregates but not biennial pairs', () => {
@@ -98,18 +99,18 @@ describe('preprocess-data.mjs typed parsers (P0)', () => {
 });
 
 describe('processed CONAB JSONs (run `npm run preprocess` if stale)', () => {
-  it('calendar rows are typed and keep the legacy key', () => {
+  it('calendar rows are typed with NO `;`-joined legacy keys', () => {
     const rows = calendarJson as Record<string, unknown>[];
     expect(rows.length).toBeGreaterThan(100);
     for (const r of rows) {
       expect(typeof r['crop']).toBe('string');
       expect(typeof r['uf']).toBe('string');
       expect(r['months']).toHaveLength(12);
-      expect(typeof r[LEGACY_CALENDAR_KEY]).toBe('string');
+      expect(Object.keys(r).some((k) => k.includes(';'))).toBe(false);
     }
   });
 
-  it('availability rows are typed, forward-filled, aggregates flagged', () => {
+  it('availability rows are typed, forward-filled, aggregates flagged, no legacy keys', () => {
     const rows = availabilityJson as Record<string, unknown>[];
     expect(rows.length).toBeGreaterThan(10);
     for (const r of rows) {
@@ -118,7 +119,7 @@ describe('processed CONAB JSONs (run `npm run preprocess` if stale)', () => {
       expect(Array.isArray(r['anos_1s'])).toBe(true);
       expect(Array.isArray(r['anos_2s'])).toBe(true);
       expect(typeof r['is_long_aggregate']).toBe('boolean');
-      expect(typeof r[LEGACY_AVAIL_KEY]).toBe('string');
+      expect(Object.keys(r).some((k) => k.includes(';'))).toBe(false);
     }
     // No empty-crop rows survive; aggregates exist and are flagged.
     expect(rows.some((r) => r['crop'] === '')).toBe(false);

@@ -1,69 +1,62 @@
 import { describe, it, expect } from 'vitest';
 import { parseInitiatives } from '../../lib/dataParser';
-import ibgeEn from '../../data/processed/brazilian_ibge_agricultural_data.json';
-import ibgePt from '../../data/processed/brazilian_agricultural_data.json';
+import type { PamUnified } from '../../lib/agriP2b';
+import pamUnifiedJson from '../../data/processed/pam_unified.json';
 import initiativesJson from '../../data/processed/initiatives.json';
-
-type CropEn = {
-  production_quantity_tonnes: Record<string, number>;
-  harvested_area_hectares: Record<string, number>;
-  average_yield_kg_per_ha?: Record<string, number>;
-};
-type CropPt = {
-  quantidade_produzida_toneladas: Record<string, number>;
-  area_colhida_hectares: Record<string, number>;
-  rendimento_medio_kg_por_ha?: Record<string, number>;
-};
 
 const YEARS = ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'];
 
-describe('P1 PAM 2025 definitiva (PT+EN espelhados)', () => {
-  const en = ibgeEn as {
-    metadata: { last_updated: string; pam_2025_status?: string };
-    data: {
-      agricultural_production: Record<string, CropEn>;
-      summary_annual: Record<string, Record<string, unknown>>;
-    };
-  };
-  const pt = ibgePt as {
-    metadata: { last_updated: string; pam_2025_status?: string };
-    data: {
-      producao_agricola: Record<string, CropPt>;
-      resumo_anual: Record<string, Record<string, unknown>>;
-    };
-  };
+const EXPECTED_CROPS = [
+  'peanut',
+  'rice',
+  'oat',
+  'sweet_potato',
+  'potato',
+  'sugarcane',
+  'cassava',
+  'corn',
+  'soybean',
+  'wheat',
+  'cotton',
+] as const;
 
-  it('mantém 11 culturas espelhadas PT/EN sem deduplicar', () => {
-    expect(Object.keys(en.data.agricultural_production)).toHaveLength(11);
-    expect(Object.keys(pt.data.producao_agricola)).toHaveLength(11);
+describe('P1 PAM 2025 definitiva (payload unificado, sem duplicar série)', () => {
+  const pam = pamUnifiedJson as PamUnified;
+  const crops = pam.crops ?? {};
+
+  it('traz 11 culturas sob chaves estáveis com nomes PT+EN', () => {
+    expect(Object.keys(crops).sort()).toEqual([...EXPECTED_CROPS].sort());
+    for (const [key, crop] of Object.entries(crops)) {
+      expect(crop.code, key).toBeTruthy();
+      expect(crop.name, key).toBeTruthy();
+      expect(crop.nome, key).toBeTruthy();
+    }
+    expect(crops.soybean.name).toBe('Soybean (grain)');
+    expect(crops.soybean.nome).toBe('Soja (em grão)');
   });
 
-  it('traz average_yield/rendimento_medio 2018-2025 derivado de quantidade/área', () => {
-    for (const crop of Object.values(en.data.agricultural_production)) {
-      expect(Object.keys(crop.average_yield_kg_per_ha ?? {})).toEqual(YEARS);
+  it('guarda UMA série numérica 2018-2025 + rendimento derivado de quantidade/área', () => {
+    for (const [key, crop] of Object.entries(crops)) {
+      expect(Object.keys(crop.average_yield_kg_per_ha ?? {}), key).toEqual(YEARS);
       for (const y of YEARS) {
         const expected = Math.round(
-          (crop.production_quantity_tonnes[y] * 1000) / crop.harvested_area_hectares[y],
+          (crop.production_quantity_tonnes?.[y] ?? 0) * 1000 /
+            (crop.harvested_area_hectares?.[y] ?? 1),
         );
-        expect(crop.average_yield_kg_per_ha?.[y]).toBe(expected);
+        expect(crop.average_yield_kg_per_ha?.[y], `${key}/${y}`).toBe(expected);
       }
     }
-    for (const crop of Object.values(pt.data.producao_agricola)) {
-      expect(Object.keys(crop.rendimento_medio_kg_por_ha ?? {})).toEqual(YEARS);
-    }
-    // Espelho: soja 2025 rende igual nos dois arquivos
-    expect(en.data.agricultural_production.soybean.average_yield_kg_per_ha?.['2025']).toBe(
-      pt.data.producao_agricola.soja.rendimento_medio_kg_por_ha?.['2025'],
-    );
+    expect(crops.soybean.average_yield_kg_per_ha?.['2025']).toBe(3470);
   });
 
-  it('registra o valor da produção 2025 (R$ 927 bi) no resumo anual + bump last_updated', () => {
-    expect(en.data.summary_annual['2025'].total_production_value_billion_reais).toBe(927);
-    expect(pt.data.resumo_anual['2025'].valor_total_producao_bilhoes_reais).toBe(927);
-    expect(en.metadata.pam_2025_status).toBe('final');
-    expect(pt.metadata.pam_2025_status).toBe('definitiva');
-    expect(en.metadata.last_updated).toBe('2026-10-16');
-    expect(pt.metadata.last_updated).toBe('2026-10-16');
+  it('registra o valor da produção 2025 (R$ 927 bi) no resumo anual + metadados bilíngues', () => {
+    expect(pam.summary_annual?.['2025']?.total_production_value_billion_reais).toBe(927);
+    expect(pam.metadata?.pam_2025_status).toMatchObject({ pt: 'definitiva', en: 'final' });
+    expect(pam.metadata?.last_updated).toBe('2026-10-16');
+    expect(pam.metadata?.survey).toMatchObject({
+      pt: 'Produção Agrícola Municipal',
+      en: 'Municipal Agricultural Production',
+    });
   });
 });
 
@@ -72,20 +65,22 @@ describe('P1 initiatives.json (15+ entradas coerentes, anos estendidos)', () => 
     string,
     {
       acronym?: string;
+      status?: string;
       available_years?: number[];
       update_frequency?: string;
       near_real_time?: boolean;
-      status?: string;
+      status_note?: string;
       latest_deforestation_rate?: { year: number; area_km2: number };
       accuracy?: { by_collection?: { collection_name: string; accuracy: number | null }[] };
     }
   >;
 
-  it('tem 15+ entradas, todas com sigla e série de anos não-vazia', () => {
+  it('tem 15+ entradas, todas com sigla, status e série de anos não-vazia', () => {
     const names = Object.keys(meta);
     expect(names.length).toBeGreaterThanOrEqual(15);
     for (const [name, entry] of Object.entries(meta)) {
       expect(entry.acronym, name).toBeTruthy();
+      expect(entry.status, name).toMatch(/^(active|legacy)$/);
       expect(Array.isArray(entry.available_years), name).toBe(true);
       expect(entry.available_years!.length, name).toBeGreaterThan(0);
     }
@@ -119,5 +114,25 @@ describe('P1 initiatives.json (15+ entradas coerentes, anos estendidos)', () => 
     expect(rows.length).toBeGreaterThanOrEqual(15);
     expect(Math.max(...rows.map((r) => r.Year_End))).toBe(2025);
     for (const r of rows) expect(r.Acronym).not.toBe('N/A');
+  });
+
+  it('accuracies sem avaliação viram n/a justificado (nunca 0.0 inventado)', () => {
+    const rows = parseInitiatives(meta as never);
+    for (const r of rows) {
+      expect(r.Accuracy_Label, r.Name).toBeTruthy();
+    }
+    const byName = Object.fromEntries(rows.map((r) => [r.Name, r]));
+    // IBGE (sem avaliação) e CONAB-AM (incompleta): n/a + motivo da fonte.
+    for (const name of [
+      'IBGE Monitoring Land Cover and Land Use',
+      'National Supply Company Agricultural Mapping',
+    ]) {
+      expect(byName[name].Accuracy).toBe(0);
+      expect(byName[name].Accuracy_Label).toBe('n/a');
+      expect(byName[name].Accuracy_Note, name).toBeTruthy();
+    }
+    // Avaliadas mantêm rótulo numérico, sem nota.
+    expect(byName['Global Pasture Watch (GPW)'].Accuracy_Label).toBe('91.0');
+    expect(byName['Global Pasture Watch (GPW)'].Accuracy_Note).toBe('');
   });
 });

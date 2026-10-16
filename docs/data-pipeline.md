@@ -74,12 +74,25 @@ Two different mechanisms serve data in this SPA. Do not mix them.
   `Header`). Drawer a11y (Escape, `role=dialog`/`aria-modal`, focus trap,
   `aria-current`, `<Link>`) lives in `Header.tsx`.
 
-## 5. CONAB typed outputs (P0, reversible)
+## 5. CONAB typed outputs (P0, reversible; Fase 1 saneamento 2026-10-16)
 
 - **Calendar/availability:** `processCsv` is delimiter-aware (`;`/`,`, BOM/CRLF)
-  and emits typed rows **alongside** the legacy single-key string
-  (`{crop, uf, months[12]}` Oct→Sep; `{crop, uf, anos_1s, anos_2s,
-is_long_aggregate}`). Old `split(';')` consumers keep working untouched.
+  and emits typed rows only (`{crop, uf, months[12]}` Oct→Sep; `{crop, uf,
+anos_1s, anos_2s, is_long_aggregate}`). The legacy `;`-joined single keys
+  were removed — all 8 consumers (`CropCalendar/*Tab` × 7,
+  `AgricultureAvailabilityPage`) read typed arrays
+  (`src/types/calendar.ts`: `ConabCalendarRow`/`ConabAvailabilityRow`).
+  `src/test/data/noLegacySemicolon.test.ts` regresses this.
+- **Canonical availability:** `src/types/calendar.ts` →
+  `CalendarAvailability {cropId, month 1-12, region UF, plantingPct,
+harvestPct, areaSharePct?, source, vintage, updatedAt}` +
+  `normalizeCalendarRows()` (P→100/0, H→0/100, PH→50/50, blank→0/0).
+- **PAM i18n único:** `brazilian_agricultural_data.json` (PT) +
+  `brazilian_ibge_agricultural_data.json` (EN) carry identical numerics, so
+  preprocess fuses them into `src/data/processed/pam_unified.json`
+  (stable EN slugs + `{pt, en}` name dictionary, single numeric payload;
+  `buildPamUnified` throws on any PT/EN divergence). The per-language copies
+  are no longer emitted — bundle payload ~halved (23.5 KB → 12.8 KB).
 - **`Anos (1S)/(2S)`:** crop years with mapping in the 1st/2nd-semester
   campaign (`"YYYY-YYYY"` pairs). Empty crop cells forward-fill from the
   row above; Area `Brazil` → `BR` (national aggregate). Full notes in
@@ -89,8 +102,12 @@ is_long_aggregate}`). Old `split(';')` consumers keep working untouched.
   out of per-year axes (covered by `src/test/scripts/preprocess-data.test.ts`).
 - **Safra XLSX:** header-row detection + merged sub-header folding
   (`SAFRAS 24/25`, `PRODUÇÃO (Em mil t) Safra 25/26 (f)`); zero `__EMPTY`
-  keys; all-null columns trimmed. `2324` stays an `_unavailable` marker
-  (failed download — re-download + `npm run preprocess`).
+  keys; all-null columns trimmed. `conab_safra_2023_24.xlsx` re-downloaded
+  2026-10-16 (12º levantamento 2023/24, 76 sheets) — marker `_unavailable`
+  substituído por dados reais. `conab_serie_historica.xlsx` segue marcador
+  de download falho: série histórica CONAB não tem URL estável trivial
+  (portal é SPA sem link direto) — ingestão pulada com nota, sem inventar
+  dados.
 - **Seasons:** `conab_agricultural_data.json` carries `2024/25` (closed,
   Jul/2025) + `2025/26` (forecast; CONAB grain total 361.7 Mt —
   9 tracked crops sum ~357.1 Mt). `ConabEstimatesTab` KPIs use the last

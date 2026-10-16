@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import Card from '../../ui/Card';
 import EChartsLine from '../../charts/echarts/EChartsLine';
 import { useT } from '../../../i18n/LanguageContext';
-import { buildPamYieldSeries, PAM_GRAIN_KEYS, PAM_YEARS, type PamProduction } from '../../../lib/agriP2b';
-import pamData from '../../../data/processed/brazilian_agricultural_data.json';
+import { buildPamYieldSeries, PAM_GRAIN_KEYS, PAM_YEARS, type PamUnified } from '../../../lib/agriP2b';
+import pamData from '../../../data/processed/pam_unified.json';
 
 /**
  * P2b (1): série de rendimento médio (kg/ha) por cultura PAM 2018–2025 —
@@ -11,13 +11,12 @@ import pamData from '../../../data/processed/brazilian_agricultural_data.json';
  * (Verde Agro via builders ECharts existentes).
  */
 export default function ProductivitySeriesChart(): React.JSX.Element | null {
-  const { t: tBody } = useT('agricultural');
+  const { t: tBody, locale } = useT('agricultural');
 
   const series = useMemo(() => {
-    const production = (pamData as { data: { producao_agricola: PamProduction } }).data
-      ?.producao_agricola;
-    return buildPamYieldSeries(production, PAM_GRAIN_KEYS, PAM_YEARS);
-  }, []);
+    const production = (pamData as PamUnified).crops;
+    return buildPamYieldSeries(production, PAM_GRAIN_KEYS, PAM_YEARS, locale);
+  }, [locale]);
 
   if (series.length === 0) return null;
 

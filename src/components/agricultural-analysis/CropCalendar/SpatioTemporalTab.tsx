@@ -7,12 +7,11 @@ import { useT } from '../../../i18n/LanguageContext';
 import { translateCropName, translateMonthShort } from '../../../data/glossary';
 import conabCalendar from '../../../data/processed/conab_calendar.json';
 import conabMapping from '../../../data/processed/conab_mapping.json';
+import type { ConabCalendarRow } from '../../../types/calendar';
 
 const MONTHS_SHORT = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
 
-interface CalendarRow {
-  'Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September': string;
-}
+type CalendarRow = ConabCalendarRow;
 
 interface StateInfo {
   name: string;
@@ -53,23 +52,18 @@ export default function SpatioTemporalTab({ selectedCrops, selectedRegions }: Sp
     const stateCropMonths: Record<string, Record<string, Set<number>>> = {};
 
     for (const row of rawData) {
-      const entry = row['Crop type;Federation Unit;October;November;December;January;February;March;April;May;June;July;August;September'];
-      if (!entry || entry.trim() === '' || entry.startsWith(';')) continue;
-
-      const parts = entry.split(';');
-      if (parts.length < 13) continue;
-
-      const crop = parts[0].trim();
+      const crop = (row.crop || '').trim();
       if (!crop || !selectedCrops.includes(crop)) continue;
 
-      const state = parts[1].trim();
+      const state = (row.uf || '').trim();
+      if (!state) continue;
       const region = stateRegions[state];
       if (region && !selectedRegions.includes(region)) continue;
 
       if (!stateCropMonths[state]) stateCropMonths[state] = {};
       if (!stateCropMonths[state][crop]) stateCropMonths[state][crop] = new Set();
 
-      parts.slice(2).forEach((v, i) => {
+      row.months.forEach((v, i) => {
         if (parseActivityValue(v) > 0) {
           stateCropMonths[state][crop].add(i);
         }
