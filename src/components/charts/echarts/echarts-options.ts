@@ -555,6 +555,16 @@ export interface LineInput extends BaseBuilderInput {
   areaFill?: boolean;
   /** Stack all series (Plotly `stackgroup` analogue, default false). */
   stack?: boolean;
+  /**
+   * Y-axis bounds for 0/1-style series (ex. cobertura temporal binária):
+   * omite ticks fracionários como 0.5. Omitidos → eixo automático
+   * (comportamento dos demais line charts, inalterado).
+   */
+  yMin?: number;
+  /** Y-axis upper bound (ver `yMin`). */
+  yMax?: number;
+  /** Y-axis minimum tick gap (ver `yMin`; `1` = só ticks inteiros). */
+  yMinInterval?: number;
 }
 
 export function buildLineOption(input: LineInput): EChartsCoreOption {
@@ -595,6 +605,9 @@ export function buildLineOption(input: LineInput): EChartsCoreOption {
     },
     yAxis: {
       type: 'value',
+      ...(input.yMin !== undefined ? { min: input.yMin } : {}),
+      ...(input.yMax !== undefined ? { max: input.yMax } : {}),
+      ...(input.yMinInterval !== undefined ? { minInterval: input.yMinInterval } : {}),
       axisLabel: tickLabel(input.theme, fontFamily, {
         formatter: (v: number): string =>
           formatEChartsNumber(v, input.locale),

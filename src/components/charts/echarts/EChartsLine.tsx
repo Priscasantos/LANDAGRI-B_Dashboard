@@ -17,6 +17,12 @@ interface EChartsLineProps {
   areaFill?: boolean;
   /** Stack all series (Plotly `stackgroup` analogue). */
   stack?: boolean;
+  /** Y-axis lower bound for 0/1-style series (omitted → auto). */
+  yMin?: number;
+  /** Y-axis upper bound (omitted → auto). */
+  yMax?: number;
+  /** Y-axis minimum tick gap (`1` = integer-only ticks; omitted → auto). */
+  yMinInterval?: number;
 }
 
 export default function EChartsLine({
@@ -26,6 +32,9 @@ export default function EChartsLine({
   showMarkers = true,
   areaFill = false,
   stack = false,
+  yMin,
+  yMax,
+  yMinInterval,
 }: EChartsLineProps): ReactElement {
   const theme = useEffectiveTheme();
   const fontFamily = useChartFontFamily();
@@ -41,8 +50,11 @@ export default function EChartsLine({
         showMarkers,
         areaFill,
         stack,
+        ...(yMin !== undefined ? { yMin } : {}),
+        ...(yMax !== undefined ? { yMax } : {}),
+        ...(yMinInterval !== undefined ? { yMinInterval } : {}),
       }),
-    [series, theme, locale, fontFamily, showMarkers, areaFill, stack],
+    [series, theme, locale, fontFamily, showMarkers, areaFill, stack, yMin, yMax, yMinInterval],
   );
 
   const caption = captionKey !== undefined ? t(captionKey) : '';

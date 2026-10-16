@@ -948,3 +948,48 @@ describe('echarts-options palette (theme | divergent)', () => {
     expect(dls[0].markPoint.itemStyle.color).toBe(LANDAGRI_COLORWAY_DARK[6]);
   });
 });
+
+describe('line: integer temporal axis (ConabMappingTab coverage evolution)', () => {
+  const presence = {
+    series: [
+      {
+        name: 'Soja',
+        x: ['2020', '2021', '2022', '2023', '2024'],
+        y: [1, 1, 1, 1, 1],
+      },
+    ],
+    theme: 'light' as const,
+    locale: 'pt-BR',
+  };
+
+  it('year categories stay whole years (never fractional ticks)', () => {
+    const option = buildLineOption(presence);
+    expect(option.xAxis).toMatchObject({ type: 'category' });
+    expect(
+      (option.xAxis as { data: unknown }).data,
+    ).toEqual(['2020', '2021', '2022', '2023', '2024']);
+    const formatter = (
+      option.xAxis as { axisLabel: { formatter: (v: unknown) => string } }
+    ).axisLabel.formatter;
+    expect(formatter('2020')).toBe('2020');
+    expect(formatter('2024')).toBe('2024');
+  });
+
+  it('binary presence series gets integer-only y ticks via overrides', () => {
+    const option = buildLineOption({ ...presence, yMin: 0, yMax: 1, yMinInterval: 1 });
+    expect(option.yAxis).toMatchObject({
+      type: 'value',
+      min: 0,
+      max: 1,
+      minInterval: 1,
+    });
+  });
+
+  it('y overrides omitted → yAxis untouched (back-compat for other line charts)', () => {
+    const option = buildLineOption(presence);
+    const yAxis = option.yAxis as Record<string, unknown>;
+    expect(yAxis).not.toHaveProperty('min');
+    expect(yAxis).not.toHaveProperty('max');
+    expect(yAxis).not.toHaveProperty('minInterval');
+  });
+});

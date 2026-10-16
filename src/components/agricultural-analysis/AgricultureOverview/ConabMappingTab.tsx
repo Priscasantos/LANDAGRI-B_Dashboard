@@ -106,18 +106,17 @@ export default function ConabMappingTab() {
     if (!cropsMapping) return { series: [] };
 
     const years = ['2020', '2021', '2022', '2023', '2024'];
-    // Numeric years (not date-like strings) so Plotly uses a linear axis;
-    // combined with `dtick: 1` + `tickformat: 'd'` below, ticks are always
-    // whole years — never fractional labels like "2020.5".
-    const numericYears = years.map(Number);
+    // Anos como categorias de string: o eixo x (`category` em
+    // `buildLineOption`) exibe anos inteiros verbatim — nunca interpola
+    // ticks fracionários como "2020.5" nem reagrupa por locale ("2.020").
     const series = Object.entries(cropsMapping).map(([, crop]) => ({
-      name: crop.name,
-      x: numericYears,
+      name: translateCropName(crop.name, locale),
+      x: years,
       y: years.map(y => (crop.mapping_years?.includes(y) ? 1 : 0)),
     }));
 
     return { series };
-  }, [mappingDataDetailed]);
+  }, [mappingDataDetailed, locale]);
 
   if (!mappingData?.crop_calendar) {
     return (
@@ -166,6 +165,9 @@ export default function ConabMappingTab() {
             height={350}
             showMarkers={false}
             areaFill
+            yMin={0}
+            yMax={1}
+            yMinInterval={1}
           />
         ) : (
           <p className="text-fg-muted text-center py-8">{tBody('noTemporalData')}</p>
