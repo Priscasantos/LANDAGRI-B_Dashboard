@@ -228,3 +228,82 @@ export function recencyOf(records: CalendarAvailability[]): Recency | null {
   if (first === undefined) return null;
   return { source: first.source, vintage: first.vintage, updatedAt: first.updatedAt };
 }
+
+/**
+ * Breakdown por grupo (cultura/região): contagem honesta de células
+ * UF×mês com plantio/colheita — sem ponderação por área, sem invenção.
+ * Denominador = nº de registros (UF×mês) do grupo; listas de UFs
+ * ordenadas para tooltips top-N + overflow.
+ */
+export interface GroupBreakdown {
+  key: string;
+  totalCells: number;
+  plantingCells: number;
+  harvestCells: number;
+  pctPlanting: number;
+  pctHarvest: number;
+  plantingUfs: string[];
+  harvestUfs: string[];
+  activeUfs: string[];
+}
+
+/** Agrega registros em um `GroupBreakdown` por chave (ordem alfabética). */
+export function summarizeActivityByGroup(
+  records: CalendarAvailability[],
+  groupKey: (record: CalendarAvailability) => string,
+): GroupBreakdown[] {
+  const groups = new Map<string, CalendarAvailability[]>();
+  for (const r of records) {
+    const key = groupKey(r);
+    const list = groups.get(key) ?? [];
+    list.push(r);
+    groups.set(key, list);
+  }
+  const out: GroupBreakdown[] = [];
+  for (const [key, list] of groups) {
+    const planting = list.filter((r) => r.plantingPct > 0);
+    const harvest = list.filter((r) => r.harvestPct > 0);
+    const uniq = (l: CalendarAvailability[]): string[] =>
+      [...new Set(l.map((r) => r.region))].sort();
+    out.push({
+      key,
+      totalCells: list.length,
+      plantingCells: planting.length,
+      harvestCells: harvest.length,
+      pctPlanting: list.length > 0 ? (planting.length / list.length) * 100 : 0,
+      pctHarvest: list.length > 0 ? (harvest.length / list.length) * 100 : 0,
+      plantingUfs: uniq(planting),
+      harvestUfs: uniq(harvest),
+      activeUfs: uniq(list.filter(isActive)),
+    });
+  }
+  return out.sort((a, b) => a.key.localeCompare(b.key));
+}
+
+/** Fatia do tooltip de breakdown: só plantio, só colheita ou ambos. */
+export type BreakdownTipSlice = 'planting' | 'harvest' | 'both';
+
+/**
+ * Tooltip HTML do breakdown por grupo: título + % P/H + listas de UFs
+ * (top-N + "+k outras"). Rótulos injetados pelo chamador (i18n).
+ */
+export function formatBreakdownTip(
+  title: string,
+  breakdown: GroupBreakdown,
+  labels: ShareTipLabels,
+  topN: number = TOOLTIP_TOP_UFS,
+  slice: BreakdownTipSlice = 'both',
+): string {
+  const formatList = (list: string[]): string => {
+    const { top, overflow } = topUfsWithOverflow(list, topN);
+    const base = top.join(', ') || '–';
+    return overflow > 0 ? `${base} ${labels.more(overflow)}` : base;
+  };
+  const plantingLine =
+    `${labels.planting}: ${Math.round(breakdown.pctPlanting)}% (${formatList(breakdown.plantingUfs)})`;
+  const harvestLine =
+    `${labels.harvest}: ${Math.round(breakdown.pctHarvest)}% (${formatList(breakdown.harvestUfs)})`;
+  const body =
+    slice === 'planting' ? plantingLine : slice === 'harvest' ? harvestLine : `${plantingLine}<br>${harvestLine}`;
+  return `<b>${title}</b><br>${body}`;
+}

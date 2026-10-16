@@ -18,6 +18,11 @@ interface EChartsGroupedBarProps {
   referenceLine?: { value: number; name: string; color?: string };
   /** Y axis scale (Plotly `type: 'log'` analogue). */
   yAxisType?: 'value' | 'log';
+  /**
+   * Pre-formatted HTML tooltip per `[series][category]` (ex. listas de
+   *   UFs). Omitido → tooltip padrão do eixo.
+   */
+  tips?: (string | null)[][];
 }
 
 export default function EChartsGroupedBar({
@@ -28,6 +33,7 @@ export default function EChartsGroupedBar({
   stacked,
   referenceLine,
   yAxisType,
+  tips,
 }: EChartsGroupedBarProps): ReactElement {
   const theme = useEffectiveTheme();
   const fontFamily = useChartFontFamily();
@@ -44,8 +50,9 @@ export default function EChartsGroupedBar({
         stacked,
         referenceLine,
         yAxisType,
+        ...(tips !== undefined ? { tips } : {}),
       }),
-    [categories, series, theme, locale, fontFamily, stacked, referenceLine, yAxisType],
+    [categories, series, theme, locale, fontFamily, stacked, referenceLine, yAxisType, tips],
   );
 
   const caption = captionKey !== undefined ? t(captionKey) : '';

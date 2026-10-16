@@ -284,6 +284,12 @@ export interface GroupedBarInput extends BaseBuilderInput {
   referenceLine?: { value: number; name: string; color?: string };
   /** Y axis scale (Plotly `type: 'log'` analogue for resolution meters). */
   yAxisType?: 'value' | 'log';
+  /**
+   * Pre-formatted HTML tooltip per `[series][category]` (ex. listas de
+   *   UFs do breakdown sazonal). `null`/ausente → linha padrão
+   *   `série: valor`. Omitido → tooltip padrão do eixo (legado).
+   */
+  tips?: (string | null)[][];
 }
 
 export function buildGroupedBarOption(
@@ -300,6 +306,34 @@ export function buildGroupedBarOption(
       ...tooltipBase(input, fontFamily),
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
+      ...(input.tips !== undefined
+        ? {
+            formatter: (params: unknown): string => {
+              const list = (Array.isArray(params) ? params : [params]) as Array<{
+                seriesIndex?: number;
+                dataIndex?: number;
+                seriesName?: string;
+                value?: unknown;
+                marker?: string;
+              }>;
+              const dataIndex = list[0]?.dataIndex ?? -1;
+              const cat = dataIndex >= 0 ? input.categories[dataIndex] : '';
+              const lines = list.map((p) => {
+                const tip =
+                  p.seriesIndex !== undefined && dataIndex >= 0
+                    ? (input.tips?.[p.seriesIndex]?.[dataIndex] ?? null)
+                    : null;
+                if (typeof tip === 'string' && tip !== '') return tip;
+                const v =
+                  typeof p.value === 'number'
+                    ? formatEChartsNumber(p.value, input.locale)
+                    : String(p.value ?? '');
+                return `${p.marker ?? ''} ${p.seriesName ?? ''}: ${v}`.trim();
+              });
+              return `<b>${String(cat)}</b><br>` + lines.join('<br>');
+            },
+          }
+        : {}),
     },
     legend: legendBase(input.theme, fontFamily),
     grid: { left: 8, right: 24, top: 40, bottom: legendGridBottom(input.series.length), containLabel: true },
