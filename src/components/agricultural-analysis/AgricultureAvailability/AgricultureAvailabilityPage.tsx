@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactElement } from 'react';
-import { Map, Wheat, MapPin } from 'lucide-react';
+import { ChevronDown, Map, Wheat, MapPin } from 'lucide-react';
 import Card from '../../ui/Card';
 import MetricCard from '../../ui/MetricCard';
 import EChartsHorizontalBar from '../../charts/echarts/EChartsHorizontalBar';
@@ -250,7 +250,10 @@ export default function AgricultureAvailabilityPage(): ReactElement {
   const hasActiveFilters = selectedCrop !== ALL || selectedRegion !== ALL || selectedPeriod !== ALL;
 
   const selectClassName =
-    'mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
+    'min-h-[44px] w-full cursor-pointer appearance-none rounded-lg border border-border bg-surface py-2.5 pr-10 pl-3 text-sm text-fg shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
+
+  const selectChevronClassName =
+    'pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-fg-muted';
 
   return (
     <div>
@@ -258,64 +261,73 @@ export default function AgricultureAvailabilityPage(): ReactElement {
         <legend className="px-2 text-sm font-semibold text-fg">{tBody('filtersTitle')}</legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
-            <label htmlFor="availability-filter-crop" className="text-sm font-medium text-fg">
+            <label htmlFor="availability-filter-crop" className="mb-1.5 block text-sm font-medium text-fg">
               {tBody('filterCrop')}
             </label>
-            <select
-              id="availability-filter-crop"
-              className={selectClassName}
-              value={selectedCrop}
-              onChange={(event) => setSelectedCrop(event.target.value)}
-            >
-              <option value={ALL}>{tBody('allCrops')}</option>
-              {filterOptions.crops.map((crop) => (
-                <option key={crop} value={crop}>
-                  {translateCropName(crop, locale)}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                id="availability-filter-crop"
+                className={selectClassName}
+                value={selectedCrop}
+                onChange={(event) => setSelectedCrop(event.target.value)}
+              >
+                <option value={ALL}>{tBody('allCrops')}</option>
+                {filterOptions.crops.map((crop) => (
+                  <option key={crop} value={crop}>
+                    {translateCropName(crop, locale)}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={16} aria-hidden="true" className={selectChevronClassName} />
+            </div>
           </div>
           <div>
-            <label htmlFor="availability-filter-region" className="text-sm font-medium text-fg">
+            <label htmlFor="availability-filter-region" className="mb-1.5 block text-sm font-medium text-fg">
               {tBody('filterRegion')}
             </label>
-            <select
-              id="availability-filter-region"
-              className={selectClassName}
-              value={selectedRegion}
-              onChange={(event) => setSelectedRegion(event.target.value)}
-            >
-              <option value={ALL}>{tBody('allRegions')}</option>
-              {filterOptions.regions.map((region) => (
-                <option key={region} value={region}>
-                  {translateRegion(region, locale)}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                id="availability-filter-region"
+                className={selectClassName}
+                value={selectedRegion}
+                onChange={(event) => setSelectedRegion(event.target.value)}
+              >
+                <option value={ALL}>{tBody('allRegions')}</option>
+                {filterOptions.regions.map((region) => (
+                  <option key={region} value={region}>
+                    {translateRegion(region, locale)}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={16} aria-hidden="true" className={selectChevronClassName} />
+            </div>
           </div>
           <div>
-            <label htmlFor="availability-filter-period" className="text-sm font-medium text-fg">
+            <label htmlFor="availability-filter-period" className="mb-1.5 block text-sm font-medium text-fg">
               {tBody('filterPeriod')}
             </label>
-            <select
-              id="availability-filter-period"
-              className={selectClassName}
-              value={selectedPeriod}
-              onChange={(event) => setSelectedPeriod(event.target.value)}
-            >
-              <option value={ALL}>{tBody('allPeriods')}</option>
-              {filterOptions.periods.map((period) => (
-                <option key={period} value={period}>
-                  {period}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                id="availability-filter-period"
+                className={selectClassName}
+                value={selectedPeriod}
+                onChange={(event) => setSelectedPeriod(event.target.value)}
+              >
+                <option value={ALL}>{tBody('allPeriods')}</option>
+                {filterOptions.periods.map((period) => (
+                  <option key={period} value={period}>
+                    {period}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={16} aria-hidden="true" className={selectChevronClassName} />
+            </div>
           </div>
         </div>
         {hasActiveFilters && (
           <button
             type="button"
-            className="mt-4 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-fg-secondary transition-colors hover:bg-surface-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="mt-4 inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 py-2 text-sm font-medium text-fg-secondary transition-colors hover:bg-surface-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             onClick={() => {
               setSelectedCrop(ALL);
               setSelectedRegion(ALL);

@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import { ChevronDown } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface ViewOption {
@@ -58,7 +59,7 @@ export default function ViewSwitcher({ label, options, value, onChange }: ViewSw
         role="radiogroup"
         aria-label={label}
         onKeyDown={handleRadioKeyDown}
-        className="mb-4 hidden overflow-x-auto border-b border-border sm:flex"
+        className="mb-4 hidden gap-1 overflow-x-auto border-b border-border sm:flex"
       >
         {options.map((option, index) => {
           const isActive = option.id === value;
@@ -71,7 +72,7 @@ export default function ViewSwitcher({ label, options, value, onChange }: ViewSw
               aria-checked={isActive}
               tabIndex={index === activeIndex ? 0 : -1}
               onClick={() => onChange(option.id)}
-              className="inline-flex shrink-0 items-center gap-1.5 border-b-2 -mb-px px-4 py-2.5 text-sm whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 border-b-2 -mb-px px-4 py-2.5 text-sm whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               style={{
                 borderBottomColor: isActive ? 'var(--color-primary)' : 'transparent',
                 color: isActive ? 'var(--color-primary)' : 'var(--color-fg-muted)',
@@ -89,19 +90,26 @@ export default function ViewSwitcher({ label, options, value, onChange }: ViewSw
         <label htmlFor={selectId} className="sr-only">
           {label}
         </label>
-        <select
-          id={selectId}
-          aria-label={label}
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          className="w-full appearance-none rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        >
-          {options.map((option) => (
-            <option key={option.id} value={option.id}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            id={selectId}
+            aria-label={label}
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            className="min-h-[44px] w-full appearance-none rounded-lg border border-border bg-surface py-2.5 pr-10 pl-3 text-sm text-fg shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            {options.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            size={16}
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-fg-muted"
+          />
+        </div>
       </div>
     </div>
   );

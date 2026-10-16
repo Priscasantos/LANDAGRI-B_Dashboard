@@ -139,7 +139,7 @@ function SidebarNavContent({ onNavigate }: { onNavigate: () => void }): React.JS
                 onClick={() => toggleGroup(group.labelKey, isOpen)}
                 aria-expanded={isOpen}
                 aria-controls={panelId}
-                className="flex w-full items-center justify-between rounded-lg px-3 pt-5 pb-1.5 text-[11px] font-semibold tracking-wider text-fg-muted uppercase transition-colors first:pt-1 hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="flex min-h-[36px] w-full items-center justify-between rounded-lg px-3 pt-5 pb-1.5 text-[11px] font-semibold tracking-wider text-fg-muted uppercase transition-colors first:pt-1 hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
                 <span className="truncate">{tNav(group.labelKey)}</span>
                 <ChevronDown
@@ -162,7 +162,7 @@ function SidebarNavContent({ onNavigate }: { onNavigate: () => void }): React.JS
                         end={item.items === undefined}
                         onClick={onNavigate}
                         className={({ isActive }: { isActive: boolean }) =>
-                          `relative flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                          `relative flex min-h-[44px] items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                             isActive
                               ? 'bg-sidebar-active-bg font-semibold text-sidebar-text-active before:absolute before:inset-y-1.5 before:left-0 before:w-1 before:rounded-full before:bg-primary'
                               : 'text-sidebar-text hover:bg-sidebar-hover-bg hover:text-fg'
@@ -180,7 +180,7 @@ function SidebarNavContent({ onNavigate }: { onNavigate: () => void }): React.JS
                                 to={sub.url}
                                 onClick={onNavigate}
                                 className={({ isActive }: { isActive: boolean }) =>
-                                  `block truncate rounded-md px-2.5 py-2 text-[13px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                                  `flex min-h-[40px] items-center truncate rounded-md px-2.5 py-2 text-[13px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                                     isActive
                                       ? 'bg-sidebar-active-bg font-semibold text-sidebar-text-active'
                                       : 'text-fg-secondary hover:bg-sidebar-hover-bg hover:text-fg'
@@ -266,7 +266,7 @@ export default function AppSidebar(): React.JSX.Element {
               type="button"
               onClick={close}
               aria-label={t('closeMenu')}
-              className="absolute top-4 right-3 flex size-8 items-center justify-center rounded-lg text-fg-secondary transition-colors hover:bg-surface-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="absolute top-3 right-3 flex size-11 items-center justify-center rounded-lg text-fg-secondary transition-colors hover:bg-surface-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               <X size={18} aria-hidden="true" />
             </button>

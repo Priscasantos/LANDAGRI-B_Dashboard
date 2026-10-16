@@ -19,6 +19,29 @@ interface CommandSearchProps {
 }
 
 /**
+ * Realça o trecho do título que casa com a busca (case-insensitive).
+ * Sem match direto (ex.: acerto via sinônimo/url) devolve o texto puro.
+ */
+function HighlightedTitle({ title, query }: { title: string; query: string }): React.JSX.Element {
+  const q = query.trim();
+  if (q) {
+    const index = title.toLocaleLowerCase().indexOf(q.toLocaleLowerCase());
+    if (index !== -1) {
+      return (
+        <>
+          {title.slice(0, index)}
+          <mark className="rounded-sm bg-primary-light px-0.5 font-semibold text-primary">
+            {title.slice(index, index + q.length)}
+          </mark>
+          {title.slice(index + q.length)}
+        </>
+      );
+    }
+  }
+  return <>{title}</>;
+}
+
+/**
  * Command palette (adapted from the reference `command-search.tsx`).
  * Indexes the 5 module routes + initiative/agricultural sub-routes
  * (`commandIndex` in `src/config/routes.tsx`). Dependency-free:
@@ -166,12 +189,12 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps): React
                 type="button"
                 onMouseEnter={() => setActiveIndex(index)}
                 onClick={() => go(entry.url)}
-                className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                className={`flex min-h-[44px] w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                   index === activeIndex ? 'bg-surface-hover' : ''
                 }`}
               >
                 <span className="min-w-0 flex-1 truncate font-medium text-fg">
-                  {entry.title}
+                  <HighlightedTitle title={entry.title} query={query} />
                 </span>
                 {showRecents && index < recentCount && (
                   <span className="shrink-0 rounded-full bg-surface-alt px-2 py-0.5 text-[11px] text-fg-muted">

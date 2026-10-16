@@ -20,8 +20,8 @@ export default function Breadcrumb({ segments }: BreadcrumbProps): React.JSX.Ele
   if (segments.length === 0) return null;
   const visible = segments.length > 2 ? [segments[0], segments[segments.length - 1]] : segments;
   return (
-    <nav aria-label="breadcrumb" className="min-w-0">
-      <ol className="flex min-w-0 flex-wrap items-center gap-1.5 text-sm text-fg-secondary">
+    <nav aria-label="breadcrumb" className="min-w-0 py-1">
+      <ol className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-fg-secondary">
         {visible.map((segment, index) => {
           const isLast = index === visible.length - 1;
           return (
@@ -32,13 +32,13 @@ export default function Breadcrumb({ segments }: BreadcrumbProps): React.JSX.Ele
                 </span>
               )}
               {isLast || !segment.to ? (
-                <span aria-current="page" className="truncate font-medium text-fg max-w-[38vw] sm:max-w-none">
+                <span aria-current="page" className="inline-block max-w-[38vw] truncate py-0.5 font-medium text-fg sm:max-w-none">
                   {segment.label}
                 </span>
               ) : (
                 <Link
                   to={segment.to}
-                  className="truncate max-w-[28vw] sm:max-w-none transition-colors hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  className="inline-block max-w-[28vw] truncate py-0.5 transition-colors hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:max-w-none"
                 >
                   {segment.label}
                 </Link>

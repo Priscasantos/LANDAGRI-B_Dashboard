@@ -53,8 +53,9 @@ export default function CropCalendarFilters({
           <div className="flex items-center justify-between mb-2">
             <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-fg"><Wheat size={15} aria-hidden="true" className="shrink-0" /> {t('crops')}</span>
             <button
+              type="button"
               onClick={toggleAllCrops}
-              className="text-xs text-amber-700 hover:text-amber-800 font-medium"
+              className="inline-flex min-h-[32px] items-center rounded-md px-2 text-xs font-medium text-amber-700 transition-colors hover:text-amber-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               {allCropsSelected ? t('deselectAll') : t('selectAll')}
             </button>
@@ -63,11 +64,13 @@ export default function CropCalendarFilters({
             {crops.map(crop => (
               <button
                 key={crop}
+                type="button"
                 onClick={() => toggleCrop(crop)}
-                className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${
+                aria-pressed={selectedCrops.includes(crop)}
+                className={`inline-flex min-h-[32px] items-center rounded-full border px-3 py-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                   selectedCrops.includes(crop)
-                    ? 'bg-amber-100 border-amber-300 text-amber-800 font-medium'
-                    : 'bg-surface border-border text-fg-secondary hover:border-border'
+                    ? 'border-amber-300 bg-amber-100 font-medium text-amber-800'
+                    : 'border-border bg-surface text-fg-secondary hover:border-border hover:text-fg'
                 }`}
               >
                 {translateCropName(crop, locale)}
@@ -81,8 +84,9 @@ export default function CropCalendarFilters({
           <div className="flex items-center justify-between mb-2">
             <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-fg"><MapPin size={15} aria-hidden="true" className="shrink-0" /> {t('regions')}</span>
             <button
+              type="button"
               onClick={toggleAllRegions}
-              className="text-xs text-amber-700 hover:text-amber-800 font-medium"
+              className="inline-flex min-h-[32px] items-center rounded-md px-2 text-xs font-medium text-amber-700 transition-colors hover:text-amber-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               {allRegionsSelected ? t('deselectAll') : t('selectAll')}
             </button>
@@ -91,11 +95,13 @@ export default function CropCalendarFilters({
             {regions.map(region => (
               <button
                 key={region}
+                type="button"
                 onClick={() => toggleRegion(region)}
-                className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${
+                aria-pressed={selectedRegions.includes(region)}
+                className={`inline-flex min-h-[32px] items-center rounded-full border px-3 py-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                   selectedRegions.includes(region)
-                    ? 'bg-amber-100 border-amber-300 text-amber-800 font-medium'
-                    : 'bg-surface border-border text-fg-secondary hover:border-border'
+                    ? 'border-amber-300 bg-amber-100 font-medium text-amber-800'
+                    : 'border-border bg-surface text-fg-secondary hover:border-border hover:text-fg'
                 }`}
               >
                 {translateRegion(region, locale)}
