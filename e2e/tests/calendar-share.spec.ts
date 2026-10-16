@@ -52,7 +52,7 @@ test.describe('calendar share visuals (% UFs, mês atual, recência)', () => {
 
   test('availability: heatmap regional em % com recência', async ({ page }) => {
     await gotoSeeded(page, AVAILABILITY, 'pt-BR');
-    await expect(page.getByText(/% de UFs ativas/).first()).toBeVisible();
+    await expect(page.getByText(/% UFs ativas/).first()).toBeVisible();
     await expect(page.getByText(/Fonte: CONAB/).first()).toBeVisible();
     expect(await page.locator('.js-plotly-plot').count()).toBe(0);
   });

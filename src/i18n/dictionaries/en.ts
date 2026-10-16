@@ -346,7 +346,7 @@ export const en: EnDictionary = {
     noCalendarData: 'No calendar data available for the selected filters.',
     hNationalMatrix: 'National Calendar Matrix',
     matrixLegend: 'Green = Planting | Orange = Harvest | Blue = Both',
-    shareModeUf: '% of active UFs',
+    shareModeUf: '% active UFs',
     shareModeArea: '% of active area',
     shareScaleNote: 'Cells in % of active UFs (0–100); empty = no recorded activity.',
     currentMonth: 'Current month',

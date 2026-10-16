@@ -346,7 +346,7 @@ export const pt = {
     noCalendarData: 'Sem dados de calendário para os filtros selecionados.',
     hNationalMatrix: 'Matriz do Calendário Nacional',
     matrixLegend: 'Verde = Plantio | Laranja = Colheita | Azul = Ambos',
-    shareModeUf: '% de UFs ativas',
+    shareModeUf: '% UFs ativas',
     shareModeArea: '% de área ativa',
     shareScaleNote: 'Células em % de UFs ativas (0–100); vazio = sem atividade registrada.',
     currentMonth: 'Mês atual',

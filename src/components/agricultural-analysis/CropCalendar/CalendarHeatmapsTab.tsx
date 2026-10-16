@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Info } from 'lucide-react';
 import Card from '../../ui/Card';
 import EChartsHeatmap from '../../charts/echarts/EChartsHeatmap';
 import EChartsGroupedBar from '../../charts/echarts/EChartsGroupedBar';
@@ -135,13 +136,20 @@ export default function CalendarHeatmapsTab({ selectedCrops, selectedRegions }: 
   return (
     <div className="space-y-6">
       <Card padding="lg" hover={false}>
-        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+        <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
           <h3 className="text-base font-semibold text-fg">{tBody('hNationalMatrix')}</h3>
-          <span className="text-xs font-medium text-fg-secondary">
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-fg-secondary">
             {model.mode === 'area' ? tBody('shareModeArea') : tBody('shareModeUf')}
+            <button
+              type="button"
+              title={tBody('shareScaleNote')}
+              aria-label={tBody('shareScaleNote')}
+              className="inline-flex cursor-help items-center justify-center rounded-full text-fg-secondary hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              <Info size={14} aria-hidden="true" />
+            </button>
           </span>
         </div>
-        <p className="text-xs text-fg-secondary mb-4">{tBody('shareScaleNote')}</p>
         <EChartsHeatmap
           z={z}
           x={monthLabels}
