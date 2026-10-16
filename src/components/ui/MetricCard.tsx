@@ -6,6 +6,8 @@ interface MetricCardProps {
   label: string;
   value: string | number;
   help?: string;
+  /** Tooltip (`title`) sobre o valor — ex.: fonte sem OA publicado. */
+  valueTitle?: string;
   variant?: 'accuracy' | 'resolution' | 'classes' | 'frequency';
   className?: string;
 }
@@ -29,6 +31,7 @@ export default function MetricCard({
   label,
   value,
   help,
+  valueTitle,
   variant = 'accuracy',
   className = '',
 }: MetricCardProps): ReactElement {
@@ -52,7 +55,7 @@ export default function MetricCard({
       <div id={labelId} className="text-sm font-semibold text-fg-secondary mb-0.5">
         {label}
       </div>
-      <div id={valueId} className="text-2xl font-bold font-display tabular-nums text-fg">
+      <div id={valueId} className="text-2xl font-bold font-display tabular-nums text-fg" title={valueTitle}>
         {value}
       </div>
       {help && (

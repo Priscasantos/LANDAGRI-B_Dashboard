@@ -1,4 +1,5 @@
 import type { InitiativeMetadata, InitiativeRow, CoverageType, MethodologyType, DetailedProduct } from '../types/initiative';
+import { ACCURACY_UNAVAILABLE_LABEL } from './accuracyDisplay';
 
 /**
  * Parse initiatives metadata JSON → typed array of InitiativeRow.
@@ -157,9 +158,11 @@ function parseAccuracy(accuracy: unknown): AccuracyInfo {
 }
 
 /**
- * Human display for accuracy: numeric label when assessed, `"n/a"` with the
- * source justification when the assessment is missing/incomplete.
- * Never invents a number — unassessed series stay `n/a`, not `0.0`.
+ * Human display for accuracy: numeric label when assessed, `"—/n.d."`
+ * (literal do council) with the source justification when the assessment
+ * is missing/incomplete (IBGE-MLCU sem avaliação, CONAB-AM incompleta).
+ * Never invents a number — unassessed series stay `—/n.d.`, not `0.0`
+ * (0 interno = ausente; ver `lib/accuracyDisplay.ts`).
  */
 function describeAccuracy(raw: unknown, value: number): { label: string; note: string } {
   if (value > 0) return { label: value.toFixed(1), note: '' };
@@ -169,7 +172,7 @@ function describeAccuracy(raw: unknown, value: number): { label: string; note: s
     if (typeof r.reason === 'string' && r.reason !== '') note = r.reason;
     else if (typeof r.description === 'string' && r.description !== '') note = r.description;
   }
-  return { label: 'n/a', note };
+  return { label: ACCURACY_UNAVAILABLE_LABEL, note };
 }
 
 /**

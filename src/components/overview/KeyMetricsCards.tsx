@@ -2,6 +2,7 @@ import type { InitiativeRow } from '../../types/initiative';
 import MetricCard from '../ui/MetricCard';
 import { Target, Satellite, Tags, CalendarDays } from 'lucide-react';
 import { parseAvailableYears } from '../../lib/dataParser';
+import { accuracyTooltipText, formatAccuracyPct, hasAssessedAccuracy } from '../../lib/accuracyDisplay';
 import { useT } from '../../i18n/LanguageContext';
 
 interface KeyMetricsCardsProps {
@@ -11,15 +12,22 @@ interface KeyMetricsCardsProps {
 
 export default function KeyMetricsCards({ data }: KeyMetricsCardsProps) {
   const { t } = useT('overview');
+  const { t: tInitiative } = useT('initiative');
   const years = parseAvailableYears(data.Available_Years);
   const yearsCoverage = years.length;
+  const assessed = hasAssessedAccuracy(data.Accuracy);
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <MetricCard
         icon={Target}
         label={t('kmAccuracy')}
-        value={data.Accuracy > 0 ? `${data.Accuracy.toFixed(1)}%` : '-'}
+        value={formatAccuracyPct(data.Accuracy, data.Accuracy_Label)}
+        valueTitle={
+          assessed
+            ? undefined
+            : accuracyTooltipText(tInitiative('accuracyNoOverall'), data.Acronym, data.Accuracy_Note || undefined)
+        }
         help={t('kmAccuracyHelp')}
         variant="accuracy"
       />

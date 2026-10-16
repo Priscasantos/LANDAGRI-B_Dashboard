@@ -43,8 +43,12 @@ export default function BarChartTab({ selectedInitiatives }: BarChartTabProps) {
         default: return 0;
       }
     };
+    // Council: métrica de acurácia exclui fontes sem OA publicado
+    // (IBGE-MLCU, CONAB-AM) em vez de plotar barra 0.0.
+    const usesAccuracy = metric1 === 'accuracy' || metric2 === 'accuracy' || metric3 === 'accuracy';
     return initiatives
       .filter((i) => selectedInitiatives.includes(i.Name))
+      .filter((i) => !usesAccuracy || i.Accuracy > 0)
       .map((i) => ({
         name: getInitiativeShortName(i.Display_Name, locale),
         metric1: getValue(i, metric1),
@@ -53,10 +57,17 @@ export default function BarChartTab({ selectedInitiatives }: BarChartTabProps) {
       }));
   }, [initiatives, selectedInitiatives, metric1, metric2, metric3, locale]);
 
+  const usesAccuracyMetric = metric1 === 'accuracy' || metric2 === 'accuracy' || metric3 === 'accuracy';
+
+  const selectedCount = useMemo(
+    () => initiatives.filter((i) => selectedInitiatives.includes(i.Name)).length,
+    [initiatives, selectedInitiatives],
+  );
+
   if (filteredData.length === 0) {
     return (
       <div className="py-8 text-center text-fg-muted">
-        {tBody('noSelectionMulti')}
+        {selectedCount > 0 && usesAccuracyMetric ? tBody('overallScoreNote') : tBody('noSelectionMulti')}
       </div>
     );
   }
@@ -75,6 +86,11 @@ export default function BarChartTab({ selectedInitiatives }: BarChartTabProps) {
       <p className="text-sm text-fg-secondary">
         {tBody('barIntro')}
       </p>
+      {usesAccuracyMetric && (
+        <p className="text-xs text-fg-muted" role="note">
+          {tBody('overallScoreNote')}
+        </p>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Select

@@ -7,6 +7,7 @@ import {
   translateMethodology,
   translateTerm,
 } from '../../../data/glossary';
+import { accuracyTooltipText, formatAccuracyPct } from '../../../lib/accuracyDisplay';
 import { useT } from '../../../i18n/LanguageContext';
 
 export default function DetailedTableTab() {
@@ -23,8 +24,11 @@ export default function DetailedTableTab() {
         providerFull: i.Provider,
         coverage: translateTerm('coverage', i.Coverage, locale),
         methodology: translateMethodology(i.Methodology, locale),
-        accuracy: i.Accuracy > 0 ? `${i.Accuracy.toFixed(1)}%` : (i.Accuracy_Label ?? 'n/a'),
-        accuracyNote: i.Accuracy_Note || '',
+        accuracy: formatAccuracyPct(i.Accuracy, i.Accuracy_Label),
+        accuracyNote:
+          i.Accuracy > 0
+            ? i.Accuracy_Note || ''
+            : accuracyTooltipText(t('accuracyNoOverall'), i.Acronym, i.Accuracy_Note || undefined),
         resolution: i.Resolution > 0 ? `${i.Resolution}m` : '-',
         classes: i.Number_of_Classes,
         agriClasses: i.Number_of_Agriculture_Classes,
@@ -32,7 +36,7 @@ export default function DetailedTableTab() {
         period: `${i.Year_Start}–${i.Year_End}`,
         frequency: i.Temporal_Frequency,
       })),
-    [initiatives, locale],
+    [initiatives, locale, t],
   );
 
   const columns = [

@@ -8,6 +8,7 @@ import {
   translateMethodology,
   translateTerm,
 } from '../../../data/glossary';
+import { accuracyTooltipText, formatAccuracyValue } from '../../../lib/accuracyDisplay';
 import { useT } from '../../../i18n/LanguageContext';
 
 interface DataDetailsTabProps {
@@ -22,33 +23,39 @@ export default function DataDetailsTab({ selectedInitiatives }: DataDetailsTabPr
     () =>
       initiatives
         .filter((i) => selectedInitiatives.includes(i.Name))
-        .map((i) => ({
-          displayName: getInitiativeShortName(i.Display_Name, locale),
-          displayNameFull: translateInitiativeName(i.Display_Name, locale),
-          acronym: i.Acronym,
-          provider: getProviderShortName(i.Provider, locale),
-          providerFull: i.Provider,
-          source: i.Source,
-          coverage: translateTerm('coverage', i.Coverage, locale),
-          methodology: translateMethodology(i.Methodology, locale),
-          accuracy: i.Accuracy > 0 ? i.Accuracy.toFixed(1) : (i.Accuracy_Label ?? 'n/a'),
-          accuracyNote: i.Accuracy_Note || '',
-          accuracyMin: i.Accuracy_Min > 0 ? i.Accuracy_Min.toFixed(1) : (i.Accuracy_Label ?? 'n/a'),
-          accuracyMax: i.Accuracy_Max > 0 ? i.Accuracy_Max.toFixed(1) : (i.Accuracy_Label ?? 'n/a'),
-          resolution: i.Resolution > 0 ? `${i.Resolution}` : '-',
-          resolutionMin: i.Resolution_Min > 0 ? `${i.Resolution_Min}` : '-',
-          resolutionMax: i.Resolution_Max > 0 ? `${i.Resolution_Max}` : '-',
-          classes: String(i.Number_of_Classes),
-          agriClasses: String(i.Number_of_Agriculture_Classes),
-          agriCapabilities: i.Agricultural_Capabilities || '-',
-          startYear: String(i.Year_Start),
-          endYear: String(i.Year_End),
-          years: String(i.Available_Years.length),
-          frequency: i.Temporal_Frequency,
-          algorithm: translateMethodology(i.Algorithm, locale),
-          classificationMethod: translateMethodology(i.Classification_Method, locale),
-        })),
-    [initiatives, selectedInitiatives, locale],
+        .map((i) => {
+          const noOverall =
+            i.Accuracy > 0
+              ? ''
+              : accuracyTooltipText(t('accuracyNoOverall'), i.Acronym, i.Accuracy_Note || undefined);
+          return {
+            displayName: getInitiativeShortName(i.Display_Name, locale),
+            displayNameFull: translateInitiativeName(i.Display_Name, locale),
+            acronym: i.Acronym,
+            provider: getProviderShortName(i.Provider, locale),
+            providerFull: i.Provider,
+            source: i.Source,
+            coverage: translateTerm('coverage', i.Coverage, locale),
+            methodology: translateMethodology(i.Methodology, locale),
+            accuracy: formatAccuracyValue(i.Accuracy, i.Accuracy_Label),
+            accuracyNote: i.Accuracy > 0 ? i.Accuracy_Note || '' : noOverall,
+            accuracyMin: formatAccuracyValue(i.Accuracy_Min, i.Accuracy_Label),
+            accuracyMax: formatAccuracyValue(i.Accuracy_Max, i.Accuracy_Label),
+            resolution: i.Resolution > 0 ? `${i.Resolution}` : '-',
+            resolutionMin: i.Resolution_Min > 0 ? `${i.Resolution_Min}` : '-',
+            resolutionMax: i.Resolution_Max > 0 ? `${i.Resolution_Max}` : '-',
+            classes: String(i.Number_of_Classes),
+            agriClasses: String(i.Number_of_Agriculture_Classes),
+            agriCapabilities: i.Agricultural_Capabilities || '-',
+            startYear: String(i.Year_Start),
+            endYear: String(i.Year_End),
+            years: String(i.Available_Years.length),
+            frequency: i.Temporal_Frequency,
+            algorithm: translateMethodology(i.Algorithm, locale),
+            classificationMethod: translateMethodology(i.Classification_Method, locale),
+          };
+        }),
+    [initiatives, selectedInitiatives, locale, t],
   );
 
   const columns = [

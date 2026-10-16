@@ -90,6 +90,9 @@ export default function NormalizedPerformanceTab() {
         <p className="text-sm text-fg-secondary mb-3">
           {tBody('normalizedIntro')}
         </p>
+        <p className="text-xs text-fg-muted mb-3" role="note">
+          {tBody('overallScoreNote')}
+        </p>
         <EChartsHeatmap
           z={heatmapData}
           x={metricLabels}

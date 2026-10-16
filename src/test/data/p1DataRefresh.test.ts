@@ -116,19 +116,19 @@ describe('P1 initiatives.json (15+ entradas coerentes, anos estendidos)', () => 
     for (const r of rows) expect(r.Acronym).not.toBe('N/A');
   });
 
-  it('accuracies sem avaliação viram n/a justificado (nunca 0.0 inventado)', () => {
+  it('accuracies sem avaliação viram —/n.d. justificado (nunca 0.0 inventado)', () => {
     const rows = parseInitiatives(meta as never);
     for (const r of rows) {
       expect(r.Accuracy_Label, r.Name).toBeTruthy();
     }
     const byName = Object.fromEntries(rows.map((r) => [r.Name, r]));
-    // IBGE (sem avaliação) e CONAB-AM (incompleta): n/a + motivo da fonte.
+    // IBGE (sem avaliação) e CONAB-AM (incompleta): —/n.d. + motivo da fonte.
     for (const name of [
       'IBGE Monitoring Land Cover and Land Use',
       'National Supply Company Agricultural Mapping',
     ]) {
       expect(byName[name].Accuracy).toBe(0);
-      expect(byName[name].Accuracy_Label).toBe('n/a');
+      expect(byName[name].Accuracy_Label).toBe('—/n.d.');
       expect(byName[name].Accuracy_Note, name).toBeTruthy();
     }
     // Avaliadas mantêm rótulo numérico, sem nota.

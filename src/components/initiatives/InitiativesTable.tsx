@@ -3,6 +3,7 @@ import { Download } from 'lucide-react';
 import DataTable from '../ui/DataTable';
 import { useDashboardStore } from '../../stores/dashboardStore';
 import { getInitiativeShortName } from '../../data/glossary';
+import { accuracyTooltipText, formatAccuracyPct } from '../../lib/accuracyDisplay';
 import { useT } from '../../i18n/LanguageContext';
 import { useChartExport } from '../../hooks/use-chart-export';
 
@@ -35,6 +36,7 @@ export default function InitiativesTable({
 }: InitiativesTableProps): ReactElement {
   const { t, locale } = useT('overview');
   const { t: tTables } = useT('tables');
+  const { t: tInitiative } = useT('initiative');
   const initiatives = useDashboardStore((s) => s.initiatives);
   const { exportCsv } = useChartExport({ chartId: 'initiatives', route, initiative });
 
@@ -49,8 +51,12 @@ export default function InitiativesTable({
         periodo: i.Available_Years.length > 0 ? `${i.Year_Start}–${i.Year_End}` : '-',
         resolucao: i.Resolution,
         acuracia: i.Accuracy,
+        acuraciaNote:
+          i.Accuracy > 0
+            ? ''
+            : accuracyTooltipText(tInitiative('accuracyNoOverall'), i.Acronym, i.Accuracy_Note || undefined),
       })),
-    [initiatives, locale],
+    [initiatives, locale, tInitiative],
   );
 
   const columns = useMemo(
@@ -66,8 +72,8 @@ export default function InitiativesTable({
       {
         key: 'acuracia',
         label: t('colAccuracy'),
-        format: (v: unknown): string =>
-          typeof v === 'number' && v > 0 ? `${v.toFixed(1)}%` : '-',
+        titleKey: 'acuraciaNote',
+        format: (v: unknown): string => formatAccuracyPct(typeof v === 'number' ? v : 0),
       },
     ],
     [t],
@@ -92,7 +98,13 @@ export default function InitiativesTable({
             exportCsv(
               data.map((row) =>
                 Object.fromEntries(
-                  columns.map((col) => [col.label, row[col.key as keyof typeof row] ?? '']),
+                  columns.map((col) => {
+                    const raw = row[col.key as keyof typeof row] ?? '';
+                    // Display consistente no CSV só para acurácia (nunca "0.0" cru);
+                    // demais colunas exportam o valor bruto como antes.
+                    const value = col.key === 'acuracia' && col.format !== undefined ? col.format(raw) : raw;
+                    return [col.label, value];
+                  }),
                 ),
               )
             )

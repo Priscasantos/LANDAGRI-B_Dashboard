@@ -5,6 +5,7 @@ import EChartsLine from '../../charts/echarts/EChartsLine';
 import { useDashboardStore } from '../../../stores/dashboardStore';
 import { translateMethodology } from '../../../data/glossary';
 import { useT } from '../../../i18n/LanguageContext';
+import { averageOverValid } from '../../../lib/accuracyDisplay';
 
 /**
  * Methodology deep-dive — ECharts edition (Fase 2 fatia 2c).
@@ -17,14 +18,15 @@ export default function MethodologyDeepDiveTab() {
   const initiatives = useDashboardStore((s) => s.initiatives);
 
   const { methods, methodData, methodAccuracy } = useMemo(() => {
-    const methodMap: Record<string, { count: number; totalAccuracy: number; initiatives: string[] }> = {};
+    const methodMap: Record<string, { count: number; accuracies: number[]; initiatives: string[] }> = {};
 
     initiatives.forEach((i) => {
       if (!methodMap[i.Methodology]) {
-        methodMap[i.Methodology] = { count: 0, totalAccuracy: 0, initiatives: [] };
+        methodMap[i.Methodology] = { count: 0, accuracies: [], initiatives: [] };
       }
       methodMap[i.Methodology].count++;
-      if (i.Accuracy > 0) methodMap[i.Methodology].totalAccuracy += i.Accuracy;
+      // Overall_Score (council): só OA publicado entra na média (N válido).
+      if (i.Accuracy > 0) methodMap[i.Methodology].accuracies.push(i.Accuracy);
       methodMap[i.Methodology].initiatives.push(i.Display_Name);
     });
 
@@ -36,14 +38,16 @@ export default function MethodologyDeepDiveTab() {
     }));
     const methodAccuracy = methods.map((m) => ({
       method: m,
-      avgAccuracy:
-        methodMap[m].count > 0
-          ? Math.round((methodMap[m].totalAccuracy / methodMap[m].count) * 10) / 10
-          : 0,
+      validCount: methodMap[m].accuracies.length,
+      avgAccuracy: Math.round(averageOverValid(methodMap[m].accuracies) * 10) / 10,
     }));
 
     return { methods, methodData, methodAccuracy };
   }, [initiatives]);
+
+  // Gráficos de acurácia exibem só metodologias com OA publicado;
+  // a tabela abaixo registra "—/n.d." para as demais (nunca "0.0").
+  const chartAccuracy = methodAccuracy.filter((d) => d.validCount > 0);
 
   if (methods.length === 0) {
     return <div className="py-8 text-center text-fg-muted">{tBody('noMethodologyData')}</div>;
@@ -64,8 +68,8 @@ export default function MethodologyDeepDiveTab() {
         <div>
           <h3 className="text-base font-semibold text-fg mb-2">{tBody('hAvgByMethod')}</h3>
           <EChartsHorizontalBar
-            labels={methodAccuracy.map((d) => translateMethodology(d.method, locale))}
-            values={methodAccuracy.map((d) => d.avgAccuracy)}
+            labels={chartAccuracy.map((d) => translateMethodology(d.method, locale))}
+            values={chartAccuracy.map((d) => d.avgAccuracy)}
             captionKey="accuracyByMethodology"
             height={Math.max(250, methods.length * 50)}
           />
@@ -79,7 +83,7 @@ export default function MethodologyDeepDiveTab() {
           {tBody('trendsIntro')}
         </p>
         <EChartsLine
-          series={methodAccuracy.map((d) => ({
+          series={chartAccuracy.map((d) => ({
             name: translateMethodology(d.method, locale),
             x: [d.method],
             y: [d.avgAccuracy],
@@ -106,7 +110,7 @@ export default function MethodologyDeepDiveTab() {
                 <tr key={d.method} className={`border-b border-border ${idx % 2 === 0 ? 'bg-surface' : 'bg-surface-alt'}`}>
                   <td className="px-4 py-2 text-fg">{translateMethodology(d.method, locale)}</td>
                   <td className="px-4 py-2 text-right text-fg">{d.count}</td>
-                  <td className="px-4 py-2 text-right text-fg">{acc?.avgAccuracy ?? '-'}%</td>
+                  <td className="px-4 py-2 text-right text-fg">{acc !== undefined && acc.validCount > 0 ? `${acc.avgAccuracy}%` : tBody('accuracyUnavailable')}</td>
                 </tr>
               );
             })}

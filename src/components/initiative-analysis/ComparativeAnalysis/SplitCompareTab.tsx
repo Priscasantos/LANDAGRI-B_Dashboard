@@ -82,7 +82,7 @@ export default function SplitCompareTab(): ReactElement {
           ? String(years[years.length - 1])
           : '';
 
-  const { titleA, titleB, seriesA, seriesB } = useMemo(() => {
+  const { titleA, titleB, seriesA, seriesB, missingA, missingB } = useMemo(() => {
     if (mode === 'initiative') {
       const rowA = initiatives.find((i) => i.Name === effA);
       const rowB = initiatives.find((i) => i.Name === effB);
@@ -93,19 +93,22 @@ export default function SplitCompareTab(): ReactElement {
           rowB !== undefined ? getInitiativeShortName(rowB.Display_Name, locale) : tBody('splitInitiativeB'),
         seriesA: rowA !== undefined ? validRows([rowA]).map((r) => toBubble(r, locale)) : [],
         seriesB: rowB !== undefined ? validRows([rowB]).map((r) => toBubble(r, locale)) : [],
+        // Council: sem OA publicado (IBGE-MLCU, CONAB-AM) exibe "—/n.d." em vez de ponto 0.0.
+        missingA: rowA !== undefined && !(rowA.Accuracy > 0),
+        missingB: rowB !== undefined && !(rowB.Accuracy > 0),
       };
     }
     const yearA = Number(effA);
     const yearB = Number(effB);
+    const rowsA = initiatives.filter((i) => i.Available_Years.includes(yearA));
+    const rowsB = initiatives.filter((i) => i.Available_Years.includes(yearB));
     return {
       titleA: effA === '' ? tBody('splitYearA') : effA,
       titleB: effB === '' ? tBody('splitYearB') : effB,
-      seriesA: validRows(
-        initiatives.filter((i) => i.Available_Years.includes(yearA)),
-      ).map((r) => toBubble(r, locale)),
-      seriesB: validRows(
-        initiatives.filter((i) => i.Available_Years.includes(yearB)),
-      ).map((r) => toBubble(r, locale)),
+      seriesA: validRows(rowsA).map((r) => toBubble(r, locale)),
+      seriesB: validRows(rowsB).map((r) => toBubble(r, locale)),
+      missingA: rowsA.length > 0 && validRows(rowsA).length === 0,
+      missingB: rowsB.length > 0 && validRows(rowsB).length === 0,
     };
   }, [mode, initiatives, effA, effB, locale, tBody]);
 
@@ -167,13 +170,20 @@ export default function SplitCompareTab(): ReactElement {
               />
             ),
           chart: (
-            <EChartsScatter
-              series={seriesA}
-              captionKey="accuracyVsResolution"
-              height={420}
-              yAxisType="log"
-              group={SPLIT_COMPARE_GROUP}
-            />
+            <>
+              <EChartsScatter
+                series={seriesA}
+                captionKey="accuracyVsResolution"
+                height={420}
+                yAxisType="log"
+                group={SPLIT_COMPARE_GROUP}
+              />
+              {missingA && (
+                <p className="mt-2 text-xs text-fg-muted" role="note">
+                  {tBody('splitNoAccuracy')}
+                </p>
+              )}
+            </>
           ),
         }}
         paneB={{
@@ -197,13 +207,20 @@ export default function SplitCompareTab(): ReactElement {
               />
             ),
           chart: (
-            <EChartsScatter
-              series={seriesB}
-              captionKey="accuracyVsResolution"
-              height={420}
-              yAxisType="log"
-              group={SPLIT_COMPARE_GROUP}
-            />
+            <>
+              <EChartsScatter
+                series={seriesB}
+                captionKey="accuracyVsResolution"
+                height={420}
+                yAxisType="log"
+                group={SPLIT_COMPARE_GROUP}
+              />
+              {missingB && (
+                <p className="mt-2 text-xs text-fg-muted" role="note">
+                  {tBody('splitNoAccuracy')}
+                </p>
+              )}
+            </>
           ),
         }}
       />

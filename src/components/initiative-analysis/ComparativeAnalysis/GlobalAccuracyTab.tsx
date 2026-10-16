@@ -39,6 +39,9 @@ export default function GlobalAccuracyTab() {
       <p className="text-sm text-fg-secondary">
         {tBody('accuracyIntro')}
       </p>
+      <p className="text-xs text-fg-muted" role="note">
+        {tBody('overallScoreNote')}
+      </p>
       <EChartsGroupedBar
         categories={chartData.map((d) => d.name)}
         series={[{ name: t('overallAccuracyPct'), values: chartData.map((d) => d.accuracy) }]}

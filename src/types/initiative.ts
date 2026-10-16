@@ -111,8 +111,9 @@ export interface InitiativeRow {
   Accuracy_Min: number;
   Accuracy_Max: number;
   /**
-   * Display label for accuracy: `"91.0"` when assessed, `"n/a"` when the
-   * source reports no/incomplete assessment (never an invented number).
+   * Display label for accuracy: `"91.0"` when assessed, `"—/n.d."`
+   * (literal do council) when the source reports no/incomplete assessment
+   * (IBGE-MLCU, CONAB-AM) — never an invented number, never `"0.0"`.
    */
   Accuracy_Label?: string;
   /** Justification for `n/a` (source `reason`/`description`), else `''`. */
