@@ -85,7 +85,8 @@ function AppContent(): React.JSX.Element {
           element={<LocalizedRoute route={route} />}
         />
       ))}
-      {/* Fase 3 IA enxuta: aliases de rotas antigas (alias, não 404). */}
+      {/* Fase 3 IA enxuta: aliases PERMANENTES de rotas antigas (replace, não push/404).
+          Ver `legacyRedirects` em config/routes — remoção quebra o teste de contrato. */}
       {legacyRedirects.map((alias) => (
         <Route key={alias.from} path={alias.from} element={<Navigate to={alias.to} replace />} />
       ))}

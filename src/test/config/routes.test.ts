@@ -65,12 +65,28 @@ describe('commandIndex (PT navigation dictionary)', () => {
   });
 });
 
-describe('legacyRedirects (alias, não 404)', () => {
+describe('legacyRedirects (alias PERMANENTE, não 404)', () => {
   it('resolves known aliases to their canonical targets', () => {
     expect(resolveLegacyRedirect('/home')).toBe('/overview');
+    expect(resolveLegacyRedirect('/dashboard')).toBe('/overview');
     expect(resolveLegacyRedirect('/initiatives')).toBe('/initiative-analysis');
     expect(resolveLegacyRedirect('/agriculture')).toBe('/agricultural-analysis');
     expect(resolveLegacyRedirect('/simulator')).toBe('/predictive');
+    expect(resolveLegacyRedirect('/sobre')).toBe('/about');
+  });
+
+  it('fixa os 6 aliases permanentes da Fase 3 (quebra se remover/retargetar)', () => {
+    // Contrato permanente: App.tsx renderiza cada alias como
+    // `<Navigate to replace />` (replace = semântica 301 na SPA).
+    // Não remover nem retargetar sem atualizar docs + redirects.
+    expect(legacyRedirects).toEqual([
+      { from: '/home', to: '/overview' },
+      { from: '/dashboard', to: '/overview' },
+      { from: '/initiatives', to: '/initiative-analysis' },
+      { from: '/agriculture', to: '/agricultural-analysis' },
+      { from: '/simulator', to: '/predictive' },
+      { from: '/sobre', to: '/about' },
+    ]);
   });
 
   it('returns null for canonical routes and unknown paths', () => {

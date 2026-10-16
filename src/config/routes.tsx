@@ -236,11 +236,15 @@ export const commandIndex: CommandIndexEntry[] = [
 ];
 
 /**
- * Fase 3 IA enxuta: aliases de rotas antigas/prováveis (não 404).
+ * Fase 3 IA enxuta: aliases PERMANENTES de rotas antigas/prováveis (não 404).
  * O catch-all `*` já redireciona para `/`, mas o alias preserva a
  * intenção de navegação. `App.tsx` renderiza cada alias como
- * `<Navigate to={to} replace />`. Tabela intencionalmente pequena —
- * adicione entradas só com evidência de uso (YAGNI).
+ * `<Navigate to={to} replace />` — `replace: true` é a semântica permanente
+ * na SPA (substitui a entrada do histórico, equivalente client-side ao 301;
+ * nunca usar push/temporário aqui). Tabela intencionalmente pequena —
+ * adicione entradas só com evidência de uso (YAGNI). NÃO remova entradas:
+ * `src/test/config/routes.test.ts` fixa as 6 entradas from→to e quebra
+ * se alguma for removida ou retargetada.
  */
 export interface LegacyRedirect {
   from: string;
